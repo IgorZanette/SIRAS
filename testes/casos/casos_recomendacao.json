@@ -1,0 +1,30 @@
+[
+  {
+    "id": "EXEMPLO-01",
+    "descricao": "Modelo de caso de teste. Remover ao cadastrar os casos reais.",
+    "entrada": {
+      "cultura": "PREENCHER",
+      "ph_agua": null,
+      "indice_smp": null,
+      "argila": null,
+      "mo": null,
+      "p": null,
+      "k": null,
+      "ctc_ph7": null,
+      "al": null,
+      "ca": null,
+      "mg": null,
+      "v_percent": null,
+      "expectativa_rendimento": null,
+      "sistema_manejo": "convencional",
+      "prnt": 100
+    },
+    "referencia": {
+      "nc_t_ha": null,
+      "n": null,
+      "p2o5": null,
+      "k2o": null
+    },
+    "origem_referencia": "PREENCHER: calculo manual pelo autor em __/__/2026, Manual 2016, Tab. __; conferido com orientador em __/__/2026"
+  }
+]

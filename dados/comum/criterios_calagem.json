@@ -1,0 +1,399 @@
+{
+  "descricao": "Criterios de tomada de decisao, dose e modo de aplicacao do calcario por grupo de cultura",
+  "fonte": {
+    "manual": "CQFS-RS/SC, 11. ed., 2016",
+    "tabelas": [
+      "5.3",
+      "5.5",
+      "5.6",
+      "5.7"
+    ],
+    "paginas": [
+      75,
+      81,
+      83,
+      86
+    ],
+    "extraido_do_pdf_em": "2026-08-16",
+    "conferido_por_autor_em": null
+  },
+  "criterios": [
+    {
+      "id": "graos_convencional",
+      "grupo": "graos",
+      "sistema_manejo": "convencional",
+      "condicao_area": "todos os casos",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.0
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.3, p. 75",
+      "notas": []
+    },
+    {
+      "id": "graos_pd_implantacao",
+      "grupo": "graos",
+      "sistema_manejo": "plantio_direto",
+      "condicao_area": "implantacao do sistema",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.0
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.3, p. 75",
+      "notas": [
+        "Campo natural de baixa acidez potencial (SMP > 5,5) com opcao de inicio em superficie: 1/2 da dose do SMP para pH 6,0 (p. 73)"
+      ]
+    },
+    {
+      "id": "graos_pd_consolidado",
+      "grupo": "graos",
+      "sistema_manejo": "plantio_direto",
+      "condicao_area": "consolidado, sem restricoes na camada 10-20 cm",
+      "amostragem_cm": [
+        0,
+        10
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5,
+        "nao_aplicar_se": "V >= 65% E saturacao_Al_na_CTC < 10%"
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 0.25,
+        "ph_alvo": 6.0,
+        "limite_t_ha": 5.0
+      },
+      "modo_aplicacao": "superficial",
+      "fonte": "Tabela 5.3, p. 75",
+      "notas": [
+        "Amostrar separadamente 0-10 e 10-20 cm",
+        "Limite de 5 t/ha (PRNT 100%) em superficie"
+      ]
+    },
+    {
+      "id": "graos_pd_com_restricoes",
+      "grupo": "graos",
+      "sistema_manejo": "plantio_direto",
+      "condicao_area": "consolidado, com restricoes na camada 10-20 cm",
+      "amostragem_cm": [
+        10,
+        20
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que_e_al",
+        "ph": 5.5,
+        "saturacao_al_maior_igual": 30
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.0,
+        "usar_smp_medio_das_camadas": true
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.3, p. 75",
+      "notas": [
+        "Decisao independe da camada 0-10 cm",
+        "Usar SMP medio de 0-10 e 10-20 cm"
+      ]
+    },
+    {
+      "id": "arroz_irrigado_solo_seco",
+      "grupo": "graos",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "semeadura em solo seco",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 5.5,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5,
+        "nao_aplicar_se": "V >= 65% E sat_Al < 10%"
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 5.5
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.3, p. 75",
+      "notas": [
+        "FORA DO ESCOPO do SIRAS"
+      ]
+    },
+    {
+      "id": "arroz_irrigado_pregerminado",
+      "grupo": "graos",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "pre-germinado ou transplante",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": null,
+      "decisao": {
+        "tipo": "v_menor_que",
+        "v": 40,
+        "nao_aplicar_se": "Ca >= 4,0 E Mg >= 1,0 cmolc/dm3"
+      },
+      "dose": {
+        "tipo": "saturacao_bases",
+        "v_alvo": 40
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.3, p. 75",
+      "notas": [
+        "FORA DO ESCOPO do SIRAS"
+      ]
+    },
+    {
+      "id": "aspargo",
+      "grupo": "hortalicas",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "-",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 6.5,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 6.0
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.5
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.5, p. 81",
+      "notas": []
+    },
+    {
+      "id": "olericolas_convencional",
+      "grupo": "hortalicas",
+      "sistema_manejo": "convencional_ou_implantacao_pd",
+      "condicao_area": "-",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.0
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.5, p. 81",
+      "notas": []
+    },
+    {
+      "id": "olericolas_pd_consolidado",
+      "grupo": "hortalicas",
+      "sistema_manejo": "plantio_direto_consolidado",
+      "condicao_area": "-",
+      "amostragem_cm": [
+        0,
+        10
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 0.25,
+        "ph_alvo": 6.0,
+        "limite_t_ha": 5.0
+      },
+      "modo_aplicacao": "superficial",
+      "fonte": "Tabela 5.5, p. 81",
+      "notas": []
+    },
+    {
+      "id": "batata_e_batata_doce",
+      "grupo": "tuberculos",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "-",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 5.5,
+      "decisao": {
+        "tipo": "ph_menor_que_e_al",
+        "ph": 5.5,
+        "saturacao_al_maior_que": 10
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 5.5
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.5, p. 81",
+      "notas": [
+        "Em rotacao com culturas de pH ref 6,0, manter o alvo limitado a 5,5 (qualidade dos tuberculos), p. 80"
+      ]
+    },
+    {
+      "id": "macieira_oliveira",
+      "grupo": "frutiferas",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "area total ou faixa de plantio",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 6.5,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 6.0
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.5,
+        "fator_30cm": 1.5
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.6, p. 83",
+      "notas": [
+        "Incorporar preferencialmente ate 30 cm, aumentando a dose em 50%"
+      ]
+    },
+    {
+      "id": "frutiferas_ph55",
+      "grupo": "frutiferas",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "amoreira-preta, mirtilo, palmeira-jucara",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 5.5,
+      "decisao": {
+        "tipo": "ph_menor_que_e_al",
+        "ph": 5.5,
+        "saturacao_al_maior_que": 10
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 5.5
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.6, p. 83",
+      "notas": []
+    },
+    {
+      "id": "frutiferas_demais",
+      "grupo": "frutiferas",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "demais frutiferas",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.0,
+        "fator_30cm": 1.5
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.6, p. 83",
+      "notas": [
+        "Reaplicacao na fase de producao, com pH < 5,5: 1/2 da dose do SMP para pH 5,5, em superficie, limitada a 5 t/ha (PRNT 100%)"
+      ]
+    },
+    {
+      "id": "erva_mate_e_florestais",
+      "grupo": "erva_mate",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "especies florestais",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": null,
+      "decisao": {
+        "tipo": "v_menor_que",
+        "v": 40,
+        "nao_aplicar_se": "Ca >= 4,0 E Mg >= 1,0 cmolc/dm3"
+      },
+      "dose": {
+        "tipo": "saturacao_bases",
+        "v_alvo": 40,
+        "formula": "NC = ((40 - V)/100) * CTC_pH7"
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.6, p. 83",
+      "notas": [
+        "A erva-mate consta na Tabela 5.1 no grupo 'sem pH de referencia', junto com as especies florestais; a Tabela 5.6 cobre esse grupo",
+        "Usar calcario dolomitico (fonte de Ca e Mg)"
+      ]
+    },
+    {
+      "id": "cana_e_tabaco",
+      "grupo": "outras",
+      "sistema_manejo": "qualquer",
+      "condicao_area": "cana-de-acucar e tabaco",
+      "amostragem_cm": [
+        0,
+        20
+      ],
+      "ph_referencia": 6.0,
+      "decisao": {
+        "tipo": "ph_menor_que",
+        "ph": 5.5
+      },
+      "dose": {
+        "tipo": "smp",
+        "fator": 1.0,
+        "ph_alvo": 6.0
+      },
+      "modo_aplicacao": "incorporado",
+      "fonte": "Tabela 5.7, p. 86",
+      "notas": []
+    }
+  ]
+}

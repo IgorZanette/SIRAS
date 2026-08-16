@@ -1,0 +1,23 @@
+# Ambiente
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code (configuração pessoal, não compartilhada)
+.claude/settings.local.json
+
+# Trabalho pessoal — não versionado
+_local/
+
+# Saídas geradas
+saida/
+*.log

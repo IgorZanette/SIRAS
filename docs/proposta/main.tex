@@ -1,0 +1,78 @@
+% Proposta de Trabalho de Conclusão de Curso
+% Curso de Ciência da Computação — Universidade de Passo Fundo
+% Autor: Igor Zanette — Matrícula: 198862
+% Orientador: Prof. Rafael Rieder
+
+\documentclass[alpha-refs,brazilian,oneside]{upf-ccc}
+
+%----------------------------------------------------------------
+% Pacotes adicionais
+%----------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{nicefrac}
+\usepackage{epstopdf}
+\usepackage{chngcntr}
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+\counterwithout{footnote}{chapter}
+\usepackage{notoccite}
+\usepackage{adjustbox}
+\usepackage{enumitem}
+\usepackage{threeparttable}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+
+%----------------------------------------------------------------
+% Ajuste de quebra de linha: evita palavras invadindo a margem
+%----------------------------------------------------------------
+\tolerance=1000
+\emergencystretch=3em
+\hyphenpenalty=200
+% Hifenização correta de termos técnicos recorrentes
+\hyphenation{
+  apti-dão edá-fica frutí-feras macieira maracu-jazeiro
+  mirti-leiro nogueira-pecã quivi-zeiro espe-cia-lista
+  con-cor-dân-cia infe-rência reco-men-dação inter-pre-tação
+  Embra-pa Comis-são fer-tili-dade adu-bação cala-gem
+  pro-pri-edades microba-cias}
+
+%----------------------------------------------------------------
+% Dados do trabalho (OBRIGATÓRIO)
+%----------------------------------------------------------------
+\author{Igor Zanette}
+
+\title{SIRAS: Sistema de Interpretação e Recomendação Agronômica de Solo}
+      {SIRAS: a Soil Interpretation and Agronomic Recommendation System}
+
+\tipotrabalho{\monografia}
+
+\orientador{Rafael Rieder}
+
+%----------------------------------------------------------------
+% Início do documento
+%----------------------------------------------------------------
+\begin{document}
+
+%----------------------------------------------------------------
+% Sumário
+%----------------------------------------------------------------
+\tableofcontents
+
+%----------------------------------------------------------------
+% Seções da proposta
+%----------------------------------------------------------------
+\include{1_Resumo}
+\include{2_Motivacao_e_objetivos}
+\include{3_Revisao_Literatura}
+\include{4_Metodologia}
+
+%----------------------------------------------------------------
+% Referências bibliográficas
+%----------------------------------------------------------------
+\renewcommand*{\bibname}{\capbib}
+\clearpage\phantomsection\addcontentsline{toc}{chapter}{\MakeUppercase{\capbib}}
+\bibliography{referencias}
+
+\end{document}

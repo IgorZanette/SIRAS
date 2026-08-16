@@ -1,0 +1,143 @@
+\chapter{Motivação e Objetivos}\label{chap:problema}
+
+Este capítulo apresenta a motivação que originou a proposta deste trabalho,
+os objetivos geral e específicos a serem alcançados e as hipóteses de pesquisa formuladas.
+
+\section{Motivação}
+
+A interpretação de análises químicas e físicas de solo é uma etapa essencial
+no planejamento da fertilidade e do manejo das culturas agrícolas. Trata-se de
+um processo que exige elevado conhecimento técnico e atenção rigorosa, pois erros
+de interpretação podem acarretar prejuízos financeiros significativos aos produtores,
+seja pelo uso desnecessário de insumos, seja pela redução de produtividade decorrente
+de correções insuficientes.
+
+A complexidade desse processo advém da multiplicidade de variáveis envolvidas
+--- pH, teores de macronutrientes e micronutrientes, capacidade de troca catiônica
+(CTC), saturação por bases, textura do solo, entre outros \citep{Embrapa2011,
+ManualCalagem2016} --- e da necessidade de correlacioná-las com as exigências
+específicas de cada cultura e com as características edafoclimáticas de cada região.
+Ferramentas computacionais que realizem essa correlação de forma estruturada ainda
+são escassas no contexto do produtor e do técnico gaúcho, especialmente no que
+diz respeito à integração entre recomendações de manejo e estimativas de aptidão
+agrícola para culturas específicas \citep{Hofig2015, EmbrapaAptidao2025}.
+
+Nesse contexto, o autor deste trabalho acumulou experiência profissional tanto
+na prestação de assistência técnica a produtores rurais, com contato direto com
+laudos de análise de solo e recomendações de correção e adubação, quanto no
+atendimento bancário a carteiras de produtores rurais, em processos vinculados
+à liberação de crédito rural. Nessa última atividade, observa-se que projetos
+agrícolas submetidos às instituições financeiras podem apresentar inconsistências
+nas recomendações técnicas, evidenciando a necessidade de instrumentos que apoiem
+a validação dessas informações de maneira objetiva e rastreável.
+
+Diante desse cenário, identificou-se a oportunidade de desenvolver o
+\textbf{SIRAS} --- \textbf{S}istema de \textbf{I}nterpretação e \textbf{R}ecomendação
+\textbf{A}gronômica de \textbf{S}olo ---, uma ferramenta computacional capaz de:
+(i)~interpretar automaticamente dados de análises de solo; (ii)~gerar recomendações
+técnicas de correção e manejo; e (iii)~estimar a aptidão agrícola de culturas
+específicas em uma determinada área. O SIRAS poderia auxiliar técnicos e produtores
+no processo de tomada de decisão, reduzir erros de interpretação e servir de apoio
+na análise e validação de projetos agrícolas.
+
+Iniciativas como o FertFacil, sistema desenvolvido e disponibilizado para
+técnicos e produtores do RS, SC, MS e Paraguai, demonstram que a automação do
+processo de recomendação de adubação e calagem é tecnicamente viável e tem gerado
+resultados concretos no campo \citep{Tiecher2016}. No entanto, ferramentas dessa
+natureza concentram-se na geração de recomendações de correção e adubação, não
+contemplando a estimativa da aptidão agrícola da cultura escolhida frente às
+condições edáficas da área. Em escala mais ampla, a Embrapa desenvolveu o Sistema
+de Avaliação de Aptidão Agrícola das Terras \citep{EmbrapaAptidao2025}, voltado
+a levantamentos exploratórios regionais, o que o torna inadequado para a avaliação
+individualizada de uma área específica a partir dos dados de uma análise de solo.
+Conforme apontado por \cite{Hofig2015}, esse sistema é mais adequado para
+análises em âmbito regional e não indica práticas de manejo para os diferentes
+tipos de utilização, sendo necessárias adaptações para estudos mais detalhados.
+Constata-se, portanto, uma lacuna entre as ferramentas disponíveis: existem
+sistemas que recomendam correção do solo, e existem métodos que avaliam aptidão
+em escala regional, mas não há, no contexto das ferramentas acessíveis ao produtor
+e ao técnico do RS, uma solução que integre ambas as perspectivas a partir de uma
+análise individual de solo. Esse é o diferencial do SIRAS.
+
+%-------------------------------------------------------------------
+\section{Objetivo Geral}\label{sec:obj_geral}
+
+Desenvolver e avaliar o SIRAS --- Sistema de Interpretação e Recomendação
+Agronômica de Solo ---, um sistema especialista baseado em regras projetado
+para interpretar dados de análises químicas e físicas de solo, gerar
+recomendações técnicas de correção e manejo, e estimar a aptidão agrícola
+para um conjunto abrangente de culturas de interesse regional, considerando
+os critérios técnicos vigentes para o estado do Rio Grande do Sul.
+
+%-------------------------------------------------------------------
+\section{Objetivos Específicos}\label{sec:obj_espec}
+
+\begin{itemize}[leftmargin=5em]
+
+  \item \textbf{Revisar a literatura} sobre os principais parâmetros utilizados
+    na interpretação de análises de solo, abrangendo aspectos químicos e físicos,
+    suas correlações com o desempenho das culturas agrícolas contempladas pelo
+    SIRAS, e os critérios de calagem e adubação vigentes para o Rio Grande do Sul;
+
+  \item \textbf{Definir critérios técnicos} para as recomendações de correção
+    e manejo do solo e para a estimativa de aptidão agrícola das culturas
+    contempladas, com base nos manuais e normas regionais vigentes;
+
+  \item \textbf{Projetar e implementar} o SIRAS, incluindo os módulos de
+    entrada de dados de análise de solo, processamento das recomendações
+    de correção, e estimativa de aptidão agrícola por cultura;
+
+  \item \textbf{Validar o SIRAS} quanto à correção de suas saídas, medindo
+    a taxa de concordância das recomendações geradas com valores de
+    referência calculados de forma independente a partir dos critérios
+    técnicos vigentes;
+
+  \item \textbf{Avaliar a contribuição e a usabilidade do SIRAS}, comparando-o
+    qualitativamente às ferramentas existentes para evidenciar seu diferencial
+    e aferindo a experiência de uso junto ao público-alvo.
+
+\end{itemize}
+
+%-------------------------------------------------------------------
+\section{Hipóteses}\label{sec:hipoteses}
+
+Com base no problema identificado e nos objetivos propostos,
+formulam-se as seguintes hipóteses de pesquisa:
+
+\begin{itemize}
+
+  \item \textbf{H\textsubscript{0.1}:} O SIRAS \textbf{não} é capaz de gerar
+    recomendações de calagem e adubação com taxa de concordância igual ou
+    superior a 80\% em relação aos valores de referência derivados dos
+    critérios estabelecidos no Manual de Calagem e Adubação para os estados
+    do RS e SC.
+
+  \item \textbf{H\textsubscript{1.1}:} O SIRAS \textbf{é} capaz de gerar
+    recomendações de calagem e adubação com taxa de concordância igual ou
+    superior a 80\% em relação aos valores de referência derivados dos
+    critérios estabelecidos no Manual de Calagem e Adubação para os estados
+    do RS e SC.
+
+  \item \textbf{H\textsubscript{0.2}:} O SIRAS \textbf{não} é capaz de estimar
+    a aptidão edáfica das culturas contempladas com taxa de concordância igual
+    ou superior a 80\% em relação à classificação de referência construída a
+    partir das exigências agronômicas descritas na literatura técnica.
+
+  \item \textbf{H\textsubscript{1.2}:} O SIRAS \textbf{é} capaz de estimar
+    a aptidão edáfica das culturas contempladas com taxa de concordância igual
+    ou superior a 80\% em relação à classificação de referência construída a
+    partir das exigências agronômicas descritas na literatura técnica,
+    diferenciando-se dos sistemas de avaliação regional existentes por operar
+    a partir de uma análise individual de solo.
+
+\end{itemize}
+
+A confirmação de H\textsubscript{1.1} indicará que é viável automatizar,
+ao menos parcialmente, o processo de interpretação de análises de solo e
+geração de recomendações para o contexto do RS. A confirmação de
+H\textsubscript{1.2} demonstrará que a integração entre recomendação de
+manejo e estimativa de aptidão agrícola, a partir de dados individuais
+de solo, representa uma contribuição concreta do SIRAS em relação às
+ferramentas atualmente disponíveis. As definições operacionais de
+concordância, o conjunto de casos de teste e o procedimento de decisão
+sobre as hipóteses são detalhados no \cref{chap:metodologia}.

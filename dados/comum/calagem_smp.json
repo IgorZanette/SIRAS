@@ -1,0 +1,241 @@
+{
+  "descricao": "Quantidades de calcario (PRNT 100%) necessarias para elevar o pH em agua do solo da camada de 0 a 20 cm a 5,5, 6,0 e 6,5, estimadas pelo indice SMP",
+  "fonte": {
+    "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os estados do RS e de SC, 11. ed., 2016",
+    "tabela": "5.2",
+    "pagina": 70,
+    "secao": "5.2.1 - Definicao de dose de calcario",
+    "extraido_do_pdf_em": "2026-08-16",
+    "conferido_por_autor_em": null
+  },
+  "unidade": "t/ha de calcario PRNT 100%",
+  "profundidade_cm": [
+    0,
+    20
+  ],
+  "ph_alvo_disponiveis": [
+    5.5,
+    6.0,
+    6.5
+  ],
+  "limites": {
+    "smp_minimo": 4.4,
+    "smp_maximo": 7.1,
+    "passo": 0.1,
+    "abaixo_do_minimo": "usar a linha '<=4.4' (a tabela é aberta à esquerda)",
+    "acima_do_maximo": "sem necessidade de calagem (dose 0 em todos os pH alvo)"
+  },
+  "tabela": [
+    {
+      "indice_smp": "<=4.4",
+      "nc_ph_5_5": 15.0,
+      "nc_ph_6_0": 21.0,
+      "nc_ph_6_5": 29.0
+    },
+    {
+      "indice_smp": "4.5",
+      "nc_ph_5_5": 12.5,
+      "nc_ph_6_0": 17.3,
+      "nc_ph_6_5": 24.0
+    },
+    {
+      "indice_smp": "4.6",
+      "nc_ph_5_5": 10.9,
+      "nc_ph_6_0": 15.1,
+      "nc_ph_6_5": 20.0
+    },
+    {
+      "indice_smp": "4.7",
+      "nc_ph_5_5": 9.6,
+      "nc_ph_6_0": 13.3,
+      "nc_ph_6_5": 17.5
+    },
+    {
+      "indice_smp": "4.8",
+      "nc_ph_5_5": 8.5,
+      "nc_ph_6_0": 11.9,
+      "nc_ph_6_5": 15.7
+    },
+    {
+      "indice_smp": "4.9",
+      "nc_ph_5_5": 7.7,
+      "nc_ph_6_0": 10.7,
+      "nc_ph_6_5": 14.2
+    },
+    {
+      "indice_smp": "5.0",
+      "nc_ph_5_5": 6.6,
+      "nc_ph_6_0": 9.9,
+      "nc_ph_6_5": 13.3
+    },
+    {
+      "indice_smp": "5.1",
+      "nc_ph_5_5": 6.0,
+      "nc_ph_6_0": 9.1,
+      "nc_ph_6_5": 12.3
+    },
+    {
+      "indice_smp": "5.2",
+      "nc_ph_5_5": 5.3,
+      "nc_ph_6_0": 8.3,
+      "nc_ph_6_5": 11.3
+    },
+    {
+      "indice_smp": "5.3",
+      "nc_ph_5_5": 4.8,
+      "nc_ph_6_0": 7.5,
+      "nc_ph_6_5": 10.4
+    },
+    {
+      "indice_smp": "5.4",
+      "nc_ph_5_5": 4.2,
+      "nc_ph_6_0": 6.8,
+      "nc_ph_6_5": 9.5
+    },
+    {
+      "indice_smp": "5.5",
+      "nc_ph_5_5": 3.7,
+      "nc_ph_6_0": 6.1,
+      "nc_ph_6_5": 8.6
+    },
+    {
+      "indice_smp": "5.6",
+      "nc_ph_5_5": 3.2,
+      "nc_ph_6_0": 5.4,
+      "nc_ph_6_5": 7.8
+    },
+    {
+      "indice_smp": "5.7",
+      "nc_ph_5_5": 2.8,
+      "nc_ph_6_0": 4.8,
+      "nc_ph_6_5": 7.0
+    },
+    {
+      "indice_smp": "5.8",
+      "nc_ph_5_5": 2.3,
+      "nc_ph_6_0": 4.2,
+      "nc_ph_6_5": 6.3
+    },
+    {
+      "indice_smp": "5.9",
+      "nc_ph_5_5": 2.0,
+      "nc_ph_6_0": 3.7,
+      "nc_ph_6_5": 5.6
+    },
+    {
+      "indice_smp": "6.0",
+      "nc_ph_5_5": 1.6,
+      "nc_ph_6_0": 3.2,
+      "nc_ph_6_5": 4.9
+    },
+    {
+      "indice_smp": "6.1",
+      "nc_ph_5_5": 1.3,
+      "nc_ph_6_0": 2.7,
+      "nc_ph_6_5": 4.3
+    },
+    {
+      "indice_smp": "6.2",
+      "nc_ph_5_5": 1.0,
+      "nc_ph_6_0": 2.2,
+      "nc_ph_6_5": 3.7
+    },
+    {
+      "indice_smp": "6.3",
+      "nc_ph_5_5": 0.8,
+      "nc_ph_6_0": 1.8,
+      "nc_ph_6_5": 3.1
+    },
+    {
+      "indice_smp": "6.4",
+      "nc_ph_5_5": 0.6,
+      "nc_ph_6_0": 1.4,
+      "nc_ph_6_5": 2.6
+    },
+    {
+      "indice_smp": "6.5",
+      "nc_ph_5_5": 0.4,
+      "nc_ph_6_0": 1.1,
+      "nc_ph_6_5": 2.1
+    },
+    {
+      "indice_smp": "6.6",
+      "nc_ph_5_5": 0.2,
+      "nc_ph_6_0": 0.8,
+      "nc_ph_6_5": 1.6
+    },
+    {
+      "indice_smp": "6.7",
+      "nc_ph_5_5": 0.0,
+      "nc_ph_6_0": 0.5,
+      "nc_ph_6_5": 1.2
+    },
+    {
+      "indice_smp": "6.8",
+      "nc_ph_5_5": 0.0,
+      "nc_ph_6_0": 0.3,
+      "nc_ph_6_5": 0.8
+    },
+    {
+      "indice_smp": "6.9",
+      "nc_ph_5_5": 0.0,
+      "nc_ph_6_0": 0.2,
+      "nc_ph_6_5": 0.5
+    },
+    {
+      "indice_smp": "7.0",
+      "nc_ph_5_5": 0.0,
+      "nc_ph_6_0": 0.0,
+      "nc_ph_6_5": 0.2
+    },
+    {
+      "indice_smp": "7.1",
+      "nc_ph_5_5": 0.0,
+      "nc_ph_6_0": 0.0,
+      "nc_ph_6_5": 0.0
+    }
+  ],
+  "ajustes": {
+    "prnt": {
+      "formula": "dose_real = NC_tabela * 100 / PRNT",
+      "fonte": "Cap. 8, secao 8.1.1, p. 298"
+    },
+    "baixo_poder_tampao": {
+      "quando": "solos arenosos e/ou pobres em MO, geralmente com indice SMP > 6,3",
+      "motivo": "o indice SMP pode subestimar a acidez potencial",
+      "equacoes_t_ha_prnt100": {
+        "ph_5_5": "-0.653 + 0.480*MO + 1.937*Al",
+        "ph_6_0": "-0.516 + 0.805*MO + 2.435*Al",
+        "ph_6_5": "-0.122 + 1.193*MO + 2.713*Al"
+      },
+      "variaveis": {
+        "MO": "materia organica (%)",
+        "Al": "Al trocavel (cmolc/dm3)"
+      },
+      "fonte": "p. 71-72"
+    },
+    "profundidade_30cm": {
+      "fator": 1.5,
+      "quando": "incorporacao ate 30 cm (macieira, oliveira, demais frutiferas, roseira de corte)"
+    },
+    "faixa_de_plantio": {
+      "formula": "DC = NC * (LFA/DLP) * (100/PRNT)",
+      "variaveis": {
+        "LFA": "largura da faixa de aplicacao (m)",
+        "DLP": "distancia entre linhas (m)"
+      },
+      "fonte": "p. 83"
+    }
+  },
+  "metodo_alternativo_saturacao_bases": {
+    "observacao": "Alternativa ao indice SMP, prevista no Manual (p. 71). O SMP e o metodo preferencial; solos em primeira calagem DEVEM usar SMP.",
+    "formula": "NC = ((V1 - V2)/100) * CTC_pH7",
+    "v1_por_ph_referencia": {
+      "5.5": 65,
+      "6.0": 75,
+      "6.5": 85
+    },
+    "ressalva": "Valores de V1 nao calibrados para RS/SC; cerca de 5 p.p. menores se CTC_pH7 < 7,5 e 5 p.p. maiores se CTC_pH7 > 15 cmolc/dm3",
+    "fonte": "p. 71"
+  }
+}

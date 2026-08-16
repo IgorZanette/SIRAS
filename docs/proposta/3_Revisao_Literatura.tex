@@ -1,0 +1,189 @@
+\chapter{Revisão de Literatura}\label{chap:revisao}
+
+Este capítulo apresenta os fundamentos teóricos e os trabalhos relacionados
+que embasam o desenvolvimento de um sistema computacional para interpretação
+de análises de solo e recomendação agronômica. A revisão foi conduzida
+de forma narrativa, com buscas realizadas nas bases Google Scholar, SciELO,
+IEEE Xplore e no repositório da Embrapa, utilizando os termos
+\textit{análise de solo}, \textit{calagem e adubação}, \textit{aptidão agrícola},
+\textit{expert system agriculture} e \textit{sistema especialista agronomia},
+com filtros para publicações em língua portuguesa e inglesa. Foram priorizadas
+publicações com abrangência para o estado do Rio Grande do Sul e trabalhos
+que descrevem sistemas computacionais aplicados ao manejo da fertilidade do solo.
+
+\section{Fundamentação Teórica}
+
+Esta seção apresenta os conceitos teóricos que sustentam o desenvolvimento
+do trabalho. São abordados os principais parâmetros das análises químicas e
+físicas de solo, os critérios de calagem e adubação vigentes para o Rio Grande
+do Sul, os fundamentos da avaliação de aptidão agrícola das terras e os
+princípios dos sistemas especialistas baseados em regras.
+
+\subsection{Análise Química e Física do Solo}
+
+A análise de solo é o principal instrumento para o diagnóstico da fertilidade
+e para o planejamento das práticas de manejo nutricional das culturas. Por meio
+dela, determinam-se os teores de nutrientes disponíveis, a reação do solo e
+atributos físicos que condicionam a produtividade das lavouras
+\citep{Embrapa2011}.
+
+Os principais parâmetros avaliados em uma análise química de solo incluem o
+pH em água, que indica a acidez ou alcalinidade do meio e condiciona a
+disponibilidade da maioria dos nutrientes; o teor de fósforo disponível (P);
+os teores de potássio (K), cálcio (Ca) e magnésio (Mg) trocáveis; o alumínio
+trocável (Al\textsuperscript{3+}), associado à toxidez em solos ácidos;
+a capacidade de troca de cátions (CTC), que expressa a capacidade do solo
+em reter e fornecer nutrientes; e a saturação por bases (V\%), que indica
+a proporção da CTC ocupada por bases trocáveis \citep{Embrapa2011, ManualCalagem2016}.
+
+A textura do solo, determinada pela proporção de areia, silte e argila,
+constitui o principal atributo físico considerado na interpretação das análises,
+pois influencia diretamente a CTC, a capacidade de retenção de água e a
+resposta do solo à calagem \citep{ManualCalagem2016}. O teor de matéria orgânica
+(MO) também é avaliado, dada sua contribuição para a CTC efetiva e para a
+disponibilidade de nitrogênio \citep{Santos2003}. Além dos macronutrientes,
+os micronutrientes --- como boro, manganês, cobre e zinco --- vêm recebendo
+atenção crescente nas pesquisas regionais, com a publicação recente de
+conjuntos de dados experimentais sobre sua aplicação em culturas de grãos
+no Sul do Brasil \citep{FontouraEtAl2026}.
+
+Conforme \cite{EmbrapaDoc206}, a interpretação dos resultados analíticos exige
+que os valores obtidos sejam comparados a faixas de referência estabelecidas
+para cada parâmetro, considerando-se o tipo de solo e a cultura de interesse.
+
+\subsection{Calagem e Adubação para o Rio Grande do Sul}
+
+O Manual de Calagem e Adubação para os estados do Rio Grande do Sul e de
+Santa Catarina, elaborado pela Comissão de Química e Fertilidade do Solo
+(CQFS/NRS-SBCS), constitui a principal referência técnica para as
+recomendações de correção e fertilização no sul do Brasil
+\citep{ManualCalagem2016}. O manual estabelece critérios específicos para
+interpretação dos atributos do solo, métodos de cálculo da necessidade de
+calagem e doses de fertilizantes para as principais culturas da região.
+
+A calagem é a prática que visa elevar o pH do solo a níveis adequados para
+o desenvolvimento das culturas, neutralizando o alumínio tóxico e elevando
+a disponibilidade de cálcio e magnésio. Para a maioria das culturas de interesse
+regional, o manual define um pH de referência específico, a partir do qual
+o cálculo da necessidade de calagem é realizado com base na saturação por bases
+atual do solo, na saturação alvo correspondente ao pH de referência da cultura,
+na CTC e no poder de neutralização do corretivo \citep{ManualCalagem2016}.
+
+A adubação fosfatada e potássica é dimensionada com base nos teores
+disponíveis no solo, interpretados em classes de disponibilidade (muito baixo,
+baixo, médio, alto e muito alto), e na expectativa de rendimento da cultura.
+O manual fornece tabelas de recomendação individuais para cada cultura ou grupo
+de culturas \citep{ManualCalagem2016}.
+
+\subsection{Aptidão Agrícola das Terras}
+
+A avaliação da aptidão agrícola das terras tem por objetivo classificar
+as áreas de acordo com seu potencial para os diferentes tipos de uso
+agropecuário, considerando as limitações impostas pelos atributos do solo
+e do relevo sob diferentes níveis tecnológicos. O principal sistema utilizado
+no Brasil é o Sistema de Avaliação da Aptidão Agrícola das Terras, desenvolvido
+pela Embrapa, que classifica as terras em seis grupos de aptidão com base em
+cinco fatores de limitação: deficiência de fertilidade, deficiência hídrica,
+excesso de água, suscetibilidade à erosão e impedimentos à mecanização
+\citep{EmbrapaAptidao2025}.
+
+Conforme apontado por \cite{Hofig2015}, em estudo conduzido no município de
+Cerro Grande do Sul/RS, o Sistema de Avaliação da Aptidão Agrícola das Terras
+é mais adequado para análises em âmbito regional, não indicando práticas de
+manejo para os diferentes tipos de utilização nem sendo projetado para a
+avaliação individualizada de propriedades a partir de dados de análise de solo.
+Os autores ressaltam que adaptações são necessárias para seu uso no planejamento
+conservacionista de propriedades rurais, evidenciando uma lacuna metodológica
+relevante para propriedades rurais de escala individual.
+
+Uma abordagem alternativa consiste na estimativa de aptidão a partir dos
+próprios parâmetros da análise de solo, cruzados com as exigências agronômicas
+de cada cultura, sem considerar fatores de relevo e clima. Trata-se de uma
+estimativa de aptidão edáfica, delimitada às condições de fertilidade e físicas
+do solo para uma cultura específica, mais adequada à avaliação individualizada
+de áreas a partir de laudos de análise.
+
+\section{Sistemas Especialistas Baseados em Regras}
+
+Sistemas especialistas (SE) são programas computacionais que utilizam
+técnicas de inteligência artificial para reproduzir o raciocínio de um
+especialista humano em um domínio específico do conhecimento, apoiando
+processos de tomada de decisão, diagnóstico e recomendação
+\citep{SantosEtAl1994}. Conforme \cite{SantosEtAl1994}, um sistema
+especialista é constituído por três componentes fundamentais: a
+\textbf{base de conhecimento}, que armazena os fatos, regras e heurísticas
+do domínio; o \textbf{motor de inferência}, responsável por aplicar as
+regras à base de conhecimento para derivar conclusões a partir dos dados
+de entrada; e a \textbf{interface com o usuário}, que permite a comunicação
+bidirecional entre o sistema e o usuário final.
+
+Os sistemas baseados em regras do tipo SE-ENTÃO (\textit{if-then})
+constituem a abordagem mais difundida para a representação do conhecimento
+agronômico em sistemas computacionais. Nesse modelo, cada regra representa
+um fragmento do conhecimento especialista na forma
+\textit{SE} <condição> \textit{ENTÃO} <conclusão>, e o motor de inferência
+percorre a base de regras para identificar quais condições são satisfeitas
+pelos dados de entrada, derivando as recomendações correspondentes
+\citep{Lanzer2010}.
+
+A aplicação de sistemas especialistas na agricultura tem sido estudada em
+diferentes contextos. \cite{Lanzer2010} desenvolveu um sistema especialista
+baseado em regras para a classificação do uso e manejo das terras, aplicando
+representação hierárquica do conhecimento~--- indicada para sistemas que lidam
+com classificação~--- em um sistema de determinação de uso das terras compatível
+com o sistema brasileiro. O autor destaca que a introspecção facilita o
+desenvolvimento nos estágios iniciais de um sistema especialista quando as
+informações para definição dos estados estão presentes nos próprios sistemas
+de classificação, como é o caso do Manual de Calagem e Adubação
+\citep{ManualCalagem2016}.
+
+Em escala mais ampla, \cite{Shahzadi2016} propõem um sistema especialista
+para agricultura inteligente baseado em Internet das Coisas (IoT), no qual
+regras de conhecimento são alimentadas com dados coletados em tempo real por
+sensores, gerando diagnósticos e recomendações preventivas para o manejo de
+doenças e pragas. Embora voltado a um domínio diferente, o estudo evidencia
+a viabilidade e a aplicabilidade prática de sistemas especialistas baseados
+em regras para o suporte à decisão agronômica.
+
+\section{Trabalhos Relacionados}
+
+Esta seção apresenta os principais sistemas e ferramentas computacionais
+identificados na literatura que se relacionam ao escopo do presente trabalho,
+discutindo suas características, abrangência e limitações.
+
+\textbf{FertFacil} é um sistema online e gratuito desenvolvido para estimar
+a necessidade de adubação e calagem para os principais cultivos do RS, SC,
+MS e Paraguai \citep{Tiecher2016}. O sistema foi desenvolvido com base nos
+critérios do Manual de Calagem e Adubação e permite ao técnico ou produtor
+obter recomendações de forma rápida, a partir da entrada dos resultados da
+análise de solo e da cultura desejada. Atualmente o FertFacil cobre mais de
+100 cultivos e é a ferramenta de escolha da Emater/RS, sendo utilizado em
+mais de 480 municípios do estado. Sua principal limitação identificada é a
+ausência de um módulo de estimativa de aptidão agrícola integrado ao processo
+de recomendação.
+
+\textbf{AdubaTec} é um sistema web gratuito desenvolvido pela Embrapa
+Mandioca e Fruticultura em parceria com a Universidade Federal do
+Recôncavo da Bahia (UFRB), voltado à recomendação de calagem e adubação
+para mandioca e diversas fruteiras tropicais, com arquitetura parametrizável
+que permite a incorporação de novas culturas sem modificação do código-fonte
+\citep{AdubaTec2021}. O AdubaTec é baseado em manuais de recomendação
+voltados ao Nordeste do Brasil, não cobrindo os critérios do Manual de
+Calagem e Adubação do RS/SC, e não contempla a estimativa de aptidão
+agrícola a partir da análise individual de solo.
+
+\textbf{Sistema de Avaliação de Aptidão Agrícola das Terras da Embrapa}
+\citep{EmbrapaAptidao2025} é o principal sistema de referência para
+classificação do potencial produtivo das terras brasileiras. Trata-se de
+um sistema voltado a levantamentos regionais em escala exploratória, baseado
+em mapeamento pedológico e em fatores de limitação que incluem relevo,
+clima e solo. Sua escala de análise o torna inadequado para a avaliação
+individualizada de uma propriedade a partir de dados de análise de solo,
+conforme discutido por \cite{Hofig2015}.
+
+A partir do levantamento realizado, constata-se que os sistemas disponíveis
+abordam, de forma separada, a recomendação de manejo do solo ou a avaliação
+de aptidão agrícola em escala regional. Nenhum deles integra ambas as
+perspectivas a partir de uma análise individual de solo com cobertura para
+o Manual RS/SC, evidenciando uma lacuna que justifica o desenvolvimento de
+uma solução específica para esse contexto.

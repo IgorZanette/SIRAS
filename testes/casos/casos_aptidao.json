@@ -1,0 +1,21 @@
+[
+  {
+    "id": "EXEMPLO-APT-01",
+    "descricao": "Modelo de caso de aptidao edafica. Remover ao cadastrar os casos reais.",
+    "entrada": {
+      "cultura": "PREENCHER",
+      "ph_agua": null,
+      "argila": null,
+      "mo": null,
+      "p": null,
+      "k": null,
+      "ctc_ph7": null,
+      "al": null,
+      "v_percent": null
+    },
+    "referencia": {
+      "classe_aptidao": null
+    },
+    "origem_referencia": "PREENCHER: ver docs/VALIDACAO.md - o oraculo da aptidao NAO pode derivar das mesmas faixas implementadas pelo sistema (pendencia P1)"
+  }
+]

@@ -1,0 +1,565 @@
+\chapter{Metodologia}\label{chap:metodologia}
+
+Este capítulo descreve o método que será empregado para alcançar os
+objetivos propostos no \cref{chap:problema}. Inicialmente, a pesquisa é
+caracterizada quanto ao seu propósito, abordagem e estilo. Em seguida,
+são apresentados os materiais --- o escopo de culturas contemplado e as
+tecnologias de implementação ---, a sequência de passos do método, a
+estratégia de validação das hipóteses, o cronograma de execução, os
+resultados esperados e as limitações do estudo.
+
+%-------------------------------------------------------------------
+\section{Caracterização da Pesquisa}\label{sec:caracterizacao}
+
+Quanto ao propósito, esta pesquisa caracteriza-se como
+\textbf{descritiva e aplicada}: descreve e estrutura um conjunto de
+critérios técnicos já consolidados na literatura agronômica e aplica
+esse conhecimento na construção e na avaliação de um artefato
+computacional \citep{Wazlawick2014}. Quanto à abordagem, a pesquisa é
+\textbf{quantitativa}, uma vez que a validação se dará pela medição
+objetiva da concordância entre as saídas geradas pelo sistema e valores
+de referência calculados de forma independente, evitando-se métricas
+subjetivas.
+
+Quanto ao estilo de pesquisa corrente em Computação, o trabalho
+enquadra-se na \textbf{apresentação de um produto} (artefato de
+software). O artefato a ser construído é um \textbf{sistema especialista
+baseado em regras}, isto é, um sistema que reproduz o raciocínio de um
+especialista humano em um domínio restrito por meio de uma base de
+conhecimento explícita e de um motor de inferência que aplica regras do
+tipo SE-ENTÃO \citep{Lanzer2010, SantosEtAl1994}. Conforme
+\cite{Wazlawick2014}, o estilo de apresentação de produto exige cautela,
+pois a simples demonstração de funcionamento possui baixa aceitação
+científica: é necessário comparar o que foi construído com alguma
+referência. Por essa razão, a validação do SIRAS não se limitará à
+demonstração da aplicação: as saídas serão confrontadas com um oráculo
+técnico --- os valores obtidos pela aplicação manual e independente dos
+critérios do Manual de Calagem e Adubação \citep{ManualCalagem2016} ---
+e o sistema será posicionado frente às ferramentas existentes
+discutidas no \cref{chap:revisao}, das quais se diferencia por integrar
+recomendação de manejo e estimativa de aptidão edáfica a partir de uma
+análise individual de solo.
+
+%-------------------------------------------------------------------
+\section{Materiais}\label{sec:materiais}
+
+Esta seção apresenta os materiais que delimitam e viabilizam o
+desenvolvimento do SIRAS. Primeiro, define-se o \textbf{escopo de
+culturas} contempladas, derivado diretamente do Manual de Calagem e
+Adubação para os estados do RS e SC, que constitui a principal fonte de
+conhecimento do sistema. Em seguida, descreve-se a \textbf{tecnologia de
+implementação} adotada --- linguagem, framework, formato da base de
+conhecimento e forma de distribuição --- e as \textbf{alternativas
+tecnológicas} consideradas. Esses elementos correspondem, na metodologia
+de pesquisa em Computação, aos materiais e recursos necessários à
+execução do trabalho \citep{Wazlawick2014}.
+
+\subsection{Escopo de Culturas}\label{sec:escopo}
+
+O sistema abrangerá as culturas para as quais o Manual de Calagem e
+Adubação \citep{ManualCalagem2016} disponibiliza, em seu capítulo de
+recomendações, tabelas completas de adubação, totalizando
+\textbf{61 culturas e grupos de culturas} organizados em seis grupos,
+conforme detalhado a seguir. A contagem segue a própria organização do
+Manual: cada item corresponde a uma seção de recomendação, de modo que
+culturas que compartilham a mesma tabela --- como melancia e melão ---
+são contabilizadas como uma única entrada. Com exceção da erva-mate,
+discutida adiante, todas as culturas contempladas possuem pH de
+referência definido na Tabela~5.1 do Manual, requisito do módulo de
+calagem do sistema. Ficam fora do escopo: (i)~as culturas sem pH de
+referência cuja lógica de calagem é incompatível com o modelo
+padronizado adotado, como o arroz irrigado (cujo pH se eleva
+naturalmente pela inundação), a mandioca e as espécies florestais
+tolerantes à acidez; e (ii)~por delimitação de escopo, os grupos do
+Manual voltados a forrageiras, palmeiras (juçara, real e pupunheira),
+plantas medicinais, aromáticas e condimentares, plantas ornamentais e
+sistemas especiais de produção, por estarem fora do foco de lavouras
+comerciais do público-alvo do sistema.
+
+\textbf{Culturas de grãos (21):} arroz de sequeiro, amendoim, aveia branca,
+aveia preta, canola, centeio, cevada, ervilha seca e ervilha forrageira,
+ervilhaca, feijão, girassol, linho, milho, milho pipoca, nabo forrageiro,
+painço, soja, sorgo, tremoço, trigo e triticale. Esse grupo segue lógica
+uniforme de recomendação, com tabelas de N, P e K baseadas na expectativa
+de rendimento e na classe de disponibilidade dos nutrientes no solo; nas
+leguminosas como soja, ervilhaca e tremoço, a adubação nitrogenada não é
+recomendada em razão da fixação biológica de nitrogênio
+\citep{ManualCalagem2016}.
+
+\textbf{Hortaliças (18):} abóbora, abobrinha e moranga, alcachofra, alface,
+almeirão, chicória, rúcula e salsa, alho, aspargo, berinjela, beterraba e cenoura,
+brócolis e couve-flor, cebola, chuchu, ervilha, mandioquinha-salsa,
+melancia e melão, nabo e rabanete, pepino, pimentão, repolho e tomate.
+
+\textbf{Tubérculos (2):} batata e batata-doce, com tabelas completas de
+N, P e K.
+
+\textbf{Frutíferas (17):} abacateiro, ameixeira, amoreira-preta, bananeira,
+caquizeiro, citros, figueira, macieira, maracujazeiro, mirtileiro, morangueiro,
+nogueira-pecã, oliveira, pessegueiro e nectarineira, pereira, quivizeiro e videira.
+Esse grupo apresenta complexidade adicional em relação aos demais: a adubação
+é estruturada em até três fases (pré-plantio, crescimento e manutenção/produção),
+e o sistema deverá adaptar as recomendações de acordo com a fase informada pelo
+usuário. O fósforo e o potássio de pré-plantio seguem uma tabela compartilhada
+entre todas as frutíferas (Tabela 6.5.1 do Manual), enquanto as doses de
+nitrogênio e as recomendações de manutenção são específicas por espécie.
+
+\textbf{Erva-mate (1):} cultura de expressiva relevância socioeconômica no
+norte do Rio Grande do Sul. Constitui a única exceção ao critério de pH de
+referência: o Manual a classifica entre as espécies tolerantes à acidez,
+sem pH de referência definido, indicando a calagem apenas para o adequado
+suprimento de cálcio e magnésio \citep{ManualCalagem2016}; o sistema
+adotará esse tratamento diferenciado, sem cálculo de necessidade de
+calagem por pH alvo. Apresenta a maior complexidade de implementação
+entre as culturas contempladas: a adubação pode ocorrer em programa desde
+o plantio (três fases: plantio/crescimento, formação de copa e produção) ou
+em programa de recuperação de ervais já estabelecidos. A adubação de produção
+é calculada com base na massa verde colhida (t/ha) e no tipo de manejo
+(galho grosso retido ou retirado da área), variáveis que deverão ser informadas
+pelo usuário ao selecionar essa cultura \citep{ManualCalagem2016}.
+
+\textbf{Outras culturas comerciais (2):} cana-de-açúcar e tabaco, conforme
+o agrupamento do próprio Manual. O \textbf{tabaco} é cultura de grande
+importância econômica no RS e SC; as recomendações diferenciam-se entre os
+tipos Virgínia e Burley, especialmente nas doses de nitrogênio e potássio,
+e o sistema solicitará ao usuário o tipo cultivado ao selecionar essa
+cultura. A \textbf{cana-de-açúcar} possui recomendações distintas para
+cana-planta e cana-soca, com adubação nitrogenada definida pelo teor de
+matéria orgânica do solo. Para ambas as culturas, o Manual estabelece pH
+de referência de 6,0, com a particularidade de que a calagem é indicada
+apenas quando o pH do solo for inferior a 5,5, regra que será incorporada
+às regras de decisão do sistema \citep{ManualCalagem2016}.
+
+\subsection{Tecnologia de Implementação}\label{sec:tecnologia}
+
+O sistema será desenvolvido como uma aplicação web leve, executável
+localmente em navegador, utilizando \textbf{Python}\footnote{Disponível
+em: \url{https://www.python.org}.} como linguagem principal
+com o microframework \textbf{Flask}\footnote{Disponível em:
+\url{https://flask.palletsprojects.com}.} para a camada web, complementado por
+\textbf{HTML} e \textbf{CSS} para a interface com o usuário. Essa escolha
+fundamenta-se em três critérios principais: (i)~legibilidade e manutenibilidade
+do código, uma vez que a lógica de regras agronômicas SE-ENTÃO em Python
+resulta em código mais claro e auditável do que em linguagens de tipagem fraca;
+(ii)~flexibilidade de estilização, pois o uso de HTML e CSS na interface permite
+customização visual completa do formulário de entrada e do laudo de saída,
+sem as limitações impostas por bibliotecas de interface nativas; e
+(iii)~viabilidade para execução local, já que o Flask permite servir a aplicação
+no próprio computador do usuário sem necessidade de servidor remoto ou conexão
+com a internet, bastando executar o comando \texttt{python app.py} e acessar
+o endereço \texttt{localhost} no navegador.
+
+Está previsto o uso do Python na versão 3.12 (ou superior) e do Flask na
+série 3.x, ambos software livre distribuído sob licenças permissivas
+(PSF e BSD, respectivamente), compatíveis com o uso acadêmico e executáveis
+em sistemas operacionais Windows ou GNU/Linux. Não há dependência de
+serviços pagos, de banco de dados dedicado ou de conexão com a internet,
+o que assegura que todos os recursos planejados estão disponíveis para a
+execução do trabalho.
+
+A lógica central do sistema --- o motor de inferência baseado em regras
+SE-ENTÃO --- será implementada diretamente em Python, sem o uso de bibliotecas
+externas de inferência (como Experta ou PyKE), de modo a manter o código
+auditável e o comportamento das regras totalmente rastreável. As tabelas técnicas
+do Manual de Calagem e Adubação \citep{ManualCalagem2016} serão armazenadas em
+arquivos no formato JSON, carregados localmente pela aplicação. Essa separação
+entre base de conhecimento e mecanismo de inferência é coerente com o paradigma
+de sistemas especialistas descrito por \cite{Lanzer2010} e \cite{SantosEtAl1994},
+e permite que as tabelas de recomendação sejam atualizadas de forma independente
+da lógica de processamento. Para a geração do laudo de saída, será utilizada
+a capacidade de renderização do navegador, com possibilidade de impressão
+direta ou exportação em PDF pelo recurso nativo dos navegadores modernos.
+
+Quanto à forma de distribuição, o SIRAS será disponibilizado como
+\textbf{software de código aberto}, com o repositório publicado em
+plataforma pública de versionamento. A forma de acesso prevista nesta
+proposta é a \textbf{execução local}: o usuário obtém o código-fonte,
+instala as dependências (Python e Flask) e executa a aplicação em sua
+própria máquina, acessando a interface pelo navegador no endereço
+\texttt{localhost}. Essa opção foi escolhida por dispensar custos de
+hospedagem e por manter o controle dos dados na máquina do usuário, o
+que é adequado ao escopo de uma proposta de TCC. A arquitetura web
+adotada, contudo, não impede uma futura implantação em servidor remoto
+--- bastaria hospedar a mesma aplicação Flask para que fosse acessada
+diretamente por URL, sem instalação ---, possibilidade registrada como
+trabalho futuro na \cref{sec:limitacoes}.
+
+A \cref{fig:arquitetura} apresenta uma visão conceitual da arquitetura do sistema,
+ilustrando os três módulos principais e o fluxo de processamento das informações.
+
+\begin{figure}[htb!]
+\centering
+\begin{tikzpicture}[
+  node distance = 0.6cm and 1.1cm,
+  box/.style = {
+    rectangle, rounded corners=6pt,
+    minimum width=3.6cm, minimum height=1.0cm,
+    text centered, font=\small\sffamily,
+    line width=0.8pt
+  },
+  subbox/.style = {
+    rectangle, rounded corners=3pt,
+    minimum width=3.4cm,
+    text centered, font=\footnotesize\sffamily,
+    inner sep=4pt, line width=0.5pt
+  },
+  arrow/.style = {-{Stealth[length=7pt]}, line width=1.2pt},
+  groupbox/.style = {
+    rectangle, rounded corners=8pt,
+    draw=gray!60, fill=gray!6,
+    inner sep=8pt, line width=0.6pt
+  }
+]
+%--- MÓDULO 1: ENTRADA DE DADOS ---
+\node[box, fill=blue!15, draw=blue!50] (entrada) {Entrada de Dados};
+\node[subbox, fill=blue!7, draw=blue!30, below=0.25cm of entrada] (e1) {pH, CTC, V\%, Al$^{3+}$};
+\node[subbox, fill=blue!7, draw=blue!30, below=0.1cm of e1]       (e2) {P, K, MO, Textura};
+\node[subbox, fill=blue!7, draw=blue!30, below=0.1cm of e2]       (e3) {Cultura selecionada};
+%--- MÓDULO 2: MOTOR DE INFERÊNCIA ---
+\node[box, fill=green!15, draw=green!50,
+      right=1.1cm of entrada] (motor) {Motor de Inferência};
+\node[subbox, fill=green!7, draw=green!30, below=0.25cm of motor] (m1) {Regras SE-ENTÃO};
+\node[subbox, fill=green!7, draw=green!30, below=0.1cm of m1]     (m2) {Base de Conhecimento};
+\node[subbox, fill=green!7, draw=green!30, below=0.1cm of m2]     (m3) {Manual RS/SC 2016};
+%--- MÓDULO 3: LAUDO DE SAÍDA ---
+\node[box, fill=orange!15, draw=orange!50,
+      right=1.1cm of motor] (saida) {Laudo de Sa\'ida};
+\node[subbox, fill=orange!7, draw=orange!30, below=0.25cm of saida] (s1) {Recomenda\c{c}\~ao de};
+\node[subbox, fill=orange!7, draw=orange!30, below=0.1cm of s1]     (s2) {calagem e aduba\c{c}\~ao};
+\node[subbox, fill=orange!7, draw=orange!30, below=0.1cm of s2]     (s3) {Aptid\~ao agr\'icola};
+%--- CAIXAS DE AGRUPAMENTO ---
+\begin{scope}[on background layer]
+  \node[groupbox, fit=(entrada)(e1)(e2)(e3)] (g1) {};
+  \node[groupbox, fit=(motor)(m1)(m2)(m3)]   (g2) {};
+  \node[groupbox, fit=(saida)(s1)(s2)(s3)]   (g3) {};
+\end{scope}
+%--- SETAS ---
+\draw[arrow, blue!60]   (g1.east) -- (g2.west);
+\draw[arrow, green!60]  (g2.east) -- (g3.west);
+\end{tikzpicture}
+\caption{\label{fig:arquitetura}Arquitetura conceitual do SIRAS.}
+\end{figure}
+
+Do ponto de vista do usuário, a interação com o sistema é direta e
+organiza-se em cinco passos, ilustrados na \cref{fig:fluxo}. O usuário
+--- técnico agrícola, agrônomo ou produtor --- seleciona a cultura de
+interesse, informa em um formulário os resultados de sua análise de
+solo, aciona o processamento e, em poucos instantes, recebe na própria
+tela o laudo com a recomendação de calagem e adubação e a estimativa de
+aptidão, podendo então imprimi-lo ou exportá-lo em PDF. Todo o fluxo
+ocorre localmente no navegador, sem necessidade de cadastro ou de
+conexão com a internet.
+
+\begin{figure}[htb!]
+\centering
+\includegraphics[width=\textwidth]{fig/Fluxo_de_Uso_Usuário}
+\caption{\label{fig:fluxo}Fluxo de uso do SIRAS na perspectiva do usuário.}
+\end{figure}
+
+
+\subsection{Alternativas Tecnológicas}\label{sec:alternativas}
+
+Caso durante o desenvolvimento sejam identificadas limitações ou necessidades
+não previstas nesta proposta, as seguintes alternativas tecnológicas poderão
+ser adotadas em substituição ou complemento à stack principal:
+
+\begin{itemize}
+
+  \item \textbf{Django} --- framework web Python mais completo que o Flask,
+    indicado caso o sistema evolua para necessitar de autenticação de usuários,
+    banco de dados relacional ou administração de dados mais robusta. Mantém
+    a linguagem Python, minimizando o reaprendizado;
+
+  \item \textbf{HTML + CSS + JavaScript puro} --- caso seja identificada a
+    necessidade de eliminar qualquer dependência de servidor, a lógica de
+    recomendação pode ser portada integralmente para JavaScript, resultando
+    em uma aplicação que executa diretamente no navegador sem necessidade
+    de instalação de Python ou Flask;
+
+  \item \textbf{Streamlit} --- biblioteca Python voltada para criação rápida
+    de aplicações de dados com interface web, indicada caso a prioridade
+    seja a agilidade no desenvolvimento da interface em detrimento da
+    customização visual, pois gera interfaces funcionais com poucas linhas
+    de código Python;
+
+  \item \textbf{SQLite} --- banco de dados leve e baseado em arquivo, sem
+    necessidade de servidor de banco de dados, indicado caso seja necessário
+    persistir histórico de análises realizadas pelo usuário entre sessões
+    da aplicação.
+
+\end{itemize}
+
+%-------------------------------------------------------------------
+\section{Método}\label{sec:metodo}
+
+O método consiste na sequência de passos descrita a seguir, definida
+a partir dos objetivos específicos enunciados na \cref{sec:obj_espec}.
+
+\begin{enumerate}[label=\alph*),leftmargin=3em]
+
+  \item \textbf{Estruturação da base de conhecimento:} extração das
+    tabelas de interpretação e recomendação do Manual de Calagem e
+    Adubação \citep{ManualCalagem2016} e sua transcrição para arquivos
+    JSON, organizados pelos seis grupos de culturas definidos na
+    \cref{sec:escopo}, com conferência manual dos valores transcritos;
+
+  \item \textbf{Definição formal das regras:} especificação das regras
+    SE-ENTÃO de interpretação dos atributos do solo (classes de
+    disponibilidade), do cálculo da necessidade de calagem e do
+    dimensionamento das doses de N, P\textsubscript{2}O\textsubscript{5}
+    e K\textsubscript{2}O, incluindo os casos especiais das frutíferas
+    (três fases), da erva-mate (programas de plantio e de recuperação)
+    e do tabaco (tipos Virgínia e Burley);
+
+  \item \textbf{Definição dos critérios de aptidão edáfica:} construção,
+    a partir das faixas de interpretação dos atributos químicos e físicos
+    do solo estabelecidas no Manual de Calagem e Adubação
+    \citep{ManualCalagem2016} e das exigências agronômicas descritas na
+    literatura de avaliação de aptidão das terras
+    \citep{EmbrapaAptidao2025, Hofig2015}, das faixas de referência
+    que sustentarão a classificação de aptidão por cultura, restrita aos
+    atributos químicos e físicos do solo;
+
+  \item \textbf{Implementação do módulo de entrada de dados:} formulário
+    web para informar os resultados da análise de solo e a cultura de
+    interesse, com validação de domínio das variáveis (faixas válidas,
+    campos obrigatórios e unidades);
+
+  \item \textbf{Implementação do motor de inferência:} desenvolvimento,
+    em Python puro, do mecanismo que aplica as regras da base de
+    conhecimento aos dados de entrada;
+
+  \item \textbf{Implementação dos módulos de recomendação e de aptidão:}
+    geração das recomendações de calagem e adubação e da estimativa de
+    aptidão edáfica, integradas ao laudo de saída renderizado no
+    navegador;
+
+  \item \textbf{Construção do conjunto de casos de teste:} elaboração
+    dos casos de validação e dos respectivos valores de referência,
+    conforme detalhado na \cref{sec:validacao};
+
+  \item \textbf{Validação e análise dos resultados:} execução dos casos
+    de teste no sistema, apuração das taxas de concordância, comparação
+    com ferramenta existente e decisão sobre as hipóteses formuladas na
+    \cref{sec:hipoteses};
+
+  \item \textbf{Avaliação de usabilidade:} aplicação do roteiro de
+    tarefas e do questionário SUS com usuários do público-alvo, conforme
+    a \cref{sec:val_usabilidade}, e coleta do retorno qualitativo;
+
+  \item \textbf{Redação final:} consolidação da monografia, com a
+    discussão dos resultados frente aos trabalhos relacionados, e
+    revisão ortográfica e gramatical do texto.
+
+\end{enumerate}
+
+Está prevista a construção de um \textbf{protótipo incremental}, com dois
+marcos intermediários de avaliação junto ao orientador: o primeiro
+contempla o fluxo completo (entrada, inferência e laudo) restrito ao
+grupo de culturas de grãos, cuja lógica de recomendação é uniforme; o
+segundo estende o protótipo aos demais grupos, incorporando os casos de
+maior complexidade (frutíferas, erva-mate e tabaco). Essa estratégia
+permite validar a arquitetura cedo e reduzir o risco de retrabalho.
+
+%-------------------------------------------------------------------
+\section{Validação}\label{sec:validacao}
+
+A validação definirá se as hipóteses formuladas na \cref{sec:hipoteses}
+serão aceitas ou refutadas. Reconhece-se que a verificação da
+concordância com o Manual atesta, sobretudo, que o sistema foi
+\emph{implementado corretamente}; por isso, a estratégia de validação é
+organizada em três dimensões complementares: (i)~\textbf{correção}, que
+verifica a conformidade das saídas com os critérios técnicos de
+referência; (ii)~\textbf{comparação}, que posiciona o SIRAS frente a uma
+ferramenta existente; e (iii)~\textbf{usabilidade}, que avalia a
+experiência de uso com usuários reais.
+
+\subsection{Correção das saídas}\label{sec:val_correcao}
+
+Esta dimensão verifica se as recomendações geradas estão corretas em
+relação aos critérios técnicos vigentes. Para evitar métricas
+subjetivas, adotam-se as seguintes \textbf{definições operacionais}:
+
+\begin{itemize}
+
+  \item \textbf{Concordância de recomendação:} um caso de teste é
+    considerado concordante quando todas as saídas geradas pelo SIRAS
+    --- necessidade de calagem (t/ha) e doses de N,
+    P\textsubscript{2}O\textsubscript{5} e
+    K\textsubscript{2}O (kg/ha) --- coincidem com os valores de
+    referência do caso, admitida apenas a tolerância de arredondamento
+    decorrente da precisão das tabelas do Manual;
+
+  \item \textbf{Concordância de aptidão:} um caso de teste é considerado
+    concordante quando a classe de aptidão edáfica atribuída pelo SIRAS
+    coincide com a classe de referência derivada das faixas definidas
+    na etapa~c) do método.
+
+\end{itemize}
+
+O conjunto de validação será composto por, no mínimo, \textbf{40 casos
+de teste}, estratificados entre os seis grupos de culturas de modo a
+cobrir as diferentes classes de interpretação dos atributos (teores
+muito baixos a muito altos, diferentes CTCs e texturas) e os casos
+especiais de maior complexidade. Os valores de referência de cada caso
+constituirão o \textbf{oráculo} da validação e serão obtidos pela
+aplicação manual e independente dos critérios do Manual, conferida com
+o orientador. Para mitigar o risco de circularidade --- já que o
+sistema é construído a partir do mesmo Manual usado na referência ---,
+serão priorizados, quando disponíveis, laudos reais de análise de solo
+acompanhados de recomendação técnica elaborada por profissional
+habilitado, utilizados de forma anonimizada como casos de teste
+adicionais.
+
+Como o SIRAS é um sistema determinístico, execuções repetidas de um
+mesmo caso produzem sempre a mesma saída; a análise dos resultados,
+portanto, não requer testes de comparação de médias, e consistirá na
+apuração da \textbf{proporção de casos concordantes} para cada hipótese,
+acompanhada do respectivo intervalo de confiança de 95\%. A hipótese
+H\textsubscript{1.1} será aceita se a taxa de concordância de
+recomendação for igual ou superior a 80\%; a hipótese
+H\textsubscript{1.2} será aceita se a taxa de concordância de aptidão
+for igual ou superior a 80\%. Os casos discordantes serão analisados
+individualmente e discutidos na monografia, distinguindo-se erros de
+implementação (corrigíveis) de divergências de interpretação dos
+critérios do Manual.
+
+\subsection{Comparação com ferramenta existente}\label{sec:val_comparacao}
+
+Para situar o SIRAS frente ao estado da prática, e seguindo a orientação
+de que um artefato de software deve ser comparado a alguma referência
+\citep{Wazlawick2014}, um subconjunto dos casos de teste será também
+submetido a uma das ferramentas discutidas no \cref{chap:revisao}
+--- como o FertFácil \citep{Tiecher2016} ou o AdubaTec
+\citep{AdubaTec2021} ---, no que houver sobreposição de funcionalidade,
+sobretudo na recomendação de calagem e adubação. Essa comparação é de
+natureza \textbf{qualitativa}: pretende evidenciar convergências e
+divergências entre as recomendações, documentar as funcionalidades que o
+SIRAS oferece e que as ferramentas existentes não contemplam --- em
+especial a estimativa de aptidão edáfica integrada à recomendação de
+manejo --- e, assim, sustentar a contribuição do trabalho declarada na
+H\textsubscript{1.2}. Eventuais divergências serão analisadas à luz das
+diferenças de critério ou de versão de Manual adotadas por cada
+ferramenta.
+
+\subsection{Usabilidade}\label{sec:val_usabilidade}
+
+A terceira dimensão avalia a experiência de uso do sistema com usuários
+reais, aspecto não capturado pelas duas anteriores. Após a conclusão do
+protótipo funcional, será conduzida uma avaliação de usabilidade com um
+pequeno grupo de participantes do público-alvo (estudantes de agronomia,
+técnicos agrícolas ou agrônomos), nos quais cada participante executará
+um roteiro de tarefas típicas --- selecionar uma cultura, informar os
+dados de uma análise de solo e interpretar o laudo gerado. Ao final, os
+participantes responderão ao questionário \textbf{System Usability Scale
+(SUS)} \citep{Brooke1996}, instrumento validado e amplamente utilizado
+para mensurar a usabilidade percebida, que produz um escore de 0 a 100.
+Como referência de interpretação, adota-se o valor consagrado na
+literatura da escala, segundo o qual uma pontuação SUS média igual ou
+superior a 68 indica usabilidade satisfatória \citep{Brooke1996}.
+Complementarmente, será coletado retorno \textbf{qualitativo} por meio
+de perguntas abertas sobre dificuldades encontradas e sugestões de
+melhoria. Os resultados dessa etapa não testam as hipóteses
+H\textsubscript{1.1} e H\textsubscript{1.2}, de natureza técnica, mas
+fornecem evidências sobre a adequação da interface ao público-alvo e
+subsidiam ajustes finais e recomendações de trabalhos futuros.
+
+%-------------------------------------------------------------------
+\section{Cronograma}\label{sec:cronograma}
+
+A \cref{tab:cronograma} apresenta a distribuição das etapas do método
+ao longo do período de execução do trabalho, em quinzenas, de agosto ao
+início de dezembro de 2026, considerando que a apresentação do trabalho
+está prevista para o início de dezembro. As letras correspondem às
+etapas detalhadas na \cref{sec:metodo}, e os marcos de protótipo (M1 e
+M2) estão indicados nas linhas correspondentes da tabela: M1, ao final
+de setembro, corresponde ao fluxo completo restrito ao grupo de grãos;
+M2, em meados de outubro, à extensão do protótipo aos demais grupos. A
+redação da monografia ocorre de forma contínua a partir da segunda
+quinzena de setembro; a validação técnica e a avaliação de usabilidade
+concentram-se em novembro, e a primeira quinzena de dezembro fica
+reservada à revisão final, entrega e preparação da apresentação.
+
+\begin{table}[htb!]
+\centering
+\caption{\label{tab:cronograma}Cronograma de execução do trabalho (quinzenas, 2026).}
+\small
+\begin{tabular}{l c c c c c c c c c}
+\hline
+ & \multicolumn{2}{c}{\textbf{Ago}} & \multicolumn{2}{c}{\textbf{Set}} & \multicolumn{2}{c}{\textbf{Out}} & \multicolumn{2}{c}{\textbf{Nov}} & \textbf{Dez} \\
+\textbf{Etapa} & 1 & 2 & 1 & 2 & 1 & 2 & 1 & 2 & 1 \\
+\hline
+a) Base de conhecimento (JSON)            & X & X &   &   &   &   &   &   &   \\
+b) Regras SE-ENTÃO                        & X & X & X &   &   &   &   &   &   \\
+c) Critérios de aptidão edáfica           &   & X & X &   &   &   &   &   &   \\
+d) Módulo de entrada de dados             &   & X & X &   &   &   &   &   &   \\
+e) Motor de inferência                    &   &   & X & X &   &   &   &   &   \\
+\textbf{-- Marco M1 (protótipo grãos)}    &   &   &   & X &   &   &   &   &   \\
+f) Módulos de recomendação e aptidão      &   &   &   & X & X &   &   &   &   \\
+\textbf{-- Marco M2 (demais grupos)}      &   &   &   &   & X &   &   &   &   \\
+g) Casos de teste e oráculo               &   &   &   & X & X & X &   &   &   \\
+h) Validação e análise                    &   &   &   &   &   & X & X &   &   \\
+i) Avaliação de usabilidade (SUS)         &   &   &   &   &   &   & X & X &   \\
+j) Redação da monografia                  &   &   &   & X & X & X & X & X &   \\
+k) Revisão final, entrega e apresentação  &   &   &   &   &   &   &   & X & X \\
+\hline
+\end{tabular}
+\end{table}
+
+%-------------------------------------------------------------------
+\section{Resultados Esperados}\label{sec:resultados_esperados}
+
+Caso os objetivos sejam alcançados, espera-se dispor de uma ferramenta
+funcional, gratuita e executável localmente que apoie técnicos e
+produtores do RS na interpretação de análises de solo, na obtenção de
+recomendações de calagem e adubação e na avaliação da aptidão edáfica
+de culturas específicas, reduzindo erros de interpretação e
+qualificando a tomada de decisão. Espera-se, ainda, que a avaliação de
+usabilidade indique boa aceitação da interface pelo público-alvo,
+confirmando a adequação da ferramenta ao uso pretendido. No contexto do
+crédito rural,
+espera-se que o SIRAS possa servir de instrumento auxiliar de
+conferência das recomendações técnicas que acompanham projetos
+agrícolas, conferindo objetividade e rastreabilidade a essa análise.
+Em termos de continuidade, a separação entre base de conhecimento e
+motor de inferência deverá permitir a extensão futura do sistema a
+outras culturas e a manuais de outras regiões, bem como sua utilização
+como base para novos trabalhos acadêmicos.
+
+%-------------------------------------------------------------------
+\section{Limitações do Estudo}\label{sec:limitacoes}
+
+O trabalho possui as seguintes limitações, que delimitam a abrangência
+dos resultados:
+
+\begin{itemize}
+
+  \item a estimativa de aptidão é \textbf{exclusivamente edáfica},
+    restrita aos atributos químicos e físicos informados na análise de
+    solo, não contemplando fatores de relevo, clima, deficiência
+    hídrica ou suscetibilidade à erosão considerados pelos sistemas de
+    avaliação regional \citep{EmbrapaAptidao2025, Hofig2015};
+
+  \item o escopo restringe-se às culturas com pH de referência e
+    tabelas completas no Manual de Calagem e Adubação para os estados
+    do RS e SC \citep{ManualCalagem2016}; culturas como arroz irrigado
+    e mandioca, bem como critérios de outras regiões do país, estão
+    fora do escopo desta proposta;
+
+  \item a validação será realizada por casos de teste confrontados com
+    valores de referência, e não por experimentos agronômicos de campo;
+    portanto, os resultados atestam a conformidade do sistema com os
+    critérios do Manual, e não o desempenho agronômico das
+    recomendações em lavoura;
+
+  \item o SIRAS é uma ferramenta de apoio à decisão e não substitui a
+    responsabilidade técnica de profissional habilitado na emissão de
+    recomendações oficiais de correção e adubação.
+
+\end{itemize}
+
+Registra-se, ainda, como possibilidade de \textbf{trabalho futuro}, a
+implantação do sistema em servidor remoto, de modo a permitir o acesso
+diretamente por URL, sem a necessidade de instalação local pelo usuário,
+bem como a ampliação do escopo a outras regiões e a avaliação de
+usabilidade com amostras maiores de participantes.

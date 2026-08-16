@@ -127,11 +127,11 @@ class Carregador:
                 f"calagem_smp.json: tabela deve ter 28 linhas, encontrada {len(tabela)}"
             )
 
-        # Invariante 2: Índices de <=4.4 a 7.1 com passo 0.1
-        indices_esperados = ["<=4.4"]
+        # Invariante 2: Índices de 4.4 a 7.1 com passo 0.1
+        indices_esperados = [4.4]
         smp = 4.5
         while smp <= 7.1:
-            indices_esperados.append(f"{smp:.1f}")
+            indices_esperados.append(round(smp, 1))
             smp = round(smp + 0.1, 1)
 
         indices_obtidos = [row["indice_smp"] for row in tabela]

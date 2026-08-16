@@ -52,7 +52,8 @@
         "type": "object",
         "required": ["indice_smp", "nc_ph_5_5", "nc_ph_6_0", "nc_ph_6_5"],
         "properties": {
-          "indice_smp": { "type": "string" },
+          "indice_smp": { "type": "number" },
+          "limite_inferior": { "type": "boolean" },
           "nc_ph_5_5": { "type": "number" },
           "nc_ph_6_0": { "type": "number" },
           "nc_ph_6_5": { "type": "number" }

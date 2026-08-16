@@ -81,7 +81,16 @@
       "decisao": {
         "tipo": "ph_menor_que",
         "ph": 5.5,
-        "nao_aplicar_se": "V >= 65% E saturacao_Al_na_CTC < 10%"
+        "nao_aplicar_se": {
+          "operador": "E",
+          "condicoes": [
+            {"campo": "v_percent", "op": ">=", "valor": 65},
+            {"campo": "saturacao_al", "op": "<", "valor": 10}
+          ],
+          "motivo": "excecao_v_e_al",
+          "texto": "V >= 65% e saturacao por Al na CTC < 10%",
+          "fonte": "Tab. 5.3, nota (1)"
+        }
       },
       "dose": {
         "tipo": "smp",
@@ -137,7 +146,16 @@
       "decisao": {
         "tipo": "ph_menor_que",
         "ph": 5.5,
-        "nao_aplicar_se": "V >= 65% E sat_Al < 10%"
+        "nao_aplicar_se": {
+          "operador": "E",
+          "condicoes": [
+            {"campo": "v_percent", "op": ">=", "valor": 65},
+            {"campo": "saturacao_al", "op": "<", "valor": 10}
+          ],
+          "motivo": "excecao_v_e_al",
+          "texto": "V >= 65% e saturacao por Al na CTC < 10%",
+          "fonte": "Tab. 5.3, nota (1)"
+        }
       },
       "dose": {
         "tipo": "smp",
@@ -163,7 +181,16 @@
       "decisao": {
         "tipo": "v_menor_igual",
         "v": 40,
-        "nao_aplicar_se": "Ca >= 4,0 E Mg >= 1,0 cmolc/dm3"
+        "nao_aplicar_se": {
+          "operador": "E",
+          "condicoes": [
+            {"campo": "ca", "op": ">=", "valor": 4.0},
+            {"campo": "mg", "op": ">=", "valor": 1.0}
+          ],
+          "motivo": "ca_mg_suficientes",
+          "texto": "Ca >= 4,0 e Mg >= 1,0 cmolc/dm³",
+          "fonte": "Tab. 5.3, nota (8)"
+        }
       },
       "dose": {
         "tipo": "saturacao_bases",
@@ -360,7 +387,16 @@
       "decisao": {
         "tipo": "v_menor_igual",
         "v": 40,
-        "nao_aplicar_se": "Ca >= 4,0 E Mg >= 1,0 cmolc/dm3"
+        "nao_aplicar_se": {
+          "operador": "E",
+          "condicoes": [
+            {"campo": "ca", "op": ">=", "valor": 4.0},
+            {"campo": "mg", "op": ">=", "valor": 1.0}
+          ],
+          "motivo": "ca_mg_suficientes",
+          "texto": "Ca >= 4,0 e Mg >= 1,0 cmolc/dm³",
+          "fonte": "Tab. 5.6, nota (2)"
+        }
       },
       "dose": {
         "tipo": "saturacao_bases",

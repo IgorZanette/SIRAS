@@ -15,7 +15,9 @@
       86
     ],
     "extraido_do_pdf_em": "2026-08-16",
-    "conferido_por_autor_em": null
+    "conferido_por_autor_em": "2026-08-16",
+    "conferido_operadores_em": "2026-08-16",
+    "nota_conferencia": "Operadores >= / <= / > conferidos por leitura visual das paginas 75, 81, 83 e 86 renderizadas do PDF."
   },
   "criterios": [
     {
@@ -159,7 +161,7 @@
       ],
       "ph_referencia": null,
       "decisao": {
-        "tipo": "v_menor_que",
+        "tipo": "v_menor_igual",
         "v": 40,
         "nao_aplicar_se": "Ca >= 4,0 E Mg >= 1,0 cmolc/dm3"
       },
@@ -356,7 +358,7 @@
       ],
       "ph_referencia": null,
       "decisao": {
-        "tipo": "v_menor_que",
+        "tipo": "v_menor_igual",
         "v": 40,
         "nao_aplicar_se": "Ca >= 4,0 E Mg >= 1,0 cmolc/dm3"
       },
@@ -395,5 +397,9 @@
       "fonte": "Tabela 5.7, p. 86",
       "notas": []
     }
-  ]
+  ],
+  "escopo": {
+    "forrageiras": "As especies forrageiras contempladas no grupo de graos (aveia preta, nabo forrageiro, ervilhaca, ervilha forrageira, tremoco) sao tratadas como integradas a producao de graos e seguem a Tabela 5.3. O cultivo como pastagem (Tabela 5.4: alfafa, especies perenes, campo natural) esta fora do escopo do SIRAS.",
+    "fonte": "Manual 2016, secao 5.2.3, p. 77"
+  }
 }

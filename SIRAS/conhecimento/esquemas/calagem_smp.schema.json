@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/siras/esquemas/calagem_smp.schema.json",
+  "title": "Tabela de calagem por SMP",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "descricao",
+    "fonte",
+    "unidade",
+    "profundidade_cm",
+    "ph_alvo_disponiveis",
+    "limites",
+    "tabela",
+    "ajustes"
+  ],
+  "properties": {
+    "descricao": { "type": "string" },
+    "fonte": {
+      "type": "object",
+      "required": [
+        "manual",
+        "tabela",
+        "pagina",
+        "secao",
+        "extraido_do_pdf_em",
+        "conferido_por_autor_em"
+      ],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabela": { "type": "string" },
+        "pagina": { "type": "integer" },
+        "secao": { "type": "string" },
+        "extraido_do_pdf_em": { "type": "string" },
+        "conferido_por_autor_em": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "unidade": { "type": "string" },
+    "profundidade_cm": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "ph_alvo_disponiveis": {
+      "type": "array",
+      "items": { "type": "number" },
+      "contains": { "const": 5.5 },
+      "minItems": 3
+    },
+    "limites": {
+      "type": "object",
+      "required": [
+        "smp_minimo",
+        "smp_maximo",
+        "passo",
+        "abaixo_do_minimo",
+        "acima_do_maximo"
+      ],
+      "properties": {
+        "smp_minimo": { "type": "number" },
+        "smp_maximo": { "type": "number" },
+        "passo": { "type": "number" },
+        "abaixo_do_minimo": { "type": "string" },
+        "acima_do_maximo": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "tabela": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "indice_smp",
+          "nc_ph_5_5",
+          "nc_ph_6_0",
+          "nc_ph_6_5"
+        ],
+        "properties": {
+          "indice_smp": {
+            "type": "string",
+            "pattern": "^(<=)?[0-9]+\\.[0-9]+$"
+          },
+          "nc_ph_5_5": { "type": "number" },
+          "nc_ph_6_0": { "type": "number" },
+          "nc_ph_6_5": { "type": "number" }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "ajustes": {
+      "type": "object",
+      "required": [
+        "prnt",
+        "baixo_poder_tampao",
+        "profundidade_30cm"
+      ],
+      "properties": {
+        "prnt": {
+          "type": "object",
+          "required": ["formula", "fonte"],
+          "properties": {
+            "formula": { "type": "string" },
+            "fonte": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "baixo_poder_tampao": {
+          "type": "object",
+          "required": ["quando", "motivo", "equacoes_t_ha_prnt100", "variaveis", "fonte"],
+          "properties": {
+            "quando": { "type": "string" },
+            "motivo": { "type": "string" },
+            "equacoes_t_ha_prnt100": {
+              "type": "object",
+              "required": ["ph_5_5", "ph_6_0", "ph_6_5"],
+              "properties": {
+                "ph_5_5": { "type": "string" },
+                "ph_6_0": { "type": "string" },
+                "ph_6_5": { "type": "string" }
+              },
+              "additionalProperties": true
+            },
+            "variaveis": {
+              "type": "object",
+              "required": ["MO", "Al"],
+              "properties": {
+                "MO": { "type": "string" },
+                "Al": { "type": "string" }
+              },
+              "additionalProperties": true
+            },
+            "fonte": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "profundidade_30cm": {
+          "type": "object",
+          "required": ["fator", "quando"],
+          "properties": {
+            "fator": { "type": "number" },
+            "quando": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

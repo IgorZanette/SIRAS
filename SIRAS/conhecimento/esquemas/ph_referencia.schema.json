@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/siras/esquemas/ph_referencia.schema.json",
+  "title": "Tabela de pH de referência por cultura",
+  "type": "object",
+  "required": [
+    "descricao",
+    "fonte",
+    "nota_importante",
+    "grupos",
+    "rotacao_de_culturas"
+  ],
+  "properties": {
+    "descricao": { "type": "string" },
+    "fonte": {
+      "type": "object",
+      "required": [
+        "manual",
+        "tabela",
+        "pagina",
+        "extraido_do_pdf_em",
+        "conferido_por_autor_em"
+      ],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabela": { "type": "string" },
+        "pagina": { "type": "integer" },
+        "extraido_do_pdf_em": { "type": "string" },
+        "conferido_por_autor_em": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "nota_importante": { "type": "string" },
+    "grupos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ph_referencia", "culturas"],
+        "properties": {
+          "ph_referencia": {
+            "type": ["number", "null"]
+          },
+          "observacao": { "type": "string" },
+          "culturas": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "rotacao_de_culturas": { "type": "string" }
+  },
+  "additionalProperties": true
+}

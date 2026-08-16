@@ -1,0 +1,124 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class AnaliseSolo:
+    """Representa uma análise química e física de solo."""
+
+    ph_agua: float
+    indice_smp: float
+    argila: float
+    mo: float
+    p: float
+    k: float
+    ctc_ph7: float
+    al: float
+    ca: float
+    mg: float
+    v_percent: float
+
+    def __post_init__(self) -> None:
+        self._validar_campos_obrigatorios()
+        self._validar_faixa_fisica_plausivel()
+
+    def _validar_campos_obrigatorios(self) -> None:
+        campos = {
+            "ph_agua": self.ph_agua,
+            "indice_smp": self.indice_smp,
+            "argila": self.argila,
+            "mo": self.mo,
+            "p": self.p,
+            "k": self.k,
+            "ctc_ph7": self.ctc_ph7,
+            "al": self.al,
+            "ca": self.ca,
+            "mg": self.mg,
+            "v_percent": self.v_percent,
+        }
+
+        for nome, valor in campos.items():
+            if valor is None:
+                raise ValueError(f"Campo obrigatório '{nome}' não pode ser nulo.")
+
+    def _validar_faixa_fisica_plausivel(self) -> None:
+        # Validação estritamente física/semântica. Não adotamos limites agronômicos
+        # inventados; apenas verificamos plausibilidade numérica e a ausência de valores
+        # absurdos para o domínio do solo.
+
+        if not 0.0 <= self.ph_agua <= 14.0:
+            raise ValueError("'ph_agua' deve estar em faixa física plausível para pH em água (0 a 14).")
+
+        if self.indice_smp < 0:
+            raise ValueError("'indice_smp' não pode ser negativo.")
+
+        if self.argila < 0:
+            raise ValueError("'argila' não pode ser negativo.")
+
+        if self.mo < 0:
+            raise ValueError("'mo' não pode ser negativo.")
+
+        if self.p < 0:
+            raise ValueError("'p' não pode ser negativo.")
+
+        if self.k < 0:
+            raise ValueError("'k' não pode ser negativo.")
+
+        if self.ctc_ph7 < 0:
+            raise ValueError("'ctc_ph7' não pode ser negativo.")
+
+        if self.al < 0:
+            raise ValueError("'al' não pode ser negativo.")
+
+        if self.ca < 0:
+            raise ValueError("'ca' não pode ser negativo.")
+
+        if self.mg < 0:
+            raise ValueError("'mg' não pode ser negativo.")
+
+        if not 0.0 <= self.v_percent <= 100.0:
+            raise ValueError("'v_percent' deve estar em faixa física plausível para saturação por bases (0 a 100).")
+
+        # TODO: definir limites específicos para atributos agronômicos quando a regra
+        # for formalizada no Manual ou em outra fonte autoritativa do TCC.
+
+
+@dataclass
+class Contexto:
+    """Contexto operacional do cálculo para a cultura e o manejo considerado."""
+
+    cultura_id: str
+    sistema_manejo: str
+    condicao_area: str
+    prnt: float
+    profundidade_cm: float
+    expectativa_rendimento: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        self._validar_campos_obrigatorios()
+        self._validar_faixa_fisica_plausivel()
+
+    def _validar_campos_obrigatorios(self) -> None:
+        if not self.cultura_id:
+            raise ValueError("'cultura_id' é obrigatório.")
+        if not self.sistema_manejo:
+            raise ValueError("'sistema_manejo' é obrigatório.")
+        if not self.condicao_area:
+            raise ValueError("'condicao_area' é obrigatório.")
+        if self.prnt is None:
+            raise ValueError("'prnt' é obrigatório.")
+        if self.profundidade_cm is None:
+            raise ValueError("'profundidade_cm' é obrigatório.")
+
+    def _validar_faixa_fisica_plausivel(self) -> None:
+        # Validação estritamente física/operacional. Não inventamos limiares agronômicos.
+        if not 0.0 <= self.prnt <= 100.0:
+            raise ValueError("'prnt' deve estar em faixa física plausível para poder relativo de neutralização total (0 a 100).")
+
+        if self.profundidade_cm <= 0:
+            raise ValueError("'profundidade_cm' deve ser maior que zero.")
+
+        # TODO: definir intervalos válidos para 'expectativa_rendimento' conforme a
+        # escala agronômica adotada em cada cultura, quando esta regra for formalizada.

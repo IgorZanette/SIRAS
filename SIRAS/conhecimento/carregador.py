@@ -215,6 +215,7 @@ class Carregador:
         - IDs únicos
         - Todo critério com dose.tipo == 'smp' tem ph_alvo em [5.5, 6.0, 6.5] e fator em [1.0, 0.5, 0.25]
         - Todo critério com modo_aplicacao == 'superficial' declara dose.limite_t_ha
+        - Todo critério com ph_referencia == null tem dose.tipo == 'saturacao_bases'
         - Todo critério tem campo fonte não-vazio
 
         Args:
@@ -236,7 +237,7 @@ class Carregador:
                 )
             ids_vistos.add(id_crit)
 
-            # Invariante 4: Campo fonte não-vazio
+            # Invariante 5: Campo fonte não-vazio
             fonte = criterio.get("fonte", "").strip()
             if not fonte:
                 raise ErroCarregamento(
@@ -245,6 +246,15 @@ class Carregador:
 
             dose = criterio.get("dose", {})
             tipo_dose = dose.get("tipo")
+            ph_referencia = criterio.get("ph_referencia")
+
+            # Invariante 4: ph_referencia == null implica dose.tipo == 'saturacao_bases'
+            if ph_referencia is None:
+                if tipo_dose != "saturacao_bases":
+                    raise ErroCarregamento(
+                        f"criterios_calagem.json: critério {i} ('{id_crit}') tem ph_referencia=null "
+                        f"mas dose.tipo='{tipo_dose}' (deve ser 'saturacao_bases')"
+                    )
 
             # Invariante 2: dose.tipo == 'smp' deve ter ph_alvo válido e fator válido
             if tipo_dose == "smp":

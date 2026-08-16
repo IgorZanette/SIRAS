@@ -153,6 +153,17 @@ class TestCriteriosCalagem:
             assert fonte, \
                 f"Critério {criterio['id']} tem campo 'fonte' vazio"
 
+    def test_ph_referencia_null_implica_dose_saturacao_bases(self, dados_comum):
+        """Invariante: se ph_referencia=null, dose.tipo deve ser 'saturacao_bases'."""
+        criterios = dados_comum["criterios_calagem"]["criterios"]
+        for criterio in criterios:
+            ph_ref = criterio.get("ph_referencia")
+            if ph_ref is None:
+                dose_tipo = criterio["dose"].get("tipo")
+                assert dose_tipo == "saturacao_bases", \
+                    f"Critério {criterio['id']}: ph_referencia=null mas dose.tipo='{dose_tipo}' " \
+                    f"(deve ser 'saturacao_bases')"
+
 
 class TestPHReferencia:
     """Testes de invariantes de ph_referencia.json."""

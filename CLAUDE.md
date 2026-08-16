@@ -29,6 +29,11 @@ e **não** proponha um valor "provável" ou "típico", nem em comentário, nem c
 O mesmo vale para o campo `referencia` dos arquivos em `testes/casos/`: é o oráculo da validação e é
 calculado à mão pelo autor. Você pode criar a estrutura do arquivo; nunca o conteúdo desse campo.
 
+**Nunca altere arquivos em `dados/` para fazer validação, schema ou teste passar.** Os dados são
+transcrição conferida do Manual e são a fonte da verdade. Quando um schema ou teste conflitar com os
+dados, o schema ou o teste é que está errado. Se você acreditar que o dado está incorreto, avise e
+pare — não corrija.
+
 | Você (Claude) faz | O autor faz |
 |---|---|
 | Estrutura de código, arquitetura, refatoração | Transcrever tabelas do Manual para JSON |

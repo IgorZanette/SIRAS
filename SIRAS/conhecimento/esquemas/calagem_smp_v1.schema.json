@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Tabela 5.2 — Índice SMP e Dose de Calcário",
+  "type": "object",
+  "required": ["descricao", "fonte", "unidade", "profundidade_cm", "ph_alvo_disponiveis", "limites", "tabela"],
+  "properties": {
+    "descricao": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fonte": {
+      "type": "object",
+      "required": ["manual", "tabela", "pagina"],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabela": { "type": "string" },
+        "pagina": { "type": "integer" },
+        "secao": { "type": ["string", "null"] },
+        "extraido_do_pdf_em": { "type": ["string", "null"] },
+        "conferido_por_autor_em": { "type": ["string", "null"] }
+      }
+    },
+    "unidade": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profundidade_cm": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "integer" }
+    },
+    "ph_alvo_disponiveis": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "number" }
+    },
+    "limites": {
+      "type": "object",
+      "required": ["smp_minimo", "smp_maximo", "passo"],
+      "properties": {
+        "smp_minimo": { "type": "number" },
+        "smp_maximo": { "type": "number" },
+        "passo": { "type": "number" },
+        "abaixo_do_minimo": { "type": ["string", "null"] },
+        "acima_do_maximo": { "type": ["string", "null"] }
+      }
+    },
+    "tabela": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["indice_smp", "nc_ph_5_5", "nc_ph_6_0", "nc_ph_6_5"],
+        "properties": {
+          "indice_smp": { "type": "string" },
+          "nc_ph_5_5": { "type": "number" },
+          "nc_ph_6_0": { "type": "number" },
+          "nc_ph_6_5": { "type": "number" }
+        }
+      }
+    }
+  }
+}

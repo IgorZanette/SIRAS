@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "pH de Referência por Cultura",
+  "type": "object",
+  "required": ["descricao", "fonte", "grupos"],
+  "properties": {
+    "descricao": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fonte": {
+      "type": "object",
+      "required": ["manual"],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabela": { "type": ["string", "null"] },
+        "pagina": { "type": ["integer", "null"] },
+        "extraido_do_pdf_em": { "type": ["string", "null"] },
+        "conferido_por_autor_em": { "type": ["string", "null"] }
+      }
+    },
+    "nota_importante": { "type": ["string", "null"] },
+    "grupos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ph_referencia", "culturas"],
+        "properties": {
+          "ph_referencia": { "type": ["number", "null"] },
+          "culturas": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

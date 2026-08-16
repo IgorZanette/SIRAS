@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Critérios de Calagem por Grupo de Cultura",
+  "type": "object",
+  "required": ["descricao", "fonte", "criterios"],
+  "properties": {
+    "descricao": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fonte": {
+      "type": "object",
+      "required": ["manual"],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabelas": { "type": "array", "items": { "type": "string" } },
+        "paginas": { "type": "array", "items": { "type": "integer" } },
+        "extraido_do_pdf_em": { "type": ["string", "null"] },
+        "conferido_por_autor_em": { "type": ["string", "null"] },
+        "conferido_operadores_em": { "type": ["string", "null"] },
+        "nota_conferencia": { "type": ["string", "null"] }
+      }
+    },
+    "criterios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "grupo", "sistema_manejo", "condicao_area", "amostragem_cm", "ph_referencia", "decisao", "dose", "modo_aplicacao", "fonte"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "grupo": { "type": "string" },
+          "sistema_manejo": { "type": "string" },
+          "condicao_area": { "type": "string" },
+          "amostragem_cm": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "integer" }
+          },
+          "ph_referencia": { "type": ["number", "null"] },
+          "decisao": {
+            "type": "object",
+            "required": ["tipo"],
+            "properties": {
+              "tipo": { "type": "string" },
+              "ph": { "type": ["number", "null"] },
+              "nao_aplicar_se": { "type": ["string", "null"] }
+            }
+          },
+          "dose": {
+            "type": "object",
+            "required": ["tipo"],
+            "properties": {
+              "tipo": { "type": "string" },
+              "fator": { "type": ["number", "null"] },
+              "ph_alvo": { "type": ["number", "null"] },
+              "limite_t_ha": { "type": ["number", "null"] }
+            }
+          },
+          "modo_aplicacao": { "type": "string" },
+          "fonte": { "type": "string" },
+          "notas": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

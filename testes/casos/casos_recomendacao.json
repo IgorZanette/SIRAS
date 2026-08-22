@@ -1,59 +1,296 @@
-[
-  {
-    "id": "EXEMPLO-01",
-    "descricao": "Modelo de caso de teste. Remover ao cadastrar os casos reais.",
-    "entrada": {
-      "cultura": "PREENCHER",
-      "ph_agua": null,
-      "indice_smp": null,
-      "argila": null,
-      "mo": null,
-      "p": null,
-      "k": null,
-      "ctc_ph7": null,
-      "al": null,
-      "ca": null,
-      "mg": null,
-      "v_percent": null,
-      "expectativa_rendimento": null,
-      "sistema_manejo": "convencional",
-      "prnt": 100
-    },
-    "referencia": {
-      "nc_t_ha": null,
-      "n": null,
-      "p2o5": null,
-      "k2o": null
-    },
-    "origem_referencia": "PREENCHER: calculo manual pelo autor em __/__/2026, Manual 2016, Tab. __; conferido com orientador em __/__/2026"
+{
+  "descricao": "Casos de teste para validacao das saidas do SIRAS (Secao 4.4 da proposta).",
+  "instrucoes": {
+    "referencia": "Autor - Casos de teste de acordo com Manual.",
+    "verificacao_cruzada": "Valor pre-calculado por assistente de IA a partir das mesmas tabelas transcritas. NAO e o oraculo. Serve como segunda opiniao independente: o teste compara referencia com verificacao_cruzada e falha se divergirem, obrigando a investigar qual dos dois esta errado.",
+    "origem_referencia": "Autor - Calculado a mão",
+    "conferido_por_autor_em": "2026-08-22"
   },
-  {
-    "id": "G-SOJA-01",
-    "descricao": "Soja, convencional, pH 5,1, SMP 5,4, PRNT 100 - caso base de calagem (criterio graos_convencional). Demais atributos da analise (argila, mo, p, k, ctc_ph7, al, ca, mg, v_percent) nao fazem parte deste caso, que cobre apenas o calculo de calagem.",
-    "entrada": {
-      "cultura": "soja",
-      "ph_agua": 5.1,
-      "indice_smp": 5.4,
-      "argila": null,
-      "mo": null,
-      "p": null,
-      "k": null,
-      "ctc_ph7": null,
-      "al": null,
-      "ca": null,
-      "mg": null,
-      "v_percent": null,
-      "expectativa_rendimento": null,
-      "sistema_manejo": "convencional",
-      "prnt": 100
+  "cobertura": {
+    "CAL-01": "caminho base: disparo simples, fator 1, PRNT 100",
+    "CAL-02": "fator 1/4 do PD consolidado + conversao por PRNT",
+    "CAL-03": "nao disparo por pH acima do limite (distingue pH de referencia de pH de disparo)",
+    "CAL-04": "excecao V>=65% E Al<10%",
+    "CAL-05": "indice SMP abaixo da faixa da tabela",
+    "CAL-06": "baixo poder tampao: equacoes polinomiais em vez da tabela",
+    "CAL-07": "frutifera: disparo e alvo distintos dos graos, fator 1,5 de profundidade, PRNT",
+    "CAL-08": "criterio por saturacao por bases (erva-mate)",
+    "CAL-09": "excecao Ca>=4,0 E Mg>=1,0",
+    "ADU-01": "interpretacao de P por argila e de K por CTC + algoritmo de dose + leguminosa sem N"
+  },
+  "casos": [
+    {
+      "id": "CAL-01",
+      "descricao": "Soja, convencional, caso base de calagem",
+      "entrada": {
+        "cultura": "soja",
+        "sistema_manejo": "convencional",
+        "ph_agua": 5.1,
+        "indice_smp": 5.4,
+        "argila": 45,
+        "mo": 3.2,
+        "ctc_ph7": 9.5,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 6.8
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 6.8
+      },
+      "memoria_calculo": "Tab.5.3 p.75: disparo pH<5,5, alvo 6,0, fator 1. pH 5,1<5,5 dispara. Tab.5.2 p.70: SMP 5,4 x pH 6,0 = 6,8. Fator 1. PRNT 100 -> 6,8 t/ha.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
     },
-    "referencia": {
-      "nc_t_ha": 6.8,
-      "n": null,
-      "p2o5": null,
-      "k2o": null
+    {
+      "id": "CAL-02",
+      "descricao": "Soja, PD consolidado sem restricoes: fator 1/4 e conversao por PRNT 75",
+      "entrada": {
+        "cultura": "soja",
+        "sistema_manejo": "plantio_direto_consolidado",
+        "condicao_area": "sem_restricoes",
+        "ph_agua": 5.1,
+        "indice_smp": 5.4,
+        "v_percent": 50,
+        "saturacao_al": 15,
+        "argila": 45,
+        "mo": 3.2,
+        "ctc_ph7": 9.5,
+        "prnt": 75,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 2.3
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 2.3
+      },
+      "memoria_calculo": "Tab.5.3 p.75 linha PD consolidado: camada 0-10, disparo pH<5,5, alvo 6,0, fator 1/4, superficial. Excecao nota(1) exige V>=65 E Al<10; V=50 falha, logo NAO se aplica. Tab.5.2: SMP 5,4 x pH 6,0 = 6,8. x1/4 = 1,7. Teto 5 t/ha nao atingido. PRNT 75: 1,7 x 100/75 = 2,2667 -> 2,3 t/ha.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
     },
-    "memoria_calculo": "Tab. 5.3 (p.75), criterio graos_convencional: disparo pH<5,5, alvo 6,0, fator 1. Tab. 5.2 (p.70): SMP 5,4 x pH 6,0 = 6,8. PRNT 100 -> 6,8 t/ha.",
-    "origem_referencia": "docs/COMO_CALCULAR_ORACULO.md, exemplo resolvido; confirmado pelo autor em 2026-08-22"
-  }
-]
+    {
+      "id": "CAL-03",
+      "descricao": "Soja, pH abaixo do de referencia mas acima do disparo: sem calagem",
+      "entrada": {
+        "cultura": "soja",
+        "sistema_manejo": "convencional",
+        "ph_agua": 5.8,
+        "indice_smp": 5.4,
+        "argila": 45,
+        "mo": 3.2,
+        "ctc_ph7": 9.5,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "ph_acima_do_disparo"
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "ph_acima_do_disparo"
+      },
+      "memoria_calculo": "pH 5,8 esta abaixo do pH de referencia (6,0) mas acima do disparo (5,5). Nao dispara; Tab.5.2 nao e consultada. NC = 0.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "CAL-04",
+      "descricao": "Milho, PD consolidado: excecao V>=65% e Al<10% dispensa a calagem",
+      "entrada": {
+        "cultura": "milho",
+        "sistema_manejo": "plantio_direto_consolidado",
+        "condicao_area": "sem_restricoes",
+        "ph_agua": 5.2,
+        "indice_smp": 5.6,
+        "v_percent": 70,
+        "saturacao_al": 6,
+        "argila": 52,
+        "mo": 4.1,
+        "ctc_ph7": 12.0,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "excecao_v_e_al"
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "excecao_v_e_al"
+      },
+      "memoria_calculo": "pH 5,2<5,5 dispararia, mas nota(1) da Tab.5.3: V=70>=65 E Al=6<10, ambas verdadeiras. Excecao aplicada. NC = 0.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "CAL-05",
+      "descricao": "Trigo, indice SMP abaixo da faixa da tabela (limite inferior)",
+      "entrada": {
+        "cultura": "trigo",
+        "sistema_manejo": "convencional",
+        "ph_agua": 4.6,
+        "indice_smp": 4.3,
+        "argila": 58,
+        "mo": 2.1,
+        "ctc_ph7": 11.0,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 21.0
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 21.0
+      },
+      "memoria_calculo": "SMP 4,3 < 4,4: usar a linha limite_inferior da Tab.5.2 (tabela aberta a esquerda). pH alvo 6,0 -> 21,0 t/ha. Fator 1. PRNT 100 -> 21,0 t/ha.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "CAL-06",
+      "descricao": "Milho, solo de baixo poder tampao (SMP>6,3): equacoes polinomiais",
+      "entrada": {
+        "cultura": "milho",
+        "sistema_manejo": "convencional",
+        "ph_agua": 5.3,
+        "indice_smp": 6.5,
+        "argila": 18,
+        "mo": 1.8,
+        "al": 0.8,
+        "ctc_ph7": 5.2,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 2.9
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 2.9
+      },
+      "memoria_calculo": "SMP 6,5 > 6,3: o Manual (p.71-72) indica as equacoes polinomiais em vez da tabela. pH alvo 6,0: NC = -0,516 + 0,805*1,8 + 2,435*0,8 = 2,881 -> 2,9 t/ha. Para comparacao, a Tab.5.2 daria apenas 1,1 t/ha.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "CAL-07",
+      "descricao": "Macieira: disparo em pH<6,0, alvo 6,5, incorporacao a 30 cm (x1,5) e PRNT 85",
+      "entrada": {
+        "cultura": "macieira",
+        "sistema_manejo": "qualquer",
+        "ph_agua": 5.7,
+        "indice_smp": 5.8,
+        "argila": 48,
+        "mo": 3.5,
+        "ctc_ph7": 10.5,
+        "prnt": 85,
+        "profundidade_incorporacao_cm": 30
+      },
+      "referencia": {
+        "nc_t_ha": 11.1
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 11.1
+      },
+      "memoria_calculo": "Tab.5.6 p.83: macieira dispara em pH<6,0 (nao 5,5) e alvo e 6,5 (nao 6,0). pH 5,7<6,0 dispara. Tab.5.2: SMP 5,8 x pH 6,5 = 6,3. Fator 1. Nota(5): 30 cm -> x1,5 = 9,45. PRNT 85: 9,45 x 100/85 = 11,1176 -> 11,1 t/ha.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "CAL-08",
+      "descricao": "Erva-mate: criterio por saturacao por bases, sem consulta a Tabela 5.2",
+      "entrada": {
+        "cultura": "erva-mate",
+        "sistema_manejo": "qualquer",
+        "ph_agua": 4.9,
+        "v_percent": 32,
+        "ctc_ph7": 8.0,
+        "ca": 2.0,
+        "mg": 0.8,
+        "argila": 55,
+        "mo": 4.8,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 0.6
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 0.6
+      },
+      "memoria_calculo": "Tab.5.6 p.83 secao Especies florestais (erva-mate consta nesse grupo pela Tab.5.1). Disparo V<=40: V=32 dispara. Excecao exige Ca>=4,0 E Mg>=1,0; Ca=2,0 falha, nao se aplica. NC = ((40-32)/100) x 8,0 = 0,64 -> 0,6 t/ha. Calcario dolomitico.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "CAL-09",
+      "descricao": "Erva-mate: V baixo mas Ca e Mg suficientes, excecao dispensa a calagem",
+      "entrada": {
+        "cultura": "erva-mate",
+        "sistema_manejo": "qualquer",
+        "ph_agua": 5.4,
+        "v_percent": 35,
+        "ctc_ph7": 10.0,
+        "ca": 4.5,
+        "mg": 1.2,
+        "argila": 50,
+        "mo": 5.2,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "ca_mg_suficientes"
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "ca_mg_suficientes"
+      },
+      "memoria_calculo": "V=35<=40 dispararia, mas a excecao da Tab.5.6 nota(2) exige Ca>=4,0 E Mg>=1,0: Ca=4,5 e Mg=1,2, ambas verdadeiras. Excecao aplicada. NC = 0.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "ADU-01",
+      "descricao": "Soja: interpretacao de P por classe de argila e de K por CTC, 1o cultivo",
+      "entrada": {
+        "cultura": "soja",
+        "sistema_manejo": "convencional",
+        "ph_agua": 6.0,
+        "indice_smp": 6.2,
+        "argila": 32,
+        "mo": 3.0,
+        "p": 6.0,
+        "k": 80,
+        "ctc_ph7": 9.5,
+        "expectativa_rendimento": 3.0,
+        "cultivo": 1,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "ph_acima_do_disparo",
+        "classe_p": "muito_baixo",
+        "classe_k": "medio",
+        "n": 0,
+        "p2o5": 155,
+        "k2o": 105
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 0.0,
+        "motivo_sem_calagem": "ph_acima_do_disparo",
+        "classe_p": "muito_baixo",
+        "classe_k": "medio",
+        "n": 0,
+        "p2o5": 155,
+        "k2o": 105
+      },
+      "memoria_calculo": "CALAGEM: pH 6,0 >= 5,5, nao dispara. NC = 0. P: argila 32% -> classe 3; soja e grupo_2; Tab.6.4 classe 3: muito_baixo ate 6,0. P=6,0 cai em muito_baixo (limite superior inclusivo). Dose P 1o cultivo = 2/3 x 160 = 106,67 -> 110 (dezena) + manutencao 45 = 155 kg P2O5/ha. K: CTC 9,5 -> faixa b (7,5-15,0); Tab.6.9 faixa b: medio de 60 a 90. K=80 -> medio. Dose K 1o cultivo = correcao 30 + manutencao 75 = 105 kg K2O/ha. N: soja nao recebe adubacao nitrogenada (fixacao biologica). N = 0.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-22"
+    }
+  ]
+}

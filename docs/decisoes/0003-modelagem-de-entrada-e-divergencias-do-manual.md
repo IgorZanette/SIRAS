@@ -24,15 +24,19 @@ uma pela outra é erro silencioso e plausível.
 K entra em cmolc/dm³, mas o laudo de solo reporta K em mg/dm³. Conversão do Manual:
 `K(cmolc/dm³) = K(mg/dm³) / 391`.
 
-**Decisão:** `m` não é campo de `AnaliseSolo` — é calculado a partir de `al`, `ca`, `mg` e
-`k` (já existentes) no momento do uso. Se qualquer um desses campos estiver ausente, os
-critérios que dependem de `m` (`graos_pd_consolidado`, `graos_pd_com_restricoes`,
-`batata_e_batata_doce`, `frutiferas_ph55`) devem falhar com erro explícito citando o campo
-faltante — nunca assumir valor.
+**Decisão:** `m` é calculado a partir de `al`, `ca`, `mg` e `k` (já existentes) no momento
+do uso, via `AnaliseSolo.obter_saturacao_al()`.
 
-*(Implementação da função de cálculo de `m` e dos critérios que a usam: pendente — ver
-seção "Próximos passos" no README/ROADMAP; depende dos casos de teste calculados pelo
-autor.)*
+**Extensão (2026-08-22, após os casos de teste validados):** os casos de calagem em PD
+consolidado (`testes/casos/casos_recomendacao.json`, CAL-02/CAL-04) trazem `saturacao_al`
+como **entrada direta** do laudo, não `ca`/`mg`/`k`/`al` para derivar — cenário real quando
+o laudo de solo já traz m% calculado. `AnaliseSolo.saturacao_al` agora é um campo opcional:
+quando informado, é usado diretamente; quando ausente, `obter_saturacao_al()` calcula pela
+CTC efetiva como a decisão original previa. Implementado em `siras/dominio/analise.py`.
+
+*(Implementado em `siras/motor/calagem.py` para `graos_pd_consolidado`. Ainda não cobre
+`graos_pd_com_restricoes` — depende de D6 — nem `batata_e_batata_doce`/`frutiferas_ph55`,
+que usam `decisao.tipo="ph_menor_que_e_al"`, ainda não implementado.)*
 
 ## D5 — `Contexto.profundidade_cm` renomeado para `profundidade_incorporacao_cm`
 
@@ -52,7 +56,8 @@ O ajuste `dose.fator_30cm` (Tab. 5.6, macieira/oliveira e demais frutíferas) s�
 quando `profundidade_incorporacao_cm == 30` **e** o critério declarar `fator_30cm` — por
 isso amoreira-preta, mirtilo e palmeira-juçara (critério `frutiferas_ph55`, sem
 `fator_30cm`) não recebem o multiplicador mesmo com incorporação a 30 cm, conforme a nota
-(5) da Tabela 5.6 é lida pelo autor. *(Lógica de aplicação do fator: pendente.)*
+(5) da Tabela 5.6 é lida pelo autor. *(Implementado em `siras/motor/calagem.py`, validado
+pelo caso CAL-07 — macieira, incorporação a 30 cm.)*
 
 ## D6 — SMP e saturação por Al em duas camadas (PD consolidado com restrições)
 
@@ -74,7 +79,8 @@ k_10_20: float | None = None
 
 Se o critério exigir esses campos e algum estiver `None`, é erro de validação explícito,
 nunca suposição de valor. Extensível a um modelo de múltiplas camadas em trabalho futuro,
-se o escopo do TCC permitir. *(Implementação: pendente.)*
+se o escopo do TCC permitir. *(Implementação: pendente — `graos_pd_com_restricoes` continua
+levantando `NotImplementedError`; nenhum dos 10 casos validados em 2026-08-22 o exercita.)*
 
 ## D7 — Divergência interna do Manual: "V > 65%" (texto) vs "V ≥ 65%" (nota da tabela)
 
@@ -96,7 +102,9 @@ uma regra automática. O SIRAS é determinístico e precisa escolher um comporta
 **aplica** a exceção (`nc_t_ha = 0.0`, motivo `excecao_v_e_al`), e o `Trace`/laudo registra
 explicitamente que o Manual apresenta essa dispensa como opção ao técnico, não como
 obrigação — para que o usuário saiba que pode optar por calcariar mesmo assim.
-*(Implementação: pendente.)*
+*(Implementado em `siras/motor/calagem.py` via avaliador genérico de `nao_aplicar_se`
+(campo/operador/valor de `criterios_calagem.json`), validado pelos casos CAL-02 (exceção
+não se aplica) e CAL-04 (exceção se aplica).)*
 
 ## D9 — Teto de 5 t/ha em aplicação superficial: antes ou depois da conversão por PRNT
 
@@ -119,11 +127,18 @@ pretenderia evitar.
 **Decisão:** aplicar o corte de 5 t/ha **antes** da conversão por PRNT (mesma base da
 tabela). Na prática, com fator ¼ (único caso de aplicação superficial no escopo atual,
 `graos_pd_consolidado`/`olericolas_pd_consolidado`), a dose raramente se aproxima de
-5 t/ha — o teto deve disparar raramente. *(Implementação: pendente.)*
+5 t/ha — o teto deve disparar raramente. *(Implementado em `siras/motor/calagem.py`;
+`testes/unidade/test_calagem.py::TestTetoAplicacaoSuperficial` cobre o caso em que o teto
+dispara de fato, já que nenhum dos 10 casos validados em 2026-08-22 chega a 5 t/ha.)*
 
-## Nota de escopo
+## Nota de escopo (atualizada em 2026-08-22)
 
-Nenhuma das decisões D4–D9 foi implementada em código nesta revisão — a implementação
-aguarda os casos de teste calculados à mão pelo autor (ver `docs/COMO_CALCULAR_ORACULO.md`
-e `testes/casos/casos_recomendacao.json`), para evitar repetir o padrão que produziu e
-descartou a primeira versão de `siras/motor/calagem.py`: código plausível, não verificado.
+D4, D5, D7, D8 e D9 foram implementadas em `siras/motor/calagem.py` e `siras/motor/adubacao.py`
+(novo), depois que o autor calculou e conferiu 10 casos de teste à mão
+(`testes/casos/casos_recomendacao.json`) e confirmou que batem com `verificacao_cruzada`.
+`testes/unidade/test_casos_validados.py` liga esses 10 casos diretamente ao motor real.
+
+D6 (SMP e saturação por Al em duas camadas, `graos_pd_com_restricoes`) continua pendente —
+nenhum caso validado o exercita ainda. `decisao.tipo="ph_menor_que_e_al"`
+(`batata_e_batata_doce`, `frutiferas_ph55`) e `usar_smp_medio_das_camadas` também continuam
+fora do escopo implementado, e levantam `NotImplementedError` deliberadamente.

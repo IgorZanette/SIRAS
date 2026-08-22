@@ -61,26 +61,66 @@ pelo caso CAL-07 — macieira, incorporação a 30 cm.)*
 
 ## D6 — SMP e saturação por Al em duas camadas (PD consolidado com restrições)
 
-O critério `graos_pd_com_restricoes` exige SMP médio de duas camadas (0–10 e 10–20 cm),
-mas `AnaliseSolo` representa uma análise de camada única. Um modelo de múltiplas camadas
-completo seria mais correto, mas é refatoração desproporcional para atender a um único
-critério entre dezesseis.
+**Revisão de 2026-08-22 — a decisão original abaixo foi descartada por risco de correção.**
 
-**Decisão (trade-off assumido por escopo):** campos opcionais em `AnaliseSolo`, exclusivos
-deste critério:
+O critério `graos_pd_com_restricoes` exige dado de duas camadas (0–10 e 10–20 cm), mas
+`AnaliseSolo` representa uma análise de camada única. A primeira proposta era um punhado de
+campos opcionais `_10_20` soltos em `AnaliseSolo` (ph, al, ca, mg, k, indice_smp).
+
+**Por que foi descartada:** `AnaliseSolo` alimenta também o módulo de adubação (P, K, MO,
+argila), que interpreta esses valores como a camada de referência (0–20 cm convencional, ou
+0–10 cm em PD consolidado — Tab. 6.1 e segs.). Se os campos padrão de `AnaliseSolo`
+passassem a significar "camada 10–20 cm" só para satisfazer `graos_pd_com_restricoes`, o
+módulo de adubação leria P/K/MO da subsuperfície sem aviso nenhum — erro silencioso que
+nenhum teste de calagem pegaria, porque vive inteiramente do lado da adubação.
+
+**Direção corrigida (ainda não implementada):** um objeto `Camada` explícito, e os campos
+padrão de `AnaliseSolo` permanecem, por invariante do sistema inteiro, a camada de
+referência de fertilidade (nunca a subsuperfície):
 
 ```python
-indice_smp_10_20: float | None = None
-al_10_20: float | None = None
-ca_10_20: float | None = None
-mg_10_20: float | None = None
-k_10_20: float | None = None
+@dataclass(frozen=True)
+class Camada:
+    de_cm: int
+    ate_cm: int
+    ph_agua: Optional[float] = None
+    indice_smp: Optional[float] = None
+    ca: Optional[float] = None
+    mg: Optional[float] = None
+    k: Optional[float] = None
+    al: Optional[float] = None
+
+# Em AnaliseSolo:
+subsuperficie: Optional[Camada] = None  # exigido só pelos criterios que a declararem
 ```
 
-Se o critério exigir esses campos e algum estiver `None`, é erro de validação explícito,
-nunca suposição de valor. Extensível a um modelo de múltiplas camadas em trabalho futuro,
-se o escopo do TCC permitir. *(Implementação: pendente — `graos_pd_com_restricoes` continua
-levantando `NotImplementedError`; nenhum dos 10 casos validados em 2026-08-22 o exercita.)*
+E `criterios_calagem.json` passaria a declarar explicitamente de qual camada cada critério
+lê, em vez de o código assumir por convenção (`graos_pd_com_restricoes` como exemplo):
+
+```json
+"amostragem_cm": [[0, 10], [10, 20]],
+"decisao": {"tipo": "ph_menor_que_e_al", "camada": "subsuperficie", "ph": 5.5, "saturacao_al_maior_igual": 30},
+"dose": {"tipo": "smp_medio", "camadas": ["superficie", "subsuperficie"], "ph_alvo": 6.0}
+```
+
+**Três perguntas em aberto, a conferir pelo autor no Manual antes de implementar:**
+
+1. A dose usa a **média aritmética** dos dois índices SMP, ou o Manual pede amostra
+   composta 0–20 cm (índice SMP de uma terceira amostra, não a média de duas)? SMP é
+   tamponamento, não é necessariamente linear — a redação exata da Tab. 5.3 decide isso.
+2. O gatilho `pH < 5,5 E m ≥ 30%` na camada 10–20 cm veio da extração original; é o único
+   critério com decisão composta em duas variáveis e merece reconferência direta na nota da
+   tabela.
+3. **Quem decide "com restrições"?** Hoje o desenho pressupõe que o usuário já entra
+   sabendo que está no caso "com restrições" (escolhendo o critério certo). Mais fiel ao
+   Manual: o usuário informa PD consolidado + as duas camadas, e o motor decide entre
+   `graos_pd_consolidado` e `graos_pd_com_restricoes` avaliando o Al da subsuperfície. Isso
+   muda o contrato de `mapa_culturas.json`/`resolver_criterio_id()`.
+
+**Status:** não implementado. `graos_pd_com_restricoes` continua levantando
+`NotImplementedError` de propósito. Não implementar a partir de suposição — precisa das
+três respostas acima **e** de um caso de teste calculado à mão pelo autor, na mesma ordem
+que produziu os outros 10 casos (`docs/COMO_CALCULAR_ORACULO.md`).
 
 ## D7 — Divergência interna do Manual: "V > 65%" (texto) vs "V ≥ 65%" (nota da tabela)
 

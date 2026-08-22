@@ -1,0 +1,477 @@
+{
+  "descricao": "Interpretacao do teor de fosforo no solo (Mehlich-1) por grupo de exigencia da cultura e classe de teor de argila",
+  "fonte": {
+    "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os estados do RS e de SC, 11. ed., 2016",
+    "tabelas": [
+      "6.2",
+      "6.3",
+      "6.4",
+      "6.5",
+      "6.6"
+    ],
+    "paginas": [
+      93,
+      93,
+      94,
+      94,
+      94
+    ],
+    "extraido_do_pdf_em": "2026-08-17",
+    "conferido_por_autor_em": "2026-08-22",
+    "aviso_operadores": "Operadores >= e <= extraidos como '=' pelo PDF e reconstruidos por contexto. CONFERIR na pagina renderizada antes de preencher conferido_por_autor_em."
+  },
+  "unidade": "mg de P/dm3",
+  "metodo": "Mehlich-1",
+  "conversao_mehlich3": {
+    "formula": "P_M1 = P_M3 / (2 - (0,02 * argila))",
+    "fonte": "Capitulo 4"
+  },
+  "depende_de": "classe_argila",
+  "grupos_exigencia": [
+    {
+      "grupo": "grupo_1",
+      "descricao": "muito exigentes (teor critico 1,7x graos)",
+      "tabela": "6.3",
+      "culturas": [
+        "alho",
+        "beterraba",
+        "cenoura",
+        "batata",
+        "roseira-de-corte"
+      ]
+    },
+    {
+      "grupo": "grupo_2",
+      "descricao": "exigentes (teor critico igual graos)",
+      "tabela": "6.4",
+      "culturas_texto": "culturas de graos exceto arroz irrigado; hortalicas exceto Grupo 1; pastagens exceto pastagem natural; frutiferas; gengibre"
+    },
+    {
+      "grupo": "grupo_3",
+      "descricao": "pouco exigentes (teor critico 0,5x graos)",
+      "tabela": "6.5",
+      "culturas_texto": "demais culturas: florestais, medicinais, aromaticas, condimentares, raizes, cana-de-acucar e tabaco"
+    },
+    {
+      "grupo": "grupo_4",
+      "descricao": "arroz irrigado por alagamento",
+      "tabela": "6.6",
+      "culturas": [
+        "arroz-irrigado"
+      ],
+      "nota": "FORA DO ESCOPO do SIRAS"
+    }
+  ],
+  "tabelas": [
+    {
+      "grupo": "grupo_1",
+      "fonte": "Tabela 6.3, p. 93",
+      "por_classe_argila": [
+        {
+          "classe_argila": "1",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 5.0
+            },
+            {
+              "classe": "baixo",
+              "de": 5.0,
+              "ate": 10.0
+            },
+            {
+              "classe": "medio",
+              "de": 10.0,
+              "ate": 15.0
+            },
+            {
+              "classe": "alto",
+              "de": 15.0,
+              "ate": 30.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 30.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "2",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 7.0
+            },
+            {
+              "classe": "baixo",
+              "de": 7.0,
+              "ate": 14.0
+            },
+            {
+              "classe": "medio",
+              "de": 14.0,
+              "ate": 21.0
+            },
+            {
+              "classe": "alto",
+              "de": 21.0,
+              "ate": 42.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 42.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "3",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 10.0
+            },
+            {
+              "classe": "baixo",
+              "de": 10.0,
+              "ate": 20.0
+            },
+            {
+              "classe": "medio",
+              "de": 20.0,
+              "ate": 30.0
+            },
+            {
+              "classe": "alto",
+              "de": 30.0,
+              "ate": 60.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 60.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "4",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 17.0
+            },
+            {
+              "classe": "baixo",
+              "de": 17.0,
+              "ate": 34.0
+            },
+            {
+              "classe": "medio",
+              "de": 34.0,
+              "ate": 51.0
+            },
+            {
+              "classe": "alto",
+              "de": 51.0,
+              "ate": 102.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 102.0,
+              "ate": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "grupo_2",
+      "fonte": "Tabela 6.4, p. 94",
+      "por_classe_argila": [
+        {
+          "classe_argila": "1",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 3.0
+            },
+            {
+              "classe": "baixo",
+              "de": 3.0,
+              "ate": 6.0
+            },
+            {
+              "classe": "medio",
+              "de": 6.0,
+              "ate": 9.0
+            },
+            {
+              "classe": "alto",
+              "de": 9.0,
+              "ate": 18.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 18.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "2",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 4.0
+            },
+            {
+              "classe": "baixo",
+              "de": 4.0,
+              "ate": 8.0
+            },
+            {
+              "classe": "medio",
+              "de": 8.0,
+              "ate": 12.0
+            },
+            {
+              "classe": "alto",
+              "de": 12.0,
+              "ate": 24.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 24.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "3",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 6.0
+            },
+            {
+              "classe": "baixo",
+              "de": 6.0,
+              "ate": 12.0
+            },
+            {
+              "classe": "medio",
+              "de": 12.0,
+              "ate": 18.0
+            },
+            {
+              "classe": "alto",
+              "de": 18.0,
+              "ate": 36.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 36.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "4",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 10.0
+            },
+            {
+              "classe": "baixo",
+              "de": 10.0,
+              "ate": 20.0
+            },
+            {
+              "classe": "medio",
+              "de": 20.0,
+              "ate": 30.0
+            },
+            {
+              "classe": "alto",
+              "de": 30.0,
+              "ate": 60.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 60.0,
+              "ate": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "grupo_3",
+      "fonte": "Tabela 6.5, p. 94",
+      "por_classe_argila": [
+        {
+          "classe_argila": "1",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 1.5
+            },
+            {
+              "classe": "baixo",
+              "de": 1.5,
+              "ate": 3.0
+            },
+            {
+              "classe": "medio",
+              "de": 3.0,
+              "ate": 4.5
+            },
+            {
+              "classe": "alto",
+              "de": 4.5,
+              "ate": 9.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 9.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "2",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 2.0
+            },
+            {
+              "classe": "baixo",
+              "de": 2.0,
+              "ate": 4.0
+            },
+            {
+              "classe": "medio",
+              "de": 4.0,
+              "ate": 6.0
+            },
+            {
+              "classe": "alto",
+              "de": 6.0,
+              "ate": 12.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 12.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "3",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 3.0
+            },
+            {
+              "classe": "baixo",
+              "de": 3.0,
+              "ate": 6.0
+            },
+            {
+              "classe": "medio",
+              "de": 6.0,
+              "ate": 9.0
+            },
+            {
+              "classe": "alto",
+              "de": 9.0,
+              "ate": 18.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 18.0,
+              "ate": null
+            }
+          ]
+        },
+        {
+          "classe_argila": "4",
+          "faixas": [
+            {
+              "classe": "muito_baixo",
+              "de": null,
+              "ate": 5.0
+            },
+            {
+              "classe": "baixo",
+              "de": 5.0,
+              "ate": 10.0
+            },
+            {
+              "classe": "medio",
+              "de": 10.0,
+              "ate": 15.0
+            },
+            {
+              "classe": "alto",
+              "de": 15.0,
+              "ate": 30.0
+            },
+            {
+              "classe": "muito_alto",
+              "de": 30.0,
+              "ate": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "grupo_4",
+      "fonte": "Tabela 6.6, p. 94",
+      "sem_classe_argila": [
+        {
+          "classe": "muito_baixo",
+          "de": null,
+          "ate": 2.0
+        },
+        {
+          "classe": "baixo",
+          "de": 2.0,
+          "ate": 4.0
+        },
+        {
+          "classe": "medio",
+          "de": 4.0,
+          "ate": 6.0
+        },
+        {
+          "classe": "alto",
+          "de": 6.0,
+          "ate": 12.0
+        },
+        {
+          "classe": "muito_alto",
+          "de": 12.0,
+          "ate": null
+        }
+      ],
+      "nota": "FORA DO ESCOPO do SIRAS"
+    }
+  ]
+}

@@ -1,0 +1,258 @@
+{
+  "descricao": "Interpretacao dos teores de argila, materia organica, CTC pH 7,0, calcio, magnesio, enxofre e micronutrientes",
+  "fonte": {
+    "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os estados do RS e de SC, 11. ed., 2016",
+    "tabelas": [
+      "6.1",
+      "6.11",
+      "6.12"
+    ],
+    "paginas": [
+      91,
+      97,
+      98
+    ],
+    "extraido_do_pdf_em": "2026-08-17",
+    "conferido_por_autor_em": "2026-08-22",
+    "aviso_operadores": "Operadores >= e <= extraidos como '=' pelo PDF e reconstruidos por contexto. CONFERIR na pagina renderizada antes de preencher conferido_por_autor_em."
+  },
+  "atributos": [
+    {
+      "atributo": "argila",
+      "unidade": "%",
+      "fonte": "Tabela 6.1, p. 91",
+      "nota": "Classe numerica usada na interpretacao de fosforo (1 = mais argiloso)",
+      "faixas": [
+        {
+          "classe": "4",
+          "de": null,
+          "ate": 20.0
+        },
+        {
+          "classe": "3",
+          "de": 20.0,
+          "ate": 40.0
+        },
+        {
+          "classe": "2",
+          "de": 40.0,
+          "ate": 60.0
+        },
+        {
+          "classe": "1",
+          "de": 60.0,
+          "ate": null
+        }
+      ]
+    },
+    {
+      "atributo": "materia_organica",
+      "unidade": "%",
+      "fonte": "Tabela 6.1, p. 91",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 2.5
+        },
+        {
+          "classe": "medio",
+          "de": 2.5,
+          "ate": 5.0
+        },
+        {
+          "classe": "alto",
+          "de": 5.0,
+          "ate": null
+        }
+      ]
+    },
+    {
+      "atributo": "ctc_ph7",
+      "unidade": "cmolc/dm3",
+      "fonte": "Tabela 6.1, p. 91",
+      "faixas": [
+        {
+          "classe": "baixa",
+          "de": null,
+          "ate": 7.5
+        },
+        {
+          "classe": "media",
+          "de": 7.5,
+          "ate": 15.0
+        },
+        {
+          "classe": "alta",
+          "de": 15.0,
+          "ate": 30.0
+        },
+        {
+          "classe": "muito_alta",
+          "de": 30.0,
+          "ate": null
+        }
+      ]
+    },
+    {
+      "atributo": "calcio",
+      "unidade": "cmolc/dm3",
+      "fonte": "Tabela 6.11, p. 97",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 2.0
+        },
+        {
+          "classe": "medio",
+          "de": 2.0,
+          "ate": 4.0
+        },
+        {
+          "classe": "alto",
+          "de": 4.0,
+          "ate": null
+        }
+      ]
+    },
+    {
+      "atributo": "magnesio",
+      "unidade": "cmolc/dm3",
+      "fonte": "Tabela 6.11, p. 97",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 0.5
+        },
+        {
+          "classe": "medio",
+          "de": 0.5,
+          "ate": 1.0
+        },
+        {
+          "classe": "alto",
+          "de": 1.0,
+          "ate": null
+        }
+      ]
+    },
+    {
+      "atributo": "enxofre",
+      "unidade": "mg/dm3",
+      "fonte": "Tabela 6.11, p. 97",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 2.0
+        },
+        {
+          "classe": "medio",
+          "de": 2.0,
+          "ate": 5.0
+        },
+        {
+          "classe": "alto",
+          "de": 5.0,
+          "ate": null
+        }
+      ],
+      "excecao": {
+        "culturas": "arroz irrigado, leguminosas, brassicas e liliaceas",
+        "alto_de": 10.0,
+        "nota": "teor critico dobrado"
+      }
+    },
+    {
+      "atributo": "cobre",
+      "unidade": "mg/dm3",
+      "fonte": "Tabela 6.12, p. 98",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 0.2
+        },
+        {
+          "classe": "medio",
+          "de": 0.2,
+          "ate": 0.4
+        },
+        {
+          "classe": "alto",
+          "de": 0.4,
+          "ate": null
+        }
+      ]
+    },
+    {
+      "atributo": "zinco",
+      "unidade": "mg/dm3",
+      "fonte": "Tabela 6.12, p. 98",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 0.2
+        },
+        {
+          "classe": "medio",
+          "de": 0.2,
+          "ate": 0.5
+        },
+        {
+          "classe": "alto",
+          "de": 0.5,
+          "ate": null
+        }
+      ]
+    },
+    {
+      "atributo": "boro",
+      "unidade": "mg/dm3",
+      "fonte": "Tabela 6.12, p. 98",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 0.1
+        },
+        {
+          "classe": "medio",
+          "de": 0.1,
+          "ate": 0.3
+        },
+        {
+          "classe": "alto",
+          "de": 0.3,
+          "ate": null
+        }
+      ],
+      "nota": "Para videira, teor adequado de B varia de 0,6 a 1,0 mg/dm3"
+    },
+    {
+      "atributo": "manganes",
+      "unidade": "mg/dm3",
+      "fonte": "Tabela 6.12, p. 98",
+      "faixas": [
+        {
+          "classe": "baixo",
+          "de": null,
+          "ate": 2.5
+        },
+        {
+          "classe": "medio",
+          "de": 2.5,
+          "ate": 5.0
+        },
+        {
+          "classe": "alto",
+          "de": 5.0,
+          "ate": null
+        }
+      ]
+    }
+  ]
+}

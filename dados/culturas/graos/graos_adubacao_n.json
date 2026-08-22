@@ -1,0 +1,357 @@
+{
+  "descricao": "Adubacao nitrogenada das culturas de graos, por teor de materia organica do solo",
+  "fonte": {
+    "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os estados do RS e de SC, 11. ed., 2016",
+    "tabelas": [
+      "6.1.2 a 6.1.22 (tabelas de N por cultura)"
+    ],
+    "paginas": [
+      116,
+      133
+    ],
+    "secao": "6.1 - Graos",
+    "extraido_do_pdf_em": "2026-08-17",
+    "conferido_por_autor_em": "2026-08-22",
+    "aviso_operadores": "As faixas de MO usam <=2,5 / 2,6 a 5,0 / >5,0. Na linha >5,0 o Manual imprime a dose precedida de <= na maioria das culturas (campo acima_de_5_0_e_maximo). Conferir cultura a cultura."
+  },
+  "faixas_mo": {
+    "mo_ate_2_5": "<= 2,5%",
+    "mo_2_6_a_5_0": "2,6 a 5,0%",
+    "mo_acima_5_0": "> 5,0%"
+  },
+  "nota_dose_maxima": "Na faixa de MO > 5,0% o Manual apresenta a dose como valor MAXIMO (<=), nao como valor fixo. Decisao do SIRAS: usar o valor como dose indicada e registrar no trace que o Manual a define como teto.",
+  "culturas": {
+    "amendoim": {
+      "modelo": "nao_aplica",
+      "motivo": "fixacao_biologica_de_nitrogenio",
+      "nota": "Inocular sementes; inoculante mantido abaixo de 25 C"
+    },
+    "arroz_de_sequeiro": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 50,
+        "mo_2_6_a_5_0": 40,
+        "mo_acima_5_0": 10
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 15,
+      "rendimento_referencia_t_ha": 2
+    },
+    "aveia_branca": {
+      "modelo": "mo_x_antecedente",
+      "antecedentes": [
+        "leguminosa",
+        "graminea"
+      ],
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": {
+          "leguminosa": 60,
+          "graminea": 80
+        },
+        "mo_2_6_a_5_0": {
+          "leguminosa": 40,
+          "graminea": 60
+        },
+        "mo_acima_5_0": {
+          "leguminosa": 20,
+          "graminea": 20
+        }
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": {
+        "leguminosa": 20,
+        "graminea": 30
+      },
+      "rendimento_referencia_t_ha": 3
+    },
+    "aveia_preta": {
+      "modelo": "mo_x_antecedente",
+      "antecedentes": [
+        "leguminosa",
+        "graminea"
+      ],
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": {
+          "leguminosa": 60,
+          "graminea": 80
+        },
+        "mo_2_6_a_5_0": {
+          "leguminosa": 40,
+          "graminea": 60
+        },
+        "mo_acima_5_0": {
+          "leguminosa": 20,
+          "graminea": 20
+        }
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": {
+        "leguminosa": 20,
+        "graminea": 30
+      },
+      "rendimento_referencia_t_ha": 3
+    },
+    "canola": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 60,
+        "mo_2_6_a_5_0": 40,
+        "mo_acima_5_0": 30
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 20,
+      "rendimento_referencia_t_ha": 1.5
+    },
+    "centeio": {
+      "modelo": "mo_x_antecedente",
+      "antecedentes": [
+        "leguminosa",
+        "graminea"
+      ],
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": {
+          "leguminosa": 40,
+          "graminea": 50
+        },
+        "mo_2_6_a_5_0": {
+          "leguminosa": 20,
+          "graminea": 30
+        },
+        "mo_acima_5_0": {
+          "leguminosa": 10,
+          "graminea": 10
+        }
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": {
+        "leguminosa": 20,
+        "graminea": 30
+      },
+      "rendimento_referencia_t_ha": 2
+    },
+    "cevada": {
+      "modelo": "mo_x_antecedente",
+      "antecedentes": [
+        "leguminosa",
+        "graminea"
+      ],
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": {
+          "leguminosa": 60,
+          "graminea": 80
+        },
+        "mo_2_6_a_5_0": {
+          "leguminosa": 40,
+          "graminea": 60
+        },
+        "mo_acima_5_0": {
+          "leguminosa": 20,
+          "graminea": 20
+        }
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": {
+        "leguminosa": 20,
+        "graminea": 30
+      },
+      "rendimento_referencia_t_ha": 3
+    },
+    "ervilha_seca_e_forrageira": {
+      "modelo": "nao_aplica",
+      "motivo": "fixacao_biologica_de_nitrogenio",
+      "nota": "Inocular sementes; inoculante mantido abaixo de 25 C"
+    },
+    "ervilhaca": {
+      "modelo": "nao_aplica",
+      "motivo": "fixacao_biologica_de_nitrogenio",
+      "nota": "Inocular sementes; inoculante mantido abaixo de 25 C"
+    },
+    "feijao": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 70,
+        "mo_2_6_a_5_0": 50,
+        "mo_acima_5_0": 30
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 20,
+      "rendimento_referencia_t_ha": 2.0
+    },
+    "girassol": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 60,
+        "mo_2_6_a_5_0": 40,
+        "mo_acima_5_0": 30
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 20,
+      "rendimento_referencia_t_ha": 2
+    },
+    "linho": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 70,
+        "mo_2_6_a_5_0": 50,
+        "mo_acima_5_0": 30
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 20,
+      "rendimento_referencia_t_ha": 2.0
+    },
+    "milho": {
+      "modelo": "mo_x_antecedente",
+      "antecedentes": [
+        "leguminosa",
+        "consorciacao_ou_pousio",
+        "graminea"
+      ],
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": {
+          "leguminosa": 70,
+          "consorciacao_ou_pousio": 80,
+          "graminea": 90
+        },
+        "mo_2_6_a_5_0": {
+          "leguminosa": 50,
+          "consorciacao_ou_pousio": 60,
+          "graminea": 70
+        },
+        "mo_acima_5_0": {
+          "leguminosa": 40,
+          "consorciacao_ou_pousio": 40,
+          "graminea": 50
+        }
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 15,
+      "rendimento_referencia_t_ha": 6,
+      "nota": "Semeadura + cobertura",
+      "ajustes_opcionais": [
+        "massa seca de leguminosa alta (>3 t/ha): reduzir ate 20 kg N/ha",
+        "massa seca de nabo ou consorcio baixa (<=4 t/ha): aumentar ate 20 kg N/ha",
+        "massa seca de graminea alta (>4 t/ha): aumentar 20 a 40 kg N/ha",
+        "densidade >65.000 plantas/ha: +10 kg N/ha a cada 5.000 plantas adicionais",
+        "rendimento >10 t/ha: aumentar 20 a 40%"
+      ]
+    },
+    "milho_pipoca": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 60,
+        "mo_2_6_a_5_0": 40,
+        "mo_acima_5_0": 30
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 15,
+      "rendimento_referencia_t_ha": 5
+    },
+    "nabo_forrageiro": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 60,
+        "mo_2_6_a_5_0": 50,
+        "mo_acima_5_0": 20
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 20,
+      "rendimento_referencia_t_ha": 3
+    },
+    "painco": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 50,
+        "mo_2_6_a_5_0": 30,
+        "mo_acima_5_0": 10
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 15,
+      "rendimento_referencia_t_ha": 2
+    },
+    "soja": {
+      "modelo": "nao_aplica",
+      "motivo": "fixacao_biologica_de_nitrogenio",
+      "nota": "Inocular sementes; inoculante mantido abaixo de 25 C"
+    },
+    "sorgo": {
+      "modelo": "mo",
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": 75,
+        "mo_2_6_a_5_0": 55,
+        "mo_acima_5_0": 20
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": 15,
+      "rendimento_referencia_t_ha": 4
+    },
+    "tremoco": {
+      "modelo": "nao_aplica",
+      "motivo": "fixacao_biologica_de_nitrogenio",
+      "nota": "Inocular sementes; inoculante mantido abaixo de 25 C"
+    },
+    "trigo": {
+      "modelo": "mo_x_antecedente",
+      "antecedentes": [
+        "leguminosa",
+        "graminea"
+      ],
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": {
+          "leguminosa": 60,
+          "graminea": 80
+        },
+        "mo_2_6_a_5_0": {
+          "leguminosa": 40,
+          "graminea": 60
+        },
+        "mo_acima_5_0": {
+          "leguminosa": 20,
+          "graminea": 20
+        }
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": {
+        "leguminosa": 20,
+        "graminea": 30
+      },
+      "rendimento_referencia_t_ha": 3
+    },
+    "triticale": {
+      "modelo": "mo_x_antecedente",
+      "antecedentes": [
+        "leguminosa",
+        "graminea"
+      ],
+      "doses_kg_n_ha": {
+        "mo_ate_2_5": {
+          "leguminosa": 60,
+          "graminea": 80
+        },
+        "mo_2_6_a_5_0": {
+          "leguminosa": 40,
+          "graminea": 60
+        },
+        "mo_acima_5_0": {
+          "leguminosa": 20,
+          "graminea": 20
+        }
+      },
+      "acima_de_5_0_e_maximo": true,
+      "adicional_kg_n_por_t": {
+        "leguminosa": 20,
+        "graminea": 30
+      },
+      "rendimento_referencia_t_ha": 3
+    }
+  },
+  "checksum": {
+    "descricao": "Contagem por modelo, para detectar perda de cultura em edicoes futuras.",
+    "culturas": 21,
+    "por_modelo": {
+      "nao_aplica": 5,
+      "mo": 9,
+      "mo_x_antecedente": 7
+    },
+    "verificado_em": "2026-08-17"
+  }
+}

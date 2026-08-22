@@ -1,0 +1,336 @@
+{
+  "descricao": "Adubacao fosfatada e potassica das culturas de graos: correcao total, manutencao por cultura, exportacao nos graos e algoritmo de composicao da dose",
+  "fonte": {
+    "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os estados do RS e de SC, 11. ed., 2016",
+    "tabelas": [
+      "6.1.1",
+      "6.1.2",
+      "6.1.3",
+      "6.1.4"
+    ],
+    "paginas": [
+      105,
+      106,
+      107,
+      108
+    ],
+    "extraido_do_pdf_em": "2026-08-17",
+    "conferido_por_autor_em": "2026-08-22"
+  },
+  "correcao_total": {
+    "fonte": "Tabela 6.1.1, p. 105",
+    "unidade": "kg/ha",
+    "muito_baixo": {
+      "p2o5": 160,
+      "k2o": 120
+    },
+    "baixo": {
+      "p2o5": 80,
+      "k2o": 60
+    },
+    "medio": {
+      "p2o5": 40,
+      "k2o": 30
+    }
+  },
+  "algoritmo_dose": {
+    "fonte": "Tabela 6.1.4, p. 108 e texto p. 105-108",
+    "descricao": "As tabelas de P e K por cultura do Manual sao DERIVADAS destas regras. Verificado contra soja, milho e milho pipoca: 60 valores, sem divergencia.",
+    "regras": {
+      "muito_baixo": {
+        "cultivo_1": "2/3 * correcao_total + manutencao",
+        "cultivo_2": "1/3 * correcao_total + manutencao"
+      },
+      "baixo": {
+        "cultivo_1": "2/3 * correcao_total + manutencao",
+        "cultivo_2": "1/3 * correcao_total + manutencao"
+      },
+      "medio": {
+        "cultivo_1": "correcao_total + manutencao",
+        "cultivo_2": "manutencao"
+      },
+      "alto": {
+        "cultivo_1": "manutencao",
+        "cultivo_2": "manutencao"
+      },
+      "muito_alto": {
+        "cultivo_1": "0",
+        "cultivo_2": "<= manutencao (reposicao, a criterio do tecnico)"
+      }
+    },
+    "arredondamento": "A parcela de correcao e arredondada para a dezena mais proxima ANTES de somar a manutencao. Ex.: 2/3 * 160 = 106,67 -> 110.",
+    "manutencao_adicional": "Somar por tonelada acima do rendimento referencia."
+  },
+  "manutencao_por_cultura": {
+    "fonte": "Tabela 6.1.2, p. 106",
+    "culturas": {
+      "amendoim": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 60,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 20
+      },
+      "arroz_de_sequeiro": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 20,
+        "k2o_manutencao": 20,
+        "p2o5_adicional_por_t": 10,
+        "k2o_adicional_por_t": 10
+      },
+      "aveia_branca": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 30,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "aveia_preta": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 30,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "canola": {
+        "rendimento_referencia_t_ha": 1.5,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 25,
+        "p2o5_adicional_por_t": 20,
+        "k2o_adicional_por_t": 15
+      },
+      "centeio": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 20,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "cevada": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 30,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "ervilha_seca_e_forrageira": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 40,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 20
+      },
+      "ervilhaca": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 40,
+        "k2o_manutencao": 50,
+        "p2o5_adicional_por_t": 20,
+        "k2o_adicional_por_t": 25
+      },
+      "feijao": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 40,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 20
+      },
+      "girassol": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 30,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 15
+      },
+      "linho": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 30,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 15
+      },
+      "milho": {
+        "rendimento_referencia_t_ha": 6,
+        "p2o5_manutencao": 90,
+        "k2o_manutencao": 60,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "milho_pipoca": {
+        "rendimento_referencia_t_ha": 5,
+        "p2o5_manutencao": 75,
+        "k2o_manutencao": 50,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "nabo_forrageiro": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 60,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 20
+      },
+      "painco": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 20,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "soja": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 75,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 25
+      },
+      "sorgo": {
+        "rendimento_referencia_t_ha": 4,
+        "p2o5_manutencao": 60,
+        "k2o_manutencao": 40,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "tremoco": {
+        "rendimento_referencia_t_ha": 2,
+        "p2o5_manutencao": 30,
+        "k2o_manutencao": 50,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 25
+      },
+      "trigo": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 30,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      },
+      "triticale": {
+        "rendimento_referencia_t_ha": 3,
+        "p2o5_manutencao": 45,
+        "k2o_manutencao": 30,
+        "p2o5_adicional_por_t": 15,
+        "k2o_adicional_por_t": 10
+      }
+    }
+  },
+  "exportacao_nos_graos": {
+    "fonte": "Tabela 6.1.3, p. 107",
+    "unidade": "kg/t de graos",
+    "nota": "Base da adubacao de reposicao, usada apenas em nivel Muito alto",
+    "culturas": {
+      "amendoim": {
+        "n": 50,
+        "p2o5": 11,
+        "k2o": 14
+      },
+      "arroz_de_sequeiro": {
+        "n": 14,
+        "p2o5": 5,
+        "k2o": 3,
+        "nota": "Descrito no Manual (Tab. 6.1.3, p. 107) como 'Arroz', sem distincao de sistema de cultivo; chave alinhada aqui a arroz_de_sequeiro para casar com a Tab. 6.1.2. Valores 14/5/3 (N/P2O5/K2O) reconferidos pelo autor diretamente na Tab. 6.1.3, p. 107, em 2026-08-22."
+      },
+      "aveia_branca": {
+        "n": 20,
+        "p2o5": 7,
+        "k2o": 5
+      },
+      "aveia_preta": {
+        "n": 20,
+        "p2o5": 7,
+        "k2o": 5
+      },
+      "canola": {
+        "n": 20,
+        "p2o5": 15,
+        "k2o": 12
+      },
+      "centeio": {
+        "n": 20,
+        "p2o5": 9,
+        "k2o": 5
+      },
+      "cevada": {
+        "n": 20,
+        "p2o5": 10,
+        "k2o": 6
+      },
+      "ervilha_seca_e_forrageira": {
+        "n": 36,
+        "p2o5": 9,
+        "k2o": 12
+      },
+      "ervilhaca": {
+        "n": 35,
+        "p2o5": 15,
+        "k2o": 19
+      },
+      "feijao": {
+        "n": 50,
+        "p2o5": 10,
+        "k2o": 15
+      },
+      "girassol": {
+        "n": 25,
+        "p2o5": 14,
+        "k2o": 6
+      },
+      "linho": {
+        "n": 30,
+        "p2o5": 14,
+        "k2o": 9
+      },
+      "milho": {
+        "n": 16,
+        "p2o5": 8,
+        "k2o": 6
+      },
+      "milho_pipoca": {
+        "n": 17,
+        "p2o5": 8,
+        "k2o": 6
+      },
+      "nabo_forrageiro": {
+        "n": 20,
+        "p2o5": 11,
+        "k2o": 18
+      },
+      "painco": {
+        "n": 21,
+        "p2o5": 8,
+        "k2o": 4
+      },
+      "soja": {
+        "n": 60,
+        "p2o5": 14,
+        "k2o": 20
+      },
+      "sorgo": {
+        "n": 15,
+        "p2o5": 8,
+        "k2o": 4
+      },
+      "tremoco": {
+        "n": 30,
+        "p2o5": 12,
+        "k2o": 15
+      },
+      "trigo": {
+        "n": 22,
+        "p2o5": 10,
+        "k2o": 6
+      },
+      "triticale": {
+        "n": 22,
+        "p2o5": 8,
+        "k2o": 6
+      }
+    }
+  },
+  "checksum": {
+    "descricao": "Somas derivadas das tabelas transcritas, para detectar alteracao acidental. Se um valor for corrigido legitimamente, recalcular e atualizar a data.",
+    "culturas": 21,
+    "soma_p2o5_manutencao": 885,
+    "soma_k2o_manutencao": 820,
+    "verificado_em": "2026-08-17"
+  }
+}

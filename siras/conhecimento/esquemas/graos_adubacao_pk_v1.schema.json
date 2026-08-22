@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Adubação Fosfatada e Potássica — Grãos",
+  "type": "object",
+  "required": ["descricao", "fonte", "correcao_total", "algoritmo_dose", "manutencao_por_cultura", "exportacao_nos_graos", "checksum"],
+  "properties": {
+    "descricao": { "type": "string", "minLength": 1 },
+    "fonte": {
+      "type": "object",
+      "required": ["manual", "tabelas", "paginas"],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabelas": { "type": "array", "items": { "type": "string" } },
+        "paginas": { "type": "array", "items": { "type": "integer" } },
+        "extraido_do_pdf_em": { "type": ["string", "null"] },
+        "conferido_por_autor_em": { "type": ["string", "null"] }
+      }
+    },
+    "correcao_total": {
+      "type": "object",
+      "required": ["fonte", "unidade", "muito_baixo", "baixo", "medio"],
+      "properties": {
+        "fonte": { "type": "string" },
+        "unidade": { "type": "string" },
+        "muito_baixo": {
+          "type": "object",
+          "required": ["p2o5", "k2o"],
+          "properties": { "p2o5": { "type": "number" }, "k2o": { "type": "number" } }
+        },
+        "baixo": {
+          "type": "object",
+          "required": ["p2o5", "k2o"],
+          "properties": { "p2o5": { "type": "number" }, "k2o": { "type": "number" } }
+        },
+        "medio": {
+          "type": "object",
+          "required": ["p2o5", "k2o"],
+          "properties": { "p2o5": { "type": "number" }, "k2o": { "type": "number" } }
+        }
+      }
+    },
+    "algoritmo_dose": {
+      "type": "object",
+      "required": ["fonte", "regras"],
+      "properties": {
+        "fonte": { "type": "string" },
+        "descricao": { "type": "string" },
+        "regras": {
+          "type": "object",
+          "required": ["muito_baixo", "baixo", "medio", "alto", "muito_alto"],
+          "properties": {
+            "muito_baixo": { "type": "object" },
+            "baixo": { "type": "object" },
+            "medio": { "type": "object" },
+            "alto": { "type": "object" },
+            "muito_alto": { "type": "object" }
+          }
+        },
+        "arredondamento": { "type": "string" },
+        "manutencao_adicional": { "type": "string" }
+      }
+    },
+    "manutencao_por_cultura": {
+      "type": "object",
+      "required": ["fonte", "culturas"],
+      "properties": {
+        "fonte": { "type": "string" },
+        "culturas": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "rendimento_referencia_t_ha",
+              "p2o5_manutencao",
+              "k2o_manutencao",
+              "p2o5_adicional_por_t",
+              "k2o_adicional_por_t"
+            ],
+            "properties": {
+              "rendimento_referencia_t_ha": { "type": "number" },
+              "p2o5_manutencao": { "type": "number" },
+              "k2o_manutencao": { "type": "number" },
+              "p2o5_adicional_por_t": { "type": "number" },
+              "k2o_adicional_por_t": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "exportacao_nos_graos": {
+      "type": "object",
+      "required": ["fonte", "unidade", "culturas"],
+      "properties": {
+        "fonte": { "type": "string" },
+        "unidade": { "type": "string" },
+        "nota": { "type": "string" },
+        "culturas": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["n", "p2o5", "k2o"],
+            "properties": {
+              "n": { "type": "number" },
+              "p2o5": { "type": "number" },
+              "k2o": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "checksum": {
+      "type": "object",
+      "required": ["culturas", "soma_p2o5_manutencao", "soma_k2o_manutencao"],
+      "properties": {
+        "descricao": { "type": "string" },
+        "culturas": { "type": "integer" },
+        "soma_p2o5_manutencao": { "type": "number" },
+        "soma_k2o_manutencao": { "type": "number" },
+        "verificado_em": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

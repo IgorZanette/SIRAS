@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Interpretação Geral — Argila, MO, CTC, Ca, Mg, S e Micronutrientes",
+  "type": "object",
+  "required": ["descricao", "fonte", "atributos"],
+  "properties": {
+    "descricao": { "type": "string", "minLength": 1 },
+    "fonte": {
+      "type": "object",
+      "required": ["manual", "tabelas", "paginas"],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabelas": { "type": "array", "items": { "type": "string" } },
+        "paginas": { "type": "array", "items": { "type": "integer" } },
+        "extraido_do_pdf_em": { "type": ["string", "null"] },
+        "conferido_por_autor_em": { "type": ["string", "null"] },
+        "aviso_operadores": { "type": ["string", "null"] }
+      }
+    },
+    "atributos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["atributo", "unidade", "fonte", "faixas"],
+        "properties": {
+          "atributo": { "type": "string", "minLength": 1 },
+          "unidade": { "type": "string" },
+          "fonte": { "type": "string" },
+          "nota": { "type": "string" },
+          "faixas": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["classe", "de", "ate"],
+              "properties": {
+                "classe": { "type": "string", "minLength": 1 },
+                "de": { "type": ["number", "null"] },
+                "ate": { "type": ["number", "null"] }
+              }
+            }
+          },
+          "excecao": {
+            "type": "object",
+            "required": ["culturas", "alto_de"],
+            "properties": {
+              "culturas": { "type": "string" },
+              "alto_de": { "type": "number" },
+              "nota": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

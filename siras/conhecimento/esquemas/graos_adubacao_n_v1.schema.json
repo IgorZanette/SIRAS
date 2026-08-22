@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Adubação Nitrogenada — Grãos",
+  "type": "object",
+  "required": ["descricao", "fonte", "faixas_mo", "culturas", "checksum"],
+  "properties": {
+    "descricao": { "type": "string", "minLength": 1 },
+    "fonte": {
+      "type": "object",
+      "required": ["manual", "tabelas", "paginas"],
+      "properties": {
+        "manual": { "type": "string" },
+        "tabelas": { "type": "array", "items": { "type": "string" } },
+        "paginas": { "type": "array", "items": { "type": "integer" } },
+        "secao": { "type": ["string", "null"] },
+        "extraido_do_pdf_em": { "type": ["string", "null"] },
+        "conferido_por_autor_em": { "type": ["string", "null"] },
+        "aviso_operadores": { "type": ["string", "null"] }
+      }
+    },
+    "faixas_mo": {
+      "type": "object",
+      "required": ["mo_ate_2_5", "mo_2_6_a_5_0", "mo_acima_5_0"],
+      "properties": {
+        "mo_ate_2_5": { "type": "string" },
+        "mo_2_6_a_5_0": { "type": "string" },
+        "mo_acima_5_0": { "type": "string" }
+      }
+    },
+    "nota_dose_maxima": { "type": ["string", "null"] },
+    "culturas": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["modelo"],
+        "properties": {
+          "modelo": { "type": "string", "enum": ["nao_aplica", "mo", "mo_x_antecedente"] },
+          "motivo": { "type": "string" },
+          "nota": { "type": "string" },
+          "antecedentes": { "type": "array", "items": { "type": "string" } },
+          "doses_kg_n_ha": { "type": "object" },
+          "acima_de_5_0_e_maximo": { "type": "boolean" },
+          "adicional_kg_n_por_t": {},
+          "rendimento_referencia_t_ha": { "type": "number" },
+          "ajustes_opcionais": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "checksum": {
+      "type": "object",
+      "required": ["culturas", "por_modelo"],
+      "properties": {
+        "descricao": { "type": "string" },
+        "culturas": { "type": "integer" },
+        "por_modelo": {
+          "type": "object",
+          "properties": {
+            "nao_aplica": { "type": "integer" },
+            "mo": { "type": "integer" },
+            "mo_x_antecedente": { "type": "integer" }
+          }
+        },
+        "verificado_em": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -386,6 +386,170 @@ class Carregador:
                     f"'{criterio_calagem}', que não existe em criterios_calagem.json"
                 )
 
+    def _validar_faixas_contiguas(self, faixas: list, contexto: str) -> None:
+        """
+        Valida que uma lista de faixas (classe/de/ate) é contígua e sem lacunas:
+        - primeira faixa com "de" == null (aberta à esquerda)
+        - última faixa com "ate" == null (aberta à direita)
+        - faixas[i]["ate"] == faixas[i+1]["de"] para todo par consecutivo
+
+        Args:
+            faixas: lista de dicts com "classe", "de", "ate"
+            contexto: prefixo descritivo para a mensagem de erro
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        if not faixas:
+            raise ErroCarregamento(f"{contexto}: lista de faixas vazia")
+
+        if faixas[0].get("de") is not None:
+            raise ErroCarregamento(
+                f"{contexto}: primeira faixa ('{faixas[0].get('classe')}') deveria ter "
+                f"'de'=null (aberta à esquerda), encontrado {faixas[0].get('de')}"
+            )
+        if faixas[-1].get("ate") is not None:
+            raise ErroCarregamento(
+                f"{contexto}: última faixa ('{faixas[-1].get('classe')}') deveria ter "
+                f"'ate'=null (aberta à direita), encontrado {faixas[-1].get('ate')}"
+            )
+
+        for i in range(len(faixas) - 1):
+            atual_ate = faixas[i].get("ate")
+            proxima_de = faixas[i + 1].get("de")
+            if atual_ate != proxima_de:
+                raise ErroCarregamento(
+                    f"{contexto}: faixas descontínuas entre '{faixas[i].get('classe')}' "
+                    f"(ate={atual_ate}) e '{faixas[i + 1].get('classe')}' (de={proxima_de})"
+                )
+
+    def validar_interpretacao_geral(self, dados: Dict) -> None:
+        """
+        Valida invariantes de interpretacao_geral.json: faixas de cada atributo contíguas.
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        for atributo in dados.get("atributos", []):
+            nome = atributo.get("atributo")
+            self._validar_faixas_contiguas(
+                atributo.get("faixas", []), f"interpretacao_geral.json: atributo '{nome}'"
+            )
+
+    def validar_interpretacao_k(self, dados: Dict) -> None:
+        """
+        Valida invariantes de interpretacao_k.json: faixas_ctc contíguas, toda faixa_ctc
+        referenciada nas tabelas existe em faixas_ctc, e faixas de dose contíguas.
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        faixas_ctc = dados.get("faixas_ctc", [])
+        self._validar_faixas_contiguas(faixas_ctc, "interpretacao_k.json: faixas_ctc")
+        faixas_ctc_conhecidas = {f["faixa"] for f in faixas_ctc}
+
+        for tabela in dados.get("tabelas", []):
+            grupo = tabela.get("grupo")
+            for bloco in tabela.get("por_faixa_ctc", []):
+                faixa_ctc = bloco.get("faixa_ctc")
+                if faixa_ctc not in faixas_ctc_conhecidas:
+                    raise ErroCarregamento(
+                        f"interpretacao_k.json: tabela '{grupo}' referencia faixa_ctc "
+                        f"'{faixa_ctc}', que não existe em faixas_ctc"
+                    )
+                self._validar_faixas_contiguas(
+                    bloco.get("faixas", []),
+                    f"interpretacao_k.json: tabela '{grupo}', faixa_ctc '{faixa_ctc}'"
+                )
+
+    def validar_interpretacao_p(self, dados: Dict) -> None:
+        """
+        Valida invariantes de interpretacao_p.json: faixas de dose contíguas, por classe
+        de argila (ou sem classe de argila, caso do arroz irrigado).
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        for tabela in dados.get("tabelas", []):
+            grupo = tabela.get("grupo")
+            if "por_classe_argila" in tabela:
+                for bloco in tabela["por_classe_argila"]:
+                    classe_argila = bloco.get("classe_argila")
+                    self._validar_faixas_contiguas(
+                        bloco.get("faixas", []),
+                        f"interpretacao_p.json: tabela '{grupo}', classe_argila '{classe_argila}'"
+                    )
+            elif "sem_classe_argila" in tabela:
+                self._validar_faixas_contiguas(
+                    tabela["sem_classe_argila"], f"interpretacao_p.json: tabela '{grupo}'"
+                )
+            else:
+                raise ErroCarregamento(
+                    f"interpretacao_p.json: tabela '{grupo}' não declara "
+                    f"'por_classe_argila' nem 'sem_classe_argila'"
+                )
+
+    def validar_graos_adubacao_n(self, dados: Dict) -> None:
+        """
+        Valida invariantes de graos_adubacao_n.json contra o checksum já transcrito:
+        número de culturas e contagem por modelo.
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        culturas = dados.get("culturas", {})
+        checksum = dados.get("checksum", {})
+
+        if len(culturas) != checksum.get("culturas"):
+            raise ErroCarregamento(
+                f"graos_adubacao_n.json: checksum.culturas={checksum.get('culturas')}, "
+                f"mas há {len(culturas)} entradas em 'culturas'"
+            )
+
+        contagem_por_modelo: Dict[str, int] = {}
+        for entrada in culturas.values():
+            modelo = entrada.get("modelo")
+            contagem_por_modelo[modelo] = contagem_por_modelo.get(modelo, 0) + 1
+
+        esperado = checksum.get("por_modelo", {})
+        if contagem_por_modelo != esperado:
+            raise ErroCarregamento(
+                f"graos_adubacao_n.json: contagem por modelo não bate com checksum.por_modelo\n"
+                f"  Esperado: {esperado}\n"
+                f"  Obtido: {contagem_por_modelo}"
+            )
+
+    def validar_graos_adubacao_pk(self, dados: Dict) -> None:
+        """
+        Valida invariantes de graos_adubacao_pk.json contra o checksum já transcrito:
+        número de culturas e soma de manutenção de P2O5/K2O.
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        culturas = dados.get("manutencao_por_cultura", {}).get("culturas", {})
+        checksum = dados.get("checksum", {})
+
+        if len(culturas) != checksum.get("culturas"):
+            raise ErroCarregamento(
+                f"graos_adubacao_pk.json: checksum.culturas={checksum.get('culturas')}, "
+                f"mas há {len(culturas)} entradas em manutencao_por_cultura.culturas"
+            )
+
+        soma_p2o5 = sum(c["p2o5_manutencao"] for c in culturas.values())
+        soma_k2o = sum(c["k2o_manutencao"] for c in culturas.values())
+
+        if soma_p2o5 != checksum.get("soma_p2o5_manutencao"):
+            raise ErroCarregamento(
+                f"graos_adubacao_pk.json: soma de p2o5_manutencao={soma_p2o5}, "
+                f"checksum.soma_p2o5_manutencao={checksum.get('soma_p2o5_manutencao')}"
+            )
+        if soma_k2o != checksum.get("soma_k2o_manutencao"):
+            raise ErroCarregamento(
+                f"graos_adubacao_pk.json: soma de k2o_manutencao={soma_k2o}, "
+                f"checksum.soma_k2o_manutencao={checksum.get('soma_k2o_manutencao')}"
+            )
+
     def carregar_dados_comum(self) -> Dict[str, Dict[str, Any]]:
         """
         Carrega e valida todos os arquivos de dados/comum/.
@@ -437,6 +601,68 @@ class Carregador:
         except ErroCarregamento as e:
             raise ErroCarregamento(f"mapa_culturas.json: {e}")
 
+        # Carregar interpretacao_geral.json
+        try:
+            dados = self._carregar_json(dados_dir / "interpretacao_geral.json")
+            self._validar_schema_json("interpretacao_geral.json", "interpretacao_geral_v1", dados)
+            self.validar_interpretacao_geral(dados)
+            resultado["interpretacao_geral"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"interpretacao_geral.json: {e}")
+
+        # Carregar interpretacao_k.json
+        try:
+            dados = self._carregar_json(dados_dir / "interpretacao_k.json")
+            self._validar_schema_json("interpretacao_k.json", "interpretacao_k_v1", dados)
+            self.validar_interpretacao_k(dados)
+            resultado["interpretacao_k"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"interpretacao_k.json: {e}")
+
+        # Carregar interpretacao_p.json
+        try:
+            dados = self._carregar_json(dados_dir / "interpretacao_p.json")
+            self._validar_schema_json("interpretacao_p.json", "interpretacao_p_v1", dados)
+            self.validar_interpretacao_p(dados)
+            resultado["interpretacao_p"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"interpretacao_p.json: {e}")
+
+        return resultado
+
+    def carregar_dados_graos(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Carrega e valida os arquivos de dados/culturas/graos/.
+
+        Returns:
+            Dict com chaves 'adubacao_n', 'adubacao_pk'
+
+        Raises:
+            ErroCarregamento: se algum arquivo falhar na validação
+        """
+        base_dir = Path(__file__).parent.parent.parent  # siras/conhecimento -> raiz do repo
+        dados_dir = base_dir / "dados" / "culturas" / "graos"
+
+        resultado = {}
+
+        # Carregar graos_adubacao_n.json
+        try:
+            dados = self._carregar_json(dados_dir / "graos_adubacao_n.json")
+            self._validar_schema_json("graos_adubacao_n.json", "graos_adubacao_n_v1", dados)
+            self.validar_graos_adubacao_n(dados)
+            resultado["adubacao_n"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"graos_adubacao_n.json: {e}")
+
+        # Carregar graos_adubacao_pk.json
+        try:
+            dados = self._carregar_json(dados_dir / "graos_adubacao_pk.json")
+            self._validar_schema_json("graos_adubacao_pk.json", "graos_adubacao_pk_v1", dados)
+            self.validar_graos_adubacao_pk(dados)
+            resultado["adubacao_pk"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"graos_adubacao_pk.json: {e}")
+
         return resultado
 
 
@@ -449,7 +675,8 @@ def carregar_dados_comum() -> Dict[str, Dict[str, Any]]:
     Carrega dados comuns com cache global.
 
     Returns:
-        Dict com 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas'
+        Dict com 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas',
+        'interpretacao_geral', 'interpretacao_k', 'interpretacao_p'
 
     Raises:
         ErroCarregamento: se validação falhar
@@ -458,3 +685,19 @@ def carregar_dados_comum() -> Dict[str, Dict[str, Any]]:
     if _carregador_global is None:
         _carregador_global = Carregador()
     return _carregador_global.carregar_dados_comum()
+
+
+def carregar_dados_graos() -> Dict[str, Dict[str, Any]]:
+    """
+    Carrega dados de adubação de grãos com cache global.
+
+    Returns:
+        Dict com 'adubacao_n', 'adubacao_pk'
+
+    Raises:
+        ErroCarregamento: se validação falhar
+    """
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_dados_graos()

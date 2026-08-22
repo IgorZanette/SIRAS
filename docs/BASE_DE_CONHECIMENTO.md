@@ -14,13 +14,23 @@ tocar em nenhum arquivo `.py`.
 
 | Arquivo | Origem | Estado |
 |---|---|---|
-| `calagem_smp.json` | Tabela 5.2, p. 70 + ajustes das p. 71–72, 83 e 298 | transcrito, a conferir |
-| `ph_referencia.json` | Tabela 5.1, p. 68 | transcrito, a conferir |
-| `criterios_calagem.json` | Tabelas 5.3 (p. 75), 5.5 (p. 81), 5.6 (p. 83), 5.7 (p. 86) | transcrito, a conferir |
-| `interpretacao_p.json` | Cap. 6 — classes de P por classe de argila | pendente |
-| `interpretacao_k.json` | Cap. 6 — classes de K por CTC pH 7,0 | pendente |
-| `interpretacao_geral.json` | Cap. 5 e 6 — MO, CTC, argila, Al, V%, Ca, Mg | pendente |
+| `calagem_smp.json` | Tabela 5.2, p. 70 + ajustes das p. 71–72, 83 e 298 | transcrito e conferido |
+| `ph_referencia.json` | Tabela 5.1, p. 68 | transcrito e conferido |
+| `criterios_calagem.json` | Tabelas 5.3 (p. 75), 5.5 (p. 81), 5.6 (p. 83), 5.7 (p. 86) | transcrito e conferido |
+| `mapa_culturas.json` | Resolução cultura → critério de calagem (não é tabela do Manual) | parcial — só soja/macieira/erva-mate |
+| `interpretacao_p.json` | Tabelas 6.2–6.6, p. 93–94 — classes de P por classe de argila | transcrito e conferido |
+| `interpretacao_k.json` | Tabelas 6.7–6.10, p. 95–96 — classes de K por CTC pH 7,0 | transcrito e conferido |
+| `interpretacao_geral.json` | Tabelas 6.1, 6.11, 6.12, p. 91/97/98 — MO, CTC, argila, Ca, Mg, S, micronutrientes | transcrito e conferido |
 | `corretivos.json` | Cap. 8 — PRNT, tipos de calcário | pendente |
+
+### Arquivos por grupo de cultura (`dados/culturas/<grupo>/`)
+
+Tabelas compartilhadas por todas as culturas de um grupo (não uma por cultura individual):
+
+| Arquivo | Origem | Estado |
+|---|---|---|
+| `dados/culturas/graos/graos_adubacao_n.json` | Tabelas 6.1.2–6.1.22, p. 116–133 — N por cultura e faixa de MO | transcrito e conferido |
+| `dados/culturas/graos/graos_adubacao_pk.json` | Tabelas 6.1.1–6.1.4, p. 105–108 — correção, manutenção e exportação de P/K | transcrito e conferido |
 
 ## Arquivos de cultura (`dados/culturas/<grupo>/<cultura>.json`)
 

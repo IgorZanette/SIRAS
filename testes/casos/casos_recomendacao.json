@@ -26,5 +26,34 @@
       "k2o": null
     },
     "origem_referencia": "PREENCHER: calculo manual pelo autor em __/__/2026, Manual 2016, Tab. __; conferido com orientador em __/__/2026"
+  },
+  {
+    "id": "G-SOJA-01",
+    "descricao": "Soja, convencional, pH 5,1, SMP 5,4, PRNT 100 - caso base de calagem (criterio graos_convencional). Demais atributos da analise (argila, mo, p, k, ctc_ph7, al, ca, mg, v_percent) nao fazem parte deste caso, que cobre apenas o calculo de calagem.",
+    "entrada": {
+      "cultura": "soja",
+      "ph_agua": 5.1,
+      "indice_smp": 5.4,
+      "argila": null,
+      "mo": null,
+      "p": null,
+      "k": null,
+      "ctc_ph7": null,
+      "al": null,
+      "ca": null,
+      "mg": null,
+      "v_percent": null,
+      "expectativa_rendimento": null,
+      "sistema_manejo": "convencional",
+      "prnt": 100
+    },
+    "referencia": {
+      "nc_t_ha": 6.8,
+      "n": null,
+      "p2o5": null,
+      "k2o": null
+    },
+    "memoria_calculo": "Tab. 5.3 (p.75), criterio graos_convencional: disparo pH<5,5, alvo 6,0, fator 1. Tab. 5.2 (p.70): SMP 5,4 x pH 6,0 = 6,8. PRNT 100 -> 6,8 t/ha.",
+    "origem_referencia": "docs/COMO_CALCULAR_ORACULO.md, exemplo resolvido; confirmado pelo autor em 2026-08-22"
   }
 ]

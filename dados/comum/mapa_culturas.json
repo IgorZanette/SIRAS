@@ -4,6 +4,12 @@
     "soja": {
       "grupo": "graos"
     },
+    "milho": {
+      "grupo": "graos"
+    },
+    "trigo": {
+      "grupo": "graos"
+    },
     "macieira": {
       "grupo": "frutiferas",
       "criterio_calagem": "macieira_oliveira"

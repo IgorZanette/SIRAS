@@ -19,10 +19,26 @@ class AnaliseSolo:
     ca: float
     mg: float
     v_percent: float
+    saturacao_al: Optional[float] = None
 
     def __post_init__(self) -> None:
         self._validar_campos_obrigatorios()
         self._validar_faixa_fisica_plausivel()
+
+    def obter_saturacao_al(self) -> float:
+        """Retorna a saturação por Al (m%): informada diretamente (laudo já traz o valor),
+        ou calculada pela CTC efetiva quando ausente (docs/decisoes/0003, D4).
+
+        m% = Al / (Ca + Mg + K_cmolc + Al) x 100, com K_cmolc = k (mg/dm3) / 391.
+        """
+        if self.saturacao_al is not None:
+            return self.saturacao_al
+
+        k_cmolc = self.k / 391
+        ctc_efetiva = self.ca + self.mg + k_cmolc + self.al
+        if ctc_efetiva <= 0:
+            return 0.0
+        return (self.al / ctc_efetiva) * 100
 
     def _validar_campos_obrigatorios(self) -> None:
         campos = {
@@ -83,6 +99,9 @@ class AnaliseSolo:
 
         if not 0.0 <= self.v_percent <= 100.0:
             raise ValueError("'v_percent' deve estar em faixa física plausível para saturação por bases (0 a 100).")
+
+        if self.saturacao_al is not None and not 0.0 <= self.saturacao_al <= 100.0:
+            raise ValueError("'saturacao_al' deve estar em faixa física plausível (0 a 100).")
 
         # TODO: definir limites específicos para atributos agronômicos quando a regra
         # for formalizada no Manual ou em outra fonte autoritativa do TCC.

@@ -1,16 +1,19 @@
 """
 Cálculo da necessidade de calagem (NC), pelo critério de grupo de cultura.
 
-Cadeia (docs/ARQUITETURA.md, docs/decisoes/0002):
+Cadeia (docs/ARQUITETURA.md, docs/decisoes/0002, docs/decisoes/0003):
 cultura + sistema de manejo -> critério em criterios_calagem.json (Tab. 5.3/5.5/5.6/5.7)
--> condição de disparo, pH alvo e fator -> Tabela 5.2 (calagem_smp.json) -> PRNT -> arredondamento.
+-> condição de disparo (± exceção nao_aplicar_se) -> dose (Tabela 5.2 ou saturação por
+bases) -> ajustes (baixo poder tampão, fator_30cm, teto de aplicação superficial) -> PRNT
+-> arredondamento.
 
-Escopo atual: apenas critérios com decisao.tipo == "ph_menor_que" (sem exceção
-'nao_aplicar_se') e dose.tipo == "smp" sem 'limite_t_ha', 'usar_smp_medio_das_camadas' nem
-'fator_30cm'. Plantio direto, aplicação superficial, SMP médio de camadas, incorporação a
-30 cm, faixa de plantio e saturação por bases ainda não estão implementados e levantam
-NotImplementedError propositalmente, em vez de produzir um resultado silenciosamente
-incompleto (ver testes/unidade/test_calagem.py::TestCriterioInvalido).
+Escopo atual: decisao.tipo em {"ph_menor_que", "v_menor_igual"}; dose.tipo em
+{"smp", "saturacao_bases"}. "ph_menor_que_e_al" e "usar_smp_medio_das_camadas" (SMP de
+duas camadas) ainda não estão implementados e levantam NotImplementedError propositalmente
+(ver testes/unidade/test_calagem.py::TestTodosOsCriteriosDaBaseSaoCobertos). Critérios
+marcados "FORA DO ESCOPO do SIRAS" nas próprias notas (arroz irrigado) levantam
+ErroCalagem, não NotImplementedError — não é falta de implementação, é exclusão de
+escopo deliberada.
 """
 
 from __future__ import annotations
@@ -26,6 +29,25 @@ _CHAVE_COLUNA_POR_PH_ALVO = {
     5.5: "nc_ph_5_5",
     6.0: "nc_ph_6_0",
     6.5: "nc_ph_6_5",
+}
+
+# D2 (docs/decisoes/0002): SMP > 6,3 -> equações polinomiais em vez da Tabela 5.2.
+_LIMITE_BAIXO_PODER_TAMPAO = 6.3
+
+# Coeficientes das equações de baixo poder tampão (calagem_smp.json, ajustes.baixo_poder_tampao,
+# p. 71-72): NC = intercepto + coef_mo*MO + coef_al*Al, em t/ha PRNT 100%.
+_COEFICIENTES_BAIXO_PODER_TAMPAO = {
+    5.5: (-0.653, 0.480, 1.937),
+    6.0: (-0.516, 0.805, 2.435),
+    6.5: (-0.122, 1.193, 2.713),
+}
+
+_OPERADORES = {
+    ">=": lambda a, b: a >= b,
+    ">": lambda a, b: a > b,
+    "<=": lambda a, b: a <= b,
+    "<": lambda a, b: a < b,
+    "==": lambda a, b: a == b,
 }
 
 
@@ -121,6 +143,60 @@ def _linha_smp(tabela: list, indice_smp: float) -> Tuple[Optional[Dict[str, Any]
     )
 
 
+def _nc_baixo_poder_tampao(ph_alvo: float, mo: float, al: float) -> float:
+    """NC pelas equações polinomiais de baixo poder tampão (D2, docs/decisoes/0002)."""
+    intercepto, coef_mo, coef_al = _COEFICIENTES_BAIXO_PODER_TAMPAO[ph_alvo]
+    return intercepto + coef_mo * mo + coef_al * al
+
+
+def _valor_campo(analise: AnaliseSolo, campo: str):
+    """Lê um campo de AnaliseSolo pelo nome usado em criterios_calagem.json.
+
+    'saturacao_al' passa por obter_saturacao_al() (direto ou derivado, D4).
+    """
+    if campo == "saturacao_al":
+        return analise.obter_saturacao_al()
+    return getattr(analise, campo)
+
+
+def _avaliar_nao_aplicar_se(analise: AnaliseSolo, nao_aplicar_se: Dict[str, Any]) -> bool:
+    """Avalia a exceção estruturada de um critério (criterios_calagem.json).
+
+    Retorna True se a exceção se aplica (ou seja, a calagem NÃO deve ser aplicada).
+    """
+    operador = nao_aplicar_se["operador"]
+    resultados = []
+    for condicao in nao_aplicar_se["condicoes"]:
+        valor_analise = _valor_campo(analise, condicao["campo"])
+        comparar = _OPERADORES[condicao["op"]]
+        resultados.append(comparar(valor_analise, condicao["valor"]))
+
+    if operador == "E":
+        return all(resultados)
+    if operador == "OU":
+        return any(resultados)
+    raise ErroCalagem(f"operador de nao_aplicar_se desconhecido: '{operador}'")
+
+
+def _testar_disparo(decisao: Dict[str, Any], analise: AnaliseSolo, criterio_id: str) -> Tuple[bool, Optional[str]]:
+    """Testa a condição de disparo do critério. Retorna (disparou, motivo_se_nao)."""
+    tipo = decisao["tipo"]
+
+    if tipo == "ph_menor_que":
+        if analise.ph_agua < decisao["ph"]:
+            return True, None
+        return False, "ph_acima_do_disparo"
+
+    if tipo == "v_menor_igual":
+        if analise.v_percent <= decisao["v"]:
+            return True, None
+        return False, "v_acima_do_alvo"
+
+    raise NotImplementedError(
+        f"criterio '{criterio_id}': decisao.tipo='{tipo}' ainda não implementado"
+    )
+
+
 def calcular_calagem(
     analise: AnaliseSolo,
     criterio_id: str,
@@ -139,78 +215,105 @@ def calcular_calagem(
         Dict com "nc_t_ha" e "motivo" (None quando há dose calculada).
 
     Raises:
-        ErroCalagem: critério ou linha da Tabela 5.2 não encontrados
+        ErroCalagem: critério fora de escopo do SIRAS, ou dado inconsistente
         NotImplementedError: critério fora do escopo implementado hoje
     """
     dados = carregar_dados_comum()
     criterio = _buscar_criterio(dados["criterios_calagem"], criterio_id)
 
-    decisao = criterio["decisao"]
-    if decisao["tipo"] != "ph_menor_que":
-        raise NotImplementedError(
-            f"criterio '{criterio_id}': decisao.tipo='{decisao['tipo']}' ainda não implementado"
-        )
-    if "nao_aplicar_se" in decisao:
-        raise NotImplementedError(
-            f"criterio '{criterio_id}': exceção 'nao_aplicar_se' ainda não implementada"
+    if any("fora do escopo" in nota.lower() for nota in criterio.get("notas", [])):
+        raise ErroCalagem(
+            f"criterio '{criterio_id}' está fora do escopo do SIRAS "
+            f"(ver 'notas' em criterios_calagem.json)"
         )
 
+    decisao = criterio["decisao"]
     dose_cfg = criterio["dose"]
-    if dose_cfg["tipo"] != "smp":
+
+    if dose_cfg["tipo"] not in ("smp", "saturacao_bases"):
         raise NotImplementedError(
             f"criterio '{criterio_id}': dose.tipo='{dose_cfg['tipo']}' ainda não implementado"
         )
-    if "limite_t_ha" in dose_cfg or "usar_smp_medio_das_camadas" in dose_cfg:
+    if "usar_smp_medio_das_camadas" in dose_cfg:
         raise NotImplementedError(
-            f"criterio '{criterio_id}': aplicação superficial/SMP médio ainda não implementados"
-        )
-    if "fator_30cm" in dose_cfg:
-        raise NotImplementedError(
-            f"criterio '{criterio_id}': ajuste de incorporação a 30 cm (fator_30cm) "
-            f"ainda não implementado"
+            f"criterio '{criterio_id}': SMP médio de duas camadas ainda não implementado"
         )
 
-    limite_disparo = decisao["ph"]
+    disparou, motivo = _testar_disparo(decisao, analise, criterio_id)
 
-    # R-CAL-01: pH >= limite de disparo do critério -> sem necessidade de calagem (D3)
-    if analise.ph_agua >= limite_disparo:
+    if disparou and "nao_aplicar_se" in decisao:
+        excecao = decisao["nao_aplicar_se"]
+        if _avaliar_nao_aplicar_se(analise, excecao):
+            disparou = False
+            motivo = excecao["motivo"]
+
+    # R-CAL-01: sem disparo (direto ou por exceção) -> sem necessidade de calagem (D3)
+    if not disparou:
         return trace.registrar(
-            regra=f"{criterio_id}: sem disparo (pH {analise.ph_agua} >= {limite_disparo})",
-            entradas={"ph_agua": analise.ph_agua, "limite_disparo": limite_disparo},
-            saida={"nc_t_ha": 0.0, "motivo": "ph_acima_do_disparo"},
+            regra=f"{criterio_id}: sem calagem ({motivo})",
+            entradas={"ph_agua": analise.ph_agua, "v_percent": analise.v_percent},
+            saida={"nc_t_ha": 0.0, "motivo": motivo},
             fonte=criterio["fonte"],
         )
 
-    ph_alvo = dose_cfg["ph_alvo"]
-    fator = dose_cfg["fator"]
-    chave_coluna = _CHAVE_COLUNA_POR_PH_ALVO[ph_alvo]
+    if dose_cfg["tipo"] == "saturacao_bases":
+        v_alvo = dose_cfg["v_alvo"]
+        nc_com_fator = ((v_alvo - analise.v_percent) / 100) * analise.ctc_ph7
+        origem_nc = "saturacao_bases"
+        motivo_linha = None
+    else:
+        ph_alvo = dose_cfg["ph_alvo"]
+        fator = dose_cfg["fator"]
+        chave_coluna = _CHAVE_COLUNA_POR_PH_ALVO[ph_alvo]
 
-    linha, motivo_linha = _linha_smp(dados["calagem_smp"]["tabela"], analise.indice_smp)
+        linha, motivo_linha = _linha_smp(dados["calagem_smp"]["tabela"], analise.indice_smp)
 
-    # R-CAL-02: SMP acima da Tabela 5.2 -> sem necessidade de calagem (D3)
-    if linha is None:
-        return trace.registrar(
-            regra=f"{criterio_id}: SMP {analise.indice_smp} acima da Tabela 5.2",
-            entradas={"indice_smp": analise.indice_smp},
-            saida={"nc_t_ha": 0.0, "motivo": "smp_acima_da_tabela"},
-            fonte="Manual 2016, Tab. 5.2, p. 70",
-        )
+        # R-CAL-02: SMP acima da Tabela 5.2 -> sem necessidade de calagem (D3)
+        if linha is None:
+            return trace.registrar(
+                regra=f"{criterio_id}: SMP {analise.indice_smp} acima da Tabela 5.2",
+                entradas={"indice_smp": analise.indice_smp},
+                saida={"nc_t_ha": 0.0, "motivo": "smp_acima_da_tabela"},
+                fonte="Manual 2016, Tab. 5.2, p. 70",
+            )
 
-    # R-CAL-03: disparo confirmado -> Tab. 5.2 x fator do critério x conversão por PRNT
-    nc_tabela = linha[chave_coluna]
-    nc_com_fator = nc_tabela * fator
+        nc_tabela = linha[chave_coluna]
+
+        # D2: SMP > 6,3 -> equações polinomiais (baixo poder tampão) em vez da tabela.
+        if analise.indice_smp > _LIMITE_BAIXO_PODER_TAMPAO:
+            nc_base = _nc_baixo_poder_tampao(ph_alvo, analise.mo, analise.al)
+            origem_nc = "baixo_poder_tampao"
+        else:
+            nc_base = nc_tabela
+            origem_nc = motivo_linha
+
+        nc_com_fator = nc_base * fator
+
+        # D5 (docs/decisoes/0003): incorporação a 30 cm, só quando o critério declarar o fator.
+        if "fator_30cm" in dose_cfg and contexto.profundidade_incorporacao_cm == 30:
+            nc_com_fator *= dose_cfg["fator_30cm"]
+
+    # D9 (docs/decisoes/0003): teto de aplicação superficial, ANTES da conversão por PRNT.
+    limite_t_ha = dose_cfg.get("limite_t_ha")
+    truncado = False
+    if criterio.get("modo_aplicacao") == "superficial" and limite_t_ha is not None:
+        if nc_com_fator > limite_t_ha:
+            nc_com_fator = limite_t_ha
+            truncado = True
+
+    # R-CAL-03: conversão por PRNT + arredondamento (D1)
     dose_real = nc_com_fator * 100 / contexto.prnt
     nc_t_ha = _arredondar(dose_real, 1)
 
     return trace.registrar(
-        regra=f"{criterio_id}: disparo pH<{limite_disparo}, alvo {ph_alvo}, fator {fator}",
+        regra=f"{criterio_id}: disparo confirmado, dose calculada ({origem_nc})",
         entradas={
             "ph_agua": analise.ph_agua,
-            "indice_smp": analise.indice_smp,
-            "leitura_smp": motivo_linha,
-            "nc_tabela": nc_tabela,
-            "fator": fator,
+            "indice_smp": getattr(analise, "indice_smp", None),
+            "v_percent": analise.v_percent,
             "prnt": contexto.prnt,
+            "profundidade_incorporacao_cm": contexto.profundidade_incorporacao_cm,
+            "truncado_pelo_teto_superficial": truncado,
         },
         saida={"nc_t_ha": nc_t_ha, "motivo": None},
         fonte=f"{criterio['fonte']} e Manual 2016, Tab. 5.2, p. 70",

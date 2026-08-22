@@ -75,5 +75,5 @@ participantes do público-alvo, seguido do questionário **SUS**.
 - Escala: Brooke (1996).
 - Referência de 68 como média: **Bangor, Kortum & Miller (2008)** e **Sauro (2011)** — *não* é de
   Brooke (1996); a proposta precisa dessa correção.
-- Verificar se a instituição exige submissão ao comitê de ética (CEP) e/ou TCLE. Pendência P2 do
-  roadmap.
+- Confirmado com o orientador (Rafael Rieder) que a avaliação de usabilidade não requer submissão
+  ao comitê de ética (CEP). Será aplicado TCLE aos participantes.

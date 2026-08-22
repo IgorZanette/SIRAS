@@ -11,7 +11,7 @@ Sai com código 0 se OK, 1 se houver erro.
 import sys
 from pathlib import Path
 
-# Adicionar SIRAS ao path
+# Adicionar siras ao path
 projeto_root = Path(__file__).parent.parent
 sys.path.insert(0, str(projeto_root))
 
@@ -21,7 +21,7 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
-from SIRAS.conhecimento.carregador import Carregador, ErroCarregamento
+from siras.conhecimento.carregador import Carregador, ErroCarregamento
 
 
 def main():

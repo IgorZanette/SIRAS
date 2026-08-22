@@ -8,7 +8,7 @@ Testa:
 """
 
 import pytest
-from SIRAS.conhecimento.carregador import Carregador, ErroCarregamento
+from siras.conhecimento.carregador import Carregador
 
 
 @pytest.fixture
@@ -20,10 +20,7 @@ def carregador():
 @pytest.fixture
 def dados_comum(carregador):
     """Fixture que carrega todos os dados comuns."""
-    try:
-        return carregador.carregar_dados_comum()
-    except ErroCarregamento as e:
-        pytest.skip(f"Não foi possível carregar dados: {e}")
+    return carregador.carregar_dados_comum()
 
 
 class TestCalageSMP:
@@ -39,14 +36,19 @@ class TestCalageSMP:
         tabela = dados_comum["calagem_smp"]["tabela"]
         indices_obtidos = [row["indice_smp"] for row in tabela]
 
-        indices_esperados = ["<=4.4"]
+        indices_esperados = [4.4]
         smp = 4.5
         while smp <= 7.1:
-            indices_esperados.append(f"{smp:.1f}")
+            indices_esperados.append(round(smp, 1))
             smp = round(smp + 0.1, 1)
 
-        assert indices_obtidos == indices_esperados, \
-            f"Índices esperados: {indices_esperados}\nÍndices obtidos: {indices_obtidos}"
+        assert len(indices_obtidos) == len(indices_esperados) and all(
+            abs(obtido - esperado) < 1e-9
+            for obtido, esperado in zip(indices_obtidos, indices_esperados)
+        ), f"Índices esperados: {indices_esperados}\nÍndices obtidos: {indices_obtidos}"
+
+        assert tabela[0].get("limite_inferior") is True, \
+            "Primeira linha (indice_smp=4.4) deve ter limite_inferior=true"
 
     def test_todas_doses_nao_negativas(self, dados_comum):
         """Invariante: todas as doses >= 0."""
@@ -101,11 +103,24 @@ class TestCalageSMP:
         """Invariante: última linha (7.1) tem todas as doses = 0."""
         tabela = dados_comum["calagem_smp"]["tabela"]
         ultima = tabela[-1]
-        assert ultima["indice_smp"] == "7.1", \
-            f"Última linha esperada é '7.1', encontrada '{ultima['indice_smp']}'"
+        assert abs(ultima["indice_smp"] - 7.1) < 1e-9, \
+            f"Última linha esperada é 7.1, encontrada {ultima['indice_smp']}"
         assert ultima["nc_ph_5_5"] == 0, f"nc_ph_5_5 na linha 7.1 deve ser 0"
         assert ultima["nc_ph_6_0"] == 0, f"nc_ph_6_0 na linha 7.1 deve ser 0"
         assert ultima["nc_ph_6_5"] == 0, f"nc_ph_6_5 na linha 7.1 deve ser 0"
+
+    def test_soma_colunas_bate_com_manual(self, dados_comum):
+        """Invariante: soma das colunas da Tabela 5.2 bate com o Manual (28 linhas)."""
+        tabela = dados_comum["calagem_smp"]["tabela"]
+        assert len(tabela) == 28, f"Esperado 28 linhas, encontrado {len(tabela)}"
+
+        soma_5_5 = round(sum(row["nc_ph_5_5"] for row in tabela), 1)
+        soma_6_0 = round(sum(row["nc_ph_6_0"] for row in tabela), 1)
+        soma_6_5 = round(sum(row["nc_ph_6_5"] for row in tabela), 1)
+
+        assert soma_5_5 == 111.0, f"Soma de nc_ph_5_5 esperada 111.0, obtida {soma_5_5}"
+        assert soma_6_0 == 169.3, f"Soma de nc_ph_6_0 esperada 169.3, obtida {soma_6_0}"
+        assert soma_6_5 == 237.5, f"Soma de nc_ph_6_5 esperada 237.5, obtida {soma_6_5}"
 
 
 class TestCriteriosCalagem:

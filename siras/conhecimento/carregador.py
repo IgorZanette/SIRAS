@@ -136,11 +136,21 @@ class Carregador:
 
         indices_obtidos = [row["indice_smp"] for row in tabela]
 
-        if indices_obtidos != indices_esperados:
+        indices_divergem = len(indices_obtidos) != len(indices_esperados) or any(
+            abs(obtido - esperado) >= 1e-9
+            for obtido, esperado in zip(indices_obtidos, indices_esperados)
+        )
+        if indices_divergem:
             raise ErroCarregamento(
                 f"calagem_smp.json: índices SMP incorretos\n"
                 f"  Esperado: {indices_esperados}\n"
                 f"  Obtido: {indices_obtidos}"
+            )
+
+        # Invariante 2b: primeira linha (4.4) deve ser marcada como limite_inferior
+        if not tabela[0].get("limite_inferior"):
+            raise ErroCarregamento(
+                f"calagem_smp.json: primeira linha (indice_smp=4.4) deve ter limite_inferior=true"
             )
 
         # Invariante 3 e 4: Todas doses >= 0 e monotonia por coluna
@@ -194,9 +204,9 @@ class Carregador:
 
         # Invariante 6: Última linha (7.1) tem todas as doses = 0
         ultima_linha = tabela[-1]
-        if ultima_linha["indice_smp"] != "7.1":
+        if abs(ultima_linha["indice_smp"] - 7.1) >= 1e-9:
             raise ErroCarregamento(
-                f"calagem_smp.json: última linha esperada é '7.1', encontrada '{ultima_linha['indice_smp']}'"
+                f"calagem_smp.json: última linha esperada é 7.1, encontrada {ultima_linha['indice_smp']}"
             )
 
         if ultima_linha["nc_ph_5_5"] != 0 or ultima_linha["nc_ph_6_0"] != 0 or ultima_linha["nc_ph_6_5"] != 0:
@@ -205,6 +215,18 @@ class Carregador:
                 f"  Obtido: nc_ph_5_5={ultima_linha['nc_ph_5_5']}, "
                 f"nc_ph_6_0={ultima_linha['nc_ph_6_0']}, "
                 f"nc_ph_6_5={ultima_linha['nc_ph_6_5']}"
+            )
+
+        # Invariante 7: soma das colunas bate com o total da Tabela 5.2 do Manual
+        soma_5_5 = round(sum(row["nc_ph_5_5"] for row in tabela), 1)
+        soma_6_0 = round(sum(row["nc_ph_6_0"] for row in tabela), 1)
+        soma_6_5 = round(sum(row["nc_ph_6_5"] for row in tabela), 1)
+
+        if (soma_5_5, soma_6_0, soma_6_5) != (111.0, 169.3, 237.5):
+            raise ErroCarregamento(
+                f"calagem_smp.json: soma das colunas não bate com a Tabela 5.2 do Manual\n"
+                f"  Esperado: nc_ph_5_5=111.0, nc_ph_6_0=169.3, nc_ph_6_5=237.5\n"
+                f"  Obtido: nc_ph_5_5={soma_5_5}, nc_ph_6_0={soma_6_0}, nc_ph_6_5={soma_6_5}"
             )
 
     def validar_criterios_calagem(self, dados: Dict) -> None:
@@ -334,7 +356,7 @@ class Carregador:
         Raises:
             ErroCarregamento: se algum arquivo falhar na validação
         """
-        base_dir = Path(__file__).parent.parent.parent  # Siras/conhecimento -> SIRAS
+        base_dir = Path(__file__).parent.parent.parent  # siras/conhecimento -> raiz do repo
         dados_dir = base_dir / "dados" / "comum"
 
         resultado = {}

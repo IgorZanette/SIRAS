@@ -4,9 +4,9 @@ import ast
 import re
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from SIRAS.conhecimento.carregador import carregar_dados_comum
-from SIRAS.dominio.analise import AnaliseSolo, Contexto
-from SIRAS.motor.trace import Trace
+from siras.conhecimento.carregador import carregar_dados_comum
+from siras.dominio.analise import AnaliseSolo, Contexto
+from siras.motor.trace import Trace
 
 
 def _normalizar_numero(valor: Any) -> float:

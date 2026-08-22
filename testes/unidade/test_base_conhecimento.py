@@ -6,6 +6,7 @@ Testa:
 - Tabela 5.3 (criterios_calagem.json): IDs únicos, fator/ph_alvo, superficial/limite
 - Tabela 5.1 (ph_referencia.json): culturas únicas, exceção camomila
 - mapa_culturas.json: grupo e criterio_calagem consistentes com criterios_calagem.json
+- interpretacao_geral.json, interpretacao_k.json, interpretacao_p.json: faixas contíguas
 """
 
 import pytest
@@ -243,3 +244,66 @@ class TestMapaCulturas:
             if criterio_calagem is not None:
                 assert criterio_calagem in ids_conhecidos, \
                     f"cultura '{cultura}': criterio_calagem '{criterio_calagem}' não existe em criterios_calagem.json"
+
+
+def _assert_faixas_contiguas(faixas, contexto):
+    """Helper: primeira faixa aberta à esquerda, última aberta à direita, sem lacunas."""
+    assert faixas, f"{contexto}: lista de faixas vazia"
+    assert faixas[0]["de"] is None, \
+        f"{contexto}: primeira faixa ('{faixas[0]['classe']}') deveria ter de=None"
+    assert faixas[-1]["ate"] is None, \
+        f"{contexto}: última faixa ('{faixas[-1]['classe']}') deveria ter ate=None"
+    for i in range(len(faixas) - 1):
+        assert faixas[i]["ate"] == faixas[i + 1]["de"], \
+            f"{contexto}: lacuna entre '{faixas[i]['classe']}' (ate={faixas[i]['ate']}) " \
+            f"e '{faixas[i + 1]['classe']}' (de={faixas[i + 1]['de']})"
+
+
+class TestInterpretacaoGeral:
+    """Testes de invariantes de interpretacao_geral.json."""
+
+    def test_faixas_de_cada_atributo_sao_contiguas(self, dados_comum):
+        for atributo in dados_comum["interpretacao_geral"]["atributos"]:
+            _assert_faixas_contiguas(
+                atributo["faixas"], f"atributo '{atributo['atributo']}'"
+            )
+
+
+class TestInterpretacaoK:
+    """Testes de invariantes de interpretacao_k.json."""
+
+    def test_faixas_ctc_sao_contiguas(self, dados_comum):
+        _assert_faixas_contiguas(dados_comum["interpretacao_k"]["faixas_ctc"], "faixas_ctc")
+
+    def test_toda_faixa_ctc_referenciada_existe(self, dados_comum):
+        faixas_conhecidas = {f["faixa"] for f in dados_comum["interpretacao_k"]["faixas_ctc"]}
+        for tabela in dados_comum["interpretacao_k"]["tabelas"]:
+            for bloco in tabela["por_faixa_ctc"]:
+                assert bloco["faixa_ctc"] in faixas_conhecidas, \
+                    f"tabela '{tabela['grupo']}': faixa_ctc '{bloco['faixa_ctc']}' desconhecida"
+
+    def test_faixas_de_dose_sao_contiguas(self, dados_comum):
+        for tabela in dados_comum["interpretacao_k"]["tabelas"]:
+            for bloco in tabela["por_faixa_ctc"]:
+                _assert_faixas_contiguas(
+                    bloco["faixas"],
+                    f"tabela '{tabela['grupo']}', faixa_ctc '{bloco['faixa_ctc']}'"
+                )
+
+
+class TestInterpretacaoP:
+    """Testes de invariantes de interpretacao_p.json."""
+
+    def test_faixas_de_dose_sao_contiguas(self, dados_comum):
+        for tabela in dados_comum["interpretacao_p"]["tabelas"]:
+            grupo = tabela["grupo"]
+            if "por_classe_argila" in tabela:
+                for bloco in tabela["por_classe_argila"]:
+                    _assert_faixas_contiguas(
+                        bloco["faixas"],
+                        f"tabela '{grupo}', classe_argila '{bloco['classe_argila']}'"
+                    )
+            elif "sem_classe_argila" in tabela:
+                _assert_faixas_contiguas(tabela["sem_classe_argila"], f"tabela '{grupo}'")
+            else:
+                pytest.fail(f"tabela '{grupo}' não declara por_classe_argila nem sem_classe_argila")

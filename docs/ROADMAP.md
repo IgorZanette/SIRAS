@@ -15,8 +15,8 @@ Atualize a coluna **Estado** ao concluir cada etapa. Legenda: `pendente` · `em 
 
 | Sprint | Período | Entregável | Estado |
 |---|---|---|---|
-| S0 | 16–31/08 | Repositório, ambiente, estrutura, `dados/comum/` transcrito, `AnaliseSolo` + carregador + `Trace` | em andamento |
-| S1 | 01–15/09 | `motor/calagem.py` completo e testado; 10 culturas de grãos transcritas; `motor/adubacao.py` | pendente |
+| S0 | 16–31/08 | Repositório, ambiente, estrutura, `dados/comum/` transcrito, `AnaliseSolo` + carregador + `Trace` | concluído |
+| S1 | 01–15/09 | `motor/calagem.py` completo e testado; `mapa_culturas.json` com as 21 culturas de grãos; `motor/adubacao.py` consumindo `graos_adubacao_n/pk.json` | em andamento |
 | S2 | 16–30/09 | 21 grãos; formulário web; laudo em tela; **aptidão v0**; fluxo ponta a ponta — **marco M1** | pendente |
 | S3 | 01–15/10 | Hortaliças (18), tubérculos (2), cana e tabaco | pendente |
 | S4 | 16–31/10 | Frutíferas (17, três fases) e erva-mate — **marco M2** | pendente |
@@ -41,12 +41,12 @@ Se houver atraso, o escopo é reduzido por camadas, nesta ordem — nunca sacrif
 | | Etapa | Estado |
 |---|---|---|
 | a | Estruturação da base de conhecimento (JSON) | em andamento |
-| b | Definição formal das regras SE-ENTÃO | pendente |
+| b | Definição formal das regras SE-ENTÃO | em andamento |
 | c | Definição dos critérios de aptidão edáfica | bloqueado por P1 |
 | d | Módulo de entrada de dados | pendente |
-| e | Motor de inferência | pendente |
+| e | Motor de inferência | em andamento |
 | f | Módulos de recomendação e aptidão | pendente |
-| g | Conjunto de casos de teste e oráculo | pendente |
+| g | Conjunto de casos de teste e oráculo | em andamento |
 | h | Validação e análise dos resultados | pendente |
 | i | Avaliação de usabilidade | pendente |
 | j | Redação final | pendente |

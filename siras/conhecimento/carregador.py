@@ -217,16 +217,23 @@ class Carregador:
                 f"nc_ph_6_5={ultima_linha['nc_ph_6_5']}"
             )
 
-        # Invariante 7: soma das colunas bate com o total da Tabela 5.2 do Manual
+        # Invariante 7: soma das colunas bate com o checksum transcrito em dados/comum/
+        checksum = dados.get("checksum_colunas", {})
+        esperado_5_5 = checksum.get("nc_ph_5_5")
+        esperado_6_0 = checksum.get("nc_ph_6_0")
+        esperado_6_5 = checksum.get("nc_ph_6_5")
+
         soma_5_5 = round(sum(row["nc_ph_5_5"] for row in tabela), 1)
         soma_6_0 = round(sum(row["nc_ph_6_0"] for row in tabela), 1)
         soma_6_5 = round(sum(row["nc_ph_6_5"] for row in tabela), 1)
 
-        if (soma_5_5, soma_6_0, soma_6_5) != (111.0, 169.3, 237.5):
+        if (soma_5_5, soma_6_0, soma_6_5) != (esperado_5_5, esperado_6_0, esperado_6_5):
             raise ErroCarregamento(
-                f"calagem_smp.json: soma das colunas não bate com a Tabela 5.2 do Manual\n"
-                f"  Esperado: nc_ph_5_5=111.0, nc_ph_6_0=169.3, nc_ph_6_5=237.5\n"
-                f"  Obtido: nc_ph_5_5={soma_5_5}, nc_ph_6_0={soma_6_0}, nc_ph_6_5={soma_6_5}"
+                f"calagem_smp.json: soma das colunas não bate com checksum_colunas\n"
+                f"  Esperado (checksum_colunas): nc_ph_5_5={esperado_5_5}, "
+                f"nc_ph_6_0={esperado_6_0}, nc_ph_6_5={esperado_6_5}\n"
+                f"  Obtido (soma da tabela): nc_ph_5_5={soma_5_5}, nc_ph_6_0={soma_6_0}, "
+                f"nc_ph_6_5={soma_6_5}"
             )
 
     def validar_criterios_calagem(self, dados: Dict) -> None:
@@ -346,12 +353,45 @@ class Carregador:
                     )
                 culturas_vistas[cultura] = ph_ref
 
+    def validar_mapa_culturas(self, dados: Dict, criterios_calagem: Dict) -> None:
+        """
+        Valida invariantes específicas de mapa_culturas.json.
+
+        INVARIANTES:
+        - Todo "grupo" declarado existe em algum critério de criterios_calagem.json
+        - Todo "criterio_calagem" declarado existe em criterios_calagem.json
+
+        Args:
+            dados: Dados de mapa_culturas.json
+            criterios_calagem: Dados já carregados de criterios_calagem.json
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        grupos_conhecidos = {c["grupo"] for c in criterios_calagem["criterios"]}
+        ids_conhecidos = {c["id"] for c in criterios_calagem["criterios"]}
+
+        for cultura, entrada in dados.get("culturas", {}).items():
+            grupo = entrada.get("grupo")
+            if grupo not in grupos_conhecidos:
+                raise ErroCarregamento(
+                    f"mapa_culturas.json: cultura '{cultura}' aponta para grupo '{grupo}', "
+                    f"que não existe em nenhum critério de criterios_calagem.json"
+                )
+
+            criterio_calagem = entrada.get("criterio_calagem")
+            if criterio_calagem is not None and criterio_calagem not in ids_conhecidos:
+                raise ErroCarregamento(
+                    f"mapa_culturas.json: cultura '{cultura}' aponta para criterio_calagem "
+                    f"'{criterio_calagem}', que não existe em criterios_calagem.json"
+                )
+
     def carregar_dados_comum(self) -> Dict[str, Dict[str, Any]]:
         """
         Carrega e valida todos os arquivos de dados/comum/.
 
         Returns:
-            Dict com chaves 'calagem_smp', 'criterios_calagem', 'ph_referencia'
+            Dict com chaves 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas'
 
         Raises:
             ErroCarregamento: se algum arquivo falhar na validação
@@ -388,6 +428,15 @@ class Carregador:
         except ErroCarregamento as e:
             raise ErroCarregamento(f"ph_referencia.json: {e}")
 
+        # Carregar mapa_culturas.json
+        try:
+            dados = self._carregar_json(dados_dir / "mapa_culturas.json")
+            self._validar_schema_json("mapa_culturas.json", "mapa_culturas_v1", dados)
+            self.validar_mapa_culturas(dados, resultado["criterios_calagem"])
+            resultado["mapa_culturas"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"mapa_culturas.json: {e}")
+
         return resultado
 
 
@@ -400,7 +449,7 @@ def carregar_dados_comum() -> Dict[str, Dict[str, Any]]:
     Carrega dados comuns com cache global.
 
     Returns:
-        Dict com 'calagem_smp', 'criterios_calagem', 'ph_referencia'
+        Dict com 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas'
 
     Raises:
         ErroCarregamento: se validação falhar

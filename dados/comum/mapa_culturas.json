@@ -1,0 +1,16 @@
+{
+  "descricao": "Mapeia cultura para o grupo usado em criterios_calagem.json (Tab. 5.3/5.5/5.6/5.7). Para grupos genericos (graos, hortalicas, outras), o criterio exato e resolvido cruzando grupo + sistema_manejo + condicao_area do Contexto contra criterios_calagem.json. Quando o criterio ja e especifico da especie (campo criterio_calagem presente), esse campo tem prioridade e ignora sistema_manejo/condicao_area. Escopo inicial: apenas as culturas usadas nos casos de teste calculados pelo autor (docs/COMO_CALCULAR_ORACULO.md); ampliar conforme dados/culturas/ for populado.",
+  "culturas": {
+    "soja": {
+      "grupo": "graos"
+    },
+    "macieira": {
+      "grupo": "frutiferas",
+      "criterio_calagem": "macieira_oliveira"
+    },
+    "erva-mate": {
+      "grupo": "erva_mate",
+      "criterio_calagem": "erva_mate_e_florestais"
+    }
+  }
+}

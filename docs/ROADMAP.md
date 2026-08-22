@@ -48,5 +48,5 @@ Se houver atraso, o escopo é reduzido por camadas, nesta ordem — nunca sacrif
 | f | Módulos de recomendação e aptidão | pendente |
 | g | Conjunto de casos de teste e oráculo | pendente |
 | h | Validação e análise dos resultados | pendente |
-| i | Avaliação de usabilidade | bloqueado por P2 |
+| i | Avaliação de usabilidade | pendente |
 | j | Redação final | pendente |

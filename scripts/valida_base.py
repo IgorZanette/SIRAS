@@ -38,6 +38,7 @@ def main():
         print("\n[OK] calagem_smp.json")
         print("[OK] criterios_calagem.json")
         print("[OK] ph_referencia.json")
+        print("[OK] mapa_culturas.json")
 
         print("\n" + "=" * 70)
         print("Validação de schema concluída com sucesso.")
@@ -49,10 +50,6 @@ def main():
         print("\n" + "=" * 70)
         print("Validação falhou.")
         print("=" * 70)
-        return 1
-
-    except Exception as e:
-        print(f"\n[ERRO] INESPERADO:\n{e}", file=sys.stderr)
         return 1
 
 

@@ -51,8 +51,11 @@ class AnaliseSolo:
         if not 0.0 <= self.ph_agua <= 14.0:
             raise ValueError("'ph_agua' deve estar em faixa física plausível para pH em água (0 a 14).")
 
-        if self.indice_smp < 0:
-            raise ValueError("'indice_smp' não pode ser negativo.")
+        # D2 (docs/decisoes/0002): fora de [3,0 ; 8,0] é erro de validação de entrada,
+        # distinto de estar fora da faixa da Tabela 5.2 (4,4 a 7,1), que é lido pelo
+        # limite inferior/superior da tabela e não é erro.
+        if not 3.0 <= self.indice_smp <= 8.0:
+            raise ValueError("'indice_smp' deve estar em faixa física plausível (3,0 a 8,0).")
 
         if self.argila < 0:
             raise ValueError("'argila' não pode ser negativo.")
@@ -93,7 +96,7 @@ class Contexto:
     sistema_manejo: str
     condicao_area: str
     prnt: float
-    profundidade_cm: float
+    profundidade_incorporacao_cm: float
     expectativa_rendimento: Optional[str] = None
 
     def __post_init__(self) -> None:
@@ -109,16 +112,23 @@ class Contexto:
             raise ValueError("'condicao_area' é obrigatório.")
         if self.prnt is None:
             raise ValueError("'prnt' é obrigatório.")
-        if self.profundidade_cm is None:
-            raise ValueError("'profundidade_cm' é obrigatório.")
+        if self.profundidade_incorporacao_cm is None:
+            raise ValueError("'profundidade_incorporacao_cm' é obrigatório.")
 
     def _validar_faixa_fisica_plausivel(self) -> None:
         # Validação estritamente física/operacional. Não inventamos limiares agronômicos.
         if not 0.0 <= self.prnt <= 100.0:
             raise ValueError("'prnt' deve estar em faixa física plausível para poder relativo de neutralização total (0 a 100).")
 
-        if self.profundidade_cm <= 0:
-            raise ValueError("'profundidade_cm' deve ser maior que zero.")
+        # Decisão operacional do técnico (não é dado medido do solo), restrita às duas
+        # profundidades de incorporação que o Manual discute: 0-20 cm (padrão) e 30 cm
+        # (fruteiras de raiz profunda, docs/decisoes/0003). Distinta da camada AMOSTRADA,
+        # que vem do critério de calagem (criterios_calagem.json, campo amostragem_cm).
+        if self.profundidade_incorporacao_cm not in (20.0, 30.0):
+            raise ValueError(
+                "'profundidade_incorporacao_cm' deve ser 20 ou 30 (as únicas profundidades "
+                "de incorporação que o Manual discute)."
+            )
 
         # TODO: definir intervalos válidos para 'expectativa_rendimento' conforme a
         # escala agronômica adotada em cada cultura, quando esta regra for formalizada.

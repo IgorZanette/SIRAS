@@ -65,6 +65,8 @@ Documentos principais:
 - [`docs/mapa_manual.md`](docs/mapa_manual.md) — rastreabilidade tabela do Manual → arquivo
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — cronograma e estado de cada etapa
 - [`docs/decisoes/`](docs/decisoes/) — registros de decisão de arquitetura
+- [`docs/FLUXO_DE_TRABALHO.md`](docs/FLUXO_DE_TRABALHO.md) — convenções de git e como pedir tarefas ao Claude Code
+- [`docs/COMO_CALCULAR_ORACULO.md`](docs/COMO_CALCULAR_ORACULO.md) — procedimento manual para calcular o oráculo de validação
 
 ## Estado do projeto
 

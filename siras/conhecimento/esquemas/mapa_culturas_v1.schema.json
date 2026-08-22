@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Mapa de Culturas para Critérios de Calagem",
+  "type": "object",
+  "required": ["descricao", "culturas"],
+  "properties": {
+    "descricao": {
+      "type": "string",
+      "minLength": 1
+    },
+    "culturas": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["grupo"],
+        "properties": {
+          "grupo": { "type": "string", "minLength": 1 },
+          "criterio_calagem": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -196,6 +196,12 @@
       "nc_ph_6_5": 0.0
     }
   ],
+  "checksum_colunas": {
+    "descricao": "Soma de cada coluna da tabela acima, conferida a mao pelo autor contra o Manual. Usada pelo carregador para detectar alteracao acidental de qualquer valor em edicoes futuras; nao e um dado do Manual em si, e sim um derivado das 28 linhas transcritas.",
+    "nc_ph_5_5": 111.0,
+    "nc_ph_6_0": 169.3,
+    "nc_ph_6_5": 237.5
+  },
   "ajustes": {
     "prnt": {
       "formula": "dose_real = NC_tabela * 100 / PRNT",

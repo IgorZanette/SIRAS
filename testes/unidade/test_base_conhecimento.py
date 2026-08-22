@@ -5,6 +5,7 @@ Testa:
 - Tabela 5.2 (calagem_smp.json): 28 linhas, índices, monotonia, relações
 - Tabela 5.3 (criterios_calagem.json): IDs únicos, fator/ph_alvo, superficial/limite
 - Tabela 5.1 (ph_referencia.json): culturas únicas, exceção camomila
+- mapa_culturas.json: grupo e criterio_calagem consistentes com criterios_calagem.json
 """
 
 import pytest
@@ -109,18 +110,23 @@ class TestCalageSMP:
         assert ultima["nc_ph_6_0"] == 0, f"nc_ph_6_0 na linha 7.1 deve ser 0"
         assert ultima["nc_ph_6_5"] == 0, f"nc_ph_6_5 na linha 7.1 deve ser 0"
 
-    def test_soma_colunas_bate_com_manual(self, dados_comum):
-        """Invariante: soma das colunas da Tabela 5.2 bate com o Manual (28 linhas)."""
+    def test_soma_colunas_bate_com_checksum(self, dados_comum):
+        """Invariante: soma das colunas da Tabela 5.2 bate com checksum_colunas (28 linhas)."""
         tabela = dados_comum["calagem_smp"]["tabela"]
         assert len(tabela) == 28, f"Esperado 28 linhas, encontrado {len(tabela)}"
+
+        checksum = dados_comum["calagem_smp"]["checksum_colunas"]
 
         soma_5_5 = round(sum(row["nc_ph_5_5"] for row in tabela), 1)
         soma_6_0 = round(sum(row["nc_ph_6_0"] for row in tabela), 1)
         soma_6_5 = round(sum(row["nc_ph_6_5"] for row in tabela), 1)
 
-        assert soma_5_5 == 111.0, f"Soma de nc_ph_5_5 esperada 111.0, obtida {soma_5_5}"
-        assert soma_6_0 == 169.3, f"Soma de nc_ph_6_0 esperada 169.3, obtida {soma_6_0}"
-        assert soma_6_5 == 237.5, f"Soma de nc_ph_6_5 esperada 237.5, obtida {soma_6_5}"
+        assert soma_5_5 == checksum["nc_ph_5_5"], \
+            f"Soma de nc_ph_5_5 esperada {checksum['nc_ph_5_5']}, obtida {soma_5_5}"
+        assert soma_6_0 == checksum["nc_ph_6_0"], \
+            f"Soma de nc_ph_6_0 esperada {checksum['nc_ph_6_0']}, obtida {soma_6_0}"
+        assert soma_6_5 == checksum["nc_ph_6_5"], \
+            f"Soma de nc_ph_6_5 esperada {checksum['nc_ph_6_5']}, obtida {soma_6_5}"
 
 
 class TestCriteriosCalagem:
@@ -219,3 +225,21 @@ class TestPHReferencia:
 
         assert phs_camomila == [5.5, 6.0] or phs_camomila == [6.0, 5.5], \
             f"Camomila encontrada em pH {phs_camomila}, esperado [5.5, 6.0]"
+
+
+class TestMapaCulturas:
+    """Testes de invariantes de mapa_culturas.json."""
+
+    def test_todo_grupo_existe_em_criterios_calagem(self, dados_comum):
+        grupos_conhecidos = {c["grupo"] for c in dados_comum["criterios_calagem"]["criterios"]}
+        for cultura, entrada in dados_comum["mapa_culturas"]["culturas"].items():
+            assert entrada["grupo"] in grupos_conhecidos, \
+                f"cultura '{cultura}': grupo '{entrada['grupo']}' não existe em criterios_calagem.json"
+
+    def test_todo_criterio_calagem_existe_em_criterios_calagem(self, dados_comum):
+        ids_conhecidos = {c["id"] for c in dados_comum["criterios_calagem"]["criterios"]}
+        for cultura, entrada in dados_comum["mapa_culturas"]["culturas"].items():
+            criterio_calagem = entrada.get("criterio_calagem")
+            if criterio_calagem is not None:
+                assert criterio_calagem in ids_conhecidos, \
+                    f"cultura '{cultura}': criterio_calagem '{criterio_calagem}' não existe em criterios_calagem.json"

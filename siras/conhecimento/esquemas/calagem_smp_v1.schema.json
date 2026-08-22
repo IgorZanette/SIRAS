@@ -59,6 +59,16 @@
           "nc_ph_6_5": { "type": "number" }
         }
       }
+    },
+    "checksum_colunas": {
+      "type": "object",
+      "required": ["nc_ph_5_5", "nc_ph_6_0", "nc_ph_6_5"],
+      "properties": {
+        "descricao": { "type": "string" },
+        "nc_ph_5_5": { "type": "number" },
+        "nc_ph_6_0": { "type": "number" },
+        "nc_ph_6_5": { "type": "number" }
+      }
     }
   }
 }

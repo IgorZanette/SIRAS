@@ -122,7 +122,10 @@ class TestCriterioInvalido:
         with pytest.raises(ErroCalagem, match="nao_existe"):
             calcular_calagem(_analise(), "nao_existe", _contexto(), trace)
 
-    def test_criterio_ph_menor_que_e_al_levanta_not_implemented(self):
+    def test_criterio_com_smp_medio_de_duas_camadas_levanta_not_implemented(self):
+        # graos_pd_com_restricoes usa decisao.tipo="ph_menor_que_e_al" (já implementado),
+        # mas também dose.usar_smp_medio_das_camadas=true (D6, ainda pendente) — por isso
+        # continua NotImplementedError, não pela decisão em si.
         trace = Trace()
         with pytest.raises(NotImplementedError):
             calcular_calagem(_analise(), "graos_pd_com_restricoes", _contexto(), trace)
@@ -137,6 +140,41 @@ class TestCriterioInvalido:
         trace = Trace()
         with pytest.raises(ErroCalagem, match="fora do escopo"):
             calcular_calagem(_analise(), "arroz_irrigado_pregerminado", _contexto(), trace)
+
+
+class TestDecisaoPhMenorQueEAl:
+    """batata_e_batata_doce e frutiferas_ph55: disparo pH<5,5 E saturacao_al>10%."""
+
+    def test_batata_dispara_com_ph_e_al_satisfeitos(self):
+        analise = _analise(ph_agua=5.0, indice_smp=5.0, saturacao_al=15)
+        trace = Trace()
+        resultado = calcular_calagem(analise, "batata_e_batata_doce", _contexto(), trace)
+
+        # Tab.5.2 SMP 5.0 x pH 5.5 = 6.6; fator 1.0; PRNT 100 -> 6.6
+        assert resultado["nc_t_ha"] == 6.6
+        assert resultado["motivo"] is None
+
+    def test_batata_nao_dispara_quando_al_nao_satisfaz(self):
+        analise = _analise(ph_agua=5.0, indice_smp=5.0, saturacao_al=5)
+        trace = Trace()
+        resultado = calcular_calagem(analise, "batata_e_batata_doce", _contexto(), trace)
+
+        assert resultado["nc_t_ha"] == 0.0
+        assert resultado["motivo"] == "condicao_ph_e_al_nao_satisfeita"
+
+    def test_batata_nao_dispara_quando_ph_nao_satisfaz(self):
+        analise = _analise(ph_agua=5.6, indice_smp=5.0, saturacao_al=15)
+        trace = Trace()
+        resultado = calcular_calagem(analise, "batata_e_batata_doce", _contexto(), trace)
+
+        assert resultado["nc_t_ha"] == 0.0
+        assert resultado["motivo"] == "condicao_ph_e_al_nao_satisfeita"
+
+    def test_frutiferas_ph55_mesma_logica_criterio_diferente(self):
+        analise = _analise(ph_agua=5.0, indice_smp=5.0, saturacao_al=15)
+        trace = Trace()
+        resultado = calcular_calagem(analise, "frutiferas_ph55", _contexto(), trace)
+        assert resultado["nc_t_ha"] == 6.6
 
 
 class TestExcecaoNaoAplicarSe:
@@ -301,6 +339,8 @@ class TestTodosOsCriteriosDaBaseSaoCobertos:
         "olericolas_pd_consolidado",
         "macieira_oliveira",
         "frutiferas_demais",
+        "frutiferas_ph55",
+        "batata_e_batata_doce",
         "cana_e_tabaco",
         "erva_mate_e_florestais",
     }
@@ -359,8 +399,8 @@ class TestResolverCriterioId:
         assert resultado == "erva_mate_e_florestais"
 
     def test_cultura_nao_mapeada_levanta_erro_calagem(self):
-        with pytest.raises(ErroCalagem, match="feijao"):
-            resolver_criterio_id("feijao", _contexto())
+        with pytest.raises(ErroCalagem, match="algodao"):
+            resolver_criterio_id("algodao", _contexto())
 
     def test_milho_convencional_resolve_graos_convencional(self):
         resultado = resolver_criterio_id("milho", _contexto())
@@ -369,6 +409,25 @@ class TestResolverCriterioId:
     def test_trigo_convencional_resolve_graos_convencional(self):
         resultado = resolver_criterio_id("trigo", _contexto())
         assert resultado == "graos_convencional"
+
+    def test_feijao_convencional_resolve_graos_convencional(self):
+        resultado = resolver_criterio_id("feijao", _contexto())
+        assert resultado == "graos_convencional"
+
+    def test_mapa_culturas_tem_as_21_culturas_de_graos(self):
+        from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_graos
+
+        dados_comuns = carregar_dados_comum()
+        dados_graos = carregar_dados_graos()
+
+        culturas_graos_adubacao = set(dados_graos["adubacao_n"]["culturas"].keys())
+        culturas_mapa = {
+            cultura
+            for cultura, entrada in dados_comuns["mapa_culturas"]["culturas"].items()
+            if entrada["grupo"] == "graos"
+        }
+
+        assert culturas_mapa == culturas_graos_adubacao
 
     def test_combinacao_sem_criterio_correspondente_levanta_erro_calagem(self):
         contexto = _contexto(sistema_manejo="convencional", condicao_area="condicao inexistente")

@@ -1,5 +1,5 @@
 {
-  "descricao": "Mapeia cultura para o grupo usado em criterios_calagem.json (Tab. 5.3/5.5/5.6/5.7). Para grupos genericos (graos, hortalicas, outras), o criterio exato e resolvido cruzando grupo + sistema_manejo + condicao_area do Contexto contra criterios_calagem.json. Quando o criterio ja e especifico da especie (campo criterio_calagem presente), esse campo tem prioridade e ignora sistema_manejo/condicao_area. Escopo inicial: apenas as culturas usadas nos casos de teste calculados pelo autor (docs/COMO_CALCULAR_ORACULO.md); ampliar conforme dados/culturas/ for populado.",
+  "descricao": "Mapeia cultura para o grupo usado em criterios_calagem.json (Tab. 5.3/5.5/5.6/5.7). Para grupos genericos (graos, hortalicas, outras), o criterio exato e resolvido cruzando grupo + sistema_manejo + condicao_area do Contexto contra criterios_calagem.json. Quando o criterio ja e especifico da especie (campo criterio_calagem presente), esse campo tem prioridade e ignora sistema_manejo/condicao_area. As 21 culturas de graos abaixo espelham dados/culturas/graos/graos_adubacao_n.json (mesma checksum: 21 culturas).",
   "culturas": {
     "soja": {
       "grupo": "graos"
@@ -8,6 +8,60 @@
       "grupo": "graos"
     },
     "trigo": {
+      "grupo": "graos"
+    },
+    "amendoim": {
+      "grupo": "graos"
+    },
+    "arroz_de_sequeiro": {
+      "grupo": "graos"
+    },
+    "aveia_branca": {
+      "grupo": "graos"
+    },
+    "aveia_preta": {
+      "grupo": "graos"
+    },
+    "canola": {
+      "grupo": "graos"
+    },
+    "centeio": {
+      "grupo": "graos"
+    },
+    "cevada": {
+      "grupo": "graos"
+    },
+    "ervilha_seca_e_forrageira": {
+      "grupo": "graos"
+    },
+    "ervilhaca": {
+      "grupo": "graos"
+    },
+    "feijao": {
+      "grupo": "graos"
+    },
+    "girassol": {
+      "grupo": "graos"
+    },
+    "linho": {
+      "grupo": "graos"
+    },
+    "milho_pipoca": {
+      "grupo": "graos"
+    },
+    "nabo_forrageiro": {
+      "grupo": "graos"
+    },
+    "painco": {
+      "grupo": "graos"
+    },
+    "sorgo": {
+      "grupo": "graos"
+    },
+    "tremoco": {
+      "grupo": "graos"
+    },
+    "triticale": {
       "grupo": "graos"
     },
     "macieira": {

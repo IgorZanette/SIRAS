@@ -7,10 +7,11 @@ cultura + sistema de manejo -> critério em criterios_calagem.json (Tab. 5.3/5.5
 bases) -> ajustes (baixo poder tampão, fator_30cm, teto de aplicação superficial) -> PRNT
 -> arredondamento.
 
-Escopo atual: decisao.tipo em {"ph_menor_que", "v_menor_igual"}; dose.tipo em
-{"smp", "saturacao_bases"}. "ph_menor_que_e_al" e "usar_smp_medio_das_camadas" (SMP de
-duas camadas) ainda não estão implementados e levantam NotImplementedError propositalmente
-(ver testes/unidade/test_calagem.py::TestTodosOsCriteriosDaBaseSaoCobertos). Critérios
+Escopo atual: decisao.tipo em {"ph_menor_que", "v_menor_igual", "ph_menor_que_e_al"};
+dose.tipo em {"smp", "saturacao_bases"}. "usar_smp_medio_das_camadas" (SMP de duas
+camadas, único critério: graos_pd_com_restricoes) ainda não está implementado e levanta
+NotImplementedError propositalmente (ver
+testes/unidade/test_calagem.py::TestTodosOsCriteriosDaBaseSaoCobertos). Critérios
 marcados "FORA DO ESCOPO do SIRAS" nas próprias notas (arroz irrigado) levantam
 ErroCalagem, não NotImplementedError — não é falta de implementação, é exclusão de
 escopo deliberada.
@@ -191,6 +192,22 @@ def _testar_disparo(decisao: Dict[str, Any], analise: AnaliseSolo, criterio_id: 
         if analise.v_percent <= decisao["v"]:
             return True, None
         return False, "v_acima_do_alvo"
+
+    if tipo == "ph_menor_que_e_al":
+        ph_ok = analise.ph_agua < decisao["ph"]
+        saturacao_al = analise.obter_saturacao_al()
+        if "saturacao_al_maior_igual" in decisao:
+            al_ok = saturacao_al >= decisao["saturacao_al_maior_igual"]
+        elif "saturacao_al_maior_que" in decisao:
+            al_ok = saturacao_al > decisao["saturacao_al_maior_que"]
+        else:
+            raise ErroCalagem(
+                f"criterio '{criterio_id}': decisao.tipo='ph_menor_que_e_al' sem "
+                f"'saturacao_al_maior_igual' nem 'saturacao_al_maior_que'"
+            )
+        if ph_ok and al_ok:
+            return True, None
+        return False, "condicao_ph_e_al_nao_satisfeita"
 
     raise NotImplementedError(
         f"criterio '{criterio_id}': decisao.tipo='{tipo}' ainda não implementado"

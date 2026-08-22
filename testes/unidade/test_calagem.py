@@ -122,28 +122,168 @@ class TestCriterioInvalido:
         with pytest.raises(ErroCalagem, match="nao_existe"):
             calcular_calagem(_analise(), "nao_existe", _contexto(), trace)
 
-    def test_criterio_fora_de_escopo_levanta_not_implemented(self):
+    def test_criterio_ph_menor_que_e_al_levanta_not_implemented(self):
         trace = Trace()
         with pytest.raises(NotImplementedError):
-            calcular_calagem(_analise(), "graos_pd_consolidado", _contexto(), trace)
+            calcular_calagem(_analise(), "graos_pd_com_restricoes", _contexto(), trace)
 
-    def test_criterio_por_saturacao_bases_levanta_not_implemented(self):
+    def test_criterio_fora_de_escopo_levanta_erro_calagem_nao_not_implemented(self):
+        # arroz irrigado é excluído do escopo do SIRAS por decisão de projeto, não por
+        # falta de implementação — por isso ErroCalagem, não NotImplementedError.
         trace = Trace()
-        with pytest.raises(NotImplementedError):
-            calcular_calagem(_analise(), "erva_mate_e_florestais", _contexto(), trace)
-
-    def test_criterio_com_fator_30cm_levanta_not_implemented(self):
-        # Regressão: macieira_oliveira e frutiferas_demais tem dose.fator_30cm (ajuste de
-        # incorporação a 30 cm, x1.5). Sem essa guarda, o calculo roda e sai errado
-        # (faltando o fator), sem erro nenhum — exatamente o que D3 (docs/decisoes/0002)
-        # existe para evitar.
-        trace = Trace()
-        with pytest.raises(NotImplementedError):
-            calcular_calagem(_analise(), "macieira_oliveira", _contexto(), trace)
+        with pytest.raises(ErroCalagem, match="fora do escopo"):
+            calcular_calagem(_analise(), "arroz_irrigado_solo_seco", _contexto(), trace)
 
         trace = Trace()
-        with pytest.raises(NotImplementedError):
-            calcular_calagem(_analise(), "frutiferas_demais", _contexto(), trace)
+        with pytest.raises(ErroCalagem, match="fora do escopo"):
+            calcular_calagem(_analise(), "arroz_irrigado_pregerminado", _contexto(), trace)
+
+
+class TestExcecaoNaoAplicarSe:
+    """CAL-02/CAL-04 (testes/casos/casos_recomendacao.json): exceção V>=65% E Al<10%
+    do PD consolidado (graos_pd_consolidado, Tab. 5.3 nota 1)."""
+
+    def test_cal_02_soja_pd_consolidado_excecao_nao_se_aplica(self):
+        # V=50 (<65) e saturacao_al=15 (>=10): nenhuma condição basta, exceção não se aplica.
+        analise = _analise(
+            ph_agua=5.1, indice_smp=5.4, v_percent=50, saturacao_al=15,
+            argila=45, mo=3.2, ctc_ph7=9.5,
+        )
+        contexto = _contexto(
+            sistema_manejo="plantio_direto_consolidado", condicao_area="sem_restricoes", prnt=75.0,
+        )
+        trace = Trace()
+        resultado = calcular_calagem(analise, "graos_pd_consolidado", contexto, trace)
+
+        assert resultado["nc_t_ha"] == 2.3
+        assert resultado["motivo"] is None
+
+    def test_cal_04_milho_pd_consolidado_excecao_se_aplica(self):
+        # V=70 (>=65) E saturacao_al=6 (<10): as duas condições valem, exceção dispensa a calagem.
+        analise = _analise(
+            ph_agua=5.2, indice_smp=5.6, v_percent=70, saturacao_al=6,
+            argila=52, mo=4.1, ctc_ph7=12.0,
+        )
+        contexto = _contexto(
+            sistema_manejo="plantio_direto_consolidado", condicao_area="sem_restricoes", prnt=100.0,
+        )
+        trace = Trace()
+        resultado = calcular_calagem(analise, "graos_pd_consolidado", contexto, trace)
+
+        assert resultado["nc_t_ha"] == 0.0
+        assert resultado["motivo"] == "excecao_v_e_al"
+
+    def test_saturacao_al_derivada_quando_nao_informada_diretamente(self):
+        # Sem saturacao_al direta: deriva de ca/mg/k/al (D4). al alto e bases baixas -> m% alto.
+        analise = _analise(
+            ph_agua=5.2, indice_smp=5.6, v_percent=70, saturacao_al=None,
+            al=5.0, ca=0.5, mg=0.2, k=39.1,  # k/391 = 0.1 cmolc/dm3
+            argila=52, mo=4.1, ctc_ph7=12.0,
+        )
+        # CTC_efetiva = 0.5+0.2+0.1+5.0 = 5.8; m% = 5.0/5.8*100 = 86.2% (>=10, nao <10)
+        assert analise.obter_saturacao_al() > 10
+
+
+class TestBaixoPoderTampao:
+    """CAL-06: SMP > 6,3 usa as equações polinomiais em vez da Tabela 5.2 (D2)."""
+
+    def test_cal_06_milho_baixo_poder_tampao(self):
+        analise = _analise(ph_agua=5.3, indice_smp=6.5, argila=18, mo=1.8, al=0.8, ctc_ph7=5.2)
+        contexto = _contexto()
+        trace = Trace()
+        resultado = calcular_calagem(analise, "graos_convencional", contexto, trace)
+
+        # NC = -0.516 + 0.805*1.8 + 2.435*0.8 = 2.881 -> 2.9
+        assert resultado["nc_t_ha"] == 2.9
+
+    def test_smp_exatamente_6_3_nao_usa_baixo_poder_tampao(self):
+        # 6.3 nao e > 6.3, deve consultar a tabela normalmente.
+        analise = _analise(ph_agua=5.3, indice_smp=6.3, argila=18, mo=1.8, al=0.8, ctc_ph7=5.2)
+        trace = Trace()
+        resultado = calcular_calagem(analise, "graos_convencional", _contexto(), trace)
+        # Tabela 5.2, SMP 6.3, pH 6.0: nc_ph_6_0 = 1.8
+        assert resultado["nc_t_ha"] == 1.8
+
+
+class TestFator30cm:
+    """CAL-07: macieira, incorporação a 30 cm (fator 1,5, Tab. 5.6 nota 5)."""
+
+    def test_cal_07_macieira_incorporacao_30cm(self):
+        analise = _analise(ph_agua=5.7, indice_smp=5.8, argila=48, mo=3.5, ctc_ph7=10.5)
+        contexto = _contexto(
+            cultura_id="macieira", sistema_manejo="qualquer", condicao_area="qualquer",
+            prnt=85.0, profundidade_incorporacao_cm=30,
+        )
+        trace = Trace()
+        resultado = calcular_calagem(analise, "macieira_oliveira", contexto, trace)
+
+        # Tab.5.2 SMP 5.8 x pH 6.5 = 6.3; fator 1.0; x1.5 (30cm) = 9.45; PRNT 85 -> 11.1
+        assert resultado["nc_t_ha"] == 11.1
+
+    def test_fator_30cm_nao_aplica_com_incorporacao_a_20cm(self):
+        analise = _analise(ph_agua=5.7, indice_smp=5.8, argila=48, mo=3.5, ctc_ph7=10.5)
+        contexto = _contexto(
+            cultura_id="macieira", sistema_manejo="qualquer", condicao_area="qualquer",
+            prnt=100.0, profundidade_incorporacao_cm=20,
+        )
+        trace = Trace()
+        resultado = calcular_calagem(analise, "macieira_oliveira", contexto, trace)
+        # Sem o fator 1.5: 6.3 x fator 1.0, PRNT 100 -> 6.3
+        assert resultado["nc_t_ha"] == 6.3
+
+
+class TestSaturacaoBasesErvaMate:
+    """CAL-08/CAL-09: erva-mate, critério por saturação por bases (Tab. 5.6)."""
+
+    def test_cal_08_dispara_sem_excecao(self):
+        analise = _analise(
+            ph_agua=4.9, v_percent=32, ctc_ph7=8.0, ca=2.0, mg=0.8, argila=55, mo=4.8,
+        )
+        contexto = _contexto(cultura_id="erva-mate", sistema_manejo="qualquer", condicao_area="qualquer")
+        trace = Trace()
+        resultado = calcular_calagem(analise, "erva_mate_e_florestais", contexto, trace)
+
+        # NC = ((40-32)/100) x 8.0 = 0.64 -> 0.6
+        assert resultado["nc_t_ha"] == 0.6
+        assert resultado["motivo"] is None
+
+    def test_cal_09_excecao_ca_mg_suficientes(self):
+        analise = _analise(
+            ph_agua=5.4, v_percent=35, ctc_ph7=10.0, ca=4.5, mg=1.2, argila=50, mo=5.2,
+        )
+        contexto = _contexto(cultura_id="erva-mate", sistema_manejo="qualquer", condicao_area="qualquer")
+        trace = Trace()
+        resultado = calcular_calagem(analise, "erva_mate_e_florestais", contexto, trace)
+
+        assert resultado["nc_t_ha"] == 0.0
+        assert resultado["motivo"] == "ca_mg_suficientes"
+
+    def test_v_acima_do_alvo_nao_dispara(self):
+        analise = _analise(ph_agua=5.4, v_percent=45, ctc_ph7=10.0, ca=1.0, mg=0.2, argila=50, mo=5.2)
+        contexto = _contexto(cultura_id="erva-mate", sistema_manejo="qualquer", condicao_area="qualquer")
+        trace = Trace()
+        resultado = calcular_calagem(analise, "erva_mate_e_florestais", contexto, trace)
+
+        assert resultado["nc_t_ha"] == 0.0
+        assert resultado["motivo"] == "v_acima_do_alvo"
+
+
+class TestTetoAplicacaoSuperficial:
+    """D9: teto de 5 t/ha em aplicação superficial, aplicado antes da conversão por PRNT."""
+
+    def test_teto_trunca_quando_dose_ultrapassa_5_t_ha(self):
+        # SMP baixo o bastante para que fator 1/4 ainda ultrapasse 5 t/ha antes do PRNT.
+        analise = _analise(ph_agua=4.0, indice_smp=4.4, argila=50, mo=3.0, ctc_ph7=10.0)
+        contexto = _contexto(
+            sistema_manejo="plantio_direto_consolidado", condicao_area="sem_restricoes", prnt=100.0,
+        )
+        trace = Trace()
+        resultado = calcular_calagem(analise, "graos_pd_consolidado", contexto, trace)
+
+        # Tab.5.2 limite_inferior (4.4), pH 6.0 = 21.0; x1/4 = 5.25 > 5.0 -> truncado a 5.0
+        assert resultado["nc_t_ha"] == 5.0
+        passo = list(trace)[0]
+        assert passo.entradas["truncado_pelo_teto_superficial"] is True
 
 
 class TestTodosOsCriteriosDaBaseSaoCobertos:
@@ -155,12 +295,23 @@ class TestTodosOsCriteriosDaBaseSaoCobertos:
     IMPLEMENTADOS = {
         "graos_convencional",
         "graos_pd_implantacao",
+        "graos_pd_consolidado",
         "aspargo",
         "olericolas_convencional",
+        "olericolas_pd_consolidado",
+        "macieira_oliveira",
+        "frutiferas_demais",
         "cana_e_tabaco",
+        "erva_mate_e_florestais",
     }
 
-    def test_cada_criterio_esta_na_allowlist_ou_levanta_not_implemented(self):
+    # Fora de escopo por decisão de projeto (criterio.notas), não por falta de código.
+    FORA_DE_ESCOPO = {
+        "arroz_irrigado_solo_seco",
+        "arroz_irrigado_pregerminado",
+    }
+
+    def test_cada_criterio_esta_na_allowlist_ou_levanta_erro_esperado(self):
         from siras.conhecimento.carregador import carregar_dados_comum
 
         dados = carregar_dados_comum()
@@ -172,6 +323,9 @@ class TestTodosOsCriteriosDaBaseSaoCobertos:
             if criterio_id in self.IMPLEMENTADOS:
                 resultado = calcular_calagem(_analise(), criterio_id, _contexto(), trace)
                 assert "nc_t_ha" in resultado, f"criterio '{criterio_id}' não retornou nc_t_ha"
+            elif criterio_id in self.FORA_DE_ESCOPO:
+                with pytest.raises(ErroCalagem, match="fora do escopo"):
+                    calcular_calagem(_analise(), criterio_id, _contexto(), trace)
             else:
                 with pytest.raises(NotImplementedError):
                     calcular_calagem(_analise(), criterio_id, _contexto(), trace)
@@ -205,8 +359,16 @@ class TestResolverCriterioId:
         assert resultado == "erva_mate_e_florestais"
 
     def test_cultura_nao_mapeada_levanta_erro_calagem(self):
-        with pytest.raises(ErroCalagem, match="milho"):
-            resolver_criterio_id("milho", _contexto())
+        with pytest.raises(ErroCalagem, match="feijao"):
+            resolver_criterio_id("feijao", _contexto())
+
+    def test_milho_convencional_resolve_graos_convencional(self):
+        resultado = resolver_criterio_id("milho", _contexto())
+        assert resultado == "graos_convencional"
+
+    def test_trigo_convencional_resolve_graos_convencional(self):
+        resultado = resolver_criterio_id("trigo", _contexto())
+        assert resultado == "graos_convencional"
 
     def test_combinacao_sem_criterio_correspondente_levanta_erro_calagem(self):
         contexto = _contexto(sistema_manejo="convencional", condicao_area="condicao inexistente")

@@ -23,11 +23,11 @@ estados do Rio Grande do Sul e de Santa Catarina*. 11. ed., 2016. ISBN 978-85-66
 | 6.1, 6.11, 6.12 — Argila, MO, CTC, Ca, Mg, S, micronutrientes | 91, 97, 98 | `dados/comum/interpretacao_geral.json` | `atributos` | 17/08/2026 | 22/08/2026 |
 | 6.1.2–6.1.22 — Adubação nitrogenada de grãos por MO | 116–133 | `dados/culturas/graos/graos_adubacao_n.json` | `culturas` | 17/08/2026 | 22/08/2026 |
 | 6.1.1–6.1.4 — Correção, manutenção e exportação de P/K, grãos | 105–108 | `dados/culturas/graos/graos_adubacao_pk.json` | `manutencao_por_cultura`, `exportacao_nos_graos` | 17/08/2026 | 22/08/2026 |
-| 6.3.1–6.3.20 — Adubação N/P/K das 18 hortaliças | 161–181 | `dados/culturas/hortalicas/hortalicas_adubacao.json` | `culturas` | 22/08/2026 | |
-| 6.4.1–6.4.2 — Adubação N/P/K de batata e batata-doce | 184–185 | `dados/culturas/tuberculos/tuberculos_adubacao.json` | `culturas` | 22/08/2026 | |
-| 6.9.1–6.9.2 — Adubação N/P/K de cana-de-açúcar e tabaco | 280–283 | `dados/culturas/outras/outras_comerciais_adubacao.json` | `culturas` | 22/08/2026 | |
-| 6.5.1–6.5.18 — Adubação N/P/K das 17 frutíferas, 3 fases | 190–231 | `dados/culturas/frutiferas/frutiferas_adubacao.json` | `culturas` | 22/08/2026 | |
-| 6.6.5 — Adubação da erva-mate (plantio e recuperação) | 239–244 | `dados/culturas/erva_mate/erva_mate_adubacao.json` | `culturas` | 22/08/2026 | |
+| 6.3.1–6.3.20 — Adubação N/P/K das 18 hortaliças | 161–181 | `dados/culturas/hortalicas/hortalicas_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
+| 6.4.1–6.4.2 — Adubação N/P/K de batata e batata-doce | 184–185 | `dados/culturas/tuberculos/tuberculos_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
+| 6.9.1–6.9.2 — Adubação N/P/K de cana-de-açúcar e tabaco | 280–283 | `dados/culturas/outras/outras_comerciais_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
+| 6.5.1–6.5.18 — Adubação N/P/K das 17 frutíferas, 3 fases | 190–231 | `dados/culturas/frutiferas/frutiferas_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
+| 6.6.5 — Adubação da erva-mate (plantio e recuperação) | 239–244 | `dados/culturas/erva_mate/erva_mate_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
 
 ## Ponto de atenção da extração (S3/S4)
 

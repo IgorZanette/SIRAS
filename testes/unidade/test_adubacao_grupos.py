@@ -218,16 +218,13 @@ class TestFrutiferasManutencao:
         with pytest.raises(NotImplementedError, match="foliar"):
             calcular_adubacao_frutiferas("ameixeira", fase="manutencao")
 
-    def test_videira_manutencao_k_sem_correspondencia_levanta_not_implemented(self):
-        # Videira tem correspondencia solo-tecido para N e P, mas NAO para K (o proprio
-        # dado registra o alerta) — a bespoke ainda nao esta implementada, entao K
-        # (e N/P, por enquanto) levantam NotImplementedError, nao um valor adivinhado.
-        with pytest.raises(NotImplementedError):
-            calcular_adubacao_frutiferas("videira", fase="manutencao")
-
-    def test_cultura_com_indexacao_propria_ainda_nao_implementada(self):
-        with pytest.raises(NotImplementedError):
-            calcular_adubacao_frutiferas("mirtileiro", fase="manutencao")
+    def test_pessegueiro_e_ameixeira_tambem_levantam_not_implemented(self):
+        # As tres frutiferas de teor foliar sem correspondencia (ameixeira, macieira,
+        # pessegueiro/nectarineira) ficam fora de escopo SO na manutencao — pre_plantio
+        # e crescimento continuam plenamente computaveis (ver testes de
+        # TestFrutiferasPrePlantioECrescimento, que ja exercitam a macieira).
+        with pytest.raises(NotImplementedError, match="foliar"):
+            calcular_adubacao_frutiferas("pessegueiro_nectarineira", fase="manutencao")
 
 
 class TestErvaMate:
@@ -278,3 +275,105 @@ class TestErvaMate:
                 "recuperacao", mo=3.0, argila=55, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
                 manejo_galho_grosso="manejo_1_retido", massa_verde_t_ha=10,
             )
+
+
+class TestFrutiferasBespoke:
+    """ADU-15 a ADU-19 (rascunho de oráculo compartilhado pelo autor em 2026-08-23):
+    um caso por formato de manutenção próprio de frutífera. Cada um foi desenhado para
+    denunciar um erro específico de leitura — ver comentário em cada teste."""
+
+    def test_adu_15_amoreira_preta_colunas_nao_ordinais(self):
+        # Ano 4 -> coluna 'ano_3_mais_...' (nao e indice ordinal); produtividade 12>10
+        # -> subcoluna 'acima_10'. NOTA: a entrada original do autor tem argila=45%
+        # (classe_argila 2), que dá classe_p=ALTO (p2o5=70) — mas o "esperado"
+        # compartilhado (84) é o valor da classe MEDIO, que só bate com argila=32%
+        # (classe_argila 3). Descasamento proposital no rascunho, sinalizado pelo
+        # próprio autor ("ponto_de_atencao"); uso argila=32 aqui para bater com o
+        # "esperado" já compartilhado, mas isso precisa de confirmação do autor antes
+        # de virar referencia oficial em testes/casos/casos_recomendacao.json.
+        resultado = calcular_adubacao_frutiferas(
+            "amoreira_preta", fase="manutencao", ano=4, produtividade_estimada=12,
+            mo=3.5, argila=32, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
+        )
+        assert resultado["n"] == 117
+        assert resultado["p2o5"] == 84
+        assert resultado["k2o"] == 171
+
+    def test_adu_15_amoreira_preta_primeiro_ano_nao_aplica(self):
+        resultado = calcular_adubacao_frutiferas(
+            "amoreira_preta", fase="manutencao", ano=1, produtividade_estimada=12,
+            mo=3.5, argila=32, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
+        )
+        assert resultado["n"] == 0.0
+
+    def test_adu_16_mirtileiro_crescimento_e_manutencao_unificados(self):
+        resultado = calcular_adubacao_frutiferas(
+            "mirtileiro", fase="manutencao", produtividade_estimada=2.0,
+            mo=3.0, argila=32, p_solo=25.0, k_solo=150, ctc_ph7=9.5,
+        )
+        assert resultado["n"] == 30
+        assert resultado["p2o5"] == 10
+        assert resultado["k2o"] == 15
+
+    def test_mirtileiro_crescimento_direto_exige_manutencao(self):
+        with pytest.raises(ErroAdubacao, match="manutencao"):
+            calcular_adubacao_frutiferas("mirtileiro", fase="crescimento", mo=3.0)
+
+    def test_adu_17_morangueiro_ignora_mo_de_proposito(self):
+        # MO=6,0% (bem alto) na entrada e proposital: o Manual desconsidera a MO do
+        # morangueiro (substrato organico contribui pouco em N, p.214). Se o motor
+        # aplicasse a faixa de MO por habito, o N sairia diferente de 180.
+        resultado = calcular_adubacao_frutiferas(
+            "morangueiro", fase="manutencao", produtividade_estimada=25,
+            mo=6.0, argila=32, p_solo=25.0, k_solo=150, ctc_ph7=9.5,
+        )
+        assert resultado["n"] == 180
+        assert resultado["p2o5"] == 60
+        assert resultado["k2o"] == 180
+
+    def test_adu_18_nogueira_peca_taxa_por_tonelada_e_produtividade_fracionaria(self):
+        resultado = calcular_adubacao_frutiferas(
+            "nogueira_peca", fase="manutencao", produtividade_estimada=2.0,
+            mo=3.0, argila=32, p_solo=25.0, k_solo=150, ctc_ph7=9.5,
+        )
+        assert resultado["n"] == 200
+        assert resultado["p2o5"] == 9.2
+        assert resultado["k2o"] == 9.6
+
+    def test_adu_18_nogueira_peca_ano_de_alternancia_reduz_n_pela_metade(self):
+        resultado = calcular_adubacao_frutiferas(
+            "nogueira_peca", fase="manutencao", produtividade_estimada=2.0,
+            mo=3.0, argila=32, p_solo=25.0, k_solo=150, ctc_ph7=9.5,
+            ano_de_alternancia=True,
+        )
+        assert resultado["n"] == 100
+        assert resultado["p2o5"] == 9.2  # PK nao muda com a alternancia
+        assert resultado["k2o"] == 9.6
+
+    def test_adu_19_videira_n_e_p_vem_de_classes_de_tecido_diferentes(self):
+        # O caso discriminante: do MESMO laudo, N (via MO) e P (via classe de P no
+        # solo) chegam a classes de tecido DIFERENTES. Se o motor reaproveitasse a
+        # classe de N para o P (ou vice-versa), o p2o5 sairia 40 em vez de 60.
+        resultado = calcular_adubacao_frutiferas(
+            "videira", fase="manutencao", tipo_uva="vinho", produtividade_estimada=18,
+            mo=3.5, argila=45, p_solo=4.0, k_solo=150, ctc_ph7=9.5,
+        )
+        assert resultado["classe_tecido_n"] == "normal"
+        assert resultado["classe_tecido_p"] == "insuficiente"
+        assert resultado["n"] == 20
+        assert resultado["p2o5"] == 60
+        assert resultado["k2o"] is None
+        assert "análise de tecido" in resultado["k2o_pendente"]
+
+    def test_videira_analise_de_tecido_sobrepoe_correspondencia_do_solo(self):
+        resultado = calcular_adubacao_frutiferas(
+            "videira", fase="manutencao", tipo_uva="vinho", produtividade_estimada=18,
+            analise_de_tecido={"n": "excessivo", "p": "excessivo"},
+        )
+        assert resultado["n"] == 0
+        assert resultado["p2o5"] == 0
+        assert "classe_p" not in resultado  # nao precisou classificar o solo
+
+    def test_videira_exige_tipo_uva(self):
+        with pytest.raises(ErroAdubacao, match="tipo_uva"):
+            calcular_adubacao_frutiferas("videira", fase="manutencao", produtividade_estimada=18, mo=3.0)

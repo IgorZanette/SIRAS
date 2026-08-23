@@ -131,19 +131,69 @@ do crescimento dos ramos em cm. Nenhuma dessas variáveis vem de uma análise de
 Manual não oferece, para essas espécies, correspondência entre classes de solo e classes
 foliares.
 
-**Decisão:** para essas três espécies, o SIRAS entrega pré-plantio e crescimento normalmente e,
-na manutenção, informa explicitamente que a recomendação exige análise foliar, indicando a
-tabela do Manual a consultar. O campo `manutencao.implementado_no_siras` no JSON dirige esse
-comportamento — a regra é **dado, não código**.
+**Decisão (confirmada pelo autor em 2026-08-23, após reconferir as notas de rodapé das
+três espécies, p. 196-197, 207-208, 224-225):** para essas três espécies, o SIRAS entrega
+pré-plantio e crescimento normalmente e, na manutenção, informa explicitamente que a
+recomendação exige análise foliar, indicando a tabela do Manual a consultar. O campo
+`manutencao.implementado_no_siras` no JSON dirige esse comportamento — a regra é **dado,
+não código**. É uma limitação de **fase**, não de cultura: as 61 culturas do escopo
+continuam 61 (`siras/motor/adubacao.py::calcular_adubacao_frutiferas`, `fase="manutencao"`
+levanta `NotImplementedError` só para essas três, com a mensagem citando o motivo).
 
-A videira é o caso oposto e por isso está implementada: suas tabelas também são indexadas por
-classe de tecido, mas o próprio Manual declara a correspondência a partir do solo na ausência
-de análise foliar (MO para o N, classe de P no solo para o P).
+A videira é o caso oposto e por isso está implementada (2026-08-23): suas tabelas também
+são indexadas por classe de tecido, mas o próprio Manual declara a correspondência a
+partir do solo na ausência de análise foliar — MO para o N, classe de P no solo para o P
+(fontes **diferentes**: não deriva uma da outra — ver caso ADU-19,
+`testes/unidade/test_adubacao_grupos.py::TestFrutiferasBespoke`, que usa o mesmo laudo
+para produzir classes de tecido diferentes de N e de P de propósito).
 
-**Pendência registrada:** o Manual **não** declara correspondência solo-tecido para o **K da
-videira** — a nota da p. 231 cobre apenas o P. Assumir a mesma correspondência do P não está
-autorizado pelo texto. Decidir com o orientador entre (a) assumir e documentar a extrapolação
-ou (b) exigir análise de tecido para o K da videira, como nas três espécies acima.
+**Pendência resolvida:** o Manual **não** declara correspondência solo-tecido para o **K
+da videira** — a nota da p. 231 cobre apenas o P. Decisão do autor: **não** assumir a
+correspondência do P por analogia. A p. 230 alerta que doses de K acima das tabeladas
+favorecem a elevação do pH do vinho, sobretudo em tintos — extrapolar sem respaldo textual
+arrisca justamente a qualidade do produto, não só a adubação. `calcular_adubacao_frutiferas`
+sempre retorna `k2o=None` para a videira, com uma explicação e o encaminhamento às Tabelas
+6.5.18 (peciolos) e 6.5.19 (folhas), nunca uma dose estimada.
+
+### D4.7 — Manutenção bespoke implementada (amoreira-preta, mirtileiro, morangueiro, nogueira-pecã)
+
+As quatro frutíferas restantes com manutenção fora do formato genérico
+(`taxa_por_tonelada_estimada`) foram implementadas em 2026-08-23, cada uma com sua própria
+leitura direta em `calcular_adubacao_frutiferas` (não pelo motor de leitura genérico
+`_navegar`/`_calcular_pk_generico`, que não cobre colunas nomeadas nem eixos assimétricos):
+
+- **Amoreira-preta**: N indexado por MO × "coluna" — e a coluna não é um índice ordinal do
+  ano: `ano_1` é sempre zero (ano de plantio), `ano_2` e `ano_3_mais` têm sub-colunas por
+  faixa de produtividade próprias. P/K por classe de teor × produtividade (faixas
+  diferentes das de N).
+- **Mirtileiro**: `crescimento_e_manutencao_unificados` — a cultura não tem fase de
+  crescimento separada; chamar direto com `fase="manutencao"` (chamar com
+  `fase="crescimento"` levanta `ErroAdubacao` apontando para `manutencao`). N e P/K por
+  3 faixas de produtividade compartilhadas.
+- **Morangueiro**: mesma unificação de fase. N **ignora a MO de propósito** (p. 214: o
+  substrato orgânico do sistema de produção contribui pouco em N) — indexado só por
+  produtividade. P é uma única coluna por classe (sem produtividade); só K cruza classe ×
+  produtividade. É também a única tabela do grupo com platô entre Alto e Muito alto (doses
+  iguais) — o teste de monotonicidade genérico (`validar_adubacao_por_grupo`) já tolera
+  não-decrescente, não exige estritamente decrescente, então o dado correto não é rejeitado.
+- **Nogueira-pecã**: N por produtividade simples (faixas fracionárias, 1,5/3,0 — únicas do
+  grupo); P/K por taxa/tonelada (mesmo mecanismo de D4.1, `_dose_taxa_por_tonelada`),
+  produzindo os únicos valores não inteiros da base (9,2 e 9,6). Tem um ajuste percentual
+  documentado no Manual (redução de 50% do N em "ano de alternância de produtividade" para
+  nove cultivares nomeadas, p. 217) implementado como parâmetro opcional
+  `ano_de_alternancia`, diferente da política geral de D4.2/ajustes genéricos (que seguem
+  fora de escopo): aqui o valor (50%) é dado explicitamente pelo Manual, não uma
+  extrapolação.
+
+**Pendência de dado, não de código — ADU-15 (amoreira-preta):** o caso de teste
+compartilhado pelo autor tem um descasamento proposital entre a entrada (argila 45%, que
+classifica P=15,0 mg/dm³ como Alto) e o valor esperado de P₂O₅ (84, que é o valor da classe
+Médio). Antes de este caso virar `referencia` oficial em
+`testes/casos/casos_recomendacao.json`, o autor precisa decidir: ajustar a argila da
+entrada para 32% (classe 3, onde P=15,0 é Médio) ou corrigir o P₂O₅ esperado para 70
+(classe Alto, coerente com argila 45%). Os testes automatizados
+(`test_adubacao_grupos.py::TestFrutiferasBespoke`) usam argila=32% para bater com o 84 já
+compartilhado, mas isso é provisório até a decisão do autor.
 
 ## Consequências
 
@@ -152,5 +202,5 @@ ou (b) exigir análise de tecido para o K da videira, como nas três espécies a
   de uma ferramenta baseada em análise de solo.
 - O `Contexto` ganha campos opcionais; a validação de obrigatoriedade passa a ser dirigida
   pelo JSON da cultura.
-- Duas pendências técnicas precisam de decisão do orientador antes do cálculo do oráculo:
-  D4.2 (ajuste de rendimento sobre dose com teto) e o K da videira em D4.6.
+- D4.2 (ajuste de rendimento sobre dose com teto) segue como pendência técnica antes do
+  cálculo do oráculo. D4.6 (K da videira) foi resolvida em 2026-08-23.

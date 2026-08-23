@@ -577,6 +577,18 @@ def _dose_taxa_por_tonelada(taxa: Dict[str, Any], produtividade: float):
     return dose * produtividade
 
 
+# Videira (Tab. 6.5.18, p. 230-231, nota 1): correspondência solo -> classe de tecido
+# usada só na AUSÊNCIA de análise de tecido. N deriva da MO (mesmos limiares de
+# classes_mo.padrao); P deriva da própria classe de teor de P no solo. São fontes
+# DIFERENTES — não derive uma da outra (ver ADU-19, docs/decisoes).
+_TECIDO_POR_MO = {"ate_2_5": "insuficiente", "de_2_6_a_5_0": "normal", "acima_5_0": "excessivo"}
+_TECIDO_POR_CLASSE_P = {
+    "muito_baixo": "insuficiente", "baixo": "insuficiente",
+    "medio": "normal", "alto": "normal",
+    "muito_alto": "excessivo",
+}
+
+
 def calcular_adubacao_frutiferas(
     cultura_id: str,
     fase: str,
@@ -587,6 +599,9 @@ def calcular_adubacao_frutiferas(
     ctc_ph7: Optional[float] = None,
     ano: Optional[int] = None,
     produtividade_estimada: Optional[float] = None,
+    tipo_uva: Optional[str] = None,
+    analise_de_tecido: Optional[Dict[str, str]] = None,
+    ano_de_alternancia: bool = False,
     dados_frutiferas: Optional[Dict[str, Any]] = None,
     dados_comuns: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
@@ -594,12 +609,22 @@ def calcular_adubacao_frutiferas(
     'manutencao' — Seção 6.5).
 
     Cobre pré-plantio (referência comum, Tab. 6.5.1) e crescimento (N por classe de MO,
-    com ou sem 'ano') para todas as frutíferas do escopo, e manutenção só para as
-    culturas indexadas por 'taxa_por_tonelada_estimada' (produtividade x taxa fixa —
-    abacateiro, bananeira, caquizeiro, citros, figueira, oliveira, pereira, quivizeiro).
-    As demais formas de manutenção — teor foliar sem correspondência solo-tecido, ou
-    indexações próprias (amoreira-preta, mirtileiro, morangueiro, nogueira-pecã,
-    videira) — levantam NotImplementedError: ver docstring do módulo.
+    com ou sem 'ano') para todas as frutíferas do escopo. Manutenção cobre: taxa por
+    tonelada estimada (abacateiro, bananeira, caquizeiro, citros, figueira, oliveira,
+    pereira, quivizeiro); amoreira-preta (N por MO x ano x produtividade, colunas
+    nomeadas — 'ano' identifica o ano após o plantio); mirtileiro e morangueiro
+    (crescimento e manutenção unificados — chamar direto com fase='manutencao'; N do
+    morangueiro ignora a MO de propósito, ver p. 214); nogueira-pecã (N por
+    produtividade simples, com redução de 50% quando `ano_de_alternancia=True`; PK por
+    taxa/tonelada); e videira (`tipo_uva` obrigatório — N e P por correspondência
+    solo-tecido, cada um com fonte própria (MO para N, classe de P para P — não derive
+    uma da outra); `analise_de_tecido` (dict opcional {"n":.., "p":..}) sobrepõe a
+    correspondência quando há análise de tecido real. K da videira não tem
+    correspondência declarada pelo Manual — sempre retorna pendente, nunca uma dose.
+
+    Ameixeira, macieira e pêssego/nectarina, e a própria videira em K, seguem sem
+    solução por análise de solo — levantam NotImplementedError (foliar) ou retornam
+    "k2o": None com uma explicação (videira): ver docstring do módulo.
     """
     dados_frutiferas = dados_frutiferas if dados_frutiferas is not None else carregar_dados_frutiferas()
     dados_comuns = dados_comuns if dados_comuns is not None else carregar_dados_comum()
@@ -659,6 +684,125 @@ def calcular_adubacao_frutiferas(
                 f"correspondência solo-tecido declarada pelo Manual "
                 f"({bloco.get('motivo_nao_implementado', 'ver dados/culturas/frutiferas/')})"
             )
+
+        if cultura_id == "amoreira_preta":
+            if ano is None or produtividade_estimada is None:
+                raise ErroAdubacao("amoreira_preta: 'ano' e 'produtividade_estimada' são obrigatórios na manutenção")
+            classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+
+            n_bloco = bloco["n"]
+            faixa_mo = _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]])
+            if ano == 1:
+                n = 0.0  # nota (1): 1o ano é o ano de plantio, "nao_aplicar"
+            else:
+                faixa_prod_n = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+                coluna = f"ano_2_{faixa_prod_n}" if ano == 2 else f"ano_3_mais_{faixa_prod_n}"
+                n = _navegar(n_bloco["doses"], faixa_mo, coluna)
+
+            pk_bloco = bloco["pk"]
+            faixa_prod_pk = _classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
+            p2o5 = _navegar(pk_bloco["p"], classe_p, faixa_prod_pk)
+            k2o = _navegar(pk_bloco["k"], classe_k, faixa_prod_pk)
+            return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
+
+        if cultura_id == "mirtileiro":
+            if produtividade_estimada is None:
+                raise ErroAdubacao("mirtileiro: 'produtividade_estimada' é obrigatória na manutenção")
+            classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+
+            n_bloco = bloco["n"]
+            faixa_mo = _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]])
+            faixa_prod_n = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+            n = _navegar(n_bloco["doses"], faixa_mo, faixa_prod_n)
+
+            pk_bloco = bloco["pk"]
+            faixa_prod_pk = _classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
+            p2o5 = _navegar(pk_bloco["p"], classe_p, faixa_prod_pk)
+            k2o = _navegar(pk_bloco["k"], classe_k, faixa_prod_pk)
+            return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
+
+        if cultura_id == "morangueiro":
+            if produtividade_estimada is None:
+                raise ErroAdubacao("morangueiro: 'produtividade_estimada' é obrigatória na manutenção")
+            classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+
+            # N ignora a MO de propósito (p. 214): substrato orgânico contribui pouco.
+            n_bloco = bloco["n"]
+            faixa_prod_n = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+            n = _navegar(n_bloco["doses"], faixa_prod_n)
+
+            pk_bloco = bloco["pk"]
+            p2o5 = _navegar(pk_bloco["p"], classe_p)  # P: só classe, sem produtividade
+            faixa_prod_k = _classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
+            k2o = _navegar(pk_bloco["k"], classe_k, faixa_prod_k)
+            return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
+
+        if cultura_id == "nogueira_peca":
+            if produtividade_estimada is None:
+                raise ErroAdubacao("nogueira_peca: 'produtividade_estimada' é obrigatória na manutenção")
+            n_bloco = bloco["n"]
+            faixa_prod = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+            n = _navegar(n_bloco["doses"], faixa_prod)
+            if ano_de_alternancia:
+                # Ajuste (p. 217, cultivares Barton/Cheyenne/Elliott/Jackson/Mahan/
+                # Moneymaker/Shoshoni/Shawnee/Success): reduz N em 50% no ano de baixa
+                # produtividade por alternância. Só P/K seguem a taxa normal.
+                n = n * 0.5
+            pk_bloco = bloco["pk"]
+            p2o5 = _dose_taxa_por_tonelada(pk_bloco["p"], produtividade_estimada)
+            k2o = _dose_taxa_por_tonelada(pk_bloco["k"], produtividade_estimada)
+            return {"n": n, "p2o5": p2o5, "k2o": k2o}
+
+        if cultura_id == "videira":
+            if tipo_uva not in ("vinho", "mesa"):
+                raise ErroAdubacao("videira exige 'tipo_uva' em ('vinho', 'mesa') na manutenção")
+            if produtividade_estimada is None:
+                raise ErroAdubacao("videira: 'produtividade_estimada' é obrigatória na manutenção")
+
+            analise = analise_de_tecido or {}
+            classe_p = classe_k = None
+
+            classe_tecido_n = analise.get("n")
+            if classe_tecido_n is None:
+                if mo is None:
+                    raise ErroAdubacao("videira: 'mo' é obrigatória para derivar a classe de tecido de N (sem analise_de_tecido)")
+                faixa_mo = _classe_mo(mo, adubacao["classes_mo"]["padrao"])
+                classe_tecido_n = _TECIDO_POR_MO[faixa_mo]
+
+            classe_tecido_p = analise.get("p")
+            if classe_tecido_p is None:
+                classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+                classe_tecido_p = _TECIDO_POR_CLASSE_P[classe_p]
+
+            faixa_prod = _classificar_faixa(produtividade_estimada, bloco["faixas_produtividade"], chave_rotulo="id")
+
+            # "excessivo" usa a chave especial 'qualquer_produtividade' (Tab. 6.5.18) —
+            # não a faixa de produtividade normal.
+            faixa_n = "qualquer_produtividade" if classe_tecido_n == "excessivo" else faixa_prod
+            n = _navegar(bloco["n"]["doses"], classe_tecido_n, faixa_n, tipo_uva)
+
+            faixa_p = "qualquer_produtividade" if classe_tecido_p == "excessivo" else faixa_prod
+            p2o5 = _navegar(bloco["pk"]["p"], classe_tecido_p, faixa_p)
+
+            resultado = {
+                "n": n,
+                "p2o5": p2o5,
+                "k2o": None,
+                "classe_tecido_n": classe_tecido_n,
+                "classe_tecido_p": classe_tecido_p,
+                "k2o_pendente": (
+                    "O Manual não declara correspondência solo->tecido para K (Tab. "
+                    "6.5.18, p. 231, nota 1, cobre só P) — exige análise de tecido "
+                    "(peciolos: Tab. 6.5.18; folhas: Tab. 6.5.19). Doses de K acima do "
+                    "tabelado favorecem a elevação do pH do vinho, sobretudo em tintos "
+                    "(p. 230) — não extrapolar a partir do P."
+                ),
+            }
+            if classe_p is not None:
+                resultado["classe_p"] = classe_p
+                resultado["classe_k"] = classe_k
+            return resultado
+
         if bloco.get("tipo") == "taxa_por_tonelada_estimada":
             if produtividade_estimada is None:
                 raise ErroAdubacao(f"cultura '{cultura_id}': 'produtividade_estimada' é obrigatória na manutenção")

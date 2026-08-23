@@ -28,6 +28,7 @@ estados do Rio Grande do Sul e de Santa Catarina*. 11. ed., 2016. ISBN 978-85-66
 | 6.9.1–6.9.2 — Adubação N/P/K de cana-de-açúcar e tabaco | 280–283 | `dados/culturas/outras/outras_comerciais_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
 | 6.5.1–6.5.18 — Adubação N/P/K das 17 frutíferas, 3 fases | 190–231 | `dados/culturas/frutiferas/frutiferas_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
 | 6.6.5 — Adubação da erva-mate (plantio e recuperação) | 239–244 | `dados/culturas/erva_mate/erva_mate_adubacao.json` | `culturas` | 22/08/2026 | 22/08/2026 |
+| Anexo 2 — grupo de exigência em P e K por cultura (40 culturas de S3/S4) | 361–365 | `culturas.<id>.grupo_exigencia` nos 5 arquivos de `dados/culturas/<grupo>/*_adubacao.json` acima | `grupo_exigencia` | 23/08/2026 | 23/08/2026 |
 
 ## Ponto de atenção da extração (S3/S4)
 

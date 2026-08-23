@@ -35,9 +35,10 @@ quando informado, é usado diretamente; quando ausente, `obter_saturacao_al()` c
 CTC efetiva como a decisão original previa. Implementado em `siras/dominio/analise.py`.
 
 *(Implementado em `siras/motor/calagem.py` para `graos_pd_consolidado` (via
-`nao_aplicar_se`) e, desde 2026-08-22, também para `batata_e_batata_doce` e
-`frutiferas_ph55` (via `decisao.tipo="ph_menor_que_e_al"`, mesmo `obter_saturacao_al()`).
-Ainda não cobre `graos_pd_com_restricoes` — depende de D6 (SMP de duas camadas).)*
+`nao_aplicar_se`), `batata_e_batata_doce` e `frutiferas_ph55` (via
+`decisao.tipo="ph_menor_que_e_al"`, mesmo `obter_saturacao_al()`) e, desde 2026-08-23,
+também `graos_pd_com_restricoes` — mesmo `obter_saturacao_al()`, agora lido da camada
+`subsuperficie` (ver D6).)*
 
 ## D5 — `Contexto.profundidade_cm` renomeado para `profundidade_incorporacao_cm`
 
@@ -140,12 +141,14 @@ lê, em vez de o código assumir por convenção (`graos_pd_com_restricoes` como
    estão** — a hipótese de o motor inferir a condição a partir do Al da subsuperfície foi
    descartada.
 
-**Status:** ainda não implementado. As três perguntas originais e a pendência de arredondamento
-que a primeira abriu (D10, ADR 0002) estão todas respondidas — o desenho do `Camada`, o
-invariante de que os campos padrão de `AnaliseSolo` são sempre a camada de fertilidade, e a
-declaração da camada no JSON (resto deste ADR) continuam válidos como estão. Falta apenas um
-caso de teste calculado à mão pelo autor, na mesma ordem que produziu os outros 10 casos
-(`docs/COMO_CALCULAR_ORACULO.md`), antes de codificar.
+**Status: implementado em 2026-08-23.** As três perguntas originais e a pendência de
+arredondamento que a primeira abriu (D10, ADR 0002) foram todas respondidas antes de
+codificar — o desenho do `Camada`, o invariante de que os campos padrão de `AnaliseSolo`
+são sempre a camada de fertilidade, e a declaração `decisao.camada`/`dose.
+usar_smp_medio_das_camadas` no JSON (resto deste ADR) valem exatamente como descrito
+acima. Oráculo: CAL-10 (SMP médio exato na grade) e CAL-11 (SMP médio 5,45, fora da
+grade, exercita o arredondamento de D10), calculados à mão pelo autor em 2026-08-23
+(`testes/casos/casos_recomendacao.json`).
 
 ## D7 — Divergência interna do Manual: "V > 65%" (texto) vs "V ≥ 65%" (nota da tabela)
 
@@ -205,10 +208,10 @@ D4, D5, D7, D8 e D9 foram implementadas em `siras/motor/calagem.py` e `siras/mot
 
 **Atualização de 2026-08-22:** `decisao.tipo="ph_menor_que_e_al"` foi implementado (cobre
 `batata_e_batata_doce` e `frutiferas_ph55`), junto com a expansão de `mapa_culturas.json`
-para as 21 culturas de grãos. `motor/calagem.py` cobre agora 14 dos 15 critérios de
-`criterios_calagem.json` — só `graos_pd_com_restricoes` continua pendente.
+para as 21 culturas de grãos. `motor/calagem.py` cobria então 14 dos 15 critérios de
+`criterios_calagem.json` — só `graos_pd_com_restricoes` seguia pendente.
 
-D6 (SMP e saturação por Al em duas camadas, `graos_pd_com_restricoes`) continua pendente —
-nenhum caso validado o exercita ainda, e a decisão original de D6 foi revisada (ver seção D6
-acima) após identificar risco de contaminar o módulo de adubação. `usar_smp_medio_das_camadas`
-também continua fora do escopo implementado, e levanta `NotImplementedError` deliberadamente.
+**Atualização de 2026-08-23:** D6 foi respondido pelo autor (ver seção D6 acima), D10
+(ADR 0002) fixou a política de arredondamento do SMP médio, e `graos_pd_com_restricoes`
+foi implementado com CAL-10/CAL-11 como oráculo. `motor/calagem.py` cobre agora os 15
+critérios de `criterios_calagem.json` — nenhum permanece pendente por falta de decisão.

@@ -4,6 +4,55 @@ from dataclasses import dataclass
 from typing import Optional
 
 
+def _derivar_saturacao_al(al: float, ca: float, mg: float, k: float) -> float:
+    """m% = Al / (Ca + Mg + K_cmolc + Al) x 100, com K_cmolc = k (mg/dm3) / 391 (D4)."""
+    k_cmolc = k / 391
+    ctc_efetiva = ca + mg + k_cmolc + al
+    if ctc_efetiva <= 0:
+        return 0.0
+    return (al / ctc_efetiva) * 100
+
+
+@dataclass(frozen=True)
+class Camada:
+    """Uma camada de solo além da camada de referência de fertilidade de AnaliseSolo.
+
+    Usada por critérios de calagem que decidem ou dosam a partir de mais de uma
+    profundidade de amostragem (ex.: graos_pd_com_restricoes, Tab. 5.3, notas 6-7, p. 75
+    — ver docs/decisoes/0003, D6). Os campos padrão de AnaliseSolo continuam
+    representando, por invariante do sistema inteiro, a camada de referência de
+    fertilidade — nunca esta.
+    """
+
+    de_cm: int
+    ate_cm: int
+    ph_agua: Optional[float] = None
+    indice_smp: Optional[float] = None
+    v_percent: Optional[float] = None
+    saturacao_al: Optional[float] = None
+    al: Optional[float] = None
+    ca: Optional[float] = None
+    mg: Optional[float] = None
+    k: Optional[float] = None
+
+    def __post_init__(self) -> None:
+        if self.ph_agua is not None and not 0.0 <= self.ph_agua <= 14.0:
+            raise ValueError("'ph_agua' da camada deve estar em faixa física plausível (0 a 14).")
+        if self.indice_smp is not None and not 3.0 <= self.indice_smp <= 8.0:
+            raise ValueError("'indice_smp' da camada deve estar em faixa física plausível (3,0 a 8,0).")
+        if self.v_percent is not None and not 0.0 <= self.v_percent <= 100.0:
+            raise ValueError("'v_percent' da camada deve estar em faixa física plausível (0 a 100).")
+        if self.saturacao_al is not None and not 0.0 <= self.saturacao_al <= 100.0:
+            raise ValueError("'saturacao_al' da camada deve estar em faixa física plausível (0 a 100).")
+
+    def obter_saturacao_al(self) -> float:
+        """Mesma regra de AnaliseSolo.obter_saturacao_al() (D4): direto, ou derivado da
+        CTC efetiva quando ausente."""
+        if self.saturacao_al is not None:
+            return self.saturacao_al
+        return _derivar_saturacao_al(self.al or 0.0, self.ca or 0.0, self.mg or 0.0, self.k or 0.0)
+
+
 @dataclass
 class AnaliseSolo:
     """Representa uma análise química e física de solo."""
@@ -20,6 +69,7 @@ class AnaliseSolo:
     mg: float
     v_percent: float
     saturacao_al: Optional[float] = None
+    subsuperficie: Optional[Camada] = None
 
     def __post_init__(self) -> None:
         self._validar_campos_obrigatorios()
@@ -33,12 +83,7 @@ class AnaliseSolo:
         """
         if self.saturacao_al is not None:
             return self.saturacao_al
-
-        k_cmolc = self.k / 391
-        ctc_efetiva = self.ca + self.mg + k_cmolc + self.al
-        if ctc_efetiva <= 0:
-            return 0.0
-        return (self.al / ctc_efetiva) * 100
+        return _derivar_saturacao_al(self.al, self.ca, self.mg, self.k)
 
     def _validar_campos_obrigatorios(self) -> None:
         campos = {

@@ -8,10 +8,12 @@ bases) -> ajustes (baixo poder tampão, fator_30cm, teto de aplicação superfic
 -> arredondamento.
 
 Escopo atual: decisao.tipo em {"ph_menor_que", "v_menor_igual", "ph_menor_que_e_al"};
-dose.tipo em {"smp", "saturacao_bases"}. "usar_smp_medio_das_camadas" (SMP de duas
-camadas, único critério: graos_pd_com_restricoes) ainda não está implementado e levanta
-NotImplementedError propositalmente (ver
-testes/unidade/test_calagem.py::TestTodosOsCriteriosDaBaseSaoCobertos). Critérios
+dose.tipo em {"smp", "saturacao_bases"}. Um critério pode declarar decisao.camada para
+ler de uma camada diferente da camada de referência de AnaliseSolo (único caso hoje:
+graos_pd_com_restricoes lê a subsuperfície, AnaliseSolo.subsuperficie — Tab. 5.3, nota
+(6), p. 75; ver docs/decisoes/0003, D6). dose.usar_smp_medio_das_camadas usa a média dos
+dois índices SMP (superfície e subsuperfície), arredondada para 1 casa (meio para cima)
+antes da consulta à Tabela 5.2, sem interpolação (docs/decisoes/0002, D10). Critérios
 marcados "FORA DO ESCOPO do SIRAS" nas próprias notas (arroz irrigado) levantam
 ErroCalagem, não NotImplementedError — não é falta de implementação, é exclusão de
 escopo deliberada.
@@ -179,6 +181,21 @@ def _avaliar_nao_aplicar_se(analise: AnaliseSolo, nao_aplicar_se: Dict[str, Any]
     raise ErroCalagem(f"operador de nao_aplicar_se desconhecido: '{operador}'")
 
 
+def _resolver_camada(analise: AnaliseSolo, decisao: Dict[str, Any]):
+    """Resolve de qual camada o critério lê (D6, docs/decisoes/0003): a camada de
+    referência de AnaliseSolo por padrão, ou AnaliseSolo.<decisao["camada"]>."""
+    nome_camada = decisao.get("camada")
+    if nome_camada is None:
+        return analise
+
+    camada = getattr(analise, nome_camada, None)
+    if camada is None:
+        raise ErroCalagem(
+            f"critério exige a camada '{nome_camada}', mas AnaliseSolo.{nome_camada} não foi informada"
+        )
+    return camada
+
+
 def _testar_disparo(decisao: Dict[str, Any], analise: AnaliseSolo, criterio_id: str) -> Tuple[bool, Optional[str]]:
     """Testa a condição de disparo do critério. Retorna (disparou, motivo_se_nao)."""
     tipo = decisao["tipo"]
@@ -194,8 +211,9 @@ def _testar_disparo(decisao: Dict[str, Any], analise: AnaliseSolo, criterio_id: 
         return False, "v_acima_do_alvo"
 
     if tipo == "ph_menor_que_e_al":
-        ph_ok = analise.ph_agua < decisao["ph"]
-        saturacao_al = analise.obter_saturacao_al()
+        fonte = _resolver_camada(analise, decisao)
+        ph_ok = fonte.ph_agua < decisao["ph"]
+        saturacao_al = fonte.obter_saturacao_al()
         if "saturacao_al_maior_igual" in decisao:
             al_ok = saturacao_al >= decisao["saturacao_al_maior_igual"]
         elif "saturacao_al_maior_que" in decisao:
@@ -251,10 +269,6 @@ def calcular_calagem(
         raise NotImplementedError(
             f"criterio '{criterio_id}': dose.tipo='{dose_cfg['tipo']}' ainda não implementado"
         )
-    if "usar_smp_medio_das_camadas" in dose_cfg:
-        raise NotImplementedError(
-            f"criterio '{criterio_id}': SMP médio de duas camadas ainda não implementado"
-        )
 
     disparou, motivo = _testar_disparo(decisao, analise, criterio_id)
 
@@ -273,6 +287,8 @@ def calcular_calagem(
             fonte=criterio["fonte"],
         )
 
+    indice_smp_efetivo = analise.indice_smp
+
     if dose_cfg["tipo"] == "saturacao_bases":
         v_alvo = dose_cfg["v_alvo"]
         nc_com_fator = ((v_alvo - analise.v_percent) / 100) * analise.ctc_ph7
@@ -283,13 +299,30 @@ def calcular_calagem(
         fator = dose_cfg["fator"]
         chave_coluna = _CHAVE_COLUNA_POR_PH_ALVO[ph_alvo]
 
-        linha, motivo_linha = _linha_smp(dados["calagem_smp"]["tabela"], analise.indice_smp)
+        if dose_cfg.get("usar_smp_medio_das_camadas"):
+            if analise.subsuperficie is None or analise.subsuperficie.indice_smp is None:
+                raise ErroCalagem(
+                    f"criterio '{criterio_id}' exige indice_smp da camada subsuperficie, "
+                    f"que não foi informado em AnaliseSolo.subsuperficie"
+                )
+            # D10 (docs/decisoes/0002): média dos dois índices, arredondada meio para
+            # cima ANTES da consulta à Tabela 5.2 — sem interpolação entre linhas.
+            # A média é calculada em Decimal, não em float: (5,3+5,6)/2 em float dá
+            # 5.449999999999999 (não 5.45 exato), o que arredondaria para o lado errado.
+            media = (
+                Decimal(str(analise.indice_smp)) + Decimal(str(analise.subsuperficie.indice_smp))
+            ) / 2
+            indice_smp_efetivo = float(media.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
+        else:
+            indice_smp_efetivo = analise.indice_smp
+
+        linha, motivo_linha = _linha_smp(dados["calagem_smp"]["tabela"], indice_smp_efetivo)
 
         # R-CAL-02: SMP acima da Tabela 5.2 -> sem necessidade de calagem (D3)
         if linha is None:
             return trace.registrar(
-                regra=f"{criterio_id}: SMP {analise.indice_smp} acima da Tabela 5.2",
-                entradas={"indice_smp": analise.indice_smp},
+                regra=f"{criterio_id}: SMP {indice_smp_efetivo} acima da Tabela 5.2",
+                entradas={"indice_smp": indice_smp_efetivo},
                 saida={"nc_t_ha": 0.0, "motivo": "smp_acima_da_tabela"},
                 fonte="Manual 2016, Tab. 5.2, p. 70",
             )
@@ -297,7 +330,7 @@ def calcular_calagem(
         nc_tabela = linha[chave_coluna]
 
         # D2: SMP > 6,3 -> equações polinomiais (baixo poder tampão) em vez da tabela.
-        if analise.indice_smp > _LIMITE_BAIXO_PODER_TAMPAO:
+        if indice_smp_efetivo > _LIMITE_BAIXO_PODER_TAMPAO:
             nc_base = _nc_baixo_poder_tampao(ph_alvo, analise.mo, analise.al)
             origem_nc = "baixo_poder_tampao"
         else:
@@ -326,7 +359,7 @@ def calcular_calagem(
         regra=f"{criterio_id}: disparo confirmado, dose calculada ({origem_nc})",
         entradas={
             "ph_agua": analise.ph_agua,
-            "indice_smp": getattr(analise, "indice_smp", None),
+            "indice_smp": indice_smp_efetivo,
             "v_percent": analise.v_percent,
             "prnt": contexto.prnt,
             "profundidade_incorporacao_cm": contexto.profundidade_incorporacao_cm,

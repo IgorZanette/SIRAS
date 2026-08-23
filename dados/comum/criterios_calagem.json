@@ -117,6 +117,7 @@
       "ph_referencia": 6.0,
       "decisao": {
         "tipo": "ph_menor_que_e_al",
+        "camada": "subsuperficie",
         "ph": 5.5,
         "saturacao_al_maior_igual": 30
       },

@@ -46,6 +46,7 @@
             "required": ["tipo"],
             "properties": {
               "tipo": { "type": "string" },
+              "camada": { "type": "string" },
               "ph": { "type": ["number", "null"] },
               "v": { "type": ["number", "null"] },
               "saturacao_al_maior_igual": { "type": ["number", "null"] },
@@ -87,7 +88,8 @@
               "tipo": { "type": "string" },
               "fator": { "type": ["number", "null"] },
               "ph_alvo": { "type": ["number", "null"] },
-              "limite_t_ha": { "type": ["number", "null"] }
+              "limite_t_ha": { "type": ["number", "null"] },
+              "usar_smp_medio_das_camadas": { "type": "boolean" }
             }
           },
           "modo_aplicacao": { "type": "string" },

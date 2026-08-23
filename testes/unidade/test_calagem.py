@@ -8,7 +8,7 @@ SMP 5,4, PRNT 100 -> nc_t_ha = 6,8.
 
 import pytest
 
-from siras.dominio.analise import AnaliseSolo, Contexto
+from siras.dominio.analise import AnaliseSolo, Camada, Contexto
 from siras.motor.calagem import (
     ErroCalagem,
     calcular_calagem,
@@ -122,14 +122,6 @@ class TestCriterioInvalido:
         with pytest.raises(ErroCalagem, match="nao_existe"):
             calcular_calagem(_analise(), "nao_existe", _contexto(), trace)
 
-    def test_criterio_com_smp_medio_de_duas_camadas_levanta_not_implemented(self):
-        # graos_pd_com_restricoes usa decisao.tipo="ph_menor_que_e_al" (já implementado),
-        # mas também dose.usar_smp_medio_das_camadas=true (D6, ainda pendente) — por isso
-        # continua NotImplementedError, não pela decisão em si.
-        trace = Trace()
-        with pytest.raises(NotImplementedError):
-            calcular_calagem(_analise(), "graos_pd_com_restricoes", _contexto(), trace)
-
     def test_criterio_fora_de_escopo_levanta_erro_calagem_nao_not_implemented(self):
         # arroz irrigado é excluído do escopo do SIRAS por decisão de projeto, não por
         # falta de implementação — por isso ErroCalagem, não NotImplementedError.
@@ -175,6 +167,97 @@ class TestDecisaoPhMenorQueEAl:
         trace = Trace()
         resultado = calcular_calagem(analise, "frutiferas_ph55", _contexto(), trace)
         assert resultado["nc_t_ha"] == 6.6
+
+
+class TestGraosPdComRestricoes:
+    """CAL-10/CAL-11 (testes/casos/casos_recomendacao.json): decisão pela subsuperfície
+    (10-20 cm) e dose pelo SMP médio das duas camadas, arredondado antes da consulta à
+    Tabela 5.2 (Tab. 5.3, notas 6-7, p. 75 — docs/decisoes/0003 D6; docs/decisoes/0002 D10)."""
+
+    def _contexto_pd_com_restricoes(self, **sobrescreve):
+        campos = dict(
+            sistema_manejo="plantio_direto_consolidado",
+            condicao_area="com_restricoes",
+            prnt=100.0,
+        )
+        campos.update(sobrescreve)
+        return _contexto(**campos)
+
+    def test_cal_10_smp_medio_exato_na_grade(self):
+        analise = _analise(
+            ph_agua=5.9, indice_smp=5.2, v_percent=68, saturacao_al=6,
+            argila=45, mo=3.2, ctc_ph7=9.5,
+            subsuperficie=Camada(
+                de_cm=10, ate_cm=20, ph_agua=5.1, indice_smp=5.6, v_percent=44, saturacao_al=35
+            ),
+        )
+        trace = Trace()
+        resultado = calcular_calagem(
+            analise, "graos_pd_com_restricoes", self._contexto_pd_com_restricoes(), trace
+        )
+
+        # SMP medio = (5,2+5,6)/2 = 5,4 (exato na grade). Tab.5.2 SMP 5,4 x pH 6,0 = 6,8.
+        assert resultado["nc_t_ha"] == 6.8
+        assert resultado["motivo"] is None
+
+    def test_cal_11_smp_medio_fora_da_grade_arredonda_antes_da_consulta(self):
+        analise = _analise(
+            ph_agua=5.8, indice_smp=5.3, v_percent=60, saturacao_al=8,
+            argila=45, mo=3.2, ctc_ph7=9.5,
+            subsuperficie=Camada(
+                de_cm=10, ate_cm=20, ph_agua=5.0, indice_smp=5.6, v_percent=40, saturacao_al=42
+            ),
+        )
+        trace = Trace()
+        resultado = calcular_calagem(
+            analise, "graos_pd_com_restricoes", self._contexto_pd_com_restricoes(), trace
+        )
+
+        # SMP medio = (5,3+5,6)/2 = 5,45 -> D10: meio p/ cima -> 5,5. Tab.5.2 SMP 5,5 x pH 6,0 = 6,1.
+        assert resultado["nc_t_ha"] == 6.1
+        assert resultado["motivo"] is None
+
+    def test_decisao_le_da_subsuperficie_nao_da_superficie(self):
+        # A superficie satisfaria a excecao V>=65%/Al<10% da nota (1), mas essa excecao
+        # nao existe neste criterio e a decisao nem olha a superficie: dispara mesmo assim.
+        analise = _analise(
+            ph_agua=5.9, indice_smp=5.2, v_percent=68, saturacao_al=6,
+            argila=45, mo=3.2, ctc_ph7=9.5,
+            subsuperficie=Camada(
+                de_cm=10, ate_cm=20, ph_agua=5.1, indice_smp=5.6, v_percent=44, saturacao_al=35
+            ),
+        )
+        trace = Trace()
+        resultado = calcular_calagem(
+            analise, "graos_pd_com_restricoes", self._contexto_pd_com_restricoes(), trace
+        )
+
+        assert resultado["motivo"] is None
+        assert resultado["nc_t_ha"] > 0
+
+    def test_nao_dispara_quando_subsuperficie_nao_satisfaz(self):
+        analise = _analise(
+            ph_agua=5.9, indice_smp=5.2, v_percent=68, saturacao_al=6,
+            argila=45, mo=3.2, ctc_ph7=9.5,
+            subsuperficie=Camada(
+                de_cm=10, ate_cm=20, ph_agua=5.9, indice_smp=5.6, v_percent=68, saturacao_al=6
+            ),
+        )
+        trace = Trace()
+        resultado = calcular_calagem(
+            analise, "graos_pd_com_restricoes", self._contexto_pd_com_restricoes(), trace
+        )
+
+        assert resultado["nc_t_ha"] == 0.0
+        assert resultado["motivo"] == "condicao_ph_e_al_nao_satisfeita"
+
+    def test_erro_quando_subsuperficie_ausente(self):
+        analise = _analise(ph_agua=5.0, indice_smp=5.2)
+        trace = Trace()
+        with pytest.raises(ErroCalagem, match="subsuperficie"):
+            calcular_calagem(
+                analise, "graos_pd_com_restricoes", self._contexto_pd_com_restricoes(), trace
+            )
 
 
 class TestExcecaoNaoAplicarSe:
@@ -334,6 +417,7 @@ class TestTodosOsCriteriosDaBaseSaoCobertos:
         "graos_convencional",
         "graos_pd_implantacao",
         "graos_pd_consolidado",
+        "graos_pd_com_restricoes",
         "aspargo",
         "olericolas_convencional",
         "olericolas_pd_consolidado",
@@ -357,18 +441,26 @@ class TestTodosOsCriteriosDaBaseSaoCobertos:
         dados = carregar_dados_comum()
         criterios = dados["criterios_calagem"]["criterios"]
 
+        analise_padrao = _analise()
+        # graos_pd_com_restricoes exige AnaliseSolo.subsuperficie (D6) — a análise padrão
+        # não a traz, então esse critério usa uma análise dedicada nesta rede de segurança.
+        analise_duas_camadas = _analise(
+            subsuperficie=Camada(de_cm=10, ate_cm=20, ph_agua=5.1, indice_smp=5.6, saturacao_al=35)
+        )
+
         for criterio in criterios:
             criterio_id = criterio["id"]
             trace = Trace()
+            analise = analise_duas_camadas if criterio_id == "graos_pd_com_restricoes" else analise_padrao
             if criterio_id in self.IMPLEMENTADOS:
-                resultado = calcular_calagem(_analise(), criterio_id, _contexto(), trace)
+                resultado = calcular_calagem(analise, criterio_id, _contexto(), trace)
                 assert "nc_t_ha" in resultado, f"criterio '{criterio_id}' não retornou nc_t_ha"
             elif criterio_id in self.FORA_DE_ESCOPO:
                 with pytest.raises(ErroCalagem, match="fora do escopo"):
-                    calcular_calagem(_analise(), criterio_id, _contexto(), trace)
+                    calcular_calagem(analise, criterio_id, _contexto(), trace)
             else:
                 with pytest.raises(NotImplementedError):
-                    calcular_calagem(_analise(), criterio_id, _contexto(), trace)
+                    calcular_calagem(analise, criterio_id, _contexto(), trace)
 
 
 class TestResolverCriterioId:

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from siras.dominio.analise import AnaliseSolo, Contexto
+from siras.dominio.analise import AnaliseSolo, Camada, Contexto
 from siras.motor.adubacao import calcular_fosforo_potassio, calcular_nitrogenio
 from siras.motor.calagem import calcular_calagem
 from siras.motor.trace import Trace
@@ -31,6 +31,8 @@ _CRITERIO_POR_CASO = {
     "CAL-07": "macieira_oliveira",
     "CAL-08": "erva_mate_e_florestais",
     "CAL-09": "erva_mate_e_florestais",
+    "CAL-10": "graos_pd_com_restricoes",
+    "CAL-11": "graos_pd_com_restricoes",
     "ADU-01": "graos_convencional",
 }
 
@@ -50,6 +52,8 @@ def _construir_analise(entrada: dict) -> AnaliseSolo:
     for chave, valor in entrada.items():
         if chave in campos:
             campos[chave] = valor
+    if "subsuperficie" in entrada:
+        campos["subsuperficie"] = Camada(**entrada["subsuperficie"])
     return AnaliseSolo(**campos)
 
 

@@ -16,6 +16,8 @@
     "CAL-07": "frutifera: disparo e alvo distintos dos graos, fator 1,5 de profundidade, PRNT",
     "CAL-08": "criterio por saturacao por bases (erva-mate)",
     "CAL-09": "excecao Ca>=4,0 E Mg>=1,0",
+    "CAL-10": "graos_pd_com_restricoes: decisao pela subsuperficie, dose por SMP medio das duas camadas, SMP medio exato na grade",
+    "CAL-11": "graos_pd_com_restricoes: SMP medio fora da grade de 0,1 (5,45), arredondado antes da consulta (D10)",
     "ADU-01": "interpretacao de P por argila e de K por CTC + algoritmo de dose + leguminosa sem N"
   },
   "casos": [
@@ -291,6 +293,76 @@
       "memoria_calculo": "CALAGEM: pH 6,0 >= 5,5, nao dispara. NC = 0. P: argila 32% -> classe 3; soja e grupo_2; Tab.6.4 classe 3: muito_baixo ate 6,0. P=6,0 cai em muito_baixo (limite superior inclusivo). Dose P 1o cultivo = 2/3 x 160 = 106,67 -> 110 (dezena) + manutencao 45 = 155 kg P2O5/ha. K: CTC 9,5 -> faixa b (7,5-15,0); Tab.6.9 faixa b: medio de 60 a 90. K=80 -> medio. Dose K 1o cultivo = correcao 30 + manutencao 75 = 105 kg K2O/ha. N: soja nao recebe adubacao nitrogenada (fixacao biologica). N = 0.",
       "origem_referencia": "Autor - Calculado a mão",
       "conferido_por_autor_em": "2026-08-22"
+    },
+    {
+      "id": "CAL-10",
+      "descricao": "Soja, PD consolidado com restricoes na camada 10-20 cm: decisao na subsuperficie, dose pelo SMP medio das duas camadas (SMP medio exato na grade)",
+      "entrada": {
+        "cultura": "soja",
+        "sistema_manejo": "plantio_direto_consolidado",
+        "condicao_area": "com_restricoes",
+        "ph_agua": 5.9,
+        "indice_smp": 5.2,
+        "v_percent": 68,
+        "saturacao_al": 6,
+        "argila": 45,
+        "mo": 3.2,
+        "ctc_ph7": 9.5,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20,
+        "subsuperficie": {
+          "de_cm": 10,
+          "ate_cm": 20,
+          "ph_agua": 5.1,
+          "indice_smp": 5.6,
+          "v_percent": 44,
+          "saturacao_al": 35
+        }
+      },
+      "referencia": {
+        "nc_t_ha": 6.8
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 6.8
+      },
+      "memoria_calculo": "SELECAO DO CRITERIO: 'com restricoes' e condicao declarada pelo usuario (nota 3 da Tab.5.3 inclui produtividade abaixo da media local e compactacao, fatores de campo que nao saem de um laudo). DECISAO: linha 'consolidado, com restricoes na camada 10-20 cm' -> 'pH < 5,5 e Al >= 30%', avaliada na SUBSUPERFICIE (nota 6: a decisao independe da camada 0-10 cm). Subsuperficie: pH 5,1 < 5,5 (V) e saturacao Al 35% >= 30% (V) -> dispara. A excecao da nota (1) (V>=65% e Al<10%) nao pertence a esta linha (so 'sem restricoes' e 'arroz em solo seco'); os valores da superficie (V=68, Al=6) a satisfariam, o que o caso usa para checar que o motor nao le a decisao da camada errada. DOSE: nota (7), SMP medio das duas camadas = (5,2+5,6)/2 = 5,4 (exato na grade, sem ambiguidade de arredondamento). Tab.5.2, SMP 5,4, coluna pH 6,0 -> 6,8 t/ha. Fator 1 (nao 1/4: o 1/4 e da linha 'sem restricoes'). Teto de 5 t/ha (nota 5) nao se aplica: e so para aplicacao superficial, e aqui o modo e incorporado. PRNT 100 -> sem conversao. NC = 6,8 t/ha.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-23"
+    },
+    {
+      "id": "CAL-11",
+      "descricao": "Soja, PD com restricoes: SMP medio (5,45) cai fora da grade de 0,1 da Tabela 5.2 - arredondado meio para cima antes da consulta (D10)",
+      "entrada": {
+        "cultura": "soja",
+        "sistema_manejo": "plantio_direto_consolidado",
+        "condicao_area": "com_restricoes",
+        "ph_agua": 5.8,
+        "indice_smp": 5.3,
+        "v_percent": 60,
+        "saturacao_al": 8,
+        "argila": 45,
+        "mo": 3.2,
+        "ctc_ph7": 9.5,
+        "prnt": 100,
+        "profundidade_incorporacao_cm": 20,
+        "subsuperficie": {
+          "de_cm": 10,
+          "ate_cm": 20,
+          "ph_agua": 5.0,
+          "indice_smp": 5.6,
+          "v_percent": 40,
+          "saturacao_al": 42
+        }
+      },
+      "referencia": {
+        "nc_t_ha": 6.1
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 6.1
+      },
+      "memoria_calculo": "Decisao dispara igual ao CAL-10, avaliada na subsuperficie: pH 5,0 < 5,5 (V) e saturacao Al 42% >= 30% (V). DOSE: media dos indices SMP = (5,3+5,6)/2 = 5,45, que nao existe como linha na Tab.5.2 (passos de 0,1). D10 (docs/decisoes/0002, decisao do autor em 2026-08-23): arredondar o indice medio meio para cima (mesma regra de D1, ROUND_HALF_UP) antes de consultar a tabela -> 5,45 vira 5,5. Tab.5.2, SMP 5,5, coluna pH 6,0 -> 6,1 t/ha. Fator 1, incorporado (teto de 5 t/ha nao se aplica), PRNT 100 -> NC = 6,1 t/ha.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-23"
     }
   ]
 }

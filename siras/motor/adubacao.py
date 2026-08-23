@@ -1,17 +1,41 @@
 """
-Cálculo de adubação de grãos: nitrogênio (por MO/antecedente) e fósforo/potássio
-(classificação do teor do solo + algoritmo de dose por classe, Cap. 6 do Manual).
+Cálculo de adubação de N, P2O5 e K2O para os seis grupos de cultura do SIRAS: grãos,
+hortaliças, tubérculos, outras culturas comerciais (cana e tabaco), frutíferas e
+erva-mate (Cap. 6 do Manual).
 
-Escopo atual: apenas grupo "graos", cultivo 1 e 2 (dose de correção completa / reduzida em
-rotação). Hortaliças, frutíferas e demais grupos ainda não estão implementados.
+Grãos (calcular_nitrogenio/calcular_fosforo_potassio) usam o algoritmo de correção +
+manutenção por cultivo (Tabelas 6.1.1-6.1.4). Os demais grupos (calcular_adubacao_*)
+já trazem a dose pronta por classe de teor/MO na própria tabela da cultura — não há
+correção/manutenção separadas — e usam os utilitários genéricos `_navegar`/
+`_resolver_dose`/`_classificar_p_e_k` para ler essas tabelas, todas no mesmo formato
+(dados/culturas/<grupo>/*.json).
+
+Escopo NÃO implementado, deliberadamente (levanta NotImplementedError, nunca um valor
+adivinhado):
+- Frutíferas cuja manutenção depende de teor foliar sem correspondência solo-tecido
+  declarada pelo Manual (ameixeira, macieira, pessegueiro/nectarineira — `dados/`
+  já marca `requer_analise_foliar: true`, `implementado_no_siras: false`).
+- Frutíferas com indexação de manutenção própria e ainda sem caso de teste calculado à
+  mão (amoreira-preta, mirtileiro, morangueiro, nogueira-pecã).
+- Videira: N e P (correspondência solo→tecido declarada, Tab. 6.5.18, nota 1) estão
+  implementados; K não tem correspondência declarada pelo Manual — o próprio `dados/`
+  registra o alerta ("alerta" em `correspondencia_solo_tecido.k`).
 """
 
 from __future__ import annotations
 
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_graos
+from siras.conhecimento.carregador import (
+    carregar_dados_comum,
+    carregar_dados_erva_mate,
+    carregar_dados_frutiferas,
+    carregar_dados_graos,
+    carregar_dados_hortalicas,
+    carregar_dados_outras,
+    carregar_dados_tuberculos,
+)
 
 
 class ErroAdubacao(Exception):
@@ -228,3 +252,504 @@ def calcular_fosforo_potassio(
         "p2o5": p2o5,
         "k2o": k2o,
     }
+
+
+# ---------------------------------------------------------------------------------
+# Utilitários genéricos para os grupos hortaliças/tubérculos/outras/frutíferas/erva-mate
+# ---------------------------------------------------------------------------------
+#
+# Diferente de grãos, esses grupos publicam a dose já pronta por classe de teor/MO
+# (sem correção + manutenção separadas). O formato de cada tabela varia só na
+# QUANTIDADE e na ORDEM dos índices (classe/faixa de MO, mais opcionalmente fase, tipo,
+# faixa de produtividade ou momento) — não no mecanismo de leitura. `_navegar` cobre
+# esse mecanismo uma vez só, e cada função de grupo só precisa dizer qual índice extra
+# (se algum) usar, conforme `entrada["n"/"pk"]["tipo"]` documenta no próprio dado.
+
+
+def _resolver_dose(dose: Any):
+    """Resolve um nó-folha de dose para o valor de saída (ADR 0004, D4.1).
+
+    {"valor": X} -> X (float). Formas com mais informação que um único número —
+    {"min","max"} ou {"valor","qualificador":"ate"} — são preservadas como dict: o
+    domínio e o laudo mantêm a forma original (só a comparação com o oráculo, no
+    teste, normaliza em intervalo).
+    """
+    if not isinstance(dose, dict):
+        return dose
+    if "qualificador" in dose or "min" in dose:
+        return dict(dose)
+    if "valor" in dose:
+        return float(dose["valor"])
+    raise ErroAdubacao(f"formato de dose desconhecido: {dose}")
+
+
+def _navegar(bloco: Dict[str, Any], *chaves: str):
+    """Desce em `bloco` pela sequência de chaves e resolve a dose na folha."""
+    valor: Any = bloco
+    for chave in chaves:
+        if not isinstance(valor, dict) or chave not in valor:
+            raise ErroAdubacao(
+                f"chave '{chave}' não encontrada (disponíveis: "
+                f"{list(valor.keys()) if isinstance(valor, dict) else valor})"
+            )
+        valor = valor[chave]
+    return _resolver_dose(valor)
+
+
+def _classe_mo(mo: float, classes_mo: List[Dict[str, Any]]) -> str:
+    """Classifica MO pelas faixas do próprio arquivo de dados — nunca hardcoded em
+    Python (D4.4, docs/decisoes/0004): o tabaco usa 6 faixas próprias, não as 3 comuns
+    às demais culturas, e reaproveitar faixas fixas quebraria esse caso silenciosamente.
+    """
+    return _classificar_faixa(mo, classes_mo, chave_rotulo="id")
+
+
+def _classificar_p_e_k(
+    entrada: Dict[str, Any],
+    cultura_id: str,
+    argila: float,
+    p_solo: float,
+    k_solo: float,
+    ctc_ph7: float,
+    dados_comuns: Dict[str, Any],
+) -> Tuple[str, str]:
+    """Classifica P e K lendo `entrada["grupo_exigencia"]` (declarado explicitamente em
+    cada cultura de dados/culturas/<grupo>/*.json — sem fallback: cultura sem o campo é
+    erro de dado, não suposição de grupo)."""
+    grupo_exigencia = entrada.get("grupo_exigencia")
+    if grupo_exigencia is None:
+        raise ErroAdubacao(f"cultura '{cultura_id}' não declara 'grupo_exigencia'")
+
+    interpretacao_p = dados_comuns["interpretacao_p"]
+    faixas_argila = next(
+        atributo["faixas"]
+        for atributo in dados_comuns["interpretacao_geral"]["atributos"]
+        if atributo["atributo"] == "argila"
+    )
+    classe_argila = _classificar_faixa(argila, faixas_argila)
+    grupo_p = f"grupo_{grupo_exigencia['p']}"
+    tabela_p = next(t for t in interpretacao_p["tabelas"] if t["grupo"] == grupo_p)
+    faixas_p = next(
+        bloco["faixas"] for bloco in tabela_p["por_classe_argila"] if bloco["classe_argila"] == classe_argila
+    )
+    classe_p = _classificar_faixa(p_solo, faixas_p)
+
+    interpretacao_k = dados_comuns["interpretacao_k"]
+    faixa_ctc = _classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
+    grupo_k = f"grupo_{grupo_exigencia['k']}"
+    tabela_k = next(t for t in interpretacao_k["tabelas"] if t["grupo"] == grupo_k)
+    bloco_k = next(bloco for bloco in tabela_k["por_faixa_ctc"] if bloco["faixa_ctc"] == faixa_ctc)
+    classe_k = _classificar_faixa(k_solo, bloco_k["faixas"])
+
+    return classe_p, classe_k
+
+
+def _nome_indice_extra(tipo: str) -> Optional[str]:
+    """Extrai o nome do índice extra do sufixo de um 'tipo' (ex.: 'por_classe_mo_e_fase'
+    -> 'fase'), para mensagens de erro claras quando o chamador não o informou."""
+    if "_e_" not in tipo:
+        return None
+    return tipo.rsplit("_e_", 1)[1]
+
+
+def _calcular_n_generico(
+    bloco_n: Dict[str, Any], classes_mo: Dict[str, Any], mo: float, indice_extra: Optional[str]
+) -> Tuple[Any, Optional[str]]:
+    """Resolve a dose de N de um bloco `{"tipo": "por_classe_mo[_e_X]", ...}`.
+
+    Retorna (dose, motivo) — motivo não-None só quando o N não é recomendado
+    (leguminosas: fixação biológica) ou não se aplica na fase (P/K do pré-plantio já
+    bastam).
+    """
+    tipo = bloco_n.get("tipo", "")
+    if tipo in ("nao_recomendado", "nao_aplicar"):
+        return 0.0, bloco_n.get("motivo", tipo)
+
+    nome_extra = _nome_indice_extra(tipo)
+    if nome_extra is not None and indice_extra is None:
+        raise ErroAdubacao(f"'{nome_extra}' é obrigatório para o cálculo de N (tipo '{tipo}')")
+
+    faixa_mo = _classe_mo(mo, classes_mo[bloco_n["classes_mo"]])
+    if indice_extra is not None:
+        return _navegar(bloco_n["doses"], faixa_mo, indice_extra), None
+    return _navegar(bloco_n["doses"], faixa_mo), None
+
+
+def _calcular_pk_generico(
+    bloco_pk: Dict[str, Any], classe_p: str, classe_k: str, indice_extra: Optional[str]
+) -> Tuple[Any, Any]:
+    """Resolve P2O5/K2O de um bloco `{"tipo": "por_classe_teor[_e_X]", "p": ..., "k": ...}`."""
+    tipo = bloco_pk.get("tipo", "")
+    if tipo == "nao_aplicar":
+        return 0.0, 0.0
+
+    nome_extra = _nome_indice_extra(tipo)
+    if nome_extra is not None and indice_extra is None:
+        raise ErroAdubacao(f"'{nome_extra}' é obrigatório para o cálculo de P/K (tipo '{tipo}')")
+
+    if indice_extra is not None:
+        return _navegar(bloco_pk["p"], classe_p, indice_extra), _navegar(bloco_pk["k"], classe_k, indice_extra)
+    return _navegar(bloco_pk["p"], classe_p), _navegar(bloco_pk["k"], classe_k)
+
+
+def _somar_incremento(dose: Any, incremento: float):
+    """Soma um incremento linear (ajuste_expectativa_rendimento) a uma dose já
+    resolvida, preservando a forma (escalar, ou dict com min/max/qualificador)."""
+    if isinstance(dose, dict):
+        nova = dict(dose)
+        if "valor" in nova:
+            nova["valor"] = nova["valor"] + incremento
+        if "min" in nova:
+            nova["min"] = nova["min"] + incremento
+            nova["max"] = nova["max"] + incremento
+        return nova
+    return dose + incremento
+
+
+def _aplicar_ajuste_expectativa(
+    entrada: Dict[str, Any], expectativa_rendimento: Optional[float], n: Any, p2o5: Any, k2o: Any
+) -> Tuple[Any, Any, Any]:
+    """Aplica `ajuste_expectativa_rendimento` (incremento linear acima de um limiar de
+    produtividade) quando a cultura o declara e a expectativa informada o ultrapassa."""
+    ajuste = entrada.get("ajuste_expectativa_rendimento")
+    if not ajuste or expectativa_rendimento is None or expectativa_rendimento <= ajuste["acima_de_t_ha"]:
+        return n, p2o5, k2o
+    delta = expectativa_rendimento - ajuste["acima_de_t_ha"]
+    n = _somar_incremento(n, delta * ajuste["n_kg_por_t"])
+    p2o5 = _somar_incremento(p2o5, delta * ajuste["p_kg_por_t"])
+    k2o = _somar_incremento(k2o, delta * ajuste["k_kg_por_t"])
+    return n, p2o5, k2o
+
+
+def calcular_adubacao_hortalicas(
+    cultura_id: str,
+    mo: float,
+    argila: float,
+    p_solo: float,
+    k_solo: float,
+    ctc_ph7: float,
+    expectativa_rendimento: Optional[float] = None,
+    fase: Optional[str] = None,
+    dados_hortalicas: Optional[Dict[str, Any]] = None,
+    dados_comuns: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Calcula N/P2O5/K2O para uma hortaliça (dados/culturas/hortalicas/).
+
+    `fase` só é necessária para o aspargo (única cultura do grupo com dose por fase de
+    cultivo, além da classe de teor/MO).
+    """
+    dados_hortalicas = dados_hortalicas if dados_hortalicas is not None else carregar_dados_hortalicas()
+    dados_comuns = dados_comuns if dados_comuns is not None else carregar_dados_comum()
+    adubacao = dados_hortalicas["adubacao"]
+
+    entrada = adubacao["culturas"].get(cultura_id)
+    if entrada is None:
+        raise ErroAdubacao(f"cultura '{cultura_id}' não encontrada em hortalicas_adubacao.json")
+
+    classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+
+    indice_n = fase if entrada["n"].get("tipo", "").endswith("_e_fase") else None
+    n, motivo_n = _calcular_n_generico(entrada["n"], adubacao["classes_mo"], mo, indice_n)
+
+    indice_pk = fase if entrada["pk"].get("tipo", "").endswith("_e_fase") else None
+    p2o5, k2o = _calcular_pk_generico(entrada["pk"], classe_p, classe_k, indice_pk)
+
+    n, p2o5, k2o = _aplicar_ajuste_expectativa(entrada, expectativa_rendimento, n, p2o5, k2o)
+
+    return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "motivo_n": motivo_n, "p2o5": p2o5, "k2o": k2o}
+
+
+def calcular_adubacao_tuberculos(
+    cultura_id: str,
+    mo: float,
+    argila: float,
+    p_solo: float,
+    k_solo: float,
+    ctc_ph7: float,
+    expectativa_rendimento: Optional[float] = None,
+    dados_tuberculos: Optional[Dict[str, Any]] = None,
+    dados_comuns: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Calcula N/P2O5/K2O para batata ou batata-doce (dados/culturas/tuberculos/)."""
+    dados_tuberculos = dados_tuberculos if dados_tuberculos is not None else carregar_dados_tuberculos()
+    dados_comuns = dados_comuns if dados_comuns is not None else carregar_dados_comum()
+    adubacao = dados_tuberculos["adubacao"]
+
+    entrada = adubacao["culturas"].get(cultura_id)
+    if entrada is None:
+        raise ErroAdubacao(f"cultura '{cultura_id}' não encontrada em tuberculos_adubacao.json")
+
+    classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+    n, motivo_n = _calcular_n_generico(entrada["n"], adubacao["classes_mo"], mo, None)
+    p2o5, k2o = _calcular_pk_generico(entrada["pk"], classe_p, classe_k, None)
+    n, p2o5, k2o = _aplicar_ajuste_expectativa(entrada, expectativa_rendimento, n, p2o5, k2o)
+
+    return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "motivo_n": motivo_n, "p2o5": p2o5, "k2o": k2o}
+
+
+def calcular_adubacao_outras(
+    cultura_id: str,
+    mo: float,
+    argila: float,
+    p_solo: float,
+    k_solo: float,
+    ctc_ph7: float,
+    ciclo: Optional[str] = None,
+    tipo: Optional[str] = None,
+    produtividade_t_ha: Optional[float] = None,
+    dados_outras: Optional[Dict[str, Any]] = None,
+    dados_comuns: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Calcula N/P2O5/K2O para cana-de-açúcar ou tabaco (dados/culturas/outras/).
+
+    Cana exige `ciclo` ('cana_planta' ou 'cana_soca') e `produtividade_t_ha`; tabaco
+    exige `tipo` ('virginia' ou 'burley'). As duas culturas têm formatos diferentes
+    demais para uma única função genérica além da classificação de P/K.
+    """
+    dados_outras = dados_outras if dados_outras is not None else carregar_dados_outras()
+    dados_comuns = dados_comuns if dados_comuns is not None else carregar_dados_comum()
+    adubacao = dados_outras["adubacao"]
+
+    entrada = adubacao["culturas"].get(cultura_id)
+    if entrada is None:
+        raise ErroAdubacao(f"cultura '{cultura_id}' não encontrada em outras_comerciais_adubacao.json")
+
+    classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+
+    if cultura_id == "cana_de_acucar":
+        if ciclo not in ("cana_planta", "cana_soca"):
+            raise ErroAdubacao("cana-de-açúcar exige 'ciclo' em ('cana_planta', 'cana_soca')")
+        bloco = entrada[ciclo]
+
+        indice_produtividade = None
+        if produtividade_t_ha is not None:
+            indice_produtividade = _classificar_faixa(
+                produtividade_t_ha, bloco["pk"]["faixas_produtividade"], chave_rotulo="id"
+            )
+
+        indice_n = indice_produtividade if bloco["n"].get("tipo", "").endswith("_e_produtividade") else None
+        n, motivo_n = _calcular_n_generico(bloco["n"], adubacao["classes_mo"], mo, indice_n)
+
+        if indice_produtividade is None:
+            raise ErroAdubacao("cana-de-açúcar exige 'produtividade_t_ha' para a dose de P/K")
+        p2o5, k2o = _calcular_pk_generico(bloco["pk"], classe_p, classe_k, indice_produtividade)
+
+        return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "motivo_n": motivo_n, "p2o5": p2o5, "k2o": k2o}
+
+    if cultura_id == "tabaco":
+        if tipo not in ("virginia", "burley"):
+            raise ErroAdubacao("tabaco exige 'tipo' em ('virginia', 'burley')")
+
+        n, motivo_n = _calcular_n_generico(entrada["n"], adubacao["classes_mo"], mo, tipo)
+        # P e "comum aos tipos" (Tab. 6.9.2, p_comum_aos_tipos): sem indice de tipo. K
+        # depende do tipo (virginia/burley tem colunas de K distintas).
+        p2o5 = _navegar(entrada["pk"]["p"], classe_p)
+        k2o = _navegar(entrada["pk"]["k"], classe_k, tipo)
+
+        return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "motivo_n": motivo_n, "p2o5": p2o5, "k2o": k2o}
+
+    raise ErroAdubacao(f"cultura '{cultura_id}' não implementada em calcular_adubacao_outras")
+
+
+def _dose_taxa_por_tonelada(taxa: Dict[str, Any], produtividade: float):
+    """Multiplica uma taxa por tonelada estimada (frutíferas de manutenção, Seção 6.5)
+    pela produtividade — preservando min/max quando a taxa é uma faixa."""
+    if taxa.get("tipo") == "nao_aplicar":
+        return 0.0
+    dose = _resolver_dose(taxa)
+    if isinstance(dose, dict):
+        resultado = dict(dose)
+        if "valor" in resultado:
+            resultado["valor"] = resultado["valor"] * produtividade
+        if "min" in resultado:
+            resultado["min"] = resultado["min"] * produtividade
+            resultado["max"] = resultado["max"] * produtividade
+        return resultado
+    return dose * produtividade
+
+
+def calcular_adubacao_frutiferas(
+    cultura_id: str,
+    fase: str,
+    mo: Optional[float] = None,
+    argila: Optional[float] = None,
+    p_solo: Optional[float] = None,
+    k_solo: Optional[float] = None,
+    ctc_ph7: Optional[float] = None,
+    ano: Optional[int] = None,
+    produtividade_estimada: Optional[float] = None,
+    dados_frutiferas: Optional[Dict[str, Any]] = None,
+    dados_comuns: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Calcula N/P2O5/K2O para uma frutífera, por fase ('pre_plantio', 'crescimento' ou
+    'manutencao' — Seção 6.5).
+
+    Cobre pré-plantio (referência comum, Tab. 6.5.1) e crescimento (N por classe de MO,
+    com ou sem 'ano') para todas as frutíferas do escopo, e manutenção só para as
+    culturas indexadas por 'taxa_por_tonelada_estimada' (produtividade x taxa fixa —
+    abacateiro, bananeira, caquizeiro, citros, figueira, oliveira, pereira, quivizeiro).
+    As demais formas de manutenção — teor foliar sem correspondência solo-tecido, ou
+    indexações próprias (amoreira-preta, mirtileiro, morangueiro, nogueira-pecã,
+    videira) — levantam NotImplementedError: ver docstring do módulo.
+    """
+    dados_frutiferas = dados_frutiferas if dados_frutiferas is not None else carregar_dados_frutiferas()
+    dados_comuns = dados_comuns if dados_comuns is not None else carregar_dados_comum()
+    adubacao = dados_frutiferas["adubacao"]
+
+    entrada = adubacao["culturas"].get(cultura_id)
+    if entrada is None:
+        raise ErroAdubacao(f"cultura '{cultura_id}' não encontrada em frutiferas_adubacao.json")
+
+    if fase == "pre_plantio":
+        bloco_pk = entrada["pre_plantio"]["pk"]
+        if bloco_pk.get("tipo") != "referencia":
+            raise NotImplementedError(
+                f"cultura '{cultura_id}': pre_plantio.pk.tipo='{bloco_pk.get('tipo')}' inesperado"
+            )
+        chave_tabela = "tabela_" + bloco_pk["tabela"].replace(".", "_")
+        tabela = adubacao[chave_tabela]
+        classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+        p2o5 = _navegar(tabela["p"], classe_p)
+        k2o = _navegar(tabela["k"], classe_k)
+        return {"classe_p": classe_p, "classe_k": classe_k, "n": 0.0, "p2o5": p2o5, "k2o": k2o}
+
+    if fase == "crescimento":
+        bloco = entrada["crescimento"]
+        n_bloco = bloco["n"]
+        tipo_n = n_bloco.get("tipo")
+        if tipo_n == "ver_manutencao":
+            raise ErroAdubacao(
+                f"cultura '{cultura_id}': crescimento e manutenção são unificados — use fase='manutencao'"
+            )
+        if tipo_n in ("nao_aplicar", "nao_recomendado"):
+            n = 0.0
+        elif tipo_n == "por_classe_mo":
+            n = _navegar(n_bloco["doses"], _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]]))
+        elif tipo_n == "por_classe_mo_e_ano":
+            if ano is None:
+                raise ErroAdubacao(f"cultura '{cultura_id}': 'ano' é obrigatório na fase de crescimento")
+            faixa_mo = _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]])
+            n = _navegar(n_bloco["doses"], faixa_mo, str(ano))
+        else:
+            raise NotImplementedError(
+                f"cultura '{cultura_id}': crescimento.n.tipo='{tipo_n}' ainda não implementado"
+            )
+
+        tipo_pk = bloco["pk"].get("tipo")
+        if tipo_pk != "nao_aplicar":
+            raise NotImplementedError(
+                f"cultura '{cultura_id}': crescimento.pk.tipo='{tipo_pk}' ainda não implementado"
+            )
+        return {"n": n, "p2o5": 0.0, "k2o": 0.0}
+
+    if fase == "manutencao":
+        bloco = entrada["manutencao"]
+        if bloco.get("requer_analise_foliar"):
+            raise NotImplementedError(
+                f"cultura '{cultura_id}': manutenção depende de análise foliar sem "
+                f"correspondência solo-tecido declarada pelo Manual "
+                f"({bloco.get('motivo_nao_implementado', 'ver dados/culturas/frutiferas/')})"
+            )
+        if bloco.get("tipo") == "taxa_por_tonelada_estimada":
+            if produtividade_estimada is None:
+                raise ErroAdubacao(f"cultura '{cultura_id}': 'produtividade_estimada' é obrigatória na manutenção")
+            n = _dose_taxa_por_tonelada(bloco["n"], produtividade_estimada)
+            p2o5 = _dose_taxa_por_tonelada(bloco["p"], produtividade_estimada)
+            k2o = _dose_taxa_por_tonelada(bloco["k"], produtividade_estimada)
+            return {"n": n, "p2o5": p2o5, "k2o": k2o}
+        raise NotImplementedError(
+            f"cultura '{cultura_id}': manutenção com indexação '{bloco.get('indexacao')}' ainda não "
+            f"implementada — formato próprio da cultura, precisa de caso de teste calculado à mão "
+            f"antes de codificar (mesma política de graos_pd_com_restricoes)"
+        )
+
+    raise ErroAdubacao(f"'fase' deve ser 'pre_plantio', 'crescimento' ou 'manutencao', recebido {fase!r}")
+
+
+def calcular_adubacao_erva_mate(
+    programa: str,
+    mo: Optional[float] = None,
+    argila: Optional[float] = None,
+    p_solo: Optional[float] = None,
+    k_solo: Optional[float] = None,
+    ctc_ph7: Optional[float] = None,
+    fase: Optional[str] = None,
+    momento: Optional[str] = None,
+    manejo_galho_grosso: Optional[str] = None,
+    massa_verde_t_ha: Optional[float] = None,
+    dados_erva_mate: Optional[Dict[str, Any]] = None,
+    dados_comuns: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Calcula N/P2O5/K2O para erva-mate (Seção 6.6.5), programa 'desde_o_plantio'
+    (fases 'plantio_e_crescimento', 'formacao_da_copa' ou 'producao') ou 'recuperacao'.
+    """
+    dados_erva_mate = dados_erva_mate if dados_erva_mate is not None else carregar_dados_erva_mate()
+    dados_comuns = dados_comuns if dados_comuns is not None else carregar_dados_comum()
+    adubacao = dados_erva_mate["adubacao"]
+    entrada = adubacao["culturas"]["erva_mate"]
+    classes_mo = adubacao["classes_mo"]
+
+    if programa == "desde_o_plantio":
+        bloco_programa = entrada["programa_desde_o_plantio"]
+        if fase not in bloco_programa:
+            raise ErroAdubacao(f"fase '{fase}' inválida para programa 'desde_o_plantio'")
+        bloco_fase = bloco_programa[fase]
+
+        if fase == "plantio_e_crescimento":
+            if momento is None:
+                raise ErroAdubacao("'momento' é obrigatório na fase 'plantio_e_crescimento'")
+            classe_p, classe_k = _classificar_p_e_k(entrada, "erva_mate", argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+            n, _ = _calcular_n_generico(bloco_fase["n"], classes_mo, mo, momento)
+            p2o5 = _navegar(bloco_fase["p"]["doses"], classe_p, momento)
+            k2o = _navegar(bloco_fase["k"]["doses"], classe_k, momento)
+            return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
+
+        if fase == "formacao_da_copa":
+            classe_p, classe_k = _classificar_p_e_k(entrada, "erva_mate", argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+            n, _ = _calcular_n_generico(bloco_fase["n"], classes_mo, mo, None)
+            p2o5, k2o = _calcular_pk_generico(bloco_fase["pk"], classe_p, classe_k, None)
+            return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
+
+        if fase == "producao":
+            if manejo_galho_grosso is None or massa_verde_t_ha is None:
+                raise ErroAdubacao("'manejo_galho_grosso' e 'massa_verde_t_ha' são obrigatórios na fase 'producao'")
+            # producao/recuperacao nao declaram "classes_mo" no proprio bloco (as
+            # chaves de coeficientes/parametros ja usam os ids de "padrao" direto).
+            faixa_mo = _classe_mo(mo, classes_mo["padrao"])
+            coef_n = bloco_fase["n"]["coeficientes"][faixa_mo][manejo_galho_grosso]
+            n = coef_n * massa_verde_t_ha
+            coef_pk = bloco_fase["pk"]["coeficientes"][manejo_galho_grosso]
+            p2o5 = coef_pk["p"] * massa_verde_t_ha
+            k2o = coef_pk["k"] * massa_verde_t_ha
+            return {"n": n, "p2o5": p2o5, "k2o": k2o}
+
+        raise NotImplementedError(f"fase '{fase}' ainda não implementada")
+
+    if programa == "recuperacao":
+        bloco = entrada["programa_recuperacao"]
+        if manejo_galho_grosso is None or massa_verde_t_ha is None:
+            raise ErroAdubacao("'manejo_galho_grosso' e 'massa_verde_t_ha' são obrigatórios no programa 'recuperacao'")
+
+        classe_p, classe_k = _classificar_p_e_k(entrada, "erva_mate", argila, p_solo, k_solo, ctc_ph7, dados_comuns)
+
+        faixa_mo = _classe_mo(mo, classes_mo["padrao"])
+        parametros_n = bloco["n"]["parametros"][faixa_mo][manejo_galho_grosso]
+        n = parametros_n["base"] + parametros_n["coeficiente"] * massa_verde_t_ha
+
+        classes_atendidas = bloco["pk"]["classes_atendidas"]
+
+        def _dose_recuperacao(classe: str, nutriente: str) -> float:
+            if classe not in classes_atendidas:
+                raise ErroAdubacao(
+                    f"classe '{classe}' não está no programa de recuperação para '{nutriente}' "
+                    f"(fora de {classes_atendidas}) — o nutriente segue o regime normal de produção"
+                )
+            base = bloco["pk"]["parametros"][classe][nutriente]["base"]
+            coeficiente = bloco["pk"]["coeficientes_por_manejo"][manejo_galho_grosso][nutriente]
+            return base + coeficiente * massa_verde_t_ha
+
+        p2o5 = _dose_recuperacao(classe_p, "p")
+        k2o = _dose_recuperacao(classe_k, "k")
+        return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
+
+    raise ErroAdubacao(f"'programa' deve ser 'desde_o_plantio' ou 'recuperacao', recebido {programa!r}")

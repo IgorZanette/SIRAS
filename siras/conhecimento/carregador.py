@@ -671,6 +671,22 @@ class Carregador:
             if chave not in ("p", "k"):
                 self._percorrer_series_p_k(sub, f"{contexto}.{chave}")
 
+    def _soma_numerica(self, no: Any) -> float:
+        """Soma recursiva de todos os valores numéricos de um nó (dict/list/escalar).
+
+        bool é excluído propositalmente: em Python, bool é subclasse de int, e
+        True/False somariam 1/0 ao total sem serem doses de verdade.
+        """
+        if isinstance(no, dict):
+            return sum(self._soma_numerica(v) for v in no.values())
+        if isinstance(no, list):
+            return sum(self._soma_numerica(v) for v in no)
+        if isinstance(no, bool):
+            return 0.0
+        if isinstance(no, (int, float)):
+            return no
+        return 0.0
+
     def validar_adubacao_por_grupo(self, dados: Dict, nome_arquivo: str) -> None:
         """
         Valida invariantes comuns aos arquivos de adubação por grupo de cultura
@@ -678,6 +694,8 @@ class Carregador:
         - I1: cada lista em 'classes_mo' é contígua e sem lacunas
         - I2/I3/I4: toda série 'p'/'k' por classe de teor tem as 5 classes, doses em
           formato válido, e não aumenta conforme o teor sobe (docs/decisoes/0004, D4.1)
+        - I5: checksum — número de culturas e soma de todos os valores numéricos em
+          'culturas' batem com o que o autor conferiu contra o Manual
 
         Args:
             dados: dados já carregados do arquivo
@@ -693,6 +711,25 @@ class Carregador:
 
         for id_cultura, cultura in dados.get("culturas", {}).items():
             self._percorrer_series_p_k(cultura, f"{nome_arquivo}:{id_cultura}")
+
+        culturas = dados.get("culturas", {})
+        checksum = dados.get("checksum", {})
+
+        if len(culturas) != checksum.get("culturas"):
+            raise ErroCarregamento(
+                f"{nome_arquivo}: checksum.culturas={checksum.get('culturas')}, "
+                f"mas há {len(culturas)} entradas em 'culturas'"
+            )
+
+        soma_obtida = round(self._soma_numerica(culturas), 2)
+        soma_esperada = checksum.get("soma_total")
+        if soma_esperada is not None:
+            soma_esperada = round(soma_esperada, 2)
+        if soma_obtida != soma_esperada:
+            raise ErroCarregamento(
+                f"{nome_arquivo}: soma_total esperada {soma_esperada}, obtida {soma_obtida} "
+                f"— algum valor em 'culturas' foi alterado sem atualizar o checksum"
+            )
 
     def carregar_dados_comum(self) -> Dict[str, Dict[str, Any]]:
         """

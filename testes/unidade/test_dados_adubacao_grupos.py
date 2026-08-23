@@ -4,8 +4,10 @@ hortaliças, tubérculos, outras comerciais (cana/tabaco), frutíferas e erva-ma
 
 Cada arquivo já é validado na carga (schema + validar_adubacao_por_grupo: classes de MO
 contíguas, séries de P/K com as 5 classes de teor, doses em formato válido e não-crescentes
-conforme o teor sobe — docs/decisoes/0004, D4.1/D4.4). Este arquivo cobre contagens
-esperadas e amarrações pontuais entre arquivos.
+conforme o teor sobe, e checksum de integridade — docs/decisoes/0004, D4.1/D4.4). Este
+arquivo cobre contagens esperadas, amarrações pontuais entre arquivos, e regressão das
+invariantes (garantindo que cada uma realmente falha quando deveria, não só passa em
+silêncio).
 """
 
 import pytest
@@ -135,3 +137,31 @@ class TestInvarianteMonotonicidadeRegride:
 
         with pytest.raises(ErroCarregamento, match="qualificador desconhecido"):
             carregador.validar_adubacao_por_grupo(adubacao, "tuberculos_adubacao.json")
+
+
+class TestChecksum:
+    """I5: número de culturas e soma de valores numéricos em 'culturas' batem com o
+    checksum conferido pelo autor (docs/decisoes/0004). Protege contra alteração
+    acidental de qualquer dose que a monotonicidade (I3) não pegaria — ex.: um valor
+    trocado que continua não-crescente, mas está errado mesmo assim."""
+
+    def test_valor_alterado_sem_quebrar_monotonicidade_e_pego_pelo_checksum(self, carregador):
+        dados = carregador.carregar_dados_tuberculos()
+        adubacao = dados["adubacao"]
+        # 75 -> 74: ainda "nao-crescente" na coluna (nao quebra I3), mas o checksum pega.
+        adubacao["culturas"]["batata"]["pk"]["k"]["alto"]["valor"] = 74
+
+        with pytest.raises(ErroCarregamento, match="soma_total esperada"):
+            carregador.validar_adubacao_por_grupo(adubacao, "tuberculos_adubacao.json")
+
+    def test_contagem_de_culturas_divergente_levanta_erro(self, carregador):
+        dados = carregador.carregar_dados_tuberculos()
+        adubacao = dados["adubacao"]
+        adubacao["checksum"]["culturas"] = 999
+
+        with pytest.raises(ErroCarregamento, match="checksum.culturas"):
+            carregador.validar_adubacao_por_grupo(adubacao, "tuberculos_adubacao.json")
+
+    def test_soma_numerica_ignora_booleanos(self, carregador):
+        # bool e subclasse de int em Python; a soma nao pode contar True/False como 1/0.
+        assert carregador._soma_numerica({"a": True, "b": False, "c": 5}) == 5

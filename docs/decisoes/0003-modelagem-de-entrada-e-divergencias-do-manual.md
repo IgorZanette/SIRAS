@@ -104,24 +104,52 @@ lê, em vez de o código assumir por convenção (`graos_pd_com_restricoes` como
 "dose": {"tipo": "smp_medio", "camadas": ["superficie", "subsuperficie"], "ph_alvo": 6.0}
 ```
 
-**Três perguntas em aberto, a conferir pelo autor no Manual antes de implementar:**
+**Confirmado pelo autor em 2026-08-22, direto na Tabela 5.3 (p. 75):**
 
-1. A dose usa a **média aritmética** dos dois índices SMP, ou o Manual pede amostra
-   composta 0–20 cm (índice SMP de uma terceira amostra, não a média de duas)? SMP é
-   tamponamento, não é necessariamente linear — a redação exata da Tab. 5.3 decide isso.
-2. O gatilho `pH < 5,5 E m ≥ 30%` na camada 10–20 cm veio da extração original; é o único
-   critério com decisão composta em duas variáveis e merece reconferência direta na nota da
-   tabela.
-3. **Quem decide "com restrições"?** Hoje o desenho pressupõe que o usuário já entra
-   sabendo que está no caso "com restrições" (escolhendo o critério certo). Mais fiel ao
-   Manual: o usuário informa PD consolidado + as duas camadas, e o motor decide entre
-   `graos_pd_consolidado` e `graos_pd_com_restricoes` avaliando o Al da subsuperfície. Isso
-   muda o contrato de `mapa_culturas.json`/`resolver_criterio_id()`.
+1. **Dose — média aritmética confirmada.** Nota (7), literal: usa-se o índice SMP médio das
+   duas camadas (0–10 e 10–20 cm) para definir a dose de calcário a incorporar. É a média
+   dos dois índices, não uma amostra composta de terceira medição. (SMP ser tamponamento e
+   não necessariamente linear continua tecnicamente verdadeiro, mas é irrelevante aqui — o
+   Manual prescreve o procedimento, e o SIRAS reproduz o Manual, não a físico-química.)
 
-**Status:** não implementado. `graos_pd_com_restricoes` continua levantando
-`NotImplementedError` de propósito. Não implementar a partir de suposição — precisa das
-três respostas acima **e** de um caso de teste calculado à mão pelo autor, na mesma ordem
-que produziu os outros 10 casos (`docs/COMO_CALCULAR_ORACULO.md`).
+   **Nova pendência que isso abre:** a Tabela 5.2 é discreta, em passos de 0,1. Uma média
+   como 5,45 (de SMP 5,3 e 5,6) não existe na tabela. Arredondar para 5,4 dá 6,8 t/ha; para
+   5,5 dá 6,1 t/ha — 10% de diferença, e o Manual não resolve isso. Vira política explícita
+   em `docs/decisoes/0002-calagem-dirigida-por-criterio-de-grupo.md` (mesmo lugar do
+   arredondamento de saída e do teto de 5 t/ha), com duas opções: arredondar o índice médio
+   antes de consultar a tabela, ou interpolar linearmente entre as duas linhas adjacentes.
+   **Ainda não decidido** — ver ADR 0002.
+
+2. **Gatilho — confirmado.** A célula diz `pH < 5,5` **e** `Al ≥ 30%` (o `≥` é um dos
+   glifos-imagem do PDF, não um `=` da extração literal). O Al é saturação por Al na CTC,
+   coerente com a nota (1) ("saturação por Al na CTC < 10%"). O
+   `saturacao_al_maior_igual: 30` já presente em `criterios_calagem.json` está correto.
+
+   **Ponto de atenção para a implementação:** a exceção da nota (1) — V ≥ 65% e Al < 10% —
+   está ancorada apenas na linha "sem restrições" e na linha "arroz, semeadura em solo
+   seco", **não** na linha "com restrições". `graos_pd_com_restricoes` não deve herdar essa
+   exceção. (O dado em `criterios_calagem.json` já está correto — esse critério não tem
+   `nao_aplicar_se` — mas fica registrado aqui para não ser "corrigido" por engano numa
+   reescrita futura.)
+
+3. **Quem decide "com restrições" — a proposta original deste item estava errada.** A nota
+   (3) define "restrições" como produtividade abaixo da média local (sobretudo em anos secos),
+   compactação restringindo o crescimento radicular, e P na camada 10–20 cm abaixo do teor
+   crítico — fatores de campo e de observação do técnico, não deriváveis de um laudo/
+   `AnaliseSolo`. "Com restrições" é diagnóstico feito **antes** de escolher o critério; o
+   `pH < 5,5 E Al ≥ 30%` é a regra de decisão **dentro** do critério já escolhido, não o que
+   seleciona o critério. **`mapa_culturas.json` e `resolver_criterio_id()` permanecem como
+   estão** — a hipótese de o motor inferir a condição a partir do Al da subsuperfície foi
+   descartada.
+
+**Status:** ainda não implementado. As três perguntas originais estão respondidas — o
+desenho do `Camada`, o invariante de que os campos padrão de `AnaliseSolo` são sempre a
+camada de fertilidade, e a declaração da camada no JSON (resto deste ADR) continuam
+válidos como estão. D6 abriu uma pendência nova — a política de arredondamento/
+interpolação do SMP médio fora da grade de 0,1 da Tabela 5.2, a decidir em
+`docs/decisoes/0002` — e a implementação segue bloqueada até essa decisão **e** um caso de
+teste calculado à mão pelo autor, na mesma ordem que produziu os outros 10 casos
+(`docs/COMO_CALCULAR_ORACULO.md`).
 
 ## D7 — Divergência interna do Manual: "V > 65%" (texto) vs "V ≥ 65%" (nota da tabela)
 

@@ -131,10 +131,37 @@ dose calculada excede 5 t/ha (PRNT 100%), a dose é truncada em 5 t/ha e o trace
 original e o truncamento. O laudo informa que houve limitação, para o técnico avaliar se cabe
 reiniciar o sistema com incorporação.
 
+## D10 — Índice SMP médio fora da grade da Tabela 5.2 (`graos_pd_com_restricoes`)
+
+**Contexto:** o critério de duas camadas para grãos em PD com restrições (Tab. 5.3, nota (7) —
+ver ADR 0003, D6) usa a **média aritmética** dos índices SMP de 0–10 e 10–20 cm para consultar a
+Tabela 5.2. Essa tabela é discreta, em passos de 0,1 (D2 já trata os extremos, não este caso). Uma
+média como 5,45 (de SMP 5,3 e 5,6) não cai em nenhuma linha da tabela.
+
+**Decisão:** *ainda não tomada.* Duas opções em aberto:
+
+| Opção | Mecânica | Risco |
+|---|---|---|
+| A — arredondar antes de consultar | aplica a mesma regra de arredondamento de D1 (meio para cima) ao índice médio, depois busca a linha exata | simples e reaproveita D1, mas descarta informação — duas médias diferentes (ex.: 5,44 e 5,46) caem na mesma linha e produzem a mesma dose |
+| B — interpolar linearmente entre as duas linhas adjacentes | dose = interpolação linear entre a linha inferior e a superior, ponderada pela distância do índice médio a cada uma | mais fiel ao valor contínuo, mas o Manual não descreve interpolação em nenhuma outra tabela do Capítulo 5 — seria um procedimento sem respaldo textual direto |
+
+No exemplo levantado pelo autor (SMP 5,3 e 5,6 → média 5,45): a opção A arredonda para 5,4 ou 5,5
+dependendo do critério de desempate, o que já resulta em doses de 6,8 t/ha ou 6,1 t/ha — cerca de
+10% de diferença.
+
+**Por que fica em aberto:** D1 (arredondamento de saída) e D2 (comportamento nos extremos da
+tabela) têm respaldo indireto — prática convencional em recomendação agronômica e a própria
+construção "aberta" da tabela, respectivamente. Aqui não há pista textual equivalente de qual das
+duas opções o Manual pretende. **Decisão do autor**, a registrar nesta seção quando tomada.
+`graos_pd_com_restricoes` não deve ser implementado antes disso (ver ADR 0003, D6).
+
 ---
 
 ## Nota de organização
 
-Se preferir separar responsabilidades entre ADRs, as três políticas acima podem ser movidas para um
-`0003-politicas-do-motor.md`, mantendo em 0002 apenas a decisão sobre o critério de grupo. Estão
-juntas aqui por conveniência, já que todas decorrem da mesma leitura do Capítulo 5.
+Se preferir separar responsabilidades entre ADRs, as políticas acima (D1–D3, D10) podem ser
+movidas para um `0003-politicas-do-motor.md` próprio, mantendo em 0002 apenas a decisão sobre o
+critério de grupo — note que o nome já está ocupado por
+`0003-modelagem-de-entrada-e-divergencias-do-manual.md`, cujas decisões D4–D9 continuam a mesma
+numeração sequencial. Estão juntas aqui por conveniência, já que todas decorrem da mesma leitura do
+Capítulo 5.

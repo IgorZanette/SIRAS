@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Adubação — Hortaliças",
+  "type": "object",
+  "required": ["descricao", "fonte", "unidades", "classes_mo", "classes_teor", "culturas"],
+  "properties": {
+    "descricao": { "type": "string", "minLength": 1 },
+    "fonte": {
+      "type": "object",
+      "required": ["manual", "capitulo", "paginas"],
+      "properties": {
+        "manual": { "type": "string" },
+        "extraido_do_pdf_em": { "type": ["string", "null"] },
+        "conferido_por_autor_em": { "type": ["string", "null"] },
+        "capitulo": { "type": "string" },
+        "paginas": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "unidades": { "type": "object" },
+    "classes_mo": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["id", "de", "ate"],
+          "properties": {
+            "id": { "type": "string" },
+            "de": { "type": ["number", "null"] },
+            "ate": { "type": ["number", "null"] }
+          }
+        }
+      }
+    },
+    "classes_teor": { "type": "array", "items": { "type": "string" } },
+    "regra_geral_p_k": { "type": ["string", "null"] },
+    "fora_de_escopo": { "type": "array", "items": { "type": "string" } },
+    "culturas": { "type": "object", "minProperties": 1 }
+  }
+}

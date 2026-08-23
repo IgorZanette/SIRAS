@@ -386,16 +386,18 @@ class Carregador:
                     f"'{criterio_calagem}', que não existe em criterios_calagem.json"
                 )
 
-    def _validar_faixas_contiguas(self, faixas: list, contexto: str) -> None:
+    def _validar_faixas_contiguas(self, faixas: list, contexto: str, chave_rotulo: str = "classe") -> None:
         """
-        Valida que uma lista de faixas (classe/de/ate) é contígua e sem lacunas:
+        Valida que uma lista de faixas (rótulo/de/ate) é contígua e sem lacunas:
         - primeira faixa com "de" == null (aberta à esquerda)
         - última faixa com "ate" == null (aberta à direita)
         - faixas[i]["ate"] == faixas[i+1]["de"] para todo par consecutivo
 
         Args:
-            faixas: lista de dicts com "classe", "de", "ate"
+            faixas: lista de dicts com "de", "ate" e um rótulo (chave_rotulo)
             contexto: prefixo descritivo para a mensagem de erro
+            chave_rotulo: nome do campo usado como rótulo da faixa nas mensagens de erro
+                ("classe" nas tabelas de interpretação, "id" nas classes de MO)
 
         Raises:
             ErroCarregamento: se alguma invariante falhar
@@ -405,12 +407,12 @@ class Carregador:
 
         if faixas[0].get("de") is not None:
             raise ErroCarregamento(
-                f"{contexto}: primeira faixa ('{faixas[0].get('classe')}') deveria ter "
+                f"{contexto}: primeira faixa ('{faixas[0].get(chave_rotulo)}') deveria ter "
                 f"'de'=null (aberta à esquerda), encontrado {faixas[0].get('de')}"
             )
         if faixas[-1].get("ate") is not None:
             raise ErroCarregamento(
-                f"{contexto}: última faixa ('{faixas[-1].get('classe')}') deveria ter "
+                f"{contexto}: última faixa ('{faixas[-1].get(chave_rotulo)}') deveria ter "
                 f"'ate'=null (aberta à direita), encontrado {faixas[-1].get('ate')}"
             )
 
@@ -419,8 +421,8 @@ class Carregador:
             proxima_de = faixas[i + 1].get("de")
             if atual_ate != proxima_de:
                 raise ErroCarregamento(
-                    f"{contexto}: faixas descontínuas entre '{faixas[i].get('classe')}' "
-                    f"(ate={atual_ate}) e '{faixas[i + 1].get('classe')}' (de={proxima_de})"
+                    f"{contexto}: faixas descontínuas entre '{faixas[i].get(chave_rotulo)}' "
+                    f"(ate={atual_ate}) e '{faixas[i + 1].get(chave_rotulo)}' (de={proxima_de})"
                 )
 
     def validar_interpretacao_geral(self, dados: Dict) -> None:
@@ -550,6 +552,148 @@ class Carregador:
                 f"checksum.soma_k2o_manutencao={checksum.get('soma_k2o_manutencao')}"
             )
 
+    # Ordem oficial das classes de teor (Cap. 6), do menor ao maior — usada para checar
+    # monotonicidade das doses de P/K nos arquivos de adubação por grupo de cultura.
+    _ORDEM_CLASSES_TEOR = ["muito_baixo", "baixo", "medio", "alto", "muito_alto"]
+
+    def _e_serie_por_teor(self, no: Any) -> bool:
+        """True se `no` é um dict indexado diretamente pelas 5 classes de teor."""
+        return isinstance(no, dict) and self._ORDEM_CLASSES_TEOR[0] in no
+
+    def _valor_comparavel_dose(self, dose: Any) -> Optional[float]:
+        """Valor comparável de uma dose para checar monotonicidade: usa o limite
+        superior quando há faixa; None quando a dose é 'nao_aplicar' (não comparável)."""
+        if not isinstance(dose, dict):
+            return None
+        if "valor" in dose:
+            return dose["valor"]
+        if "max" in dose:
+            return dose["max"]
+        return None
+
+    def _validar_formato_dose(self, dose: Any, contexto: str) -> None:
+        """
+        I4 (docs/decisoes/0004, D4.1): toda dose é um objeto válido —
+        {"valor"}, {"valor","qualificador":"ate"}, {"min","max"} ou {"tipo":"nao_aplicar"}.
+        """
+        if not isinstance(dose, dict):
+            raise ErroCarregamento(f"{contexto}: dose não é objeto ({dose!r})")
+
+        chaves = set(dose)
+        valido = (
+            (chaves <= {"valor", "qualificador"} and "valor" in dose)
+            or chaves == {"min", "max"}
+            or chaves == {"tipo"}
+        )
+        if not valido:
+            raise ErroCarregamento(f"{contexto}: formato de dose inválido ({sorted(chaves)})")
+
+        if "qualificador" in dose and dose["qualificador"] != "ate":
+            raise ErroCarregamento(
+                f"{contexto}: qualificador desconhecido '{dose['qualificador']}' (só 'ate' é aceito)"
+            )
+        if chaves == {"min", "max"} and dose["min"] > dose["max"]:
+            raise ErroCarregamento(f"{contexto}: faixa invertida {dose}")
+
+    def _validar_monotonicidade(self, valores: list, rotulos: list, contexto: str) -> None:
+        """I3: a dose não pode aumentar conforme a classe de teor sobe."""
+        for anterior, atual, rotulo_a, rotulo_b in zip(valores, valores[1:], rotulos, rotulos[1:]):
+            if anterior is not None and atual is not None and atual > anterior:
+                raise ErroCarregamento(
+                    f"{contexto}: dose sobe de {rotulo_a}={anterior} para {rotulo_b}={atual} "
+                    f"(deveria ser não-crescente conforme o teor melhora)"
+                )
+
+    def _validar_serie_teor(self, serie: Dict[str, Any], contexto: str) -> None:
+        """
+        I2/I3/I4: toda série de dose por classe de teor tem as 5 classes, cada dose tem
+        formato válido, e a dose não aumenta conforme a classe de teor sobe. Cobre séries
+        simples (uma dose por classe) e séries com subcolunas (ex.: por fase, por
+        produtividade) — um nível de aninhamento.
+        """
+        faltando = [c for c in self._ORDEM_CLASSES_TEOR if c not in serie]
+        if faltando:
+            raise ErroCarregamento(f"{contexto}: classes de teor ausentes {faltando}")
+
+        primeiro = serie[self._ORDEM_CLASSES_TEOR[0]]
+        if not isinstance(primeiro, dict):
+            raise ErroCarregamento(f"{contexto}.{self._ORDEM_CLASSES_TEOR[0]}: não é objeto")
+
+        if {"valor", "min", "tipo"} & set(primeiro):
+            # Série simples: uma dose por classe de teor.
+            valores = []
+            for classe in self._ORDEM_CLASSES_TEOR:
+                self._validar_formato_dose(serie[classe], f"{contexto}.{classe}")
+                valores.append(self._valor_comparavel_dose(serie[classe]))
+            self._validar_monotonicidade(valores, self._ORDEM_CLASSES_TEOR, contexto)
+        else:
+            # Série com subcolunas (fase, produtividade etc.): checa a monotonicidade
+            # dentro de cada coluna.
+            for coluna in primeiro:
+                valores = []
+                for classe in self._ORDEM_CLASSES_TEOR:
+                    sub = serie[classe].get(coluna) if isinstance(serie[classe], dict) else None
+                    if sub is None:
+                        raise ErroCarregamento(f"{contexto}.{classe}: falta a coluna '{coluna}'")
+                    self._validar_formato_dose(sub, f"{contexto}.{classe}.{coluna}")
+                    valores.append(self._valor_comparavel_dose(sub))
+                self._validar_monotonicidade(
+                    valores, self._ORDEM_CLASSES_TEOR, f"{contexto}[{coluna}]"
+                )
+
+    def _percorrer_series_p_k(self, no: Any, contexto: str) -> None:
+        """
+        Percorre recursivamente um documento de adubação procurando blocos 'p'/'k'
+        indexados por classe de teor — diretamente ou sob uma chave 'doses' — e valida
+        cada um (I2/I3/I4). Blocos cujas chaves não são as classes de teor (ex.: videira,
+        indexada por classe de tecido foliar) são ignorados propositalmente: a
+        correspondência solo→tecido é regra agronômica registrada em ADR, não invariante
+        estrutural.
+
+        Args:
+            no: nó atual da árvore (dict, list ou valor escalar)
+            contexto: caminho descritivo até este nó, para mensagens de erro
+
+        Raises:
+            ErroCarregamento: se alguma série de teor encontrada violar I2/I3/I4
+        """
+        if not isinstance(no, dict):
+            return
+
+        for chave in ("p", "k"):
+            bloco = no.get(chave)
+            if self._e_serie_por_teor(bloco):
+                self._validar_serie_teor(bloco, f"{contexto}.{chave}")
+            elif isinstance(bloco, dict) and self._e_serie_por_teor(bloco.get("doses")):
+                self._validar_serie_teor(bloco["doses"], f"{contexto}.{chave}.doses")
+
+        for chave, sub in no.items():
+            if chave not in ("p", "k"):
+                self._percorrer_series_p_k(sub, f"{contexto}.{chave}")
+
+    def validar_adubacao_por_grupo(self, dados: Dict, nome_arquivo: str) -> None:
+        """
+        Valida invariantes comuns aos arquivos de adubação por grupo de cultura
+        (hortaliças, tubérculos, outras comerciais, frutíferas, erva-mate):
+        - I1: cada lista em 'classes_mo' é contígua e sem lacunas
+        - I2/I3/I4: toda série 'p'/'k' por classe de teor tem as 5 classes, doses em
+          formato válido, e não aumenta conforme o teor sobe (docs/decisoes/0004, D4.1)
+
+        Args:
+            dados: dados já carregados do arquivo
+            nome_arquivo: nome do arquivo, para as mensagens de erro
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        for nome_classes, faixas in dados.get("classes_mo", {}).items():
+            self._validar_faixas_contiguas(
+                faixas, f"{nome_arquivo}: classes_mo.{nome_classes}", chave_rotulo="id"
+            )
+
+        for id_cultura, cultura in dados.get("culturas", {}).items():
+            self._percorrer_series_p_k(cultura, f"{nome_arquivo}:{id_cultura}")
+
     def carregar_dados_comum(self) -> Dict[str, Dict[str, Any]]:
         """
         Carrega e valida todos os arquivos de dados/comum/.
@@ -665,6 +809,71 @@ class Carregador:
 
         return resultado
 
+    def _carregar_adubacao_por_grupo(
+        self, grupo: str, nome_arquivo: str, nome_schema: str
+    ) -> Dict[str, Any]:
+        """
+        Carrega e valida um arquivo de adubação de dados/culturas/<grupo>/.
+
+        Args:
+            grupo: nome da pasta em dados/culturas/ (ex.: "hortalicas")
+            nome_arquivo: nome do arquivo JSON (ex.: "hortalicas_adubacao.json")
+            nome_schema: nome do schema (ex.: "hortalicas_adubacao_v1")
+
+        Raises:
+            ErroCarregamento: se o arquivo falhar na validação
+        """
+        base_dir = Path(__file__).parent.parent.parent  # siras/conhecimento -> raiz do repo
+        caminho = base_dir / "dados" / "culturas" / grupo / nome_arquivo
+
+        try:
+            dados = self._carregar_json(caminho)
+            self._validar_schema_json(nome_arquivo, nome_schema, dados)
+            self.validar_adubacao_por_grupo(dados, nome_arquivo)
+            return dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"{nome_arquivo}: {e}")
+
+    def carregar_dados_hortalicas(self) -> Dict[str, Dict[str, Any]]:
+        """Carrega e valida dados/culturas/hortalicas/hortalicas_adubacao.json."""
+        return {
+            "adubacao": self._carregar_adubacao_por_grupo(
+                "hortalicas", "hortalicas_adubacao.json", "hortalicas_adubacao_v1"
+            )
+        }
+
+    def carregar_dados_tuberculos(self) -> Dict[str, Dict[str, Any]]:
+        """Carrega e valida dados/culturas/tuberculos/tuberculos_adubacao.json."""
+        return {
+            "adubacao": self._carregar_adubacao_por_grupo(
+                "tuberculos", "tuberculos_adubacao.json", "tuberculos_adubacao_v1"
+            )
+        }
+
+    def carregar_dados_outras(self) -> Dict[str, Dict[str, Any]]:
+        """Carrega e valida dados/culturas/outras/outras_comerciais_adubacao.json."""
+        return {
+            "adubacao": self._carregar_adubacao_por_grupo(
+                "outras", "outras_comerciais_adubacao.json", "outras_comerciais_adubacao_v1"
+            )
+        }
+
+    def carregar_dados_frutiferas(self) -> Dict[str, Dict[str, Any]]:
+        """Carrega e valida dados/culturas/frutiferas/frutiferas_adubacao.json."""
+        return {
+            "adubacao": self._carregar_adubacao_por_grupo(
+                "frutiferas", "frutiferas_adubacao.json", "frutiferas_adubacao_v1"
+            )
+        }
+
+    def carregar_dados_erva_mate(self) -> Dict[str, Dict[str, Any]]:
+        """Carrega e valida dados/culturas/erva_mate/erva_mate_adubacao.json."""
+        return {
+            "adubacao": self._carregar_adubacao_por_grupo(
+                "erva_mate", "erva_mate_adubacao.json", "erva_mate_adubacao_v1"
+            )
+        }
+
 
 # Função de conveniência para uso geral
 _carregador_global: Optional[Carregador] = None
@@ -701,3 +910,43 @@ def carregar_dados_graos() -> Dict[str, Dict[str, Any]]:
     if _carregador_global is None:
         _carregador_global = Carregador()
     return _carregador_global.carregar_dados_graos()
+
+
+def carregar_dados_hortalicas() -> Dict[str, Dict[str, Any]]:
+    """Carrega dados de adubação de hortaliças com cache global."""
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_dados_hortalicas()
+
+
+def carregar_dados_tuberculos() -> Dict[str, Dict[str, Any]]:
+    """Carrega dados de adubação de tubérculos com cache global."""
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_dados_tuberculos()
+
+
+def carregar_dados_outras() -> Dict[str, Dict[str, Any]]:
+    """Carrega dados de adubação de cana e tabaco com cache global."""
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_dados_outras()
+
+
+def carregar_dados_frutiferas() -> Dict[str, Dict[str, Any]]:
+    """Carrega dados de adubação de frutíferas com cache global."""
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_dados_frutiferas()
+
+
+def carregar_dados_erva_mate() -> Dict[str, Dict[str, Any]]:
+    """Carrega dados de adubação de erva-mate com cache global."""
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_dados_erva_mate()

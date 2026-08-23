@@ -1,0 +1,495 @@
+{
+  "descricao": "Adubacao da erva-mate: programa desde o plantio (tres fases) e programa de recuperacao",
+  "fonte": {
+    "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os Estados do RS e de SC, 11. ed., 2016",
+    "extraido_do_pdf_em": "2026-08-22",
+    "conferido_por_autor_em": null,
+    "capitulo": "6.6.5",
+    "paginas": [
+      239,
+      244
+    ]
+  },
+  "unidades": {
+    "n": "kg de N/ha",
+    "p": "kg de P2O5/ha",
+    "k": "kg de K2O/ha"
+  },
+  "classes_mo": {
+    "padrao": [
+      {
+        "id": "ate_2_5",
+        "de": null,
+        "ate": 2.5
+      },
+      {
+        "id": "de_2_6_a_5_0",
+        "de": 2.5,
+        "ate": 5.0
+      },
+      {
+        "id": "acima_5_0",
+        "de": 5.0,
+        "ate": null
+      }
+    ]
+  },
+  "classes_teor": [
+    "muito_baixo",
+    "baixo",
+    "medio",
+    "alto",
+    "muito_alto"
+  ],
+  "culturas": {
+    "erva_mate": {
+      "nome": "Erva-mate",
+      "culturas_incluidas": [
+        "erva-mate"
+      ],
+      "densidade_referencia": "2.000 plantas/ha",
+      "calagem": {
+        "criterio": "erva_mate_e_florestais",
+        "observacao": "Especie tolerante a acidez: sem pH de referencia. A calagem visa apenas o suprimento de Ca e Mg (ver Cap. 5)."
+      },
+      "variavel_adicional": [
+        {
+          "campo": "programa",
+          "valores": [
+            "desde_o_plantio",
+            "recuperacao"
+          ],
+          "obrigatorio": true
+        },
+        {
+          "campo": "fase",
+          "valores": [
+            "plantio_e_crescimento",
+            "formacao_da_copa",
+            "producao"
+          ],
+          "obrigatorio": true,
+          "condicao": "programa == desde_o_plantio"
+        },
+        {
+          "campo": "manejo_galho_grosso",
+          "valores": [
+            "manejo_1_retido",
+            "manejo_2_retirado"
+          ],
+          "obrigatorio": true,
+          "condicao": "fase == producao ou programa == recuperacao"
+        },
+        {
+          "campo": "massa_verde_t_ha",
+          "tipo": "numero",
+          "obrigatorio": true,
+          "condicao": "fase == producao ou programa == recuperacao",
+          "descricao": "MV: massa verde de erva-mate comercial produzida, em t/ha"
+        }
+      ],
+      "programa_desde_o_plantio": {
+        "plantio_e_crescimento": {
+          "momentos": [
+            "plantio",
+            "6_meses",
+            "14_meses",
+            "18_meses"
+          ],
+          "n": {
+            "tipo": "por_classe_mo_e_momento",
+            "classes_mo": "padrao",
+            "doses": {
+              "ate_2_5": {
+                "plantio": {
+                  "valor": 15
+                },
+                "6_meses": {
+                  "valor": 30
+                },
+                "14_meses": {
+                  "valor": 30
+                },
+                "18_meses": {
+                  "valor": 30
+                }
+              },
+              "de_2_6_a_5_0": {
+                "plantio": {
+                  "valor": 10
+                },
+                "6_meses": {
+                  "valor": 20
+                },
+                "14_meses": {
+                  "valor": 20
+                },
+                "18_meses": {
+                  "valor": 20
+                }
+              },
+              "acima_5_0": {
+                "plantio": {
+                  "valor": 5
+                },
+                "6_meses": {
+                  "valor": 10
+                },
+                "14_meses": {
+                  "valor": 10
+                },
+                "18_meses": {
+                  "valor": 10
+                }
+              }
+            }
+          },
+          "p": {
+            "tipo": "por_classe_teor_e_momento",
+            "doses": {
+              "muito_baixo": {
+                "plantio": {
+                  "valor": 35
+                },
+                "6_meses": {
+                  "valor": 35
+                },
+                "14_meses": {
+                  "valor": 35
+                },
+                "18_meses": {
+                  "valor": 35
+                }
+              },
+              "baixo": {
+                "plantio": {
+                  "valor": 25
+                },
+                "6_meses": {
+                  "valor": 25
+                },
+                "14_meses": {
+                  "valor": 25
+                },
+                "18_meses": {
+                  "valor": 25
+                }
+              },
+              "medio": {
+                "plantio": {
+                  "valor": 20
+                },
+                "6_meses": {
+                  "valor": 20
+                },
+                "14_meses": {
+                  "valor": 20
+                },
+                "18_meses": {
+                  "valor": 20
+                }
+              },
+              "alto": {
+                "plantio": {
+                  "valor": 15
+                },
+                "6_meses": {
+                  "valor": 15
+                },
+                "14_meses": {
+                  "valor": 15
+                },
+                "18_meses": {
+                  "valor": 15
+                }
+              },
+              "muito_alto": {
+                "plantio": {
+                  "valor": 15,
+                  "qualificador": "ate"
+                },
+                "6_meses": {
+                  "valor": 15,
+                  "qualificador": "ate"
+                },
+                "14_meses": {
+                  "valor": 15,
+                  "qualificador": "ate"
+                },
+                "18_meses": {
+                  "valor": 15,
+                  "qualificador": "ate"
+                }
+              }
+            }
+          },
+          "k": {
+            "tipo": "por_classe_teor_e_momento",
+            "doses": {
+              "muito_baixo": {
+                "plantio": {
+                  "valor": 30
+                },
+                "6_meses": {
+                  "valor": 30
+                },
+                "14_meses": {
+                  "valor": 35
+                },
+                "18_meses": {
+                  "valor": 35
+                }
+              },
+              "baixo": {
+                "plantio": {
+                  "valor": 20
+                },
+                "6_meses": {
+                  "valor": 20
+                },
+                "14_meses": {
+                  "valor": 25
+                },
+                "18_meses": {
+                  "valor": 25
+                }
+              },
+              "medio": {
+                "plantio": {
+                  "valor": 15
+                },
+                "6_meses": {
+                  "valor": 15
+                },
+                "14_meses": {
+                  "valor": 20
+                },
+                "18_meses": {
+                  "valor": 20
+                }
+              },
+              "alto": {
+                "plantio": {
+                  "valor": 10
+                },
+                "6_meses": {
+                  "valor": 10
+                },
+                "14_meses": {
+                  "valor": 15
+                },
+                "18_meses": {
+                  "valor": 15
+                }
+              },
+              "muito_alto": {
+                "plantio": {
+                  "valor": 10,
+                  "qualificador": "ate"
+                },
+                "6_meses": {
+                  "valor": 10,
+                  "qualificador": "ate"
+                },
+                "14_meses": {
+                  "valor": 15,
+                  "qualificador": "ate"
+                },
+                "18_meses": {
+                  "valor": 15,
+                  "qualificador": "ate"
+                }
+              }
+            }
+          },
+          "observacao": "Do plantio ate a primeira poda (~2 anos). Adubacao de crescimento em tres aplicacoes: 6, 14 e 18 meses (plantio em julho)."
+        },
+        "formacao_da_copa": {
+          "n": {
+            "tipo": "por_classe_mo",
+            "classes_mo": "padrao",
+            "unidade": "kg de N/ha/ano",
+            "doses": {
+              "ate_2_5": {
+                "valor": 80
+              },
+              "de_2_6_a_5_0": {
+                "valor": 60
+              },
+              "acima_5_0": {
+                "valor": 40
+              }
+            }
+          },
+          "pk": {
+            "tipo": "por_classe_teor",
+            "unidade": "kg/ha/ano",
+            "p": {
+              "muito_baixo": {
+                "valor": 100
+              },
+              "baixo": {
+                "valor": 70
+              },
+              "medio": {
+                "valor": 55
+              },
+              "alto": {
+                "valor": 40
+              },
+              "muito_alto": {
+                "valor": 40,
+                "qualificador": "ate"
+              }
+            },
+            "k": {
+              "muito_baixo": {
+                "valor": 90
+              },
+              "baixo": {
+                "valor": 60
+              },
+              "medio": {
+                "valor": 45
+              },
+              "alto": {
+                "valor": 30
+              },
+              "muito_alto": {
+                "valor": 30,
+                "qualificador": "ate"
+              }
+            }
+          },
+          "observacao": "Da 1a ate a 3a colheita (2 aos 5-6 anos). Doses anuais, divididas em duas parcelas iguais em janeiro e setembro."
+        },
+        "producao": {
+          "indexacao": "massa_verde_e_manejo_do_galho_grosso",
+          "n": {
+            "tipo": "formula_por_classe_mo_e_manejo",
+            "formula": "coeficiente * MV",
+            "unidade": "kg de N/ha",
+            "coeficientes": {
+              "ate_2_5": {
+                "manejo_1_retido": 12,
+                "manejo_2_retirado": 14
+              },
+              "de_2_6_a_5_0": {
+                "manejo_1_retido": 11,
+                "manejo_2_retirado": 13
+              },
+              "acima_5_0": {
+                "manejo_1_retido": 10,
+                "manejo_2_retirado": 11
+              }
+            }
+          },
+          "pk": {
+            "tipo": "formula_por_manejo",
+            "formula": "coeficiente * MV",
+            "coeficientes": {
+              "manejo_1_retido": {
+                "p": 1.0,
+                "k": 6.5
+              },
+              "manejo_2_retirado": {
+                "p": 1.2,
+                "k": 8.5
+              }
+            }
+          },
+          "observacao": "Apos a 3a colheita. Fracionar em tres aplicacoes (colheita a cada 18 meses) ou quatro (a cada 24 meses), em janeiro e setembro."
+        }
+      },
+      "programa_recuperacao": {
+        "condicao_de_uso": "Ervais estabelecidos com teores de P e/ou K abaixo do teor critico. Se apenas um nutriente estiver deficitario, aplicar o programa de recuperacao somente a ele; o outro segue o regime normal de producao.",
+        "n": {
+          "tipo": "formula_por_classe_mo_e_manejo",
+          "formula": "base + coeficiente * MV",
+          "unidade": "kg de N/ha",
+          "parametros": {
+            "ate_2_5": {
+              "manejo_1_retido": {
+                "base": 70,
+                "coeficiente": 12
+              },
+              "manejo_2_retirado": {
+                "base": 70,
+                "coeficiente": 14
+              }
+            },
+            "de_2_6_a_5_0": {
+              "manejo_1_retido": {
+                "base": 50,
+                "coeficiente": 11
+              },
+              "manejo_2_retirado": {
+                "base": 50,
+                "coeficiente": 13
+              }
+            },
+            "acima_5_0": {
+              "manejo_1_retido": {
+                "base": 30,
+                "coeficiente": 9
+              },
+              "manejo_2_retirado": {
+                "base": 30,
+                "coeficiente": 11
+              }
+            }
+          },
+          "nota": "Atencao: os coeficientes da faixa 'acima de 5,0%' na recuperacao (9 e 11) diferem dos da producao (10 e 11). Conferido na p. 244."
+        },
+        "pk": {
+          "tipo": "formula_por_classe_teor_e_manejo",
+          "formula": "base + coeficiente * MV",
+          "classes_atendidas": [
+            "muito_baixo",
+            "baixo",
+            "medio"
+          ],
+          "nota": "A tabela de recuperacao NAO tem linhas para as classes Alto e Muito alto: nessas classes o nutriente nao esta abaixo do teor critico e o erval segue o regime de producao.",
+          "parametros": {
+            "muito_baixo": {
+              "p": {
+                "base": 180
+              },
+              "k": {
+                "base": 180
+              }
+            },
+            "baixo": {
+              "p": {
+                "base": 90
+              },
+              "k": {
+                "base": 90
+              }
+            },
+            "medio": {
+              "p": {
+                "base": 45
+              },
+              "k": {
+                "base": 45
+              }
+            }
+          },
+          "coeficientes_por_manejo": {
+            "manejo_1_retido": {
+              "p": 1.0,
+              "k": 6.5
+            },
+            "manejo_2_retirado": {
+              "p": 1.2,
+              "k": 8.5
+            }
+          }
+        },
+        "observacao": "Apos a recuperacao (uma ou duas colheitas), o erval retorna ao regime de producao."
+      },
+      "fonte": "Secao 6.6.5, p. 239-244"
+    }
+  }
+}

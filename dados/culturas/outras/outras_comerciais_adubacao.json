@@ -1,0 +1,631 @@
+{
+  "descricao": "Adubacao com N, P2O5 e K2O para cana-de-acucar e tabaco",
+  "fonte": {
+    "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os Estados do RS e de SC, 11. ed., 2016",
+    "extraido_do_pdf_em": "2026-08-22",
+    "conferido_por_autor_em": null,
+    "capitulo": "6.9",
+    "paginas": [
+      280,
+      283
+    ]
+  },
+  "unidades": {
+    "n": "kg de N/ha",
+    "p": "kg de P2O5/ha",
+    "k": "kg de K2O/ha"
+  },
+  "classes_mo": {
+    "padrao": [
+      {
+        "id": "ate_2_5",
+        "de": null,
+        "ate": 2.5
+      },
+      {
+        "id": "de_2_6_a_5_0",
+        "de": 2.5,
+        "ate": 5.0
+      },
+      {
+        "id": "acima_5_0",
+        "de": 5.0,
+        "ate": null
+      }
+    ],
+    "tabaco": [
+      {
+        "id": "ate_1_0",
+        "de": null,
+        "ate": 1.0
+      },
+      {
+        "id": "de_1_1_a_2_0",
+        "de": 1.0,
+        "ate": 2.0
+      },
+      {
+        "id": "de_2_1_a_3_0",
+        "de": 2.0,
+        "ate": 3.0
+      },
+      {
+        "id": "de_3_1_a_4_0",
+        "de": 3.0,
+        "ate": 4.0
+      },
+      {
+        "id": "de_4_1_a_5_0",
+        "de": 4.0,
+        "ate": 5.0
+      },
+      {
+        "id": "acima_5_0",
+        "de": 5.0,
+        "ate": null
+      }
+    ]
+  },
+  "classes_teor": [
+    "muito_baixo",
+    "baixo",
+    "medio",
+    "alto",
+    "muito_alto"
+  ],
+  "culturas": {
+    "cana_de_acucar": {
+      "nome": "Cana-de-acucar",
+      "culturas_incluidas": [
+        "cana-de-acucar"
+      ],
+      "ciclos": [
+        "cana_planta",
+        "cana_soca"
+      ],
+      "variavel_adicional": {
+        "campo": "ciclo",
+        "valores": [
+          "cana_planta",
+          "cana_soca"
+        ],
+        "obrigatorio": true
+      },
+      "cana_planta": {
+        "n": {
+          "tipo": "por_classe_mo",
+          "classes_mo": "padrao",
+          "doses": {
+            "ate_2_5": {
+              "valor": 60
+            },
+            "de_2_6_a_5_0": {
+              "valor": 50
+            },
+            "acima_5_0": {
+              "valor": 40,
+              "qualificador": "ate"
+            }
+          }
+        },
+        "parcelamento_n": "10 a 20 kg de N/ha no plantio, no fundo do sulco; restante em cobertura antes do fechamento do canavial (aprox. 90 a 100 DAP).",
+        "pk": {
+          "tipo": "por_classe_teor_e_produtividade",
+          "faixas_produtividade": [
+            {
+              "id": "menor_90",
+              "de": null,
+              "ate": 90
+            },
+            {
+              "id": "de_90_a_120",
+              "de": 90,
+              "ate": 120
+            },
+            {
+              "id": "maior_120",
+              "de": 120,
+              "ate": null
+            }
+          ],
+          "p": {
+            "muito_baixo": {
+              "menor_90": {
+                "valor": 110
+              },
+              "de_90_a_120": {
+                "valor": 120
+              },
+              "maior_120": {
+                "valor": 140
+              }
+            },
+            "baixo": {
+              "menor_90": {
+                "valor": 70
+              },
+              "de_90_a_120": {
+                "valor": 80
+              },
+              "maior_120": {
+                "valor": 100
+              }
+            },
+            "medio": {
+              "menor_90": {
+                "valor": 50
+              },
+              "de_90_a_120": {
+                "valor": 60
+              },
+              "maior_120": {
+                "valor": 80
+              }
+            },
+            "alto": {
+              "menor_90": {
+                "valor": 30
+              },
+              "de_90_a_120": {
+                "valor": 40
+              },
+              "maior_120": {
+                "valor": 60
+              }
+            },
+            "muito_alto": {
+              "menor_90": {
+                "valor": 30,
+                "qualificador": "ate"
+              },
+              "de_90_a_120": {
+                "valor": 40,
+                "qualificador": "ate"
+              },
+              "maior_120": {
+                "valor": 60,
+                "qualificador": "ate"
+              }
+            }
+          },
+          "k": {
+            "muito_baixo": {
+              "menor_90": {
+                "valor": 110
+              },
+              "de_90_a_120": {
+                "valor": 120
+              },
+              "maior_120": {
+                "valor": 130
+              }
+            },
+            "baixo": {
+              "menor_90": {
+                "valor": 70
+              },
+              "de_90_a_120": {
+                "valor": 80
+              },
+              "maior_120": {
+                "valor": 90
+              }
+            },
+            "medio": {
+              "menor_90": {
+                "valor": 50
+              },
+              "de_90_a_120": {
+                "valor": 60
+              },
+              "maior_120": {
+                "valor": 70
+              }
+            },
+            "alto": {
+              "menor_90": {
+                "valor": 30
+              },
+              "de_90_a_120": {
+                "valor": 40
+              },
+              "maior_120": {
+                "valor": 50
+              }
+            },
+            "muito_alto": {
+              "menor_90": {
+                "valor": 30,
+                "qualificador": "ate"
+              },
+              "de_90_a_120": {
+                "valor": 40,
+                "qualificador": "ate"
+              },
+              "maior_120": {
+                "valor": 50,
+                "qualificador": "ate"
+              }
+            }
+          }
+        },
+        "observacoes": [
+          "Aplicar P e K junto com o N no plantio, no fundo do sulco.",
+          "Em solos arenosos, fracionar o K: 2/3 no plantio ou apos o corte e o restante em cobertura.",
+          "Vinhaca como fonte de K: 50 a 200 m3/ha; descontar o K aportado das doses da tabela."
+        ]
+      },
+      "cana_soca": {
+        "n": {
+          "tipo": "por_classe_mo_e_produtividade",
+          "classes_mo": "padrao",
+          "faixas_produtividade": [
+            {
+              "id": "menor_60",
+              "de": null,
+              "ate": 60
+            },
+            {
+              "id": "de_60_a_90",
+              "de": 60,
+              "ate": 90
+            },
+            {
+              "id": "maior_90",
+              "de": 90,
+              "ate": null
+            }
+          ],
+          "doses": {
+            "ate_2_5": {
+              "menor_60": {
+                "valor": 60
+              },
+              "de_60_a_90": {
+                "valor": 80
+              },
+              "maior_90": {
+                "valor": 100
+              }
+            },
+            "de_2_6_a_5_0": {
+              "menor_60": {
+                "valor": 50
+              },
+              "de_60_a_90": {
+                "valor": 70
+              },
+              "maior_90": {
+                "valor": 90
+              }
+            },
+            "acima_5_0": {
+              "menor_60": {
+                "valor": 40
+              },
+              "de_60_a_90": {
+                "valor": 60
+              },
+              "maior_90": {
+                "valor": 80
+              }
+            }
+          }
+        },
+        "pk": {
+          "tipo": "por_classe_teor_e_produtividade",
+          "faixas_produtividade": [
+            {
+              "id": "menor_60",
+              "de": null,
+              "ate": 60
+            },
+            {
+              "id": "de_60_a_90",
+              "de": 60,
+              "ate": 90
+            },
+            {
+              "id": "maior_90",
+              "de": 90,
+              "ate": null
+            }
+          ],
+          "p": {
+            "muito_baixo": {
+              "menor_60": {
+                "valor": 30
+              },
+              "de_60_a_90": {
+                "valor": 40
+              },
+              "maior_90": {
+                "valor": 50
+              }
+            },
+            "baixo": {
+              "menor_60": {
+                "valor": 30
+              },
+              "de_60_a_90": {
+                "valor": 30
+              },
+              "maior_90": {
+                "valor": 40
+              }
+            },
+            "medio": {
+              "menor_60": {
+                "valor": 30
+              },
+              "de_60_a_90": {
+                "valor": 30
+              },
+              "maior_90": {
+                "valor": 30
+              }
+            },
+            "alto": {
+              "menor_60": {
+                "valor": 30
+              },
+              "de_60_a_90": {
+                "valor": 30
+              },
+              "maior_90": {
+                "valor": 30
+              }
+            },
+            "muito_alto": {
+              "menor_60": {
+                "valor": 0
+              },
+              "de_60_a_90": {
+                "valor": 0
+              },
+              "maior_90": {
+                "valor": 0
+              }
+            }
+          },
+          "k": {
+            "muito_baixo": {
+              "menor_60": {
+                "valor": 80
+              },
+              "de_60_a_90": {
+                "valor": 100
+              },
+              "maior_90": {
+                "valor": 120
+              }
+            },
+            "baixo": {
+              "menor_60": {
+                "valor": 50
+              },
+              "de_60_a_90": {
+                "valor": 70
+              },
+              "maior_90": {
+                "valor": 90
+              }
+            },
+            "medio": {
+              "menor_60": {
+                "valor": 30
+              },
+              "de_60_a_90": {
+                "valor": 50
+              },
+              "maior_90": {
+                "valor": 60
+              }
+            },
+            "alto": {
+              "menor_60": {
+                "valor": 30,
+                "qualificador": "ate"
+              },
+              "de_60_a_90": {
+                "valor": 30
+              },
+              "maior_90": {
+                "valor": 30
+              }
+            },
+            "muito_alto": {
+              "menor_60": {
+                "valor": 0
+              },
+              "de_60_a_90": {
+                "valor": 30,
+                "qualificador": "ate"
+              },
+              "maior_90": {
+                "valor": 30,
+                "qualificador": "ate"
+              }
+            }
+          }
+        },
+        "observacoes": [
+          "Incorporar o fertilizante proximo da linha (20 cm) antes do fechamento do canavial.",
+          "Sem incorporacao sobre a palha, esperar perdas de N por volatilizacao quando a fonte for ureia."
+        ]
+      },
+      "notas_de_transcricao": [
+        "Cana-soca, K, classe Alto: apenas a coluna '< 60 t/ha' traz o qualificador 'ate'; as demais sao valores exatos (30). Conferido visualmente na p. 282.",
+        "Cana-soca, K, classe Muito Alto: '< 60' e zero exato; '60 a 90' e '> 90' trazem 'ate 30'."
+      ],
+      "fonte": "Secao 6.9.1, p. 280-282"
+    },
+    "tabaco": {
+      "nome": "Tabaco",
+      "culturas_incluidas": [
+        "tabaco"
+      ],
+      "variavel_adicional": {
+        "campo": "tipo",
+        "valores": [
+          "virginia",
+          "burley"
+        ],
+        "obrigatorio": true
+      },
+      "populacao_referencia": {
+        "virginia": "15.000 a 17.000 plantas/ha",
+        "burley": "18.000 a 20.000 plantas/ha"
+      },
+      "n": {
+        "tipo": "por_classe_mo_e_tipo",
+        "classes_mo": "tabaco",
+        "doses": {
+          "ate_1_0": {
+            "virginia": {
+              "min": 160,
+              "max": 180
+            },
+            "burley": {
+              "min": 190,
+              "max": 210
+            }
+          },
+          "de_1_1_a_2_0": {
+            "virginia": {
+              "min": 140,
+              "max": 160
+            },
+            "burley": {
+              "min": 180,
+              "max": 190
+            }
+          },
+          "de_2_1_a_3_0": {
+            "virginia": {
+              "min": 120,
+              "max": 140
+            },
+            "burley": {
+              "min": 160,
+              "max": 180
+            }
+          },
+          "de_3_1_a_4_0": {
+            "virginia": {
+              "min": 110,
+              "max": 120
+            },
+            "burley": {
+              "min": 140,
+              "max": 160
+            }
+          },
+          "de_4_1_a_5_0": {
+            "virginia": {
+              "min": 100,
+              "max": 110
+            },
+            "burley": {
+              "min": 120,
+              "max": 140
+            }
+          },
+          "acima_5_0": {
+            "virginia": {
+              "valor": 100,
+              "qualificador": "ate"
+            },
+            "burley": {
+              "valor": 120,
+              "qualificador": "ate"
+            }
+          }
+        }
+      },
+      "pk": {
+        "tipo": "por_classe_teor_e_tipo",
+        "p_comum_aos_tipos": true,
+        "p": {
+          "muito_baixo": {
+            "valor": 120
+          },
+          "baixo": {
+            "valor": 80
+          },
+          "medio": {
+            "valor": 60
+          },
+          "alto": {
+            "valor": 40
+          },
+          "muito_alto": {
+            "valor": 20,
+            "qualificador": "ate"
+          }
+        },
+        "k": {
+          "muito_baixo": {
+            "virginia": {
+              "valor": 200
+            },
+            "burley": {
+              "valor": 210
+            }
+          },
+          "baixo": {
+            "virginia": {
+              "valor": 160
+            },
+            "burley": {
+              "valor": 170
+            }
+          },
+          "medio": {
+            "virginia": {
+              "valor": 140
+            },
+            "burley": {
+              "valor": 150
+            }
+          },
+          "alto": {
+            "virginia": {
+              "valor": 120
+            },
+            "burley": {
+              "valor": 130
+            }
+          },
+          "muito_alto": {
+            "virginia": {
+              "valor": 105,
+              "qualificador": "ate"
+            },
+            "burley": {
+              "valor": 115,
+              "qualificador": "ate"
+            }
+          }
+        }
+      },
+      "parcelamento": {
+        "n": "60 a 80 kg de N/ha no plantio (pre-transplante) e o restante em cobertura, parcelado. Para o tipo Virginia, no minimo 50% do N deve vir de fertilizantes nitricos.",
+        "p": "Integralmente no plantio.",
+        "k": "60 a 80 kg de K2O/ha no plantio (pre-transplante) e o restante em cobertura."
+      },
+      "restricoes": [
+        {
+          "nutriente": "cloro",
+          "limite_kg_ha": 50,
+          "observacao": "Maximo de 50 kg de Cl/ha, usado somente na adubacao de plantio."
+        }
+      ],
+      "observacoes": [
+        "Em sistemas conservacionistas (plantio direto na palha) as doses de P2O5 e K2O podem ser reduzidas, seguindo orientacao da assistencia tecnica (o Manual nao quantifica a reducao).",
+        "As recomendacoes do tabaco foram elaboradas por tecnicos das empresas integradoras do setor."
+      ],
+      "fonte": "Secao 6.9.2, p. 282-283"
+    }
+  }
+}

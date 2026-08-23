@@ -16,10 +16,10 @@ Atualize a coluna **Estado** ao concluir cada etapa. Legenda: `pendente` · `em 
 | Sprint | Período | Entregável | Estado |
 |---|---|---|---|
 | S0 | 16–31/08 | Repositório, ambiente, estrutura, `dados/comum/` transcrito, `AnaliseSolo` + carregador + `Trace` | concluído |
-| S1 | 01–15/09 | `motor/calagem.py` completo e testado; `mapa_culturas.json` com as 21 culturas de grãos; `motor/adubacao.py` consumindo `graos_adubacao_n/pk.json` | em andamento |
+| S1 | 01–15/09 | `motor/calagem.py` completo e testado; `mapa_culturas.json` com as 21 culturas de grãos; `motor/adubacao.py` consumindo `graos_adubacao_n/pk.json` | em andamento — `mapa_culturas.json` e `motor/adubacao.py` prontos; `motor/calagem.py` cobre 14 dos 15 critérios (falta só `graos_pd_com_restricoes`, bloqueado por D6 — aguarda o autor reconferir o Manual) |
 | S2 | 16–30/09 | 21 grãos; formulário web; laudo em tela; **aptidão v0**; fluxo ponta a ponta — **marco M1** | pendente |
-| S3 | 01–15/10 | Hortaliças (18), tubérculos (2), cana e tabaco | pendente |
-| S4 | 16–31/10 | Frutíferas (17, três fases) e erva-mate — **marco M2** | pendente |
+| S3 | 01–15/10 | Hortaliças (18), tubérculos (2), cana e tabaco | em andamento — adubação das 4 famílias transcrita e conferida (`dados/culturas/hortalicas`, `tuberculos`, `outras`); falta motor de adubação para esses grupos e casos de teste |
+| S4 | 16–31/10 | Frutíferas (17, três fases) e erva-mate — **marco M2** | em andamento — adubação de frutíferas e erva-mate transcrita e conferida; falta motor de adubação para esses grupos e casos de teste |
 | S5 | 01–15/11 | Aptidão v1; 60–80 casos de teste com oráculo; script de concordância | pendente |
 | S6 | 16–30/11 | Validação, análise de discordâncias, comparação com FertFacil, SUS | pendente |
 | S7 | 01–07/12 | Revisão final, formatação, slides, ensaio | pendente |
@@ -40,7 +40,7 @@ Se houver atraso, o escopo é reduzido por camadas, nesta ordem — nunca sacrif
 
 | | Etapa | Estado |
 |---|---|---|
-| a | Estruturação da base de conhecimento (JSON) | em andamento |
+| a | Estruturação da base de conhecimento (JSON) | em andamento — `dados/comum/` e a adubação dos 6 grupos (grãos, hortaliças, tubérculos, outras, frutíferas, erva-mate) transcritas e conferidas; falta `corretivos.json` (Cap. 8) e dados de aptidão (bloqueados por P1) |
 | b | Definição formal das regras SE-ENTÃO | em andamento |
 | c | Definição dos critérios de aptidão edáfica | bloqueado por P1 |
 | d | Módulo de entrada de dados | pendente |

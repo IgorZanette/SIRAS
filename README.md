@@ -32,16 +32,20 @@ pip install -r requirements.txt
 python app.py
 ```
 
-A aplicação roda em `http://localhost:5000`. Não exige cadastro, banco de dados ou conexão com a
-internet.
+**Estado atual:** a camada web (Flask) ainda não foi implementada — `python app.py` hoje só
+confirma que o ambiente está configurado, sem subir servidor. O motor de inferência
+(calagem e adubação de grãos) já funciona e é validado por linha de comando; ver
+`docs/ROADMAP.md` para o que falta.
 
 ## Testes
 
 ```bash
-pytest                                   # todos os testes
-pytest testes/test_validacao.py          # apenas a validação do TCC
-python scripts/gera_tabela_concordancia.py   # tabela de resultados da monografia
+pytest                            # todos os testes
+python scripts/valida_base.py     # valida dados/comum/ contra os schemas
 ```
+
+`testes/test_validacao.py` e `scripts/gera_tabela_concordancia.py` (comparação com o
+oráculo, Seção 4.4 da proposta) ainda não existem — ver `docs/ROADMAP.md`, etapas g/h.
 
 ## Organização do repositório
 
@@ -52,8 +56,8 @@ python scripts/gera_tabela_concordancia.py   # tabela de resultados da monografi
 | `siras/motor/` | Motor de inferência — as regras SE-ENTÃO |
 | `siras/relatorio/` | Montagem do laudo |
 | `siras/web/` | Camada web (Flask) |
-| `dados/comum/` | Tabelas gerais do Manual (SMP, pH de referência, critérios de calagem) |
-| `dados/culturas/` | Uma tabela de recomendação por cultura, agrupada por grupo |
+| `dados/comum/` | Tabelas gerais do Manual (SMP, pH de referência, critérios de calagem, interpretação de P/K) |
+| `dados/culturas/<grupo>/` | Tabelas de adubação compartilhadas por grupo de cultura (grãos, hortaliças, tubérculos, outras comerciais, frutíferas, erva-mate) |
 | `testes/casos/` | Casos de teste e valores de referência (oráculo da validação) |
 | `docs/` | Documentação técnica, decisões de projeto e rastreabilidade das fontes |
 

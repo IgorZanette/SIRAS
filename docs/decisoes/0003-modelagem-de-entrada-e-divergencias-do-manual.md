@@ -34,9 +34,10 @@ o laudo de solo já traz m% calculado. `AnaliseSolo.saturacao_al` agora é um ca
 quando informado, é usado diretamente; quando ausente, `obter_saturacao_al()` calcula pela
 CTC efetiva como a decisão original previa. Implementado em `siras/dominio/analise.py`.
 
-*(Implementado em `siras/motor/calagem.py` para `graos_pd_consolidado`. Ainda não cobre
-`graos_pd_com_restricoes` — depende de D6 — nem `batata_e_batata_doce`/`frutiferas_ph55`,
-que usam `decisao.tipo="ph_menor_que_e_al"`, ainda não implementado.)*
+*(Implementado em `siras/motor/calagem.py` para `graos_pd_consolidado` (via
+`nao_aplicar_se`) e, desde 2026-08-22, também para `batata_e_batata_doce` e
+`frutiferas_ph55` (via `decisao.tipo="ph_menor_que_e_al"`, mesmo `obter_saturacao_al()`).
+Ainda não cobre `graos_pd_com_restricoes` — depende de D6 (SMP de duas camadas).)*
 
 ## D5 — `Contexto.profundidade_cm` renomeado para `profundidade_incorporacao_cm`
 
@@ -178,7 +179,12 @@ D4, D5, D7, D8 e D9 foram implementadas em `siras/motor/calagem.py` e `siras/mot
 (`testes/casos/casos_recomendacao.json`) e confirmou que batem com `verificacao_cruzada`.
 `testes/unidade/test_casos_validados.py` liga esses 10 casos diretamente ao motor real.
 
+**Atualização de 2026-08-22:** `decisao.tipo="ph_menor_que_e_al"` foi implementado (cobre
+`batata_e_batata_doce` e `frutiferas_ph55`), junto com a expansão de `mapa_culturas.json`
+para as 21 culturas de grãos. `motor/calagem.py` cobre agora 14 dos 15 critérios de
+`criterios_calagem.json` — só `graos_pd_com_restricoes` continua pendente.
+
 D6 (SMP e saturação por Al em duas camadas, `graos_pd_com_restricoes`) continua pendente —
-nenhum caso validado o exercita ainda. `decisao.tipo="ph_menor_que_e_al"`
-(`batata_e_batata_doce`, `frutiferas_ph55`) e `usar_smp_medio_das_camadas` também continuam
-fora do escopo implementado, e levantam `NotImplementedError` deliberadamente.
+nenhum caso validado o exercita ainda, e a decisão original de D6 foi revisada (ver seção D6
+acima) após identificar risco de contaminar o módulo de adubação. `usar_smp_medio_das_camadas`
+também continua fora do escopo implementado, e levanta `NotImplementedError` deliberadamente.

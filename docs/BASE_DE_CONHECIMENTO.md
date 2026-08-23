@@ -17,7 +17,7 @@ tocar em nenhum arquivo `.py`.
 | `calagem_smp.json` | Tabela 5.2, p. 70 + ajustes das p. 71–72, 83 e 298 | transcrito e conferido |
 | `ph_referencia.json` | Tabela 5.1, p. 68 | transcrito e conferido |
 | `criterios_calagem.json` | Tabelas 5.3 (p. 75), 5.5 (p. 81), 5.6 (p. 83), 5.7 (p. 86) | transcrito e conferido |
-| `mapa_culturas.json` | Resolução cultura → critério de calagem (não é tabela do Manual) | parcial — só soja/macieira/erva-mate |
+| `mapa_culturas.json` | Resolução cultura → critério de calagem (não é tabela do Manual) | 21 culturas de grãos + macieira + erva-mate |
 | `interpretacao_p.json` | Tabelas 6.2–6.6, p. 93–94 — classes de P por classe de argila | transcrito e conferido |
 | `interpretacao_k.json` | Tabelas 6.7–6.10, p. 95–96 — classes de K por CTC pH 7,0 | transcrito e conferido |
 | `interpretacao_geral.json` | Tabelas 6.1, 6.11, 6.12, p. 91/97/98 — MO, CTC, argila, Ca, Mg, S, micronutrientes | transcrito e conferido |
@@ -49,50 +49,26 @@ mesmo padrão de `calagem_smp.json` e dos arquivos de grãos. Uma alteração ac
 qualquer dose, mesmo uma que não quebre a monotonicidade por classe de teor, faz o
 carregador falhar.
 
-## Arquivos de cultura (`dados/culturas/<grupo>/<cultura>.json`)
+## Nota de design — não há mais "um arquivo por cultura"
 
-Não force um schema único para os 61 itens. Cada arquivo declara qual schema segue, no campo
-`schema`, e é validado contra o JSON Schema correspondente em `siras/conhecimento/esquemas/`:
+Uma versão anterior deste documento previa um arquivo por cultura
+(`dados/culturas/<grupo>/<cultura>.json`, schemas `graos_v1`/`hortalicas_v1`/`frutifera_v1`/
+`erva_mate_v1`/`outras_v1`, cada um com seu próprio campo `criterio_calagem`). Esse design
+nunca chegou a ser implementado e foi abandonado em favor do padrão que está de fato em
+produção — a tabela "Arquivos por grupo de cultura" acima: **um arquivo por grupo inteiro**,
+com todas as culturas do grupo em `culturas.<id>` (o mesmo padrão já usado para calagem em
+`criterios_calagem.json`, evitando duplicar tabela do Manual 21 ou 61 vezes).
 
-| Schema | Grupos | Particularidade |
-|---|---|---|
-| `graos_v1` | grãos (21) | dose por classe de disponibilidade × expectativa de rendimento |
-| `hortalicas_v1` | hortaliças (18), tubérculos (2) | lógica próxima à de grãos |
-| `frutifera_v1` | frutíferas (17) | três fases; P e K de pré-plantio em tabela compartilhada |
-| `erva_mate_v1` | erva-mate (1) | dois programas; produção calculada por massa verde e manejo |
-| `outras_v1` | cana, tabaco (2) | variantes (planta/soca; Virgínia/Burley) |
+A resolução cultura → critério de calagem vive em `dados/comum/mapa_culturas.json`, não num
+campo dentro do arquivo da cultura — ver `siras/motor/calagem.py::resolver_criterio_id()`.
 
-### Esqueleto de uma cultura de grãos
-
-```jsonc
-{
-  "schema": "graos_v1",
-  "id": "soja",
-  "nome": "Soja",
-  "grupo": "graos",
-  "fonte": { "manual": "CQFS-RS/SC, 11. ed., 2016", "capitulo": "6.x",
-             "tabelas": [], "paginas": [],
-             "transcrito_em": null, "conferido_em": null },
-
-  "criterio_calagem": "graos_convencional",   // id em criterios_calagem.json
-
-  "nitrogenio": { "aplica": false, "motivo": "fixacao_biologica_de_nitrogenio" },
-  "fosforo":  { "unidade": "kg/ha de P2O5", "modelo": "classe_x_expectativa_rendimento",
-                "expectativas_rendimento": [], "doses": {} },
-  "potassio": { "unidade": "kg/ha de K2O",  "modelo": "classe_x_expectativa_rendimento",
-                "expectativas_rendimento": [], "doses": {} },
-
-  "aptidao_edafica": {
-    "fonte": "PREENCHER - fonte INDEPENDENTE do Manual (ver docs/VALIDACAO.md)",
-    "criterios": []
-  }
-}
-```
-
-As chaves de classe de disponibilidade são sempre: `muito_baixo`, `baixo`, `medio`, `alto`,
-`muito_alto`.
+As chaves de classe de teor são sempre: `muito_baixo`, `baixo`, `medio`, `alto`, `muito_alto`
+(`dados/culturas/<grupo>/*.json`, nó `classes_teor`).
 
 ## Validação
 
-`scripts/valida_base.py` percorre `dados/` e valida cada arquivo contra o schema declarado. Deve
-falhar apontando arquivo e campo. Rode antes de cada commit que toque em `dados/`.
+`scripts/valida_base.py` hoje valida apenas `dados/comum/` (via `carregar_dados_comum()`). Os
+arquivos de `dados/culturas/<grupo>/` são validados por `Carregador.carregar_dados_graos()` /
+`carregar_dados_hortalicas()` / `carregar_dados_tuberculos()` / `carregar_dados_outras()` /
+`carregar_dados_frutiferas()` / `carregar_dados_erva_mate()`, exercitados pelos testes em
+`testes/unidade/` — ainda não há um único comando que valide `dados/` inteiro de uma vez.

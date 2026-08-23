@@ -3,12 +3,18 @@
   "fonte": {
     "manual": "CQFS-RS/SC, Manual de Calagem e Adubacao para os Estados do RS e de SC, 11. ed., 2016",
     "extraido_do_pdf_em": "2026-08-22",
-    "conferido_por_autor_em": null,
+    "conferido_por_autor_em": "2026-08-22",
     "capitulo": "6.6.5",
     "paginas": [
       239,
       244
     ]
+  },
+  "checksum": {
+    "descricao": "Soma de todos os valores numericos em 'culturas', para detectar alteracao acidental de qualquer dose em edicoes futuras.",
+    "culturas": 1,
+    "soma_total": 2885.4,
+    "verificado_em": "2026-08-22"
   },
   "unidades": {
     "n": "kg de N/ha",

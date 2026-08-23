@@ -430,13 +430,19 @@ def calcular_adubacao_hortalicas(
     ctc_ph7: float,
     expectativa_rendimento: Optional[float] = None,
     fase: Optional[str] = None,
+    fase_n: Optional[str] = None,
+    fase_pk: Optional[str] = None,
     dados_hortalicas: Optional[Dict[str, Any]] = None,
     dados_comuns: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Calcula N/P2O5/K2O para uma hortaliça (dados/culturas/hortalicas/).
 
-    `fase` só é necessária para o aspargo (única cultura do grupo com dose por fase de
-    cultivo, além da classe de teor/MO).
+    Só o aspargo usa fase de cultivo (além da classe de teor/MO), e com um detalhe: o
+    Manual nomeia as fases de N ('instalacao'/'formacao'/'manutencao') diferente das de
+    P/K ('pre_plantio'/'formacao'/'manutencao') — não é o mesmo eixo de 3 fases. `fase`
+    cobre o caso comum (mesma fase para os dois, ex.: 'formacao'/'manutencao');
+    `fase_n`/`fase_pk` sobrescrevem individualmente quando os nomes divergem (ex.: N em
+    'instalacao' com P/K em 'pre_plantio').
     """
     dados_hortalicas = dados_hortalicas if dados_hortalicas is not None else carregar_dados_hortalicas()
     dados_comuns = dados_comuns if dados_comuns is not None else carregar_dados_comum()
@@ -448,10 +454,13 @@ def calcular_adubacao_hortalicas(
 
     classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
 
-    indice_n = fase if entrada["n"].get("tipo", "").endswith("_e_fase") else None
+    fase_n = fase_n if fase_n is not None else fase
+    fase_pk = fase_pk if fase_pk is not None else fase
+
+    indice_n = fase_n if entrada["n"].get("tipo", "").endswith("_e_fase") else None
     n, motivo_n = _calcular_n_generico(entrada["n"], adubacao["classes_mo"], mo, indice_n)
 
-    indice_pk = fase if entrada["pk"].get("tipo", "").endswith("_e_fase") else None
+    indice_pk = fase_pk if entrada["pk"].get("tipo", "").endswith("_e_fase") else None
     p2o5, k2o = _calcular_pk_generico(entrada["pk"], classe_p, classe_k, indice_pk)
 
     n, p2o5, k2o = _aplicar_ajuste_expectativa(entrada, expectativa_rendimento, n, p2o5, k2o)

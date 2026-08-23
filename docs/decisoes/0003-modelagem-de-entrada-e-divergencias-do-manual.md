@@ -112,13 +112,11 @@ lê, em vez de o código assumir por convenção (`graos_pd_com_restricoes` como
    não necessariamente linear continua tecnicamente verdadeiro, mas é irrelevante aqui — o
    Manual prescreve o procedimento, e o SIRAS reproduz o Manual, não a físico-química.)
 
-   **Nova pendência que isso abre:** a Tabela 5.2 é discreta, em passos de 0,1. Uma média
-   como 5,45 (de SMP 5,3 e 5,6) não existe na tabela. Arredondar para 5,4 dá 6,8 t/ha; para
-   5,5 dá 6,1 t/ha — 10% de diferença, e o Manual não resolve isso. Vira política explícita
-   em `docs/decisoes/0002-calagem-dirigida-por-criterio-de-grupo.md` (mesmo lugar do
-   arredondamento de saída e do teto de 5 t/ha), com duas opções: arredondar o índice médio
-   antes de consultar a tabela, ou interpolar linearmente entre as duas linhas adjacentes.
-   **Ainda não decidido** — ver ADR 0002.
+   **Pendência que isso abriu — resolvida.** A Tabela 5.2 é discreta, em passos de 0,1; uma
+   média como 5,45 (de SMP 5,3 e 5,6) não existe na tabela. Decisão do autor em
+   `docs/decisoes/0002-calagem-dirigida-por-criterio-de-grupo.md`, D10 (2026-08-23): o índice
+   médio é arredondado meio para cima (mesma regra de D1) **antes** de consultar a tabela —
+   sem interpolação. 5,45 vira 5,5.
 
 2. **Gatilho — confirmado.** A célula diz `pH < 5,5` **e** `Al ≥ 30%` (o `≥` é um dos
    glifos-imagem do PDF, não um `=` da extração literal). O Al é saturação por Al na CTC,
@@ -142,14 +140,12 @@ lê, em vez de o código assumir por convenção (`graos_pd_com_restricoes` como
    estão** — a hipótese de o motor inferir a condição a partir do Al da subsuperfície foi
    descartada.
 
-**Status:** ainda não implementado. As três perguntas originais estão respondidas — o
-desenho do `Camada`, o invariante de que os campos padrão de `AnaliseSolo` são sempre a
-camada de fertilidade, e a declaração da camada no JSON (resto deste ADR) continuam
-válidos como estão. D6 abriu uma pendência nova — a política de arredondamento/
-interpolação do SMP médio fora da grade de 0,1 da Tabela 5.2, a decidir em
-`docs/decisoes/0002` — e a implementação segue bloqueada até essa decisão **e** um caso de
-teste calculado à mão pelo autor, na mesma ordem que produziu os outros 10 casos
-(`docs/COMO_CALCULAR_ORACULO.md`).
+**Status:** ainda não implementado. As três perguntas originais e a pendência de arredondamento
+que a primeira abriu (D10, ADR 0002) estão todas respondidas — o desenho do `Camada`, o
+invariante de que os campos padrão de `AnaliseSolo` são sempre a camada de fertilidade, e a
+declaração da camada no JSON (resto deste ADR) continuam válidos como estão. Falta apenas um
+caso de teste calculado à mão pelo autor, na mesma ordem que produziu os outros 10 casos
+(`docs/COMO_CALCULAR_ORACULO.md`), antes de codificar.
 
 ## D7 — Divergência interna do Manual: "V > 65%" (texto) vs "V ≥ 65%" (nota da tabela)
 

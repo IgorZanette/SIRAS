@@ -138,22 +138,25 @@ ver ADR 0003, D6) usa a **média aritmética** dos índices SMP de 0–10 e 10�
 Tabela 5.2. Essa tabela é discreta, em passos de 0,1 (D2 já trata os extremos, não este caso). Uma
 média como 5,45 (de SMP 5,3 e 5,6) não cai em nenhuma linha da tabela.
 
-**Decisão:** *ainda não tomada.* Duas opções em aberto:
+**Decisão (autor, 2026-08-23): opção A — arredondar antes de consultar.** O índice SMP médio é
+arredondado para 1 casa decimal com a mesma regra de D1 (meio para cima, `ROUND_HALF_UP`) **antes**
+de buscar a linha na Tabela 5.2. Não há interpolação: a consulta é sempre por uma linha exata da
+tabela, igual a qualquer outro critério.
 
 | Opção | Mecânica | Risco |
 |---|---|---|
-| A — arredondar antes de consultar | aplica a mesma regra de arredondamento de D1 (meio para cima) ao índice médio, depois busca a linha exata | simples e reaproveita D1, mas descarta informação — duas médias diferentes (ex.: 5,44 e 5,46) caem na mesma linha e produzem a mesma dose |
-| B — interpolar linearmente entre as duas linhas adjacentes | dose = interpolação linear entre a linha inferior e a superior, ponderada pela distância do índice médio a cada uma | mais fiel ao valor contínuo, mas o Manual não descreve interpolação em nenhuma outra tabela do Capítulo 5 — seria um procedimento sem respaldo textual direto |
+| **A — escolhida** | aplica a mesma regra de arredondamento de D1 (meio para cima) ao índice médio, depois busca a linha exata | descarta informação — duas médias diferentes (ex.: 5,44 e 5,46) caem na mesma linha e produzem a mesma dose |
+| B — descartada | interpolação linear entre as duas linhas adjacentes, ponderada pela distância do índice médio a cada uma | mais fiel ao valor contínuo, mas o Manual não descreve interpolação em nenhuma outra tabela do Capítulo 5 — seria um procedimento sem respaldo textual direto |
 
-No exemplo levantado pelo autor (SMP 5,3 e 5,6 → média 5,45): a opção A arredonda para 5,4 ou 5,5
-dependendo do critério de desempate, o que já resulta em doses de 6,8 t/ha ou 6,1 t/ha — cerca de
-10% de diferença.
+No exemplo levantado pelo autor (SMP 5,3 e 5,6 → média 5,45): arredonda para 5,5 (meio para cima),
+consulta direta na linha 5,5 da Tabela 5.2.
 
-**Por que fica em aberto:** D1 (arredondamento de saída) e D2 (comportamento nos extremos da
-tabela) têm respaldo indireto — prática convencional em recomendação agronômica e a própria
-construção "aberta" da tabela, respectivamente. Aqui não há pista textual equivalente de qual das
-duas opções o Manual pretende. **Decisão do autor**, a registrar nesta seção quando tomada.
-`graos_pd_com_restricoes` não deve ser implementado antes disso (ver ADR 0003, D6).
+**Justificativa:** reaproveita a mesma regra e a mesma implementação de D1 — um único ponto de
+arredondamento no motor, não dois mecanismos distintos de leitura de tabela. A opção B exigiria
+introduzir um procedimento (interpolação) que não aparece em nenhuma outra tabela do Capítulo 5,
+sem respaldo textual no Manual; a opção A generaliza um comportamento já adotado e justificado em
+D1. `graos_pd_com_restricoes` pode agora ser implementado (ver ADR 0003, D6) usando este
+arredondamento antes da consulta.
 
 ---
 

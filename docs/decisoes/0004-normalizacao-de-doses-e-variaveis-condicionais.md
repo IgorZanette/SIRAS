@@ -185,15 +185,20 @@ leitura direta em `calcular_adubacao_frutiferas` (não pelo motor de leitura gen
   fora de escopo): aqui o valor (50%) é dado explicitamente pelo Manual, não uma
   extrapolação.
 
-**Pendência de dado, não de código — ADU-15 (amoreira-preta):** o caso de teste
-compartilhado pelo autor tem um descasamento proposital entre a entrada (argila 45%, que
-classifica P=15,0 mg/dm³ como Alto) e o valor esperado de P₂O₅ (84, que é o valor da classe
-Médio). Antes de este caso virar `referencia` oficial em
-`testes/casos/casos_recomendacao.json`, o autor precisa decidir: ajustar a argila da
-entrada para 32% (classe 3, onde P=15,0 é Médio) ou corrigir o P₂O₅ esperado para 70
-(classe Alto, coerente com argila 45%). Os testes automatizados
-(`test_adubacao_grupos.py::TestFrutiferasBespoke`) usam argila=32% para bater com o 84 já
-compartilhado, mas isso é provisório até a decisão do autor.
+**ADU-15 (amoreira-preta) — descasamento resolvido pelo autor em 2026-08-23, confirmado
+na p. 199.** O rascunho original tinha entrada com argila 45% (classe de solo 2, onde
+P = 15,0 mg/dm³ cai em Alto) e um P₂O₅ esperado de 84 (valor da classe Médio, que só bate
+com argila 32%). Decisão: manter argila 45% e corrigir o esperado para **70** (linha Alto,
+coluna de produtividade "10-15", Tab. 6.4/p. 199) — não baixar a argila para 32%, pelos
+dois motivos que o autor deu: (a) é a única cobertura da base para a classe de argila 2
+(faixa 41-60%, Tabela 6.4); baixar para 32% eliminaria essa faixa da suíte de testes; (b)
+com 45%, P classifica Alto e K (mesmo caso) classifica Médio — as duas classes divergem no
+mesmo laudo, o que expõe um motor que classifique P e K numa única chamada e propague
+acidentalmente a classe de um nutriente para o outro. Com 32% ambos ficariam em Médio e
+essa detecção desapareceria. Caso final: `n=117, p2o5=70, k2o=171` (N e K não mudam — a
+classe de argila não entra em nenhum dos dois cálculos). Já integrado como oráculo em
+`test_adubacao_grupos.py::TestFrutiferasBespoke` e em
+`testes/casos/casos_recomendacao.json` (ADU-15).
 
 ## Consequências
 

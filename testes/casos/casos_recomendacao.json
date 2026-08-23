@@ -18,7 +18,8 @@
     "CAL-09": "excecao Ca>=4,0 E Mg>=1,0",
     "CAL-10": "graos_pd_com_restricoes: decisao pela subsuperficie, dose por SMP medio das duas camadas, SMP medio exato na grade",
     "CAL-11": "graos_pd_com_restricoes: SMP medio fora da grade de 0,1 (5,45), arredondado antes da consulta (D10)",
-    "ADU-01": "interpretacao de P por argila e de K por CTC + algoritmo de dose + leguminosa sem N"
+    "ADU-01": "interpretacao de P por argila e de K por CTC + algoritmo de dose + leguminosa sem N",
+    "ADU-15": "amoreira-preta, manutencao: colunas de N nao-ordinais por ano; P e K classificam diferente no mesmo caso (discriminante contra contaminacao entre nutrientes)"
   },
   "casos": [
     {
@@ -362,6 +363,34 @@
       },
       "memoria_calculo": "Decisao dispara igual ao CAL-10, avaliada na subsuperficie: pH 5,0 < 5,5 (V) e saturacao Al 42% >= 30% (V). DOSE: media dos indices SMP = (5,3+5,6)/2 = 5,45, que nao existe como linha na Tab.5.2 (passos de 0,1). D10 (docs/decisoes/0002, decisao do autor em 2026-08-23): arredondar o indice medio meio para cima (mesma regra de D1, ROUND_HALF_UP) antes de consultar a tabela -> 5,45 vira 5,5. Tab.5.2, SMP 5,5, coluna pH 6,0 -> 6,1 t/ha. Fator 1, incorporado (teto de 5 t/ha nao se aplica), PRNT 100 -> NC = 6,1 t/ha.",
       "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-08-23"
+    },
+    {
+      "id": "ADU-15",
+      "descricao": "Amoreira-preta, manutencao: N por MO x ano x produtividade (colunas nomeadas, nao ordinais); P e K por classe x produtividade, com classes DIVERGENTES no mesmo caso",
+      "entrada": {
+        "cultura": "amoreira_preta",
+        "fase": "manutencao",
+        "ano": 4,
+        "produtividade_estimada": 12,
+        "mo": 3.5,
+        "argila": 45,
+        "p": 15.0,
+        "k": 80,
+        "ctc_ph7": 9.5
+      },
+      "referencia": {
+        "n": 117,
+        "p2o5": 70,
+        "k2o": 171
+      },
+      "verificacao_cruzada": {
+        "n": 117,
+        "p2o5": 70,
+        "k2o": 171
+      },
+      "memoria_calculo": "Secao 6.5.3, p. 198-199. N (p.198): MO 3,5% cai na faixa '2,6 a 5,0'. Ano 4 -> coluna 'a partir do 3o ano' (1o ano e 'nao aplicar'; 2o ano tem colunas proprias - 'ano' nao e indice ordinal). Produtividade 12 t/ha > 10 -> subcoluna '>10' -> 117 kg de N/ha. P e K (p.199): amoreira-preta e grupo P2 e K2 (Anexo 2). Argila 45% -> classe de solo 2 (41 a 60%); Tab.6.4 classe 2: Alto = 12,1 a 24,0 mg/dm3 -> P=15,0 e ALTO. CTC 9,5 -> faixa 7,6-15,0; Tab.6.9: Medio = 61 a 90 -> K=80 e MEDIO (classe diferente da de P no mesmo caso, de proposito - detecta contaminacao entre nutrientes). Produtividade 12 -> coluna '10-15'. Linha Alto, coluna 10-15 -> 70 kg de P2O5/ha. Linha Medio, coluna 10-15 -> 171 kg de K2O/ha.",
+      "origem_referencia": "Autor - Calculado a mão, confirmado na p. 199 em 2026-08-23",
       "conferido_por_autor_em": "2026-08-23"
     }
   ]

@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from siras.dominio.analise import AnaliseSolo, Camada, Contexto
-from siras.motor.adubacao import calcular_fosforo_potassio, calcular_nitrogenio
+from siras.motor.adubacao import calcular_adubacao_frutiferas, calcular_fosforo_potassio, calcular_nitrogenio
 from siras.motor.calagem import calcular_calagem
 from siras.motor.trace import Trace
 
@@ -67,7 +67,9 @@ def _construir_contexto(entrada: dict) -> Contexto:
     )
 
 
-@pytest.mark.parametrize("caso", _carregar_casos(), ids=lambda c: c["id"])
+@pytest.mark.parametrize(
+    "caso", [c for c in _carregar_casos() if c["id"] in _CRITERIO_POR_CASO], ids=lambda c: c["id"]
+)
 def test_caso_bate_com_referencia_e_verificacao_cruzada(caso):
     assert caso["conferido_por_autor_em"] is not None, (
         f"{caso['id']}: conferido_por_autor_em ainda é null — não vale como validação "
@@ -119,3 +121,34 @@ def test_adu_01_adubacao_completa():
     assert resultado_pk["classe_k"] == referencia["classe_k"]
     assert resultado_pk["p2o5"] == referencia["p2o5"]
     assert resultado_pk["k2o"] == referencia["k2o"]
+
+
+def test_adu_15_amoreira_preta_manutencao():
+    casos = {c["id"]: c for c in _carregar_casos()}
+    caso = casos["ADU-15"]
+    assert caso["conferido_por_autor_em"] is not None, (
+        f"{caso['id']}: conferido_por_autor_em ainda é null — não vale como validação"
+    )
+    assert caso["referencia"] == caso["verificacao_cruzada"], (
+        f"{caso['id']}: referencia diverge de verificacao_cruzada — investigar qual dos "
+        f"dois está errado antes de confiar no caso"
+    )
+
+    entrada = caso["entrada"]
+    referencia = caso["referencia"]
+
+    resultado = calcular_adubacao_frutiferas(
+        entrada["cultura"],
+        fase=entrada["fase"],
+        ano=entrada["ano"],
+        produtividade_estimada=entrada["produtividade_estimada"],
+        mo=entrada["mo"],
+        argila=entrada["argila"],
+        p_solo=entrada["p"],
+        k_solo=entrada["k"],
+        ctc_ph7=entrada["ctc_ph7"],
+    )
+
+    assert resultado["n"] == referencia["n"]
+    assert resultado["p2o5"] == referencia["p2o5"]
+    assert resultado["k2o"] == referencia["k2o"]

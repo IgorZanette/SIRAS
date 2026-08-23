@@ -284,25 +284,23 @@ class TestFrutiferasBespoke:
 
     def test_adu_15_amoreira_preta_colunas_nao_ordinais(self):
         # Ano 4 -> coluna 'ano_3_mais_...' (nao e indice ordinal); produtividade 12>10
-        # -> subcoluna 'acima_10'. NOTA: a entrada original do autor tem argila=45%
-        # (classe_argila 2), que dá classe_p=ALTO (p2o5=70) — mas o "esperado"
-        # compartilhado (84) é o valor da classe MEDIO, que só bate com argila=32%
-        # (classe_argila 3). Descasamento proposital no rascunho, sinalizado pelo
-        # próprio autor ("ponto_de_atencao"); uso argila=32 aqui para bater com o
-        # "esperado" já compartilhado, mas isso precisa de confirmação do autor antes
-        # de virar referencia oficial em testes/casos/casos_recomendacao.json.
+        # -> subcoluna 'acima_10'. Oraculo (autor, 2026-08-23, p.199): argila=45%
+        # (classe_argila 2) -> P=15,0 e ALTO (12,1-24,0), enquanto K=80 com CTC 9,5
+        # permanece MEDIO — as duas classificacoes divergem no mesmo caso de proposito,
+        # o que pega um motor que classifique P e K numa chamada so e propague a classe
+        # de um nutriente para o outro.
         resultado = calcular_adubacao_frutiferas(
             "amoreira_preta", fase="manutencao", ano=4, produtividade_estimada=12,
-            mo=3.5, argila=32, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
+            mo=3.5, argila=45, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
         )
         assert resultado["n"] == 117
-        assert resultado["p2o5"] == 84
+        assert resultado["p2o5"] == 70
         assert resultado["k2o"] == 171
 
     def test_adu_15_amoreira_preta_primeiro_ano_nao_aplica(self):
         resultado = calcular_adubacao_frutiferas(
             "amoreira_preta", fase="manutencao", ano=1, produtividade_estimada=12,
-            mo=3.5, argila=32, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
+            mo=3.5, argila=45, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
         )
         assert resultado["n"] == 0.0
 

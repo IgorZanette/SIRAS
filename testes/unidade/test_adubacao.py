@@ -137,3 +137,29 @@ class TestFosforoPotassio:
             calcular_fosforo_potassio(
                 cultura_id="feijao_magico", argila=32, p_solo=6.0, ctc_ph7=9.5, k_solo=80, cultivo=1,
             )
+
+
+class TestClasseMuitoAlto:
+    """Achado de revisão (2026-08-23): cultivo 2 na classe muito_alto retornava a
+    manutenção como escalar, mas a tabela (graos_adubacao_pk.json, algoritmo_dose.regras)
+    so da um teto — "<= manutencao (reposicao, a criterio do tecnico)" — nao um valor.
+    Sem o qualificador, o SIRAS recomendaria uma dose fixa onde o Manual autoriza nao
+    aplicar nada, justamente o oposto do que a classe Muito alto significa."""
+
+    def test_cultivo_1_muito_alto_e_zero_escalar(self):
+        # P=50,0 (>36,0) e K=300 (>180), argila 32/CTC 9,5: ambos Muito alto (ADU-05).
+        resultado = calcular_fosforo_potassio(
+            cultura_id="soja", argila=32, p_solo=50.0, ctc_ph7=9.5, k_solo=300, cultivo=1,
+        )
+        assert resultado["classe_p"] == "muito_alto"
+        assert resultado["classe_k"] == "muito_alto"
+        assert resultado["p2o5"] == 0.0
+        assert resultado["k2o"] == 0.0
+
+    def test_cultivo_2_muito_alto_e_teto_nao_escalar(self):
+        resultado = calcular_fosforo_potassio(
+            cultura_id="soja", argila=32, p_solo=50.0, ctc_ph7=9.5, k_solo=300, cultivo=2,
+        )
+        # manutencao da soja: p2o5=45, k2o=75 (graos_adubacao_pk.json).
+        assert resultado["p2o5"] == {"valor": 45, "qualificador": "ate"}
+        assert resultado["k2o"] == {"valor": 75, "qualificador": "ate"}

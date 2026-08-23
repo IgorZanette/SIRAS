@@ -117,7 +117,7 @@ def calcular_nitrogenio(
     return {"n": dose, "faixa_mo": faixa_mo, "motivo": None}
 
 
-def _dose_pk(classe: str, cultivo: int, correcao_nutriente: Optional[float], manutencao_valor: float) -> float:
+def _dose_pk(classe: str, cultivo: int, correcao_nutriente: Optional[float], manutencao_valor: float):
     """Aplica o algoritmo de dose de graos_adubacao_pk.json (algoritmo_dose.regras)."""
     if classe in ("muito_baixo", "baixo"):
         fracao = (2 / 3) if cultivo == 1 else (1 / 3)
@@ -129,10 +129,14 @@ def _dose_pk(classe: str, cultivo: int, correcao_nutriente: Optional[float], man
     if classe == "alto":
         return manutencao_valor
     if classe == "muito_alto":
-        # Manual: cultivo 1 = 0; cultivo 2 = "<= manutencao (reposicao, a criterio do
-        # tecnico)" — facultativo, não determinístico. Decisão do SIRAS (a registrar em
-        # ADR, análoga a D8): usar a manutenção como teto e sinalizar que é opcional.
-        return 0.0 if cultivo == 1 else manutencao_valor
+        # Manual: cultivo 1 = 0 (determinístico). Cultivo 2 = "<= manutencao (reposicao,
+        # a criterio do tecnico)" — um TETO, não um valor. Representado no formato de
+        # dose do ADR 0004 (D4.1), a mesma forma usada por hortaliças/frutíferas para
+        # "qualificador: ate" — não um escalar, para não implicar precisão que o Manual
+        # não dá.
+        if cultivo == 1:
+            return 0.0
+        return {"valor": manutencao_valor, "qualificador": "ate"}
     raise ErroAdubacao(f"classe de teor '{classe}' desconhecida")
 
 
@@ -159,7 +163,10 @@ def calcular_fosforo_potassio(
             referência da cultura, soma o adicional por tonelada à manutenção
 
     Returns:
-        Dict com "classe_p", "classe_k", "p2o5", "k2o"
+        Dict com "classe_p", "classe_k", "p2o5", "k2o". "p2o5"/"k2o" são normalmente
+        float; na classe "muito_alto" com cultivo=2, o Manual só dá um teto ("<=
+        manutenção"), não um valor, e o retorno é o objeto de dose do ADR 0004
+        (`{"valor": ..., "qualificador": "ate"}`).
 
     Raises:
         ErroAdubacao: cultura/grupo de exigência não encontrados, ou 'cultivo' inválido

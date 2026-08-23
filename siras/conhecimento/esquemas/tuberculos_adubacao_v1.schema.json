@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-2020-12/schema",
   "title": "Adubação — Tubérculos",
   "type": "object",
-  "required": ["descricao", "fonte", "unidades", "classes_mo", "classes_teor", "culturas"],
+  "required": ["descricao", "fonte", "unidades", "classes_mo", "classes_teor", "culturas", "checksum"],
   "properties": {
     "descricao": { "type": "string", "minLength": 1 },
     "fonte": {
@@ -37,6 +37,16 @@
     "classes_teor": { "type": "array", "items": { "type": "string" } },
     "regra_geral_p_k": { "type": ["string", "null"] },
     "fora_de_escopo": { "type": "array", "items": { "type": "string" } },
-    "culturas": { "type": "object", "minProperties": 1 }
+    "culturas": { "type": "object", "minProperties": 1 },
+    "checksum": {
+      "type": "object",
+      "required": ["culturas", "soma_total"],
+      "properties": {
+        "descricao": { "type": "string" },
+        "culturas": { "type": "integer" },
+        "soma_total": { "type": "number" },
+        "verificado_em": { "type": ["string", "null"] }
+      }
+    }
   }
 }

@@ -31,6 +31,16 @@ Tabelas compartilhadas por todas as culturas de um grupo (não uma por cultura i
 |---|---|---|
 | `dados/culturas/graos/graos_adubacao_n.json` | Tabelas 6.1.2–6.1.22, p. 116–133 — N por cultura e faixa de MO | transcrito e conferido |
 | `dados/culturas/graos/graos_adubacao_pk.json` | Tabelas 6.1.1–6.1.4, p. 105–108 — correção, manutenção e exportação de P/K | transcrito e conferido |
+| `dados/culturas/hortalicas/hortalicas_adubacao.json` | Cap. 6.3, p. 161–181 — N/P/K das 18 hortaliças | transcrito, a conferir |
+| `dados/culturas/tuberculos/tuberculos_adubacao.json` | Cap. 6.4, p. 184–185 — N/P/K de batata e batata-doce | transcrito, a conferir |
+| `dados/culturas/outras/outras_comerciais_adubacao.json` | Cap. 6.9, p. 280–283 — N/P/K de cana-de-açúcar e tabaco | transcrito, a conferir |
+| `dados/culturas/frutiferas/frutiferas_adubacao.json` | Cap. 6.5, p. 190–231 — N/P/K das 17 frutíferas, em 3 fases | transcrito, a conferir |
+| `dados/culturas/erva_mate/erva_mate_adubacao.json` | Seção 6.6.5, p. 239–244 — programas desde o plantio e de recuperação | transcrito, a conferir |
+
+Ver `docs/CONFERENCIA_S3.md` e `docs/CONFERENCIA_S4.md` para o roteiro de conferência página a
+página desses arquivos, e `docs/NOTA_EXTRACAO_PDF.md` para o problema de extração do símbolo `≤`
+que motivou o roteiro. Decisões de modelagem (doses em faixa/teto, variáveis condicionais, classes
+de MO por referência) estão em `docs/decisoes/0004-normalizacao-de-doses-e-variaveis-condicionais.md`.
 
 ## Arquivos de cultura (`dados/culturas/<grupo>/<cultura>.json`)
 

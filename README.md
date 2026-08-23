@@ -67,6 +67,9 @@ Documentos principais:
 - [`docs/decisoes/`](docs/decisoes/) — registros de decisão de arquitetura
 - [`docs/FLUXO_DE_TRABALHO.md`](docs/FLUXO_DE_TRABALHO.md) — convenções de git e como pedir tarefas ao Claude Code
 - [`docs/COMO_CALCULAR_ORACULO.md`](docs/COMO_CALCULAR_ORACULO.md) — procedimento manual para calcular o oráculo de validação
+- [`docs/CONFERENCIA_S3.md`](docs/CONFERENCIA_S3.md) — roteiro de conferência: hortaliças, tubérculos, cana, tabaco
+- [`docs/CONFERENCIA_S4.md`](docs/CONFERENCIA_S4.md) — roteiro de conferência: frutíferas e erva-mate
+- [`docs/NOTA_EXTRACAO_PDF.md`](docs/NOTA_EXTRACAO_PDF.md) — o símbolo `≤` no PDF do Manual e como foi recuperado
 
 ## Estado do projeto
 

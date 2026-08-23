@@ -11,10 +11,10 @@
     ]
   },
   "checksum": {
-    "descricao": "Soma de todos os valores numericos em 'culturas', para detectar alteracao acidental de qualquer dose em edicoes futuras.",
+    "descricao": "Soma de todos os valores numericos em 'culturas' (agora incluindo grupo_exigencia.p/k), para detectar alteracao acidental de qualquer dose em edicoes futuras.",
     "culturas": 18,
-    "soma_total": 39007.4,
-    "verificado_em": "2026-08-22"
+    "soma_total": 39073.4,
+    "verificado_em": "2026-08-23"
   },
   "unidades": {
     "n": "kg de N/ha",
@@ -121,7 +121,14 @@
         "p": "Integralmente no plantio.",
         "k": "Abobora e moranga: 5, 10, 15, 20, 25 e 25% aos 25, 32, 39, 46, 53 e 60 DAP. Abobrinha: 15, 15, 30 e 40% aos 15, 30, 45 e 60 DAP."
       },
-      "fonte": "Secao 6.3.1, p. 161"
+      "fonte": "Secao 6.3.1, p. 161",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "alcachofra": {
       "nome": "Alcachofra",
@@ -191,7 +198,14 @@
         "p": "Integralmente no plantio.",
         "k": "50% no plantio e 50% no inicio do aparecimento das cabecas."
       },
-      "fonte": "Secao 6.3.2, p. 162"
+      "fonte": "Secao 6.3.2, p. 162",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "alface_almeirao_chicoria_rucula_salsa": {
       "nome": "Alface, almeirao, chicoria, rucula e salsa",
@@ -263,7 +277,14 @@
         "p": "Integralmente no plantio.",
         "k": "Alface: 20, 35 e 45% aos 10, 20 e 30 dias. Almeirao, chicoria e rucula: 50% aos 14 e aos 21 DAP. Salsa: 25% aos 10 DAP, repetindo apos cada corte."
       },
-      "fonte": "Secao 6.3.3, p. 162-163"
+      "fonte": "Secao 6.3.3, p. 162-163",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "alho": {
       "nome": "Alho",
@@ -360,7 +381,14 @@
           }
         }
       },
-      "fonte": "Secao 6.3.4, p. 163-164"
+      "fonte": "Secao 6.3.4, p. 163-164",
+      "grupo_exigencia": {
+        "p": 1,
+        "k": 1,
+        "tabela_interpretacao_p": "6.3",
+        "tabela_interpretacao_k": "6.8",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "aspargo": {
       "nome": "Aspargo",
@@ -548,7 +576,14 @@
         "Formacao = 1o e 2o anos; manutencao = 3o e 4o anos.",
         "No 5o ano, nova amostragem: usar as doses de pre-plantio; do 6o ano em diante, manutencao."
       ],
-      "fonte": "Secao 6.3.5, p. 164-165"
+      "fonte": "Secao 6.3.5, p. 164-165",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "berinjela": {
       "nome": "Berinjela",
@@ -615,7 +650,14 @@
         "p": "Integralmente no plantio.",
         "k": "Mesmo parcelamento do N."
       },
-      "fonte": "Secao 6.3.6, p. 166"
+      "fonte": "Secao 6.3.6, p. 166",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "beterraba_cenoura": {
       "nome": "Beterraba e cenoura",
@@ -689,7 +731,14 @@
         "dose_kg_ha": 30,
         "momento": "plantio"
       },
-      "fonte": "Secao 6.3.7, p. 167"
+      "fonte": "Secao 6.3.7, p. 167",
+      "grupo_exigencia": {
+        "p": 1,
+        "k": 1,
+        "tabela_interpretacao_p": "6.3",
+        "tabela_interpretacao_k": "6.8",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "brocolis_couve_flor": {
       "nome": "Brocolis e couve-flor",
@@ -765,7 +814,14 @@
           "valor": 30
         }
       ],
-      "fonte": "Secao 6.3.8, p. 167-168"
+      "fonte": "Secao 6.3.8, p. 167-168",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "cebola": {
       "nome": "Cebola",
@@ -857,7 +913,14 @@
         "condicao": "solos arenosos, pobres em MO ou cultivo frequente com cebola"
       },
       "micronutrientes_observacao": "Zn: 3 a 4 kg/ha via solo no transplante/semeadura. B: 1,5 a 2 kg/ha via solo a cada cultivo. Mn: 2 a 4 pulverizacoes foliares com sulfato de manganes a 1% em areas deficientes.",
-      "fonte": "Secao 6.3.9, p. 168-169"
+      "fonte": "Secao 6.3.9, p. 168-169",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "chuchu": {
       "nome": "Chuchu",
@@ -925,7 +988,14 @@
         "p": "Integralmente no plantio.",
         "k": "10% a cada 15 dias apos o inicio da frutificacao."
       },
-      "fonte": "Secao 6.3.10, p. 170-171"
+      "fonte": "Secao 6.3.10, p. 170-171",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "ervilha": {
       "nome": "Ervilha",
@@ -979,7 +1049,14 @@
       "parcelamento": {
         "pk": "P e K no plantio. Nao aplicar mais de 60 kg/ha de K2O na linha de semeadura; acima disso, 50% a lanco na semeadura e o restante em cobertura antes do florescimento."
       },
-      "fonte": "Secao 6.3.11, p. 171"
+      "fonte": "Secao 6.3.11, p. 171",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "mandioquinha_salsa": {
       "nome": "Mandioquinha-salsa",
@@ -1047,7 +1124,14 @@
         "p": "Integralmente no plantio.",
         "k": "20, 20, 30, 15 e 15% aos 90, 135, 190, 235 e 290 DAP."
       },
-      "fonte": "Secao 6.3.12, p. 172"
+      "fonte": "Secao 6.3.12, p. 172",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 1,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.8",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "melancia_melao": {
       "nome": "Melancia e melao",
@@ -1116,7 +1200,14 @@
         "p": "Integralmente no plantio.",
         "k": "5, 10, 15, 20, 25 e 25% aos 25, 32, 39, 46, 53 e 60 DAP."
       },
-      "fonte": "Secao 6.3.13, p. 172-173"
+      "fonte": "Secao 6.3.13, p. 172-173",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "nabo_rabanete": {
       "nome": "Nabo e rabanete",
@@ -1191,7 +1282,14 @@
           "observacao": "Reducao facultativa indicada no texto da secao."
         }
       ],
-      "fonte": "Secao 6.3.14, p. 173-174"
+      "fonte": "Secao 6.3.14, p. 173-174",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "pepino": {
       "nome": "Pepino salada",
@@ -1259,7 +1357,14 @@
         "p": "Integralmente no plantio.",
         "k": "10, 15, 15, 20, 20 e 20% aos 15, 30, 45, 55, 65 e 75 DAP."
       },
-      "fonte": "Secao 6.3.16, p. 176-177"
+      "fonte": "Secao 6.3.16, p. 176-177",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "pimentao": {
       "nome": "Pimentao",
@@ -1327,7 +1432,14 @@
         "p": "Integralmente no plantio.",
         "k": "Mesmo parcelamento do N."
       },
-      "fonte": "Secao 6.3.17, p. 177-178"
+      "fonte": "Secao 6.3.17, p. 177-178",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "repolho": {
       "nome": "Repolho",
@@ -1402,7 +1514,14 @@
           "valor": 30
         }
       ],
-      "fonte": "Secao 6.3.19, p. 179-180"
+      "fonte": "Secao 6.3.19, p. 179-180",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "tomate": {
       "nome": "Tomateiro",
@@ -1478,7 +1597,17 @@
       "observacoes": [
         "Unica hortalica cuja classe de MO > 5,0% traz valor exato (90), sem o qualificador 'ate'."
       ],
-      "fonte": "Secao 6.3.20, p. 180-181"
+      "fonte": "Secao 6.3.20, p. 180-181",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 1,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.8",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     }
-  }
+  },
+  "notas": [
+    "grupo_exigencia acrescentado em 2026-08-23: o grupo de P e o de K sao INDEPENDENTES e diferem em algumas culturas (ex.: batata_doce 3/1, mandioquinha_salsa 2/1, tomate 2/1). Nao derive um do outro."
+  ]
 }

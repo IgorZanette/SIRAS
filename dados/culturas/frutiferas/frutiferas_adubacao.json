@@ -11,10 +11,10 @@
     ]
   },
   "checksum": {
-    "descricao": "Soma de todos os valores numericos em 'culturas', para detectar alteracao acidental de qualquer dose em edicoes futuras.",
+    "descricao": "Soma de todos os valores numericos em 'culturas' (agora incluindo grupo_exigencia.p/k), para detectar alteracao acidental de qualquer dose em edicoes futuras.",
     "culturas": 17,
-    "soma_total": 20294.9,
-    "verificado_em": "2026-08-22"
+    "soma_total": 20362.9,
+    "verificado_em": "2026-08-23"
   },
   "unidades": {
     "n": "kg de N/ha",
@@ -200,7 +200,14 @@
       "fonte": "Secao 6.5.1, p. 193-194",
       "culturas_incluidas": [
         "abacateiro"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "ameixeira": {
       "nome": "Ameixeira",
@@ -283,7 +290,14 @@
       "fonte": "Secao 6.5.2, p. 195-197",
       "culturas_incluidas": [
         "ameixeira"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "amoreira_preta": {
       "nome": "Amoreira-preta",
@@ -538,7 +552,14 @@
       "fonte": "Secao 6.5.3, p. 198-199",
       "culturas_incluidas": [
         "amoreira-preta"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "bananeira": {
       "nome": "Bananeira",
@@ -591,7 +612,14 @@
       "fonte": "Secao 6.5.4, p. 200-201",
       "culturas_incluidas": [
         "bananeira"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "caquizeiro": {
       "nome": "Caquizeiro",
@@ -676,7 +704,14 @@
       "fonte": "Secao 6.5.5, p. 201-202",
       "culturas_incluidas": [
         "caquizeiro"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "citros": {
       "nome": "Citros",
@@ -775,7 +810,14 @@
       "fonte": "Secao 6.5.6, p. 203-204",
       "culturas_incluidas": [
         "citros"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "figueira": {
       "nome": "Figueira",
@@ -849,7 +891,14 @@
       "fonte": "Secao 6.5.7, p. 205",
       "culturas_incluidas": [
         "figueira"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "macieira": {
       "nome": "Macieira",
@@ -938,7 +987,14 @@
       "fonte": "Secao 6.5.8, p. 206-208",
       "culturas_incluidas": [
         "macieira"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "maracujazeiro": {
       "nome": "Maracujazeiro",
@@ -1008,7 +1064,14 @@
       "fonte": "Secao 6.5.9, p. 210-211",
       "culturas_incluidas": [
         "maracujazeiro"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "mirtileiro": {
       "nome": "Mirtileiro",
@@ -1229,7 +1292,14 @@
       "fonte": "Secao 6.5.10, p. 212-213",
       "culturas_incluidas": [
         "mirtileiro"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "morangueiro": {
       "nome": "Morangueiro",
@@ -1383,7 +1453,14 @@
       "fonte": "Secao 6.5.11, p. 214-215",
       "culturas_incluidas": [
         "morangueiro"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "nogueira_peca": {
       "nome": "Nogueira-peca",
@@ -1531,7 +1608,14 @@
       "fonte": "Secao 6.5.12, p. 215-217",
       "culturas_incluidas": [
         "nogueira-peca"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "oliveira": {
       "nome": "Oliveira",
@@ -1632,7 +1716,14 @@
       "fonte": "Secao 6.5.13, p. 218-219",
       "culturas_incluidas": [
         "oliveira"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "pereira": {
       "nome": "Pereira",
@@ -1716,7 +1807,14 @@
       "fonte": "Secao 6.5.15, p. 221-222",
       "culturas_incluidas": [
         "pereira"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "pessegueiro_nectarineira": {
       "nome": "Pessegueiro e nectarineira",
@@ -1800,7 +1898,14 @@
           "K por teor foliar (p. 225)"
         ]
       },
-      "fonte": "Secao 6.5.16, p. 223-225"
+      "fonte": "Secao 6.5.16, p. 223-225",
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "quivizeiro": {
       "nome": "Quivizeiro",
@@ -1883,7 +1988,14 @@
       "fonte": "Secao 6.5.17, p. 226-227",
       "culturas_incluidas": [
         "quivizeiro"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "videira": {
       "nome": "Videira",
@@ -2287,7 +2399,17 @@
       "fonte": "Secao 6.5.18, p. 228-231",
       "culturas_incluidas": [
         "videira"
-      ]
+      ],
+      "grupo_exigencia": {
+        "p": 2,
+        "k": 2,
+        "tabela_interpretacao_p": "6.4",
+        "tabela_interpretacao_k": "6.9",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     }
-  }
+  },
+  "notas": [
+    "grupo_exigencia acrescentado em 2026-08-23: o grupo de P e o de K sao INDEPENDENTES e diferem em algumas culturas (ex.: batata_doce 3/1, mandioquinha_salsa 2/1, tomate 2/1). Nao derive um do outro."
+  ]
 }

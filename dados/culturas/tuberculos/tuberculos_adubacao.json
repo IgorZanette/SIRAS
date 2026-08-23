@@ -11,10 +11,10 @@
     ]
   },
   "checksum": {
-    "descricao": "Soma de todos os valores numericos em 'culturas', para detectar alteracao acidental de qualquer dose em edicoes futuras.",
+    "descricao": "Soma de todos os valores numericos em 'culturas' (agora incluindo grupo_exigencia.p/k), para detectar alteracao acidental de qualquer dose em edicoes futuras.",
     "culturas": 2,
-    "soma_total": 3470,
-    "verificado_em": "2026-08-22"
+    "soma_total": 3476.0,
+    "verificado_em": "2026-08-23"
   },
   "unidades": {
     "n": "kg de N/ha",
@@ -137,7 +137,14 @@
           ]
         }
       ],
-      "fonte": "Secao 6.4.1, p. 184"
+      "fonte": "Secao 6.4.1, p. 184",
+      "grupo_exigencia": {
+        "p": 1,
+        "k": 1,
+        "tabela_interpretacao_p": "6.3",
+        "tabela_interpretacao_k": "6.8",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "batata_doce": {
       "nome": "Batata-doce",
@@ -204,7 +211,17 @@
         "n": "10 kg/ha no plantio e o restante em cobertura ~30 dias apos a brotacao (batata-semente) ou ~30 dias apos o transplante (mudas).",
         "pk": "P e K integralmente no plantio."
       },
-      "fonte": "Secao 6.4.2, p. 185"
+      "fonte": "Secao 6.4.2, p. 185",
+      "grupo_exigencia": {
+        "p": 3,
+        "k": 1,
+        "tabela_interpretacao_p": "6.5",
+        "tabela_interpretacao_k": "6.8",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     }
-  }
+  },
+  "notas": [
+    "grupo_exigencia acrescentado em 2026-08-23: o grupo de P e o de K sao INDEPENDENTES e diferem em algumas culturas (ex.: batata_doce 3/1, mandioquinha_salsa 2/1, tomate 2/1). Nao derive um do outro."
+  ]
 }

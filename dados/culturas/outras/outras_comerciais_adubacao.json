@@ -11,10 +11,10 @@
     ]
   },
   "checksum": {
-    "descricao": "Soma de todos os valores numericos em 'culturas', para detectar alteracao acidental de qualquer dose em edicoes futuras.",
+    "descricao": "Soma de todos os valores numericos em 'culturas' (agora incluindo grupo_exigencia.p/k), para detectar alteracao acidental de qualquer dose em edicoes futuras.",
     "culturas": 2,
-    "soma_total": 10190,
-    "verificado_em": "2026-08-22"
+    "soma_total": 10202.0,
+    "verificado_em": "2026-08-23"
   },
   "unidades": {
     "n": "kg de N/ha",
@@ -464,7 +464,14 @@
         "Cana-soca, K, classe Alto: apenas a coluna '< 60 t/ha' traz o qualificador 'ate'; as demais sao valores exatos (30). Conferido visualmente na p. 282.",
         "Cana-soca, K, classe Muito Alto: '< 60' e zero exato; '60 a 90' e '> 90' trazem 'ate 30'."
       ],
-      "fonte": "Secao 6.9.1, p. 280-282"
+      "fonte": "Secao 6.9.1, p. 280-282",
+      "grupo_exigencia": {
+        "p": 3,
+        "k": 3,
+        "tabela_interpretacao_p": "6.5",
+        "tabela_interpretacao_k": "6.10",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     },
     "tabaco": {
       "nome": "Tabaco",
@@ -631,7 +638,17 @@
         "Em sistemas conservacionistas (plantio direto na palha) as doses de P2O5 e K2O podem ser reduzidas, seguindo orientacao da assistencia tecnica (o Manual nao quantifica a reducao).",
         "As recomendacoes do tabaco foram elaboradas por tecnicos das empresas integradoras do setor."
       ],
-      "fonte": "Secao 6.9.2, p. 282-283"
+      "fonte": "Secao 6.9.2, p. 282-283",
+      "grupo_exigencia": {
+        "p": 3,
+        "k": 3,
+        "tabela_interpretacao_p": "6.5",
+        "tabela_interpretacao_k": "6.10",
+        "fonte": "Anexo 2, p. 361-365; Tabelas 6.2 e 6.7"
+      }
     }
-  }
+  },
+  "notas": [
+    "grupo_exigencia acrescentado em 2026-08-23: o grupo de P e o de K sao INDEPENDENTES e diferem em algumas culturas (ex.: batata_doce 3/1, mandioquinha_salsa 2/1, tomate 2/1). Nao derive um do outro."
+  ]
 }

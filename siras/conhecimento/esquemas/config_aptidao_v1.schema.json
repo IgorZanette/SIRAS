@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Configuração do Motor de Aptidão Edáfica — parâmetros do Apêndice A do CCAE",
+  "type": "object",
+  "required": [
+    "descricao", "fonte",
+    "REBAIXAMENTO_POR_ACUMULO", "REBAIXAMENTO_MIN_FATORES",
+    "F4_GRAU_MAXIMO", "F5_GRAU_MAXIMO", "F6_GRAU_MAXIMO",
+    "F7_ATIVO", "MUITO_ALTO_REBAIXA",
+    "NC_MAX_INCORPORADO_T_HA", "NC_MAX_SUPERFICIAL_T_HA"
+  ],
+  "properties": {
+    "descricao": { "type": "string", "minLength": 1 },
+    "fonte": {
+      "type": "object",
+      "required": ["documento"],
+      "properties": {
+        "documento": { "type": "string" }
+      }
+    },
+    "REBAIXAMENTO_POR_ACUMULO": { "type": "boolean" },
+    "REBAIXAMENTO_MIN_FATORES": { "type": "integer", "minimum": 1, "maximum": 7 },
+    "F4_GRAU_MAXIMO": { "type": "string", "enum": ["NULO", "LIGEIRO", "MODERADO", "FORTE", "MUITO_FORTE"] },
+    "F5_GRAU_MAXIMO": { "type": "string", "enum": ["NULO", "LIGEIRO", "MODERADO", "FORTE", "MUITO_FORTE"] },
+    "F6_GRAU_MAXIMO": { "type": "string", "enum": ["NULO", "LIGEIRO", "MODERADO", "FORTE", "MUITO_FORTE"] },
+    "F7_ATIVO": { "type": "boolean" },
+    "MUITO_ALTO_REBAIXA": { "type": "boolean" },
+    "NC_MAX_INCORPORADO_T_HA": { "type": "number", "exclusiveMinimum": 0 },
+    "NC_MAX_SUPERFICIAL_T_HA": { "type": "number", "exclusiveMinimum": 0 }
+  }
+}

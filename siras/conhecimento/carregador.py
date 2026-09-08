@@ -491,6 +491,109 @@ class Carregador:
                     f"'por_classe_argila' nem 'sem_classe_argila'"
                 )
 
+    # Os sete fatores de limitação do motor de aptidão (CCAE-v1.0.md, Seção 6).
+    _FATORES_APTIDAO = [
+        "F1_acidez", "F2_fosforo", "F3_potassio", "F4_ca_mg", "F5_ctc", "F6_mo", "F7_textura"
+    ]
+
+    def validar_criterios_aptidao(self, dados: Dict) -> None:
+        """
+        Valida invariantes de criterios_aptidao.json:
+        - F1_acidez.com_ph_referencia.m_percent_faixas contíguas, e toda 'classe' ali e em
+          todo mapeamento classe->grau referencia um grau conhecido em 'graus'
+        - composicao.grau_para_classe só aponta para classes de composicao.ordem_classes
+          (ou 'INDETERMINADA', que não faz parte da escala de aptidão em si)
+        - composicao.ordem_fatores_desempate e corrigibilidade cobrem exatamente os 7
+          fatores, sem faltar nem repetir nenhum
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        graus_conhecidos = set(dados.get("graus", {}))
+
+        m_percent_faixas = dados["F1_acidez"]["com_ph_referencia"]["m_percent_faixas"]
+        self._validar_faixas_contiguas(
+            m_percent_faixas, "criterios_aptidao.json: F1_acidez.com_ph_referencia.m_percent_faixas"
+        )
+        for faixa in m_percent_faixas:
+            if faixa["classe"] not in graus_conhecidos:
+                raise ErroCarregamento(
+                    f"criterios_aptidao.json: F1_acidez.com_ph_referencia.m_percent_faixas "
+                    f"usa grau desconhecido '{faixa['classe']}'"
+                )
+
+        grau_sem_ph = dados["F1_acidez"]["sem_ph_referencia"]["grau_se_deficiente"]
+        if grau_sem_ph not in graus_conhecidos:
+            raise ErroCarregamento(
+                f"criterios_aptidao.json: F1_acidez.sem_ph_referencia.grau_se_deficiente "
+                f"tem grau desconhecido '{grau_sem_ph}'"
+            )
+
+        def _checar_rotulos(mapeamento: Dict[str, str], contexto: str) -> None:
+            for classe, rotulo in mapeamento.items():
+                if classe.startswith("_"):
+                    continue
+                if rotulo not in graus_conhecidos:
+                    raise ErroCarregamento(
+                        f"criterios_aptidao.json: {contexto} mapeia '{classe}' para grau "
+                        f"desconhecido '{rotulo}'"
+                    )
+
+        _checar_rotulos(dados["mapeamento_disponibilidade_grau"], "mapeamento_disponibilidade_grau")
+        _checar_rotulos(dados["F4_ca_mg"]["mapeamento"], "F4_ca_mg.mapeamento")
+        _checar_rotulos(dados["F5_ctc"]["mapeamento"], "F5_ctc.mapeamento")
+        _checar_rotulos(dados["F6_mo"]["mapeamento"], "F6_mo.mapeamento")
+        _checar_rotulos(
+            dados["F7_textura"]["mapeamento_por_classe_argila"], "F7_textura.mapeamento_por_classe_argila"
+        )
+
+        composicao = dados["composicao"]
+        classes_conhecidas = set(composicao["ordem_classes"])
+        for grau_str, classe in composicao["grau_para_classe"].items():
+            if classe not in classes_conhecidas:
+                raise ErroCarregamento(
+                    f"criterios_aptidao.json: composicao.grau_para_classe['{grau_str}'] "
+                    f"aponta para classe desconhecida '{classe}' (fora de ordem_classes)"
+                )
+
+        ordem_fatores = composicao["ordem_fatores_desempate"]
+        if sorted(ordem_fatores) != sorted(self._FATORES_APTIDAO):
+            raise ErroCarregamento(
+                f"criterios_aptidao.json: composicao.ordem_fatores_desempate deve conter "
+                f"exatamente {self._FATORES_APTIDAO}, obtido {ordem_fatores}"
+            )
+
+        corrigibilidade = [k for k in dados["corrigibilidade"] if not k.startswith("_")]
+        if sorted(corrigibilidade) != sorted(self._FATORES_APTIDAO):
+            raise ErroCarregamento(
+                f"criterios_aptidao.json: corrigibilidade deve cobrir exatamente "
+                f"{self._FATORES_APTIDAO}, obtido {sorted(corrigibilidade)}"
+            )
+
+    def validar_config_aptidao(self, dados: Dict, criterios_aptidao: Dict) -> None:
+        """
+        Valida invariantes de config_aptidao.json:
+        - F4/F5/F6_GRAU_MAXIMO são graus conhecidos de criterios_aptidao.json
+        - o teto de calagem superficial não é maior que o incorporado
+
+        Raises:
+            ErroCarregamento: se alguma invariante falhar
+        """
+        graus_conhecidos = set(criterios_aptidao.get("graus", {}))
+        for chave in ("F4_GRAU_MAXIMO", "F5_GRAU_MAXIMO", "F6_GRAU_MAXIMO"):
+            valor = dados[chave]
+            if valor not in graus_conhecidos:
+                raise ErroCarregamento(
+                    f"config_aptidao.json: {chave}='{valor}' não é um grau conhecido "
+                    f"(ver criterios_aptidao.json.graus)"
+                )
+
+        if dados["NC_MAX_SUPERFICIAL_T_HA"] > dados["NC_MAX_INCORPORADO_T_HA"]:
+            raise ErroCarregamento(
+                "config_aptidao.json: NC_MAX_SUPERFICIAL_T_HA não pode ser maior que "
+                "NC_MAX_INCORPORADO_T_HA"
+            )
+
     def validar_graos_adubacao_n(self, dados: Dict) -> None:
         """
         Valida invariantes de graos_adubacao_n.json contra o checksum já transcrito:
@@ -736,7 +839,9 @@ class Carregador:
         Carrega e valida todos os arquivos de dados/comum/.
 
         Returns:
-            Dict com chaves 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas'
+            Dict com chaves 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas',
+            'interpretacao_geral', 'interpretacao_k', 'interpretacao_p', 'criterios_aptidao',
+            'config_aptidao'
 
         Raises:
             ErroCarregamento: se algum arquivo falhar na validação
@@ -808,6 +913,24 @@ class Carregador:
             resultado["interpretacao_p"] = dados
         except ErroCarregamento as e:
             raise ErroCarregamento(f"interpretacao_p.json: {e}")
+
+        # Carregar criterios_aptidao.json
+        try:
+            dados = self._carregar_json(dados_dir / "criterios_aptidao.json")
+            self._validar_schema_json("criterios_aptidao.json", "criterios_aptidao_v1", dados)
+            self.validar_criterios_aptidao(dados)
+            resultado["criterios_aptidao"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"criterios_aptidao.json: {e}")
+
+        # Carregar config_aptidao.json
+        try:
+            dados = self._carregar_json(dados_dir / "config_aptidao.json")
+            self._validar_schema_json("config_aptidao.json", "config_aptidao_v1", dados)
+            self.validar_config_aptidao(dados, resultado["criterios_aptidao"])
+            resultado["config_aptidao"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"config_aptidao.json: {e}")
 
         return resultado
 
@@ -922,7 +1045,8 @@ def carregar_dados_comum() -> Dict[str, Dict[str, Any]]:
 
     Returns:
         Dict com 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas',
-        'interpretacao_geral', 'interpretacao_k', 'interpretacao_p'
+        'interpretacao_geral', 'interpretacao_k', 'interpretacao_p', 'criterios_aptidao',
+        'config_aptidao'
 
     Raises:
         ErroCarregamento: se validação falhar

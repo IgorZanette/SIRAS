@@ -51,13 +51,17 @@ def _arredondar_dezena(valor: float) -> float:
     return float((Decimal(str(valor)) / 10).quantize(Decimal("1"), rounding=ROUND_HALF_UP) * 10)
 
 
-def _classificar_faixa(valor: float, faixas: List[Dict[str, Any]], chave_rotulo: str = "classe") -> str:
+def classificar_faixa(valor: float, faixas: List[Dict[str, Any]], chave_rotulo: str = "classe") -> str:
     """Classifica um valor numérico segundo uma lista de faixas contíguas (de/ate).
 
     Convenção (confirmada em testes/casos/casos_recomendacao.json, caso ADU-01: "P=6,0
     cai em muito_baixo, limite superior inclusivo"): faixa aplica-se quando
     de < valor <= ate (limite inferior aberto, superior fechado); None em "de"/"ate"
     representa -infinito/+infinito.
+
+    Pública porque motor/aptidao.py reaproveita o mesmo classificador para as classes de
+    argila, CTC, Ca, Mg e MO (docs/decisoes/0005) — evita duplicar a mesma regra de faixa
+    em dois motores.
     """
     for faixa in faixas:
         de = faixa["de"]
@@ -67,7 +71,7 @@ def _classificar_faixa(valor: float, faixas: List[Dict[str, Any]], chave_rotulo:
     raise ErroAdubacao(f"valor {valor} não se encaixa em nenhuma faixa: {faixas}")
 
 
-def _grupo_exigencia(cultura_id: str, mapa_culturas: Dict[str, Any], grupos_exigencia: List[Dict[str, Any]],
+def grupo_exigencia(cultura_id: str, mapa_culturas: Dict[str, Any], grupos_exigencia: List[Dict[str, Any]],
                       nome_arquivo: str) -> str:
     """Resolve o grupo de exigência (P ou K) de uma cultura.
 
@@ -77,6 +81,10 @@ def _grupo_exigencia(cultura_id: str, mapa_culturas: Dict[str, Any], grupos_exig
     "culturas de grãos exceto arroz irrigado" (interpretacao_p.json/interpretacao_k.json,
     grupos_exigencia[].culturas_texto). Arroz irrigado é fora de escopo do SIRAS e nunca
     aparece com grupo "graos" nesse fallback.
+
+    Pública porque motor/aptidao.py reaproveita esta mesma resolução para F2/F3
+    (docs/decisoes/0005) — uma só fonte para grupo_p/grupo_k evita a divergência que o
+    CCAE (Seção 3, "Armadilha conhecida") alerta ser um erro clássico.
     """
     for grupo in grupos_exigencia:
         if cultura_id in grupo.get("culturas", []):
@@ -215,21 +223,21 @@ def calcular_fosforo_potassio(
         for atributo in dados_comuns["interpretacao_geral"]["atributos"]
         if atributo["atributo"] == "argila"
     )
-    classe_argila = _classificar_faixa(argila, faixas_argila)
+    classe_argila = classificar_faixa(argila, faixas_argila)
 
-    grupo_p = _grupo_exigencia(cultura_id, mapa_culturas, interpretacao_p["grupos_exigencia"], "interpretacao_p.json")
+    grupo_p = grupo_exigencia(cultura_id, mapa_culturas, interpretacao_p["grupos_exigencia"], "interpretacao_p.json")
     tabela_p = next(t for t in interpretacao_p["tabelas"] if t["grupo"] == grupo_p)
     faixas_p = next(
         bloco["faixas"] for bloco in tabela_p["por_classe_argila"] if bloco["classe_argila"] == classe_argila
     )
-    classe_p = _classificar_faixa(p_solo, faixas_p)
+    classe_p = classificar_faixa(p_solo, faixas_p)
 
-    faixa_ctc = _classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
+    faixa_ctc = classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
 
-    grupo_k = _grupo_exigencia(cultura_id, mapa_culturas, interpretacao_k["grupos_exigencia"], "interpretacao_k.json")
+    grupo_k = grupo_exigencia(cultura_id, mapa_culturas, interpretacao_k["grupos_exigencia"], "interpretacao_k.json")
     tabela_k = next(t for t in interpretacao_k["tabelas"] if t["grupo"] == grupo_k)
     bloco_k = next(bloco for bloco in tabela_k["por_faixa_ctc"] if bloco["faixa_ctc"] == faixa_ctc)
-    classe_k = _classificar_faixa(k_solo, bloco_k["faixas"])
+    classe_k = classificar_faixa(k_solo, bloco_k["faixas"])
 
     rendimento_referencia = manutencao["rendimento_referencia_t_ha"]
     delta_rendimento = 0.0
@@ -301,7 +309,7 @@ def _classe_mo(mo: float, classes_mo: List[Dict[str, Any]]) -> str:
     Python (D4.4, docs/decisoes/0004): o tabaco usa 6 faixas próprias, não as 3 comuns
     às demais culturas, e reaproveitar faixas fixas quebraria esse caso silenciosamente.
     """
-    return _classificar_faixa(mo, classes_mo, chave_rotulo="id")
+    return classificar_faixa(mo, classes_mo, chave_rotulo="id")
 
 
 def _classificar_p_e_k(
@@ -326,20 +334,20 @@ def _classificar_p_e_k(
         for atributo in dados_comuns["interpretacao_geral"]["atributos"]
         if atributo["atributo"] == "argila"
     )
-    classe_argila = _classificar_faixa(argila, faixas_argila)
+    classe_argila = classificar_faixa(argila, faixas_argila)
     grupo_p = f"grupo_{grupo_exigencia['p']}"
     tabela_p = next(t for t in interpretacao_p["tabelas"] if t["grupo"] == grupo_p)
     faixas_p = next(
         bloco["faixas"] for bloco in tabela_p["por_classe_argila"] if bloco["classe_argila"] == classe_argila
     )
-    classe_p = _classificar_faixa(p_solo, faixas_p)
+    classe_p = classificar_faixa(p_solo, faixas_p)
 
     interpretacao_k = dados_comuns["interpretacao_k"]
-    faixa_ctc = _classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
+    faixa_ctc = classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
     grupo_k = f"grupo_{grupo_exigencia['k']}"
     tabela_k = next(t for t in interpretacao_k["tabelas"] if t["grupo"] == grupo_k)
     bloco_k = next(bloco for bloco in tabela_k["por_faixa_ctc"] if bloco["faixa_ctc"] == faixa_ctc)
-    classe_k = _classificar_faixa(k_solo, bloco_k["faixas"])
+    classe_k = classificar_faixa(k_solo, bloco_k["faixas"])
 
     return classe_p, classe_k
 
@@ -532,7 +540,7 @@ def calcular_adubacao_outras(
 
         indice_produtividade = None
         if produtividade_t_ha is not None:
-            indice_produtividade = _classificar_faixa(
+            indice_produtividade = classificar_faixa(
                 produtividade_t_ha, bloco["pk"]["faixas_produtividade"], chave_rotulo="id"
             )
 
@@ -695,12 +703,12 @@ def calcular_adubacao_frutiferas(
             if ano == 1:
                 n = 0.0  # nota (1): 1o ano é o ano de plantio, "nao_aplicar"
             else:
-                faixa_prod_n = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+                faixa_prod_n = classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
                 coluna = f"ano_2_{faixa_prod_n}" if ano == 2 else f"ano_3_mais_{faixa_prod_n}"
                 n = _navegar(n_bloco["doses"], faixa_mo, coluna)
 
             pk_bloco = bloco["pk"]
-            faixa_prod_pk = _classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
+            faixa_prod_pk = classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
             p2o5 = _navegar(pk_bloco["p"], classe_p, faixa_prod_pk)
             k2o = _navegar(pk_bloco["k"], classe_k, faixa_prod_pk)
             return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
@@ -712,11 +720,11 @@ def calcular_adubacao_frutiferas(
 
             n_bloco = bloco["n"]
             faixa_mo = _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]])
-            faixa_prod_n = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+            faixa_prod_n = classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
             n = _navegar(n_bloco["doses"], faixa_mo, faixa_prod_n)
 
             pk_bloco = bloco["pk"]
-            faixa_prod_pk = _classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
+            faixa_prod_pk = classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
             p2o5 = _navegar(pk_bloco["p"], classe_p, faixa_prod_pk)
             k2o = _navegar(pk_bloco["k"], classe_k, faixa_prod_pk)
             return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
@@ -728,12 +736,12 @@ def calcular_adubacao_frutiferas(
 
             # N ignora a MO de propósito (p. 214): substrato orgânico contribui pouco.
             n_bloco = bloco["n"]
-            faixa_prod_n = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+            faixa_prod_n = classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
             n = _navegar(n_bloco["doses"], faixa_prod_n)
 
             pk_bloco = bloco["pk"]
             p2o5 = _navegar(pk_bloco["p"], classe_p)  # P: só classe, sem produtividade
-            faixa_prod_k = _classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
+            faixa_prod_k = classificar_faixa(produtividade_estimada, pk_bloco["faixas_produtividade"], chave_rotulo="id")
             k2o = _navegar(pk_bloco["k"], classe_k, faixa_prod_k)
             return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
 
@@ -741,7 +749,7 @@ def calcular_adubacao_frutiferas(
             if produtividade_estimada is None:
                 raise ErroAdubacao("nogueira_peca: 'produtividade_estimada' é obrigatória na manutenção")
             n_bloco = bloco["n"]
-            faixa_prod = _classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
+            faixa_prod = classificar_faixa(produtividade_estimada, n_bloco["faixas_produtividade"], chave_rotulo="id")
             n = _navegar(n_bloco["doses"], faixa_prod)
             if ano_de_alternancia:
                 # Ajuste (p. 217, cultivares Barton/Cheyenne/Elliott/Jackson/Mahan/
@@ -774,7 +782,7 @@ def calcular_adubacao_frutiferas(
                 classe_p, classe_k = _classificar_p_e_k(entrada, cultura_id, argila, p_solo, k_solo, ctc_ph7, dados_comuns)
                 classe_tecido_p = _TECIDO_POR_CLASSE_P[classe_p]
 
-            faixa_prod = _classificar_faixa(produtividade_estimada, bloco["faixas_produtividade"], chave_rotulo="id")
+            faixa_prod = classificar_faixa(produtividade_estimada, bloco["faixas_produtividade"], chave_rotulo="id")
 
             # "excessivo" usa a chave especial 'qualquer_produtividade' (Tab. 6.5.18) —
             # não a faixa de produtividade normal.

@@ -1,0 +1,197 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Critérios de Aptidão Edáfica — mapeamento classe/teor -> grau e composição",
+  "type": "object",
+  "required": ["descricao", "fonte", "graus", "mapeamento_disponibilidade_grau", "F1_acidez", "F4_ca_mg", "F5_ctc", "F6_mo", "F7_textura", "composicao", "corrigibilidade"],
+  "properties": {
+    "descricao": { "type": "string", "minLength": 1 },
+    "fonte": {
+      "type": "object",
+      "required": ["documento", "manual"],
+      "properties": {
+        "documento": { "type": "string" },
+        "manual": { "type": "string" },
+        "outras_fontes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "graus": {
+      "type": "object",
+      "required": ["NULO", "LIGEIRO", "MODERADO", "FORTE", "MUITO_FORTE"],
+      "properties": {
+        "NULO": { "const": 0 },
+        "LIGEIRO": { "const": 1 },
+        "MODERADO": { "const": 2 },
+        "FORTE": { "const": 3 },
+        "MUITO_FORTE": { "const": 4 }
+      }
+    },
+    "mapeamento_disponibilidade_grau": {
+      "type": "object",
+      "required": ["muito_baixo", "baixo", "medio", "alto", "muito_alto"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "muito_baixo": { "type": "string" },
+        "baixo": { "type": "string" },
+        "medio": { "type": "string" },
+        "alto": { "type": "string" },
+        "muito_alto": { "type": "string" }
+      }
+    },
+    "F1_acidez": {
+      "type": "object",
+      "required": ["com_ph_referencia", "sem_ph_referencia"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "com_ph_referencia": {
+          "type": "object",
+          "required": ["_fonte", "m_percent_faixas"],
+          "properties": {
+            "_fonte": { "type": "string" },
+            "m_percent_faixas": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["classe", "de", "ate"],
+                "properties": {
+                  "classe": { "type": "string", "minLength": 1 },
+                  "de": { "type": ["number", "null"] },
+                  "ate": { "type": ["number", "null"] }
+                }
+              }
+            }
+          }
+        },
+        "sem_ph_referencia": {
+          "type": "object",
+          "required": ["_fonte", "v_minimo", "excecao_ca_minimo", "excecao_mg_minimo", "grau_se_deficiente"],
+          "properties": {
+            "_fonte": { "type": "string" },
+            "v_minimo": { "type": "number" },
+            "excecao_ca_minimo": { "type": "number" },
+            "excecao_mg_minimo": { "type": "number" },
+            "grau_se_deficiente": { "type": "string" }
+          }
+        }
+      }
+    },
+    "F4_ca_mg": {
+      "type": "object",
+      "required": ["_fonte", "mapeamento"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "mapeamento": {
+          "type": "object",
+          "required": ["baixo", "medio", "alto"],
+          "properties": {
+            "baixo": { "type": "string" },
+            "medio": { "type": "string" },
+            "alto": { "type": "string" }
+          }
+        }
+      }
+    },
+    "F5_ctc": {
+      "type": "object",
+      "required": ["_fonte", "mapeamento"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "mapeamento": {
+          "type": "object",
+          "required": ["baixa", "media", "alta", "muito_alta"],
+          "properties": {
+            "baixa": { "type": "string" },
+            "media": { "type": "string" },
+            "alta": { "type": "string" },
+            "muito_alta": { "type": "string" }
+          }
+        }
+      }
+    },
+    "F6_mo": {
+      "type": "object",
+      "required": ["_fonte", "mapeamento"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "mapeamento": {
+          "type": "object",
+          "required": ["baixo", "medio", "alto"],
+          "properties": {
+            "baixo": { "type": "string" },
+            "medio": { "type": "string" },
+            "alto": { "type": "string" }
+          }
+        }
+      }
+    },
+    "F7_textura": {
+      "type": "object",
+      "required": ["_fonte", "mapeamento_por_classe_argila"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "mapeamento_por_classe_argila": {
+          "type": "object",
+          "required": ["4", "3", "2", "1"],
+          "properties": {
+            "4": { "type": "string" },
+            "3": { "type": "string" },
+            "2": { "type": "string" },
+            "1": { "type": "string" }
+          }
+        }
+      }
+    },
+    "composicao": {
+      "type": "object",
+      "required": ["_fonte", "grau_para_classe", "ordem_classes", "ordem_fatores_desempate"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "grau_para_classe": {
+          "type": "object",
+          "required": ["0", "1", "2", "3", "4"],
+          "properties": {
+            "0": { "type": "string" },
+            "1": { "type": "string" },
+            "2": { "type": "string" },
+            "3": { "type": "string" },
+            "4": { "type": "string" }
+          }
+        },
+        "ordem_classes": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "type": "string" }
+        },
+        "ordem_fatores_desempate": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "fora_de_escopo": {
+      "type": "object",
+      "required": ["_fonte", "culturas"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "culturas": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "corrigibilidade": {
+      "type": "object",
+      "required": ["F1_acidez", "F2_fosforo", "F3_potassio", "F4_ca_mg", "F5_ctc", "F6_mo", "F7_textura"],
+      "properties": {
+        "_fonte": { "type": "string" },
+        "F1_acidez": { "type": "string", "enum": ["CORRIGIVEL", "PERMANENTE"] },
+        "F2_fosforo": { "type": "string", "enum": ["CORRIGIVEL", "PERMANENTE"] },
+        "F3_potassio": { "type": "string", "enum": ["CORRIGIVEL", "PERMANENTE"] },
+        "F4_ca_mg": { "type": "string", "enum": ["CORRIGIVEL", "PERMANENTE"] },
+        "F5_ctc": { "type": "string", "enum": ["CORRIGIVEL", "PERMANENTE"] },
+        "F6_mo": { "type": "string", "enum": ["CORRIGIVEL", "PERMANENTE"] },
+        "F7_textura": { "type": "string", "enum": ["CORRIGIVEL", "PERMANENTE"] }
+      }
+    }
+  }
+}

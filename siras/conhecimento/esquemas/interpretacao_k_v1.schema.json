@@ -51,7 +51,9 @@
           "descricao": { "type": "string" },
           "tabela": { "type": "string" },
           "culturas": { "type": "array", "items": { "type": "string" } },
-          "culturas_texto": { "type": "string" }
+          "culturas_texto": { "type": "string" },
+          "culturas_fonte": { "type": "string" },
+          "culturas_pendente": { "type": "string" }
         }
       }
     },

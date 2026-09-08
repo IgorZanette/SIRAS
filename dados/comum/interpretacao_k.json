@@ -67,13 +67,29 @@
       "grupo": "grupo_2",
       "descricao": "exigentes (igual graos)",
       "tabela": "6.9",
-      "culturas_texto": "culturas de graos; pastagens exceto pastagem natural; frutiferas; mandioca; hortalicas exceto Grupo 1"
+      "culturas_texto": "culturas de graos; pastagens exceto pastagem natural; frutiferas; mandioca; hortalicas exceto Grupo 1",
+      "culturas": [
+        "mandioca"
+      ],
+      "culturas_fonte": "Manual RS/SC 2016, Anexo 2 (p. 361-366) - transcricao parcial, conferida pelo autor em 2026-09-07. Mandioca diverge de P (grupo_p=3, grupo_k=2) - ver interpretacao_p.json."
     },
     {
       "grupo": "grupo_3",
       "descricao": "pouco exigentes (0,7x graos)",
       "tabela": "6.10",
-      "culturas_texto": "demais culturas nao inclusas nos Grupos 1 e 2"
+      "culturas_texto": "demais culturas nao inclusas nos Grupos 1 e 2",
+      "culturas": [
+        "acácia-negra",
+        "araucária",
+        "bracatinga",
+        "cedro-australiano",
+        "erva-mate",
+        "eucalipto",
+        "pinus",
+        "pastagem-natural"
+      ],
+      "culturas_fonte": "Manual RS/SC 2016, Anexo 2 (p. 361-366) - transcricao parcial, conferida pelo autor em 2026-09-07",
+      "culturas_pendente": "Anexo 2 tem ~150 culturas; so as listadas acima (as sem pH de referencia da Tabela 5.1) foram conferidas ate agora. 'culturas_texto' continua sendo so descricao, nao lista exaustiva - grupo_exigencia() so resolve pelas 'culturas' explicitas ou pelo fallback de graos."
     }
   ],
   "tabelas": [

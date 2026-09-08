@@ -1,0 +1,111 @@
+{
+  "descricao": "Mapeamento de classe de disponibilidade/teor para grau de limitacao (Ramalho Filho e Beek, 1995) e regra de composicao da aptidao edafica. As faixas numericas do Manual NAO sao duplicadas aqui: F2 e F3 usam as classes de interpretacao_p.json/interpretacao_k.json; F4, F5, F6 e F7 usam as classes de interpretacao_geral.json (calcio, magnesio, ctc_ph7, materia_organica, argila). Este arquivo guarda apenas a camada de grau/classe que nao vem diretamente do Manual: e a especificacao do CCAE, aprovada pelo orientador antes da implementacao (tag criterios-v1.0).",
+  "fonte": {
+    "documento": "docs/CCAE-v1.0.md, versao 1.0 (Secoes 4, 6 e 8)",
+    "manual": "CQFS-RS/SC, 11. ed., 2016, Cap. 6, p. 89-90 (rendimento relativo por classe de disponibilidade)",
+    "outras_fontes": [
+      "Ramalho Filho, A.; Beek, K. J. Sistema de avaliacao da aptidao agricola das terras. EMBRAPA-CNPS, 1995, apud Hofig, Moura e Giasson (2015), p. 357",
+      "Sobral, L. F. et al. Guia pratico para interpretacao de resultados de analises de solo. Embrapa Tabuleiros Costeiros, 2015, Tabela 4 (limiares de saturacao por aluminio)"
+    ]
+  },
+  "graus": {
+    "NULO": 0,
+    "LIGEIRO": 1,
+    "MODERADO": 2,
+    "FORTE": 3,
+    "MUITO_FORTE": 4
+  },
+  "mapeamento_disponibilidade_grau": {
+    "_fonte": "CCAE-v1.0.md Sec. 4.1; Manual RS/SC 2016, Cap. 6, p. 89-90",
+    "muito_baixo": "MUITO_FORTE",
+    "baixo": "FORTE",
+    "medio": "MODERADO",
+    "alto": "NULO",
+    "muito_alto": "NULO"
+  },
+  "F1_acidez": {
+    "_fonte": "CCAE-v1.0.md Sec. 6, F1",
+    "com_ph_referencia": {
+      "_fonte": "Manual RS/SC 2016, Tab. 5.1, p. 68, texto p. 69; Sobral et al. 2015, Tab. 4",
+      "m_percent_faixas": [
+        {"classe": "MODERADO", "de": null, "ate": 30.0},
+        {"classe": "FORTE", "de": 30.0, "ate": 50.0},
+        {"classe": "MUITO_FORTE", "de": 50.0, "ate": null}
+      ]
+    },
+    "sem_ph_referencia": {
+      "_fonte": "Manual RS/SC 2016, Tab. 5.6 e 5.7",
+      "v_minimo": 40.0,
+      "excecao_ca_minimo": 4.0,
+      "excecao_mg_minimo": 1.0,
+      "grau_se_deficiente": "MODERADO"
+    }
+  },
+  "F4_ca_mg": {
+    "_fonte": "CCAE-v1.0.md Sec. 6, F4; classes de calcio/magnesio em interpretacao_geral.json",
+    "mapeamento": {
+      "baixo": "MODERADO",
+      "medio": "LIGEIRO",
+      "alto": "NULO"
+    }
+  },
+  "F5_ctc": {
+    "_fonte": "CCAE-v1.0.md Sec. 6, F5; classes de ctc_ph7 em interpretacao_geral.json",
+    "mapeamento": {
+      "baixa": "MODERADO",
+      "media": "LIGEIRO",
+      "alta": "NULO",
+      "muito_alta": "NULO"
+    }
+  },
+  "F6_mo": {
+    "_fonte": "CCAE-v1.0.md Sec. 6, F6; classes de materia_organica em interpretacao_geral.json",
+    "mapeamento": {
+      "baixo": "MODERADO",
+      "medio": "LIGEIRO",
+      "alto": "NULO"
+    }
+  },
+  "F7_textura": {
+    "_fonte": "CCAE-v1.0.md Sec. 6, F7; classes de argila em interpretacao_geral.json",
+    "mapeamento_por_classe_argila": {
+      "4": "MODERADO",
+      "3": "LIGEIRO",
+      "2": "NULO",
+      "1": "NULO"
+    }
+  },
+  "composicao": {
+    "_fonte": "CCAE-v1.0.md Sec. 8; Ramalho Filho e Beek 1995, apud Hofig et al. 2015, p. 357",
+    "grau_para_classe": {
+      "0": "APTA",
+      "1": "APTA",
+      "2": "APTA_COM_RESTRICOES",
+      "3": "RESTRITA",
+      "4": "INAPTA_SEM_CORRECAO"
+    },
+    "ordem_classes": ["APTA", "APTA_COM_RESTRICOES", "RESTRITA", "INAPTA_SEM_CORRECAO"],
+    "ordem_fatores_desempate": [
+      "F1_acidez", "F2_fosforo", "F3_potassio", "F4_ca_mg", "F5_ctc", "F6_mo", "F7_textura"
+    ]
+  },
+  "fora_de_escopo": {
+    "_fonte": "CCAE-v1.0.md Sec. 1.3: 'Ficam fora do escopo o arroz irrigado por alagamento e a mandioca'",
+    "culturas": [
+      "mandioca",
+      "arroz-irrigado",
+      "arroz-irrigado-pre-germinado-ou-transplante",
+      "arroz-irrigado-semeadura-em-solo-seco"
+    ]
+  },
+  "corrigibilidade": {
+    "_fonte": "CCAE-v1.0.md Sec. 7.1",
+    "F1_acidez": "CORRIGIVEL",
+    "F2_fosforo": "CORRIGIVEL",
+    "F3_potassio": "CORRIGIVEL",
+    "F4_ca_mg": "CORRIGIVEL",
+    "F5_ctc": "PERMANENTE",
+    "F6_mo": "CORRIGIVEL",
+    "F7_textura": "PERMANENTE"
+  }
+}

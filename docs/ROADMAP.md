@@ -7,7 +7,7 @@ Atualize a coluna **Estado** ao concluir cada etapa. Legenda: `pendente` · `em 
 
 | # | Pendência | Por quê | Estado |
 |---|---|---|---|
-| P1 | Definir o oráculo da aptidão edáfica (fonte independente + agrônomo para classificação às cegas) | Sem isso, a H1.2 é circular e o teste não mede nada | pendente |
+| P1 | Definir o oráculo da aptidão edáfica (fonte independente + agrônomo para classificação às cegas) | Sem isso, a H1.2 é circular e o teste não mede nada | resolvido — H0.2/H1.2 removidas da proposta; aptidão migrou de hipótese de validação para objetivo de projeto, verificado por conformidade da implementação frente ao Caderno de Critérios de Aptidão Edáfica (`docs/CCAE-v1.0.md`, aprovado pelo orientador, tag `criterios-v1.0`), não por painel de especialistas. Auditoria agronômica qualitativa (parecer do orientador sobre laudos gerados) registrada como complemento, sem percentual — ver CCAE §10 |
 | P2 | Confirmar necessidade de CEP/TCLE para o teste de usabilidade | Trâmite leva semanas; descobrir em novembro inviabiliza o capítulo | concluído — Confirmado que a avaliação de usabilidade não requer submissão ao CEP. Será aplicado TCLE aos participantes. (confirmado com o orientador Rafael Rieder) |
 | P3 | Corrigir a proposta: método de calagem (SMP), atribuição do SUS, referência Ramalho Filho & Beek | Erros conhecidos no texto atual | em andamento |
 
@@ -42,10 +42,10 @@ Se houver atraso, o escopo é reduzido por camadas, nesta ordem — nunca sacrif
 |---|---|---|
 | a | Estruturação da base de conhecimento (JSON) | em andamento — `dados/comum/` e a adubação dos 6 grupos (grãos, hortaliças, tubérculos, outras, frutíferas, erva-mate) transcritas e conferidas; falta `corretivos.json` (Cap. 8) e dados de aptidão (bloqueados por P1) |
 | b | Definição formal das regras SE-ENTÃO | em andamento |
-| c | Definição dos critérios de aptidão edáfica | bloqueado por P1 |
+| c | Definição dos critérios de aptidão edáfica | concluído — `docs/CCAE-v1.0.md`, F1-F7 rastreados ao Manual e a Ramalho Filho &amp; Beek (1995); motor em `siras/motor/aptidao.py` (docs/decisoes/0005) |
 | d | Módulo de entrada de dados | pendente |
 | e | Motor de inferência | em andamento |
-| f | Módulos de recomendação e aptidão | pendente |
+| f | Módulos de recomendação e aptidão | em andamento — `siras/motor/aptidao.py` implementado e testado contra o CCAE-v1.0.md; falta preencher `testes/casos/casos_aptidao.json` (gabarito à mão, autor) para a verificação de conformidade da etapa g |
 | g | Conjunto de casos de teste e oráculo | em andamento |
 | h | Validação e análise dos resultados | pendente |
 | i | Avaliação de usabilidade | pendente |

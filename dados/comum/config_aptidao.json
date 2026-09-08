@@ -1,0 +1,15 @@
+{
+  "descricao": "Parametros de decisao do autor para o motor de aptidao edafica (Apendice A do CCAE-v1.0.md). Cada chave e o parametro configuravel de uma decisao registrada la; mudar um valor aqui e reportado na analise de sensibilidade (CCAE Sec. 9.4), nunca no codigo do motor.",
+  "fonte": {
+    "documento": "docs/CCAE-v1.0.md, versao 1.0, Apendice A"
+  },
+  "REBAIXAMENTO_POR_ACUMULO": false,
+  "REBAIXAMENTO_MIN_FATORES": 3,
+  "F4_GRAU_MAXIMO": "MODERADO",
+  "F5_GRAU_MAXIMO": "MODERADO",
+  "F6_GRAU_MAXIMO": "MODERADO",
+  "F7_ATIVO": true,
+  "MUITO_ALTO_REBAIXA": false,
+  "NC_MAX_INCORPORADO_T_HA": 20.0,
+  "NC_MAX_SUPERFICIAL_T_HA": 5.0
+}

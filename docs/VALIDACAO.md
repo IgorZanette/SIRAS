@@ -48,6 +48,26 @@ autor, o teste mede apenas se a implementação corresponde à transcrição.
   1. faixas construídas a partir de fonte **independente** do Manual; e
   2. subconjunto de casos classificado às cegas por um agrônomo.
 
+## Convergência entre transcrições — o que ela prova e o que não prova
+
+Os grupos de exigência de P e K de cada cultura foram transcritos do Manual três vezes, em
+momentos distintos e por caminhos distintos: nos arquivos de adubação por grupo (agosto de
+2026, campo `grupo_exigencia`), nas listas `culturas` de `interpretacao_p.json` e
+`interpretacao_k.json` (setembro de 2026) e no catálogo completo do Anexo 2
+(`dados/comum/catalogo_anexo2.json`, 141 culturas, 10/09/2026). As três concordam
+integralmente — zero divergências —, e `testes/unidade/test_integridade_catalogo_anexo2.py`
+mantém essa concordância travada: qualquer edição futura que desalinhe as três quebra a suíte.
+
+**A distinção precisa ser explícita no texto da monografia:** isso é evidência de *correção da
+transcrição*, não de correção agronômica dos critérios. Prova que o dado que está no sistema é
+o dado que está no Manual; não prova que o critério do Manual seja o adequado, nem que a
+interpretação que o SIRAS faz dele produza a recomendação certa. Escrever sem essa ressalva
+transformaria um controle de qualidade de transcrição em alegação de validação agronômica, que
+é coisa maior e depende do conjunto de casos com oráculo e da auditoria do agrônomo.
+
+O mesmo vale para a validação cruzada contra os cabeçalhos das Tabelas 6.2 e 6.7, que nomeiam
+exaustivamente os Grupos 1 e 4: é uma checagem interna ao Manual, feita sem sair dele.
+
 ## Análise dos resultados
 
 O sistema é determinístico: execuções repetidas produzem a mesma saída, logo não há teste de

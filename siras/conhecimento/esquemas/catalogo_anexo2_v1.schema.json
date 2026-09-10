@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "title": "Catálogo de culturas do Anexo 2 (grupos de exigência de P e K)",
+  "type": "object",
+  "required": ["descricao", "versao", "fonte", "procedencia", "culturas"],
+  "properties": {
+    "descricao": { "type": "string", "minLength": 1 },
+    "versao": { "type": "string", "minLength": 1 },
+    "fonte": { "type": "string", "minLength": 1 },
+    "procedencia": { "type": "string", "minLength": 1 },
+    "o_que_o_anexo_2_nao_fornece": { "type": "string" },
+    "lacunas_conhecidas": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "culturas": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z0-9_]+$" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["nome_anexo2", "nome_exibicao", "sinonimos", "nome_cientifico",
+                     "categoria", "grupo_p", "grupo_k", "pagina", "fonte_grupos"],
+        "additionalProperties": false,
+        "properties": {
+          "nome_anexo2": { "type": "string", "minLength": 1 },
+          "nome_exibicao": { "type": "string", "minLength": 1 },
+          "sinonimos": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "nome_cientifico": { "type": "string", "minLength": 1 },
+          "categoria": {
+            "type": "string",
+            "enum": ["graos", "forrageiras", "hortalicas", "tuberculos_e_raizes",
+                     "frutiferas", "florestais", "medicinais_aromaticas_condimentares",
+                     "ornamentais", "outras_culturas_comerciais"]
+          },
+          "grupo_p": { "type": "integer", "enum": [1, 2, 3, 4] },
+          "grupo_k": { "type": "integer", "enum": [1, 2, 3] },
+          "pagina": { "type": "integer", "minimum": 361, "maximum": 366 },
+          "fonte_grupos": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$comment": "O Anexo 2 fornece somente grupo_p e grupo_k. pH de referência (Tab. 5.1) mora em ph_referencia.json e critério de calagem (Tab. 5.3 a 5.7) em mapa_culturas.json — additionalProperties:false impede que esses campos reapareçam aqui e criem uma segunda fonte da verdade."
+}

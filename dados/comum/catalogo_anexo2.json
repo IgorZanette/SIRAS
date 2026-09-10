@@ -1,0 +1,1644 @@
+{
+  "descricao": "Catalogo de culturas do Anexo 2 do Manual RS/SC 2016 (p. 361-365): grupo de exigencia de fosforo (grupo_p, Tab. 6.2) e de potassio (grupo_k, Tab. 6.7) por cultura, com nome cientifico e sinonimos.",
+  "versao": "1.0",
+  "fonte": "Manual de Calagem e Adubacao para os Estados do Rio Grande do Sul e de Santa Catarina, 11. ed., 2016 - Anexo 2, p. 361-365",
+  "procedencia": "Transcrito do Manual impresso por Igor Zanette em 2026-09-10; validado contra os cabecalhos das Tab. 6.2 e 6.7 (nenhuma cultura fora das listas nominais dos Grupos 1 e 4 recebe esses grupos) e conferido contra as transcricoes ja existentes em interpretacao_p.json, interpretacao_k.json e nos arquivos de adubacao por grupo: zero divergencias em 141 registros.",
+  "o_que_o_anexo_2_nao_fornece": "O Anexo 2 da SOMENTE grupo_p e grupo_k. Nao da pH de referencia (fonte: ph_referencia.json, Tab. 5.1) nem criterio de calagem (fonte: mapa_culturas.json + criterios_calagem.json, Tab. 5.3 a 5.7). Nao acrescente esses campos aqui: duas fontes para a mesma pergunta e pior que uma incompleta.",
+  "lacunas_conhecidas": [
+    "abobrinha: consta da Tab. 5.1 (pH 6,0) mas NAO tem entrada no Anexo 2",
+    "consorciacoes de gramineas e leguminosas (estacao fria e quente): a Tab. 5.1 as menciona; o Anexo 2 so lista especies individuais",
+    "gramineas e leguminosas forrageiras de estacao fria e quente: idem"
+  ],
+  "culturas": {
+    "abacateiro": {
+      "nome_anexo2": "Abacateiro",
+      "nome_exibicao": "Abacateiro",
+      "sinonimos": [],
+      "nome_cientifico": "Persea spp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "abobora": {
+      "nome_anexo2": "Abobora",
+      "nome_exibicao": "Abobora",
+      "sinonimos": [],
+      "nome_cientifico": "Cucurbita moschata",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "acacia_negra": {
+      "nome_anexo2": "Acacia-negra",
+      "nome_exibicao": "Acacia-negra",
+      "sinonimos": [],
+      "nome_cientifico": "Acacia mearnsii",
+      "categoria": "florestais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "alcachofra": {
+      "nome_anexo2": "Alcachofra",
+      "nome_exibicao": "Alcachofra",
+      "sinonimos": [],
+      "nome_cientifico": "Cynara scolymus",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "alface": {
+      "nome_anexo2": "Alface",
+      "nome_exibicao": "Alface",
+      "sinonimos": [],
+      "nome_cientifico": "Lactuca sativa",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "alfafa": {
+      "nome_anexo2": "Alfafa",
+      "nome_exibicao": "Alfafa",
+      "sinonimos": [],
+      "nome_cientifico": "Medicago sativa",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "alfavaca": {
+      "nome_anexo2": "Alfavaca (manjericao)",
+      "nome_exibicao": "Alfavaca",
+      "sinonimos": [
+        "manjericao"
+      ],
+      "nome_cientifico": "Ocimum basilicum",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "alho": {
+      "nome_anexo2": "Alho",
+      "nome_exibicao": "Alho",
+      "sinonimos": [],
+      "nome_cientifico": "Allium sativum",
+      "categoria": "hortalicas",
+      "grupo_p": 1,
+      "grupo_k": 1,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "ameixeira": {
+      "nome_anexo2": "Ameixeira",
+      "nome_exibicao": "Ameixeira",
+      "sinonimos": [],
+      "nome_cientifico": "Prunus domestica, P. salicina",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "amendoim": {
+      "nome_anexo2": "Amendoim",
+      "nome_exibicao": "Amendoim",
+      "sinonimos": [],
+      "nome_cientifico": "Arachis hypogaea",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "amendoim_forrageiro": {
+      "nome_anexo2": "Amendoim forrageiro",
+      "nome_exibicao": "Amendoim forrageiro",
+      "sinonimos": [],
+      "nome_cientifico": "Arachis pintoi",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "amoreira_preta": {
+      "nome_anexo2": "Amoreira-preta",
+      "nome_exibicao": "Amoreira-preta",
+      "sinonimos": [],
+      "nome_cientifico": "Rubus spp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "araucaria": {
+      "nome_anexo2": "Araucaria (pinheiro brasileiro)",
+      "nome_exibicao": "Araucaria",
+      "sinonimos": [
+        "pinheiro brasileiro"
+      ],
+      "nome_cientifico": "Araucaria angustifolia",
+      "categoria": "florestais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "arroz": {
+      "nome_anexo2": "Arroz",
+      "nome_exibicao": "Arroz",
+      "sinonimos": [],
+      "nome_cientifico": "Oryza sativa",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "arroz_irrigado": {
+      "nome_anexo2": "Arroz irrigado",
+      "nome_exibicao": "Arroz irrigado",
+      "sinonimos": [],
+      "nome_cientifico": "Oryza sativa",
+      "categoria": "graos",
+      "grupo_p": 4,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "aspargo": {
+      "nome_anexo2": "Aspargo",
+      "nome_exibicao": "Aspargo",
+      "sinonimos": [],
+      "nome_cientifico": "Asparagus officinalis",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "aveia_branca": {
+      "nome_anexo2": "Aveia branca",
+      "nome_exibicao": "Aveia branca",
+      "sinonimos": [],
+      "nome_cientifico": "Avena sativa",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "aveia_perene": {
+      "nome_anexo2": "Aveia perene",
+      "nome_exibicao": "Aveia perene",
+      "sinonimos": [],
+      "nome_cientifico": "Arrhenatherum elatius",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "aveia_preta": {
+      "nome_anexo2": "Aveia preta",
+      "nome_exibicao": "Aveia preta",
+      "sinonimos": [],
+      "nome_cientifico": "Avena strigosa",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "aveias": {
+      "nome_anexo2": "Aveias",
+      "nome_exibicao": "Aveias",
+      "sinonimos": [],
+      "nome_cientifico": "Avena spp",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "azevem": {
+      "nome_anexo2": "Azevem",
+      "nome_exibicao": "Azevem",
+      "sinonimos": [],
+      "nome_cientifico": "Lolium multiflorum, L. perenne",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "bananeira": {
+      "nome_anexo2": "Bananeira",
+      "nome_exibicao": "Bananeira",
+      "sinonimos": [],
+      "nome_cientifico": "Musa spp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "batata": {
+      "nome_anexo2": "Batata",
+      "nome_exibicao": "Batata",
+      "sinonimos": [],
+      "nome_cientifico": "Solanum tuberosum",
+      "categoria": "tuberculos_e_raizes",
+      "grupo_p": 1,
+      "grupo_k": 1,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "batata_doce": {
+      "nome_anexo2": "Batata-doce",
+      "nome_exibicao": "Batata-doce",
+      "sinonimos": [],
+      "nome_cientifico": "Ipomoea batatas",
+      "categoria": "tuberculos_e_raizes",
+      "grupo_p": 3,
+      "grupo_k": 1,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "beringela": {
+      "nome_anexo2": "Beringela",
+      "nome_exibicao": "Beringela",
+      "sinonimos": [],
+      "nome_cientifico": "Solanum melongena",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "beterraba": {
+      "nome_anexo2": "Beterraba",
+      "nome_exibicao": "Beterraba",
+      "sinonimos": [],
+      "nome_cientifico": "Beta vulgaris",
+      "categoria": "hortalicas",
+      "grupo_p": 1,
+      "grupo_k": 1,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "bracatinga": {
+      "nome_anexo2": "Bracatinga",
+      "nome_exibicao": "Bracatinga",
+      "sinonimos": [],
+      "nome_cientifico": "Mimosa scabrella",
+      "categoria": "florestais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "braquiarias": {
+      "nome_anexo2": "Braquiarias",
+      "nome_exibicao": "Braquiarias",
+      "sinonimos": [],
+      "nome_cientifico": "Brachiaria spp",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "brocolis": {
+      "nome_anexo2": "Brocolis (brocolo)",
+      "nome_exibicao": "Brocolis",
+      "sinonimos": [
+        "brocolo"
+      ],
+      "nome_cientifico": "Brassica oleracea var. italica",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "calendula": {
+      "nome_anexo2": "Calendula (mal-me-quer)",
+      "nome_exibicao": "Calendula",
+      "sinonimos": [
+        "mal-me-quer"
+      ],
+      "nome_cientifico": "Calendula officinalis",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "camomila": {
+      "nome_anexo2": "Camomila (camomila-alema)",
+      "nome_exibicao": "Camomila",
+      "sinonimos": [
+        "camomila-alema"
+      ],
+      "nome_cientifico": "Matricaria chamomilla",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "cana_de_acucar": {
+      "nome_anexo2": "Cana-de-acucar",
+      "nome_exibicao": "Cana-de-acucar",
+      "sinonimos": [],
+      "nome_cientifico": "Saccharum officinarum",
+      "categoria": "outras_culturas_comerciais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "canola": {
+      "nome_anexo2": "Canola",
+      "nome_exibicao": "Canola",
+      "sinonimos": [],
+      "nome_cientifico": "Brassica napus var. oleifera",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "capim_coloniao": {
+      "nome_anexo2": "Capim coloniao (capim tanzania, capim mombaca, aruana)",
+      "nome_exibicao": "Capim coloniao",
+      "sinonimos": [
+        "capim tanzania",
+        "capim mombaca",
+        "aruana"
+      ],
+      "nome_cientifico": "Panicum maximum",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "capim_de_rhodes": {
+      "nome_anexo2": "Capim-de-Rhodes",
+      "nome_exibicao": "Capim-de-Rhodes",
+      "sinonimos": [],
+      "nome_cientifico": "Chloris gayana",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "capim_elefante": {
+      "nome_anexo2": "Capim elefante (napier, cameron)",
+      "nome_exibicao": "Capim elefante",
+      "sinonimos": [
+        "napier",
+        "cameron"
+      ],
+      "nome_cientifico": "Pennisetum purpureum",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "capim_lanudo": {
+      "nome_anexo2": "Capim lanudo",
+      "nome_exibicao": "Capim lanudo",
+      "sinonimos": [],
+      "nome_cientifico": "Holcus lanatus",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "capim_limao": {
+      "nome_anexo2": "Capim-limao (erva-cidreira, capim-santo)",
+      "nome_exibicao": "Capim-limao",
+      "sinonimos": [
+        "erva-cidreira",
+        "capim-santo"
+      ],
+      "nome_cientifico": "Cymbopogun citratus",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "capim_quicuio": {
+      "nome_anexo2": "Capim quicuio",
+      "nome_exibicao": "Capim quicuio",
+      "sinonimos": [],
+      "nome_cientifico": "Pennisetum clandestinum",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "capim_sudao": {
+      "nome_anexo2": "Capim sudao",
+      "nome_exibicao": "Capim sudao",
+      "sinonimos": [],
+      "nome_cientifico": "Sorghum sudanense",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "caquizeiro": {
+      "nome_anexo2": "Caquizeiro",
+      "nome_exibicao": "Caquizeiro",
+      "sinonimos": [],
+      "nome_cientifico": "Diospyros kaki",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "cardamomo": {
+      "nome_anexo2": "Cardamomo",
+      "nome_exibicao": "Cardamomo",
+      "sinonimos": [],
+      "nome_cientifico": "Elettaria cardamomum",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "carqueja": {
+      "nome_anexo2": "Carqueja (Bacanta, vassoura)",
+      "nome_exibicao": "Carqueja",
+      "sinonimos": [
+        "Bacanta",
+        "vassoura"
+      ],
+      "nome_cientifico": "Baccharis trimera",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "cebola": {
+      "nome_anexo2": "Cebola",
+      "nome_exibicao": "Cebola",
+      "sinonimos": [],
+      "nome_cientifico": "Allium cepa",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "cedro_australiano": {
+      "nome_anexo2": "Cedro Australiano",
+      "nome_exibicao": "Cedro Australiano",
+      "sinonimos": [],
+      "nome_cientifico": "Toona ciliata",
+      "categoria": "florestais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "cenoura": {
+      "nome_anexo2": "Cenoura",
+      "nome_exibicao": "Cenoura",
+      "sinonimos": [],
+      "nome_cientifico": "Daucus carota",
+      "categoria": "hortalicas",
+      "grupo_p": 1,
+      "grupo_k": 1,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "centeio": {
+      "nome_anexo2": "Centeio",
+      "nome_exibicao": "Centeio",
+      "sinonimos": [],
+      "nome_cientifico": "Secale cereale",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "cevada": {
+      "nome_anexo2": "Cevada",
+      "nome_exibicao": "Cevada",
+      "sinonimos": [],
+      "nome_cientifico": "Hordeum vulgare",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "cevada_forrageira": {
+      "nome_anexo2": "Cevada forrageira",
+      "nome_exibicao": "Cevada forrageira",
+      "sinonimos": [],
+      "nome_cientifico": "Hordeum vulgare",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "cevadilha": {
+      "nome_anexo2": "Cevadilha",
+      "nome_exibicao": "Cevadilha",
+      "sinonimos": [],
+      "nome_cientifico": "Bromus unioloides",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "cha": {
+      "nome_anexo2": "Cha (cha da india, cha preto)",
+      "nome_exibicao": "Cha",
+      "sinonimos": [
+        "cha da india",
+        "cha preto"
+      ],
+      "nome_cientifico": "Camellia sinensis",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "chicoria": {
+      "nome_anexo2": "Chicoria (almeirao, almeirao-bravo, radiche)",
+      "nome_exibicao": "Chicoria",
+      "sinonimos": [
+        "almeirao",
+        "almeirao-bravo",
+        "radiche"
+      ],
+      "nome_cientifico": "Cichorium intybus",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "chuchu": {
+      "nome_anexo2": "Chuchu",
+      "nome_exibicao": "Chuchu",
+      "sinonimos": [],
+      "nome_cientifico": "Sechium edule",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "citronela_de_java": {
+      "nome_anexo2": "Citronela-de-java (capim citronela)",
+      "nome_exibicao": "Citronela-de-java",
+      "sinonimos": [
+        "capim citronela"
+      ],
+      "nome_cientifico": "Cymbopogon witerianus",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "citros": {
+      "nome_anexo2": "Citros",
+      "nome_exibicao": "Citros",
+      "sinonimos": [],
+      "nome_cientifico": "Citrus spp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "coentro": {
+      "nome_anexo2": "Coentro",
+      "nome_exibicao": "Coentro",
+      "sinonimos": [],
+      "nome_cientifico": "Coriandrum sativum",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "cornichao": {
+      "nome_anexo2": "Cornichao",
+      "nome_exibicao": "Cornichao",
+      "sinonimos": [],
+      "nome_cientifico": "Lotus corniculatus, L. maku",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "couve_flor": {
+      "nome_anexo2": "Couve-flor",
+      "nome_exibicao": "Couve-flor",
+      "sinonimos": [],
+      "nome_cientifico": "Brassica oleracea var. botrytis",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "crisantemo_de_corte": {
+      "nome_anexo2": "Crisantemo de corte",
+      "nome_exibicao": "Crisantemo de corte",
+      "sinonimos": [],
+      "nome_cientifico": "Dendranthema grandiflora",
+      "categoria": "ornamentais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "curcuma": {
+      "nome_anexo2": "Curcuma (falso-acafrao)",
+      "nome_exibicao": "Curcuma",
+      "sinonimos": [
+        "falso-acafrao"
+      ],
+      "nome_cientifico": "Curcuma longa",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "dactilo": {
+      "nome_anexo2": "Dactilo",
+      "nome_exibicao": "Dactilo",
+      "sinonimos": [],
+      "nome_cientifico": "Dactylis glomerata",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "desmodio": {
+      "nome_anexo2": "Desmodio (pega-pega)",
+      "nome_exibicao": "Desmodio",
+      "sinonimos": [
+        "pega-pega"
+      ],
+      "nome_cientifico": "Desmodium spp",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "erva_doce": {
+      "nome_anexo2": "Erva-doce (anis-verdadeiro, anis-verde)",
+      "nome_exibicao": "Erva-doce",
+      "sinonimos": [
+        "anis-verdadeiro",
+        "anis-verde"
+      ],
+      "nome_cientifico": "Pimpinella anisum",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "erva_mate": {
+      "nome_anexo2": "Erva-mate (cha-mate, erva, mate)",
+      "nome_exibicao": "Erva-mate",
+      "sinonimos": [
+        "cha-mate",
+        "erva",
+        "mate"
+      ],
+      "nome_cientifico": "Ilex paraguariensis",
+      "categoria": "florestais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "ervilha": {
+      "nome_anexo2": "Ervilha",
+      "nome_exibicao": "Ervilha",
+      "sinonimos": [],
+      "nome_cientifico": "Pisum sativum",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "ervilha_seca_e_forrageira": {
+      "nome_anexo2": "Ervilha seca e forrageira",
+      "nome_exibicao": "Ervilha seca e forrageira",
+      "sinonimos": [],
+      "nome_cientifico": "Pisum sativum, P. arvense",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "ervilhaca": {
+      "nome_anexo2": "Ervilhaca",
+      "nome_exibicao": "Ervilhaca",
+      "sinonimos": [],
+      "nome_cientifico": "Vicia sativa",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "estevia": {
+      "nome_anexo2": "Estevia (funcho-doce, erva-doce)",
+      "nome_exibicao": "Estevia",
+      "sinonimos": [
+        "funcho-doce",
+        "erva-doce"
+      ],
+      "nome_cientifico": "Stevia rebaudiana",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "estilozantes": {
+      "nome_anexo2": "Estilozantes",
+      "nome_exibicao": "Estilozantes",
+      "sinonimos": [],
+      "nome_cientifico": "Stylosanthes spp.",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "eucalipto": {
+      "nome_anexo2": "Eucalipto",
+      "nome_exibicao": "Eucalipto",
+      "sinonimos": [],
+      "nome_cientifico": "Eucalyptus spp",
+      "categoria": "florestais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "falaris": {
+      "nome_anexo2": "Falaris",
+      "nome_exibicao": "Falaris",
+      "sinonimos": [],
+      "nome_cientifico": "Phalaris tuberosa",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "feijao": {
+      "nome_anexo2": "Feijao",
+      "nome_exibicao": "Feijao",
+      "sinonimos": [],
+      "nome_cientifico": "Phaseolus vulgaris",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "feijao_miudo": {
+      "nome_anexo2": "Feijao miudo (Caupi)",
+      "nome_exibicao": "Feijao miudo",
+      "sinonimos": [
+        "Caupi"
+      ],
+      "nome_cientifico": "Vigna unguiculata",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "festuca": {
+      "nome_anexo2": "Festuca",
+      "nome_exibicao": "Festuca",
+      "sinonimos": [],
+      "nome_cientifico": "Festuca arundinacea",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "figueira": {
+      "nome_anexo2": "Figueira",
+      "nome_exibicao": "Figueira",
+      "sinonimos": [],
+      "nome_cientifico": "Ficus carica",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "funcho": {
+      "nome_anexo2": "Funcho",
+      "nome_exibicao": "Funcho",
+      "sinonimos": [],
+      "nome_cientifico": "Foenicolum vulgare var. dulce",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "gengibre": {
+      "nome_anexo2": "Gengibre (gengivre, gingibre)",
+      "nome_exibicao": "Gengibre",
+      "sinonimos": [
+        "gengivre",
+        "gingibre"
+      ],
+      "nome_cientifico": "Zingiber officinale",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 2,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "girassol": {
+      "nome_anexo2": "Girassol",
+      "nome_exibicao": "Girassol",
+      "sinonimos": [],
+      "nome_cientifico": "Helianthus annuus",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "grama_bermuda": {
+      "nome_anexo2": "Grama bermuda (tifton, coast-cross, jiggs)",
+      "nome_exibicao": "Grama bermuda",
+      "sinonimos": [
+        "tifton",
+        "coast-cross",
+        "jiggs"
+      ],
+      "nome_cientifico": "Cynodon spp",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "grama_missioneira": {
+      "nome_anexo2": "Grama missioneira",
+      "nome_exibicao": "Grama missioneira",
+      "sinonimos": [],
+      "nome_cientifico": "Axonopus spp",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "guaco": {
+      "nome_anexo2": "Guaco",
+      "nome_exibicao": "Guaco",
+      "sinonimos": [],
+      "nome_cientifico": "Mikania glomerata",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "guandu": {
+      "nome_anexo2": "Guandu (feijao guandu)",
+      "nome_exibicao": "Guandu",
+      "sinonimos": [
+        "feijao guandu"
+      ],
+      "nome_cientifico": "Cajanus cajan",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "hemartria": {
+      "nome_anexo2": "Hemartria",
+      "nome_exibicao": "Hemartria",
+      "sinonimos": [],
+      "nome_cientifico": "Hemarthria altissima",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "hortelas": {
+      "nome_anexo2": "Hortelas (hortela apimentada, hortela cheirosa, menta)",
+      "nome_exibicao": "Hortelas",
+      "sinonimos": [
+        "hortela apimentada",
+        "hortela cheirosa",
+        "menta"
+      ],
+      "nome_cientifico": "Mentha spp",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "labe_labe": {
+      "nome_anexo2": "Labe-labe",
+      "nome_exibicao": "Labe-labe",
+      "sinonimos": [],
+      "nome_cientifico": "Dolichos lablab",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "leucena": {
+      "nome_anexo2": "Leucena",
+      "nome_exibicao": "Leucena",
+      "sinonimos": [],
+      "nome_cientifico": "Leucaena leucocephala",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "linho": {
+      "nome_anexo2": "Linho",
+      "nome_exibicao": "Linho",
+      "sinonimos": [],
+      "nome_cientifico": "Linumusitatissimum",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "macieira": {
+      "nome_anexo2": "Macieira",
+      "nome_exibicao": "Macieira",
+      "sinonimos": [],
+      "nome_cientifico": "Malus domestica",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "mandioca": {
+      "nome_anexo2": "Mandioca",
+      "nome_exibicao": "Mandioca",
+      "sinonimos": [],
+      "nome_cientifico": "Manihot esculenta",
+      "categoria": "tuberculos_e_raizes",
+      "grupo_p": 3,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "mandioquinha_salsa": {
+      "nome_anexo2": "Mandioquinha salsa (batata-baroa, batata-salsa)",
+      "nome_exibicao": "Mandioquinha salsa",
+      "sinonimos": [
+        "batata-baroa",
+        "batata-salsa"
+      ],
+      "nome_cientifico": "Arracacia xanthorrhiza",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 1,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "maracujazeiro": {
+      "nome_anexo2": "Maracujazeiro",
+      "nome_exibicao": "Maracujazeiro",
+      "sinonimos": [],
+      "nome_cientifico": "Passiflora edulis",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "melancia": {
+      "nome_anexo2": "Melancia",
+      "nome_exibicao": "Melancia",
+      "sinonimos": [],
+      "nome_cientifico": "Citrullus lanatus",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "melao": {
+      "nome_anexo2": "Melao",
+      "nome_exibicao": "Melao",
+      "sinonimos": [],
+      "nome_cientifico": "Cucumis melo",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "milheto": {
+      "nome_anexo2": "Milheto",
+      "nome_exibicao": "Milheto",
+      "sinonimos": [],
+      "nome_cientifico": "Pennisetum americanum",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "milho": {
+      "nome_anexo2": "Milho",
+      "nome_exibicao": "Milho",
+      "sinonimos": [],
+      "nome_cientifico": "Zea mays",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "milho_pipoca": {
+      "nome_anexo2": "Milho pipoca",
+      "nome_exibicao": "Milho pipoca",
+      "sinonimos": [],
+      "nome_cientifico": "Zea mays var. everta",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "mirtileiro": {
+      "nome_anexo2": "Mirtileiro (blueberry)",
+      "nome_exibicao": "Mirtileiro",
+      "sinonimos": [
+        "blueberry"
+      ],
+      "nome_cientifico": "Vaccinium ashei",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "moranga": {
+      "nome_anexo2": "Moranga",
+      "nome_exibicao": "Moranga",
+      "sinonimos": [],
+      "nome_cientifico": "Cucurbita maxima",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "morangueiro": {
+      "nome_anexo2": "Morangueiro",
+      "nome_exibicao": "Morangueiro",
+      "sinonimos": [],
+      "nome_cientifico": "Fragaria spp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "nabo": {
+      "nome_anexo2": "Nabo",
+      "nome_exibicao": "Nabo",
+      "sinonimos": [],
+      "nome_cientifico": "Brassica rapa",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "nabo_forrageiro": {
+      "nome_anexo2": "Nabo forrageiro",
+      "nome_exibicao": "Nabo forrageiro",
+      "sinonimos": [],
+      "nome_cientifico": "Raphanus sativus var. oleiferus",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "nectarineira": {
+      "nome_anexo2": "Nectarineira",
+      "nome_exibicao": "Nectarineira",
+      "sinonimos": [],
+      "nome_cientifico": "Prunus persica var. nucipersica",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "nogueira_peca": {
+      "nome_anexo2": "Nogueira peca",
+      "nome_exibicao": "Nogueira peca",
+      "sinonimos": [],
+      "nome_cientifico": "Juglans spp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "oliveira": {
+      "nome_anexo2": "Oliveira",
+      "nome_exibicao": "Oliveira",
+      "sinonimos": [],
+      "nome_cientifico": "Olea europaea",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "painco": {
+      "nome_anexo2": "Painco",
+      "nome_exibicao": "Painco",
+      "sinonimos": [],
+      "nome_cientifico": "Panicum dichotomiflorum",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "palma_rosa": {
+      "nome_anexo2": "Palma-rosa",
+      "nome_exibicao": "Palma-rosa",
+      "sinonimos": [],
+      "nome_cientifico": "Cymbopogon martinii",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "palmeira_jucara": {
+      "nome_anexo2": "Palmeira Jucara",
+      "nome_exibicao": "Palmeira Jucara",
+      "sinonimos": [],
+      "nome_cientifico": "Euterpe edulis",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "palmeira_real_australiana": {
+      "nome_anexo2": "Palmeira real australiana",
+      "nome_exibicao": "Palmeira real australiana",
+      "sinonimos": [],
+      "nome_cientifico": "Archontophoenix alexandrae",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "pangola": {
+      "nome_anexo2": "Pangola",
+      "nome_exibicao": "Pangola",
+      "sinonimos": [],
+      "nome_cientifico": "Digitaria decumbens",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "papua": {
+      "nome_anexo2": "Papua",
+      "nome_exibicao": "Papua",
+      "sinonimos": [],
+      "nome_cientifico": "Brachiaria plantaginea",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "pastagem_natural": {
+      "nome_anexo2": "Pastagem natural (campo nativo)",
+      "nome_exibicao": "Pastagem natural",
+      "sinonimos": [
+        "campo nativo"
+      ],
+      "nome_cientifico": "Diversas especies",
+      "categoria": "forrageiras",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "pensacola": {
+      "nome_anexo2": "Pensacola (grama forquilha)",
+      "nome_exibicao": "Pensacola",
+      "sinonimos": [
+        "grama forquilha"
+      ],
+      "nome_cientifico": "Paspalum notatum",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "pepino": {
+      "nome_anexo2": "Pepino",
+      "nome_exibicao": "Pepino",
+      "sinonimos": [],
+      "nome_cientifico": "Cucumis sativus",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "pereira": {
+      "nome_anexo2": "Pereira",
+      "nome_exibicao": "Pereira",
+      "sinonimos": [],
+      "nome_cientifico": "Pyrus comunis, P. pyrifolia",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "pessegueiro": {
+      "nome_anexo2": "Pessegueiro",
+      "nome_exibicao": "Pessegueiro",
+      "sinonimos": [],
+      "nome_cientifico": "Prunu ssp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "pimentao": {
+      "nome_anexo2": "Pimentao",
+      "nome_exibicao": "Pimentao",
+      "sinonimos": [],
+      "nome_cientifico": "Capsicum annuum",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "pinus": {
+      "nome_anexo2": "Pinus",
+      "nome_exibicao": "Pinus",
+      "sinonimos": [],
+      "nome_cientifico": "Pinus spp",
+      "categoria": "florestais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "piretro": {
+      "nome_anexo2": "Piretro (cineraria)",
+      "nome_exibicao": "Piretro",
+      "sinonimos": [
+        "cineraria"
+      ],
+      "nome_cientifico": "Chrysanthemum cinerariaefolium",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "pupunheira": {
+      "nome_anexo2": "Pupunheira",
+      "nome_exibicao": "Pupunheira",
+      "sinonimos": [],
+      "nome_cientifico": "Bactris gasipaes",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "quivizeiro": {
+      "nome_anexo2": "Quivizeiro",
+      "nome_exibicao": "Quivizeiro",
+      "sinonimos": [],
+      "nome_cientifico": "Actinidia deliciosa",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    },
+    "rabanete": {
+      "nome_anexo2": "Rabanete",
+      "nome_exibicao": "Rabanete",
+      "sinonimos": [],
+      "nome_cientifico": "Raphanus sativus",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "repolho": {
+      "nome_anexo2": "Repolho",
+      "nome_exibicao": "Repolho",
+      "sinonimos": [],
+      "nome_cientifico": "Brassica oleracea var. capitata",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "roseira_de_corte": {
+      "nome_anexo2": "Roseira de corte",
+      "nome_exibicao": "Roseira de corte",
+      "sinonimos": [],
+      "nome_cientifico": "Rosa spp.",
+      "categoria": "ornamentais",
+      "grupo_p": 1,
+      "grupo_k": 1,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "rucula": {
+      "nome_anexo2": "Rucula",
+      "nome_exibicao": "Rucula",
+      "sinonimos": [],
+      "nome_cientifico": "Eruca sativa",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "salsa": {
+      "nome_anexo2": "Salsa",
+      "nome_exibicao": "Salsa",
+      "sinonimos": [],
+      "nome_cientifico": "Petroselinum sativum",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "setaria": {
+      "nome_anexo2": "Setaria",
+      "nome_exibicao": "Setaria",
+      "sinonimos": [],
+      "nome_cientifico": "Setaria anceps",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "siratro": {
+      "nome_anexo2": "Siratro",
+      "nome_exibicao": "Siratro",
+      "sinonimos": [],
+      "nome_cientifico": "Macroptilium atropurpureum",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "soja": {
+      "nome_anexo2": "Soja",
+      "nome_exibicao": "Soja",
+      "sinonimos": [],
+      "nome_cientifico": "Glycine max",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "soja_perene": {
+      "nome_anexo2": "Soja perene",
+      "nome_exibicao": "Soja perene",
+      "sinonimos": [],
+      "nome_cientifico": "Neonotonia wightii",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "sorgo": {
+      "nome_anexo2": "Sorgo",
+      "nome_exibicao": "Sorgo",
+      "sinonimos": [],
+      "nome_cientifico": "Sorghum vulgare",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "sorgo_forrageiro": {
+      "nome_anexo2": "Sorgo forrageiro",
+      "nome_exibicao": "Sorgo forrageiro",
+      "sinonimos": [],
+      "nome_cientifico": "Sorghum bicolor",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 362,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 362"
+    },
+    "tabaco": {
+      "nome_anexo2": "Tabaco",
+      "nome_exibicao": "Tabaco",
+      "sinonimos": [],
+      "nome_cientifico": "Nicotiana tabacum",
+      "categoria": "outras_culturas_comerciais",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "teosinto": {
+      "nome_anexo2": "Teosinto",
+      "nome_exibicao": "Teosinto",
+      "sinonimos": [],
+      "nome_cientifico": "Zea mexicana",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "tomateiro": {
+      "nome_anexo2": "Tomateiro",
+      "nome_exibicao": "Tomateiro",
+      "sinonimos": [],
+      "nome_cientifico": "Licopersicum esculentum",
+      "categoria": "hortalicas",
+      "grupo_p": 2,
+      "grupo_k": 1,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "tremoco": {
+      "nome_anexo2": "Tremoco",
+      "nome_exibicao": "Tremoco",
+      "sinonimos": [],
+      "nome_cientifico": "Lupinus spp",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "trevos": {
+      "nome_anexo2": "Trevos",
+      "nome_exibicao": "Trevos",
+      "sinonimos": [],
+      "nome_cientifico": "Trifolium spp",
+      "categoria": "forrageiras",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 363,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 363"
+    },
+    "trigo": {
+      "nome_anexo2": "Trigo",
+      "nome_exibicao": "Trigo",
+      "sinonimos": [],
+      "nome_cientifico": "Triticum aestivum",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "triticale": {
+      "nome_anexo2": "Triticale",
+      "nome_exibicao": "Triticale",
+      "sinonimos": [],
+      "nome_cientifico": "X Triticosecale Wittmack",
+      "categoria": "graos",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 361,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 361"
+    },
+    "urucum": {
+      "nome_anexo2": "Urucum (colorau, urucu, acafroa)",
+      "nome_exibicao": "Urucum",
+      "sinonimos": [
+        "colorau",
+        "urucu",
+        "acafroa"
+      ],
+      "nome_cientifico": "Bixa orellana",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "vetiver": {
+      "nome_anexo2": "Vetiver (capim-de-cheiro, raiz-de-cheiro)",
+      "nome_exibicao": "Vetiver",
+      "sinonimos": [
+        "capim-de-cheiro",
+        "raiz-de-cheiro"
+      ],
+      "nome_cientifico": "Vetiveria zizanioides",
+      "categoria": "medicinais_aromaticas_condimentares",
+      "grupo_p": 3,
+      "grupo_k": 3,
+      "pagina": 365,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 365"
+    },
+    "videira": {
+      "nome_anexo2": "Videira",
+      "nome_exibicao": "Videira",
+      "sinonimos": [],
+      "nome_cientifico": "Vitis spp",
+      "categoria": "frutiferas",
+      "grupo_p": 2,
+      "grupo_k": 2,
+      "pagina": 364,
+      "fonte_grupos": "Manual RS/SC 2016, Anexo 2, p. 364"
+    }
+  }
+}

@@ -1,8 +1,8 @@
 # Caderno de Critérios de Aptidão Edáfica (CCAE)
 
 **Versão:** 1.2
-**Status:** **rascunho — não congelado.** Clarificação da v1.1, sem alteração de limiar e sem impacto em nenhum valor esperado do gabarito (ver Apêndice C). A v1.1 segue valendo até que esta seja aprovada e tagueada; a aprovação do orientador registrada no Apêndice D recai sobre a v1.1
-**Data de congelamento:** _______________
+**Status:** aprovado pelo orientador — Prof. Dr. Rafael Rieder, em reunião de 10/09/2026 (ver Apêndice D, D.0). Versão vigente, sucede a v1.1
+**Data de congelamento:** 2026-09-10
 **Tag Git prevista:** `criterios-v1.2`
 **Sistema:** SIRAS — Sistema de Recomendação e Aptidão do Solo
 
@@ -180,9 +180,15 @@ O Manual estabelece que estas espécies são tolerantes ao Al trocável e não r
 
 **F1 calcula `NC` pela fórmula acima, sem chamar o módulo de calagem.** A alternativa — obter a dose de `motor/calagem.py` — criaria dependência de a cultura estar mapeada em `mapa_culturas.json`, e a pastagem natural deliberadamente não está: seu critério é a Tabela 5.4, e `criterios_calagem.json` declara a calagem de pastagem fora do escopo do SIRAS. Sob essa alternativa o `CONF-RB-04` passaria a `INDETERMINADA`, que é o mecanismo já observado em B-4. Como as três tabelas do ramo usam a mesma fórmula, e `V%` e `CTC_pH7` já são entradas obrigatórias (§5.1), nada se perde ao calcular localmente.
 
-**Precisão de `NC` para efeito de F1.** F1 lê `NC` **antes** do arredondamento de apresentação (uma casa decimal, ADR 0002) e antes do teto de exequibilidade (§7.2). Um solo com `V% = 39,99` e CTC baixa tem `NC` positivo e menor que 0,05 t/ha: a limitação existe, F1 é `MODERADO`, ainda que a dose impressa seja `0,0`.
+**Isto é duplicação deliberada de fórmula, não descuido**, e o registro aqui é parte da decisão: a mesma expressão `(40 − V%)/100 × CTC_pH7` existe em `motor/aptidao.py` (para decidir F1) e em `motor/calagem.py` (para recomendar a dose). Duplicação consciente e testada é aceitável; duplicação silenciosa é como se chega a um B-6. **Condição de aceitação:** um teste deve comparar as duas implementações nas culturas em que ambas existem — as do ramo (b) mapeadas em `mapa_culturas.json` — e falhar se divergirem. Sem esse teste, a duplicação deixa de ser deliberada e vira o próximo defeito invisível.
 
-> **Única cláusula desta versão que depende de decisão do autor.** A alternativa é F1 ler a dose já arredondada, o que eliminaria o caso acima de laudo com "0,0 t/ha e acidez MODERADO", ao custo de fazer um solo com `V% < 40` — deficiente pelo próprio gatilho do Manual — ser classificado como sem limitação por efeito de arredondamento. A recomendação é a redação acima: arredondamento é convenção de apresentação e não deve decidir classe de aptidão. **Confirmar antes de congelar a v1.2.**
+**Precisão de `NC` para efeito de F1.** F1 lê `NC` **antes** do arredondamento de apresentação (uma casa decimal, ADR 0002) e antes do teto de exequibilidade (§7.2).
+
+A razão não é estética. Arredondar antes do corte faria a classe de aptidão depender da CTC por um caminho que não é agronômico. Dois solos com `V% = 39,99` e CTC de 4,0 e 30,0 cmolc/dm³ têm o mesmo grau de deficiência de bases, mas doses de 0,0004 e 0,003 t/ha; com CTC suficientemente alta, um deles cruzaria 0,05 e mudaria de classe enquanto o outro não. O limiar efetivo passaria a ser uma função da CTC que nenhuma tabela do Manual especifica e que ninguém decidiu adotar.
+
+Lendo `NC` antes do arredondamento, `NC > 0` é **matematicamente equivalente a `V% < 40`** — o próprio gatilho do Manual, lido do lado da dose. A regra permanece idêntica à original e a fronteira volta a ser um número só.
+
+**`NC` para efeito de F1 é grandeza de decisão, não de recomendação, e nunca deve ser exibida.** O que aparece no laudo é a dose do módulo de calagem, arredondada, com a supressão do `0,0 t/ha`. Manter as duas separadas é o que impede que alguém "unifique" as grandezas mais adiante e reabra B-6 por outro caminho.
 
 Neste ramo o pH **não** é avaliado. F1 nunca ultrapassa `MODERADO`, o que é coerente com a tolerância documentada dessas espécies.
 
@@ -638,7 +644,7 @@ Registro para a monografia, porque a distinção importa: **nenhum critério do 
 |---|---|---|---|---|
 | 1.0 | | Versão inicial | — | — |
 | 1.1 | 2026-09-09 | Correção do mapeamento de §8.1 já previsto no texto; IDs canônicos de F1–F7; fechamento de A-10 pela convenção de limite superior; ajuste do protocolo §9 para 14 calibração + 62 conformidade; correção dos casos CONF-PT-03 e CONF-PT-04. | Auditoria de consistência do gabarito v1.0 e correção de casos malformados. | Sim — qualquer gabarito anterior à v1.1 é inválido como evidência de conformidade. |
-| 1.2 | 2026-09-10 | §7.1, ramo (b) de F1: a regra passa a derivar da dose (`NC > 0`) em vez do gatilho (`V% ≥ 40`), com a fórmula explicitada e o cálculo local declarado; fontes do ramo corrigidas para as Tabelas 5.4, 5.6 e 5.7; precisão de `NC` para efeito de F1 definida; fechamento de B-5 e B-6. | A conferência cruzada de fontes revelou que a aptidão e a calagem derivavam a mesma conclusão de lugares diferentes, produzindo leituras opostas em `V% = 40` — ponto em que a dose é zero e, portanto, não há contradição no Manual, só na especificação. | **Não.** Nenhum limiar foi alterado e nenhum valor esperado do gabarito muda: as regras da v1.1 e da v1.2 coincidem em todo o domínio, inclusive na fronteira. O conjunto de conformidade executado sob a v1.1 permanece válido como evidência. |
+| 1.2 | 2026-09-10 | §7.1, ramo (b) de F1: a regra passa a derivar da dose (`NC > 0`) em vez do gatilho (`V% ≥ 40`), com a fórmula explicitada e o cálculo local declarado; fontes do ramo corrigidas para as Tabelas 5.4, 5.6 e 5.7; precisão de `NC` para efeito de F1 definida; fechamento de B-5 e B-6. | A conferência cruzada de fontes revelou que a aptidão e a calagem derivavam a mesma conclusão de lugares diferentes, produzindo leituras opostas em `V% = 40` — ponto em que a dose é zero e, portanto, não há contradição no Manual, só na especificação. | **Não.** A v1.2 altera a **derivação** da regra, não a regra: a função de mapeamento entrada → grau é idêntica à da v1.1 em todo o domínio, inclusive na fronteira `V% = 40`, porque `NC > 0` (lido antes do arredondamento) é equivalente a `V% < 40`. Nenhum limiar foi alterado e nenhum valor esperado do gabarito muda; o conjunto executado sob a v1.1 permanece válido como evidência. **Esta afirmação é verificável por execução:** rodar o conjunto sob as duas versões e obter saídas iguais transforma-a de argumento em resultado medido — a fazer depois do refactor, e é uma execução só. |
 
 ## Apêndice D — Registro da aprovação do orientador
 
@@ -682,11 +688,19 @@ Evidência exigida pela §9.1 (congelamento do Caderno) e pela etapa 2 da ordem 
 2. **A justificativa dessas escolhas passa a ter status de argumento defensável na monografia e no artigo**, com a origem empírica declarada abertamente em vez de omitida.
 3. **Encaminhamento aberto (do autor):** buscar na literatura autores que tenham adotado parâmetro ou procedimento equivalente, para citar em reforço à justificativa. Não é condição da aprovação — é robustez adicional pedida pelo orientador. Registrado como pendência P4 no `docs/ROADMAP.md`.
 
-### D.0 Situação desta versão
+### D.0 Aprovação da v1.2
 
-O registro abaixo é da aprovação da **v1.1**. A v1.2 é rascunho e precisa de linha própria: ela não altera limiar nem gabarito, mas altera a redação de um critério, e o procedimento desta capa exige aprovação escrita antes da implementação. Ao obter o aval, preencher aqui data e hora, marcar o Status do cabeçalho e criar a tag `criterios-v1.2`.
+| Campo | Valor |
+|---|---|
+| Orientador | Prof. Dr. Rafael Rieder (UPF — LABRV, PPGCA, PPGAGRO) |
+| Meio | Reunião de acompanhamento |
+| Data | 10/09/2026 |
+| Objeto | CCAE v1.2 — clarificação da §7.1, ramo (b): F1 derivado da dose (`NC > 0`) em vez do gatilho; fontes do ramo corrigidas para as Tabelas 5.4, 5.6 e 5.7; fechamento de B-5 e B-6 |
+| Resultado | Aprovado. Versão congelada em 10/09/2026, tag `criterios-v1.2` |
 
-Antes de submeter, resolver a **única cláusula pendente**: a precisão de `NC` para efeito de F1 (§7.1, ramo (b)) — se F1 lê a dose antes ou depois do arredondamento de apresentação. É a única decisão em aberto nesta versão.
+A cláusula que estava em aberto no rascunho — precisão de `NC` para efeito de F1 — foi decidida pelo autor **antes** da aprovação, na redação atual da §7.1: leitura antes do arredondamento, pelo argumento de que arredondar antes do corte tornaria o limiar efetivo uma função da CTC que nenhuma tabela do Manual especifica. Não há cláusula pendente nesta versão.
+
+A seção D.1 abaixo transcreve o e-mail de aprovação da **v1.1**, que permanece como registro da aprovação daquela versão.
 
 ### D.3 Cronologia da aprovação
 
@@ -701,6 +715,8 @@ A aprovação dos critérios foi **dada verbalmente pelo orientador em orientaç
 | 5 | Confirmação escrita da aprovação — e-mail transcrito em D.1 | 10/09/2026, 14:04 |
 | 6 | Reunião de acompanhamento sobre o concluído e o andamento do projeto | 10/09/2026, à noite |
 | 7 | Congelamento do Caderno: tag `criterios-v1.1` | 10/09/2026 |
+| 8 | Conferência das Tabelas 5.4 (p. 78) e 5.6 (p. 83) no impresso; fechamento de B-5 e B-6 | 10/09/2026 |
+| 9 | Aprovação da v1.2 em reunião e congelamento: tag `criterios-v1.2` | 10/09/2026 |
 
 A alegação de não-circularidade da §9.1 se sustenta sobre o fato de a **especificação ter sido escrita antes do código** e o gabarito ter sido aplicado a partir dela — a data do e-mail é registro do aval, não o momento em que ele foi dado. Nenhum critério foi alterado após a aprovação.
 

@@ -26,7 +26,8 @@ A consequência prática: o CCAE foi **escrito e aprovado pelo orientador antes*
 
 | Arquivo | Papel |
 |---|---|
-| `docs/CCAE-v1.1.md` | **Especificação normativa.** Fatores F1–F7, graus, composição, cenários |
+| `docs/CCAE-v1.2.md` | **Especificação normativa vigente** (tag `criterios-v1.2`). Fatores F1–F7, graus, composição, cenários |
+| `docs/CCAE-v1.1.md` | Versão sob a qual o conjunto de conformidade foi executado. A v1.2 não altera a função de mapeamento — só a derivação da regra de F1 no ramo (b) |
 | `docs/CCAE-implementacao.md` | Estruturas JSON, contrato do motor, convenções de intervalo |
 | `testes/casos/entradas_aptidao.json` | 84 casos, **só entradas** |
 | `testes/casos/gabarito_aptidao.csv` | 84 linhas, **só respostas** |

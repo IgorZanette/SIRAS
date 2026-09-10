@@ -4,7 +4,7 @@
 **Status:** aprovado pelo orientador — e-mail do Prof. Dr. Rafael Rieder em 10/09/2026, 14:04 (transcrito no Apêndice D)
 **Data de congelamento:** 2026-09-10
 **Tag Git prevista:** `criterios-v1.1`
-**Sucessora:** existe um rascunho de v1.2 em `docs/CCAE-v1.2.md` (clarificação da §7.1, ramo (b), sem alteração de limiar nem de gabarito). **Esta v1.1 continua sendo a versão vigente** até que a v1.2 seja aprovada e tagueada.
+**Superada pela v1.2** (`docs/CCAE-v1.2.md`), aprovada pelo orientador em reunião de 10/09/2026 e congelada na tag `criterios-v1.2`. A v1.2 clarifica a §7.1, ramo (b), sem alterar limiar nem gabarito — a função de mapeamento entrada → grau é idêntica. Esta v1.1 permanece como registro da versão sob a qual o conjunto de conformidade foi executado.
 **Sistema:** SIRAS — Sistema de Recomendação e Aptidão do Solo
 
 ---

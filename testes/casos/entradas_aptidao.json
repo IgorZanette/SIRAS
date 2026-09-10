@@ -1,0 +1,2189 @@
+{
+  "versao_criterios": "1.1",
+  "descricao": "Entradas dos casos de teste de aptidao edafica. NAO contem as respostas esperadas: o gabarito vive em testes/casos/gabarito_aptidao.csv e so o runner de teste o le.",
+  "casos": [
+    {
+      "id_caso": "ANX-G1-ALHO",
+      "bloco": "anexo1_manual",
+      "cultura": "alho",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 1 do Anexo 1 do Manual, cultura alho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.9,
+        "argila": 65,
+        "mo": 4.0,
+        "p_mehlich1": 2.0,
+        "k_mehlich1": 65,
+        "ca": 5.7,
+        "mg": 3.4,
+        "al": 0.2,
+        "ctc_ph7": 14.2,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "ANX-G1-EUCA",
+      "bloco": "anexo1_manual",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 1 do Anexo 1 do Manual, cultura eucalipto. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.9,
+        "argila": 65,
+        "mo": 4.0,
+        "p_mehlich1": 2.0,
+        "k_mehlich1": 65,
+        "ca": 5.7,
+        "mg": 3.4,
+        "al": 0.2,
+        "ctc_ph7": 14.2,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "ANX-G1-MILH",
+      "bloco": "anexo1_manual",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 1 do Anexo 1 do Manual, cultura milho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.9,
+        "argila": 65,
+        "mo": 4.0,
+        "p_mehlich1": 2.0,
+        "k_mehlich1": 65,
+        "ca": 5.7,
+        "mg": 3.4,
+        "al": 0.2,
+        "ctc_ph7": 14.2,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "ANX-G2-ALHO",
+      "bloco": "anexo1_manual",
+      "cultura": "alho",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 2 do Anexo 1 do Manual, cultura alho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.1,
+        "indice_smp": 5.8,
+        "argila": 45,
+        "mo": 2.9,
+        "p_mehlich1": 6.2,
+        "k_mehlich1": 50,
+        "ca": 2.1,
+        "mg": 1.4,
+        "al": 1.0,
+        "ctc_ph7": 8.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "ANX-G2-EUCA",
+      "bloco": "anexo1_manual",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 2 do Anexo 1 do Manual, cultura eucalipto. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.1,
+        "indice_smp": 5.8,
+        "argila": 45,
+        "mo": 2.9,
+        "p_mehlich1": 6.2,
+        "k_mehlich1": 50,
+        "ca": 2.1,
+        "mg": 1.4,
+        "al": 1.0,
+        "ctc_ph7": 8.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "ANX-G2-MILH",
+      "bloco": "anexo1_manual",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 2 do Anexo 1 do Manual, cultura milho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.1,
+        "indice_smp": 5.8,
+        "argila": 45,
+        "mo": 2.9,
+        "p_mehlich1": 6.2,
+        "k_mehlich1": 50,
+        "ca": 2.1,
+        "mg": 1.4,
+        "al": 1.0,
+        "ctc_ph7": 8.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "ANX-G3-ALHO",
+      "bloco": "anexo1_manual",
+      "cultura": "alho",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 3 do Anexo 1 do Manual, cultura alho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.8,
+        "indice_smp": 5.9,
+        "argila": 12,
+        "mo": 1.9,
+        "p_mehlich1": 12.5,
+        "k_mehlich1": 25,
+        "ca": 2.0,
+        "mg": 1.1,
+        "al": 0.0,
+        "ctc_ph7": 4.7,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "ANX-G3-EUCA",
+      "bloco": "anexo1_manual",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 3 do Anexo 1 do Manual, cultura eucalipto. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.8,
+        "indice_smp": 5.9,
+        "argila": 12,
+        "mo": 1.9,
+        "p_mehlich1": 12.5,
+        "k_mehlich1": 25,
+        "ca": 2.0,
+        "mg": 1.1,
+        "al": 0.0,
+        "ctc_ph7": 4.7,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "ANX-G3-MILH",
+      "bloco": "anexo1_manual",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 3 do Anexo 1 do Manual, cultura milho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.8,
+        "indice_smp": 5.9,
+        "argila": 12,
+        "mo": 1.9,
+        "p_mehlich1": 12.5,
+        "k_mehlich1": 25,
+        "ca": 2.0,
+        "mg": 1.1,
+        "al": 0.0,
+        "ctc_ph7": 4.7,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "ANX-G4-ALHO",
+      "bloco": "anexo1_manual",
+      "cultura": "alho",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 4 do Anexo 1 do Manual, cultura alho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.3,
+        "indice_smp": 5.4,
+        "argila": 27,
+        "mo": 2.1,
+        "p_mehlich1": 13.1,
+        "k_mehlich1": 44,
+        "ca": 2.5,
+        "mg": 1.3,
+        "al": 1.1,
+        "ctc_ph7": 12.7,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "ANX-G4-EUCA",
+      "bloco": "anexo1_manual",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 4 do Anexo 1 do Manual, cultura eucalipto. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.3,
+        "indice_smp": 5.4,
+        "argila": 27,
+        "mo": 2.1,
+        "p_mehlich1": 13.1,
+        "k_mehlich1": 44,
+        "ca": 2.5,
+        "mg": 1.3,
+        "al": 1.1,
+        "ctc_ph7": 12.7,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "ANX-G4-MILH",
+      "bloco": "anexo1_manual",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Gleba 4 do Anexo 1 do Manual, cultura milho. Classes de P e K publicadas nas Tab. A.2 e A.3.",
+      "entrada": {
+        "ph_agua": 5.3,
+        "indice_smp": 5.4,
+        "argila": 27,
+        "mo": 2.1,
+        "p_mehlich1": 13.1,
+        "k_mehlich1": 44,
+        "ca": 2.5,
+        "mg": 1.3,
+        "al": 1.1,
+        "ctc_ph7": 12.7,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-01",
+      "bloco": "calibracao",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.8,
+        "indice_smp": 6.1,
+        "argila": 42,
+        "mo": 3.4,
+        "p_mehlich1": 14.0,
+        "k_mehlich1": 95,
+        "ca": 4.8,
+        "mg": 1.5,
+        "al": 0.1,
+        "ctc_ph7": 13.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-02",
+      "bloco": "calibracao",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.3,
+        "indice_smp": 5.8,
+        "argila": 55,
+        "mo": 4.6,
+        "p_mehlich1": 9.0,
+        "k_mehlich1": 70,
+        "ca": 3.2,
+        "mg": 1.1,
+        "al": 0.9,
+        "ctc_ph7": 16.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-03",
+      "bloco": "calibracao",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 6.1,
+        "indice_smp": 6.3,
+        "argila": 38,
+        "mo": 2.9,
+        "p_mehlich1": 22.0,
+        "k_mehlich1": 130,
+        "ca": 5.5,
+        "mg": 1.9,
+        "al": 0.0,
+        "ctc_ph7": 13.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-04",
+      "bloco": "calibracao",
+      "cultura": "alho",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 28,
+        "mo": 4.8,
+        "p_mehlich1": 40.0,
+        "k_mehlich1": 230,
+        "ca": 8.0,
+        "mg": 2.6,
+        "al": 0.0,
+        "ctc_ph7": 19.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CAL-05",
+      "bloco": "calibracao",
+      "cultura": "cenoura",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.6,
+        "indice_smp": 6.0,
+        "argila": 18,
+        "mo": 2.2,
+        "p_mehlich1": 22.0,
+        "k_mehlich1": 85,
+        "ca": 3.0,
+        "mg": 0.9,
+        "al": 0.2,
+        "ctc_ph7": 8.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CAL-06",
+      "bloco": "calibracao",
+      "cultura": "batata",
+      "grupo_sistema": "tuberculos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.9,
+        "argila": 33,
+        "mo": 3.1,
+        "p_mehlich1": 26.0,
+        "k_mehlich1": 140,
+        "ca": 4.0,
+        "mg": 1.3,
+        "al": 0.4,
+        "ctc_ph7": 12.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 5.5,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CAL-07",
+      "bloco": "calibracao",
+      "cultura": "batata_doce",
+      "grupo_sistema": "tuberculos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.9,
+        "indice_smp": 6.2,
+        "argila": 22,
+        "mo": 2.6,
+        "p_mehlich1": 9.0,
+        "k_mehlich1": 95,
+        "ca": 3.4,
+        "mg": 1.0,
+        "al": 0.1,
+        "ctc_ph7": 9.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 3,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CAL-08",
+      "bloco": "calibracao",
+      "cultura": "macieira",
+      "grupo_sistema": "frutiferas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 6.0,
+        "indice_smp": 6.2,
+        "argila": 52,
+        "mo": 4.9,
+        "p_mehlich1": 24.0,
+        "k_mehlich1": 160,
+        "ca": 6.5,
+        "mg": 2.1,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.5,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-09",
+      "bloco": "calibracao",
+      "cultura": "amoreira_preta",
+      "grupo_sistema": "frutiferas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.2,
+        "indice_smp": 5.7,
+        "argila": 44,
+        "mo": 3.9,
+        "p_mehlich1": 13.0,
+        "k_mehlich1": 88,
+        "ca": 2.4,
+        "mg": 0.8,
+        "al": 1.1,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 5.5,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-10",
+      "bloco": "calibracao",
+      "cultura": "mirtileiro",
+      "grupo_sistema": "frutiferas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 4.9,
+        "indice_smp": 5.5,
+        "argila": 36,
+        "mo": 5.4,
+        "p_mehlich1": 11.0,
+        "k_mehlich1": 75,
+        "ca": 1.9,
+        "mg": 0.7,
+        "al": 1.7,
+        "ctc_ph7": 15.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 5.5,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-11",
+      "bloco": "calibracao",
+      "cultura": "videira",
+      "grupo_sistema": "frutiferas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.7,
+        "indice_smp": 6.0,
+        "argila": 46,
+        "mo": 3.3,
+        "p_mehlich1": 19.0,
+        "k_mehlich1": 125,
+        "ca": 5.0,
+        "mg": 1.7,
+        "al": 0.1,
+        "ctc_ph7": 14.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-12",
+      "bloco": "calibracao",
+      "cultura": "alfafa",
+      "grupo_sistema": "forrageiras",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 6.3,
+        "indice_smp": 6.5,
+        "argila": 50,
+        "mo": 4.1,
+        "p_mehlich1": 28.0,
+        "k_mehlich1": 175,
+        "ca": 9.5,
+        "mg": 2.8,
+        "al": 0.0,
+        "ctc_ph7": 21.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.5,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CAL-13",
+      "bloco": "calibracao",
+      "cultura": "pastagem_natural",
+      "grupo_sistema": "forrageiras",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.1,
+        "indice_smp": 5.6,
+        "argila": 30,
+        "mo": 3.0,
+        "p_mehlich1": 5.0,
+        "k_mehlich1": 48,
+        "ca": 2.0,
+        "mg": 0.7,
+        "al": 1.3,
+        "ctc_ph7": 11.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CAL-14",
+      "bloco": "calibracao",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Caso de calibracao: ajustes no CCAE permitidos apos analise",
+      "entrada": {
+        "ph_agua": 5.0,
+        "indice_smp": 5.6,
+        "argila": 58,
+        "mo": 4.4,
+        "p_mehlich1": 7.0,
+        "k_mehlich1": 62,
+        "ca": 3.0,
+        "mg": 1.0,
+        "al": 1.2,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-ER-01",
+      "bloco": "entrada_invalida",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Campo obrigatorio ausente (indice_smp)",
+      "entrada": {
+        "ph_agua": 5.3,
+        "argila": 45,
+        "mo": 3.8,
+        "p_mehlich1": 20.0,
+        "k_mehlich1": 100,
+        "ca": 4.0,
+        "mg": 1.4,
+        "al": 0.9,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-ER-02",
+      "bloco": "entrada_invalida",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Valor fora da faixa valida (pH 12,0)",
+      "entrada": {
+        "ph_agua": 12.0,
+        "indice_smp": 6.2,
+        "argila": 45,
+        "mo": 3.8,
+        "p_mehlich1": 20.0,
+        "k_mehlich1": 100,
+        "ca": 4.0,
+        "mg": 1.4,
+        "al": 0.0,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-ER-03",
+      "bloco": "entrada_invalida",
+      "cultura": "arroz_irrigado",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Cultura fora de escopo na v1.0",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.9,
+        "argila": 35,
+        "mo": 3.2,
+        "p_mehlich1": 8.0,
+        "k_mehlich1": 80,
+        "ca": 3.5,
+        "mg": 1.2,
+        "al": 0.5,
+        "ctc_ph7": 13.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 4,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-ER-04",
+      "bloco": "entrada_invalida",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Incoerencia quimica: CTC menor que S + Al",
+      "entrada": {
+        "ph_agua": 5.2,
+        "indice_smp": 5.7,
+        "argila": 45,
+        "mo": 3.8,
+        "p_mehlich1": 20.0,
+        "k_mehlich1": 100,
+        "ca": 8.0,
+        "mg": 4.0,
+        "al": 3.0,
+        "ctc_ph7": 9.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F1-01",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH acima do pH de referencia",
+      "entrada": {
+        "ph_agua": 6.3,
+        "indice_smp": 6.4,
+        "argila": 45,
+        "mo": 3.8,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 110,
+        "ca": 6.0,
+        "mg": 2.2,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F1-02",
+      "bloco": "fator_determinante",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH entre 5,5 e pH de referencia 6,0",
+      "entrada": {
+        "ph_agua": 5.7,
+        "indice_smp": 6.0,
+        "argila": 48,
+        "mo": 4.0,
+        "p_mehlich1": 28.0,
+        "k_mehlich1": 120,
+        "ca": 5.5,
+        "mg": 2.0,
+        "al": 0.1,
+        "ctc_ph7": 17.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F1-03",
+      "bloco": "fator_determinante",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH < 5,5 com m% na faixa intermediaria",
+      "entrada": {
+        "ph_agua": 5.1,
+        "indice_smp": 5.6,
+        "argila": 52,
+        "mo": 4.2,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 130,
+        "ca": 2.2,
+        "mg": 0.9,
+        "al": 1.6,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F2-01",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "P na classe mais baixa, demais fatores altos",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 2.0,
+        "k_mehlich1": 140,
+        "ca": 6.5,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F2-02",
+      "bloco": "fator_determinante",
+      "cultura": "alho",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "P baixo p/ cultura muito exigente (grupo 1)",
+      "entrada": {
+        "ph_agua": 6.3,
+        "indice_smp": 6.5,
+        "argila": 30,
+        "mo": 4.2,
+        "p_mehlich1": 18.0,
+        "k_mehlich1": 200,
+        "ca": 7.0,
+        "mg": 2.5,
+        "al": 0.0,
+        "ctc_ph7": 20.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CONF-F2-03",
+      "bloco": "fator_determinante",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "mesmo P do caso anterior, cultura grupo 3",
+      "entrada": {
+        "ph_agua": 6.3,
+        "indice_smp": 6.5,
+        "argila": 30,
+        "mo": 4.2,
+        "p_mehlich1": 18.0,
+        "k_mehlich1": 200,
+        "ca": 7.0,
+        "mg": 2.5,
+        "al": 0.0,
+        "ctc_ph7": 20.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-F3-01",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "K na classe mais baixa, demais fatores altos",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 18,
+        "ca": 6.5,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F3-02",
+      "bloco": "fator_determinante",
+      "cultura": "tomateiro",
+      "grupo_sistema": "hortalicas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "K baixo p/ grupo_k 1 (divergente do grupo_p 2)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 35,
+        "mo": 4.0,
+        "p_mehlich1": 32.0,
+        "k_mehlich1": 70,
+        "ca": 6.0,
+        "mg": 2.2,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CONF-F3-03",
+      "bloco": "fator_determinante",
+      "cultura": "gengibre",
+      "grupo_sistema": "medicinais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "grupo_p 2 e grupo_k 3 na mesma cultura",
+      "entrada": {
+        "ph_agua": 6.1,
+        "indice_smp": 6.3,
+        "argila": 38,
+        "mo": 4.1,
+        "p_mehlich1": 13.0,
+        "k_mehlich1": 55,
+        "ca": 5.8,
+        "mg": 2.1,
+        "al": 0.0,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-F4-01",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Mg na classe mais baixa, Ca alto",
+      "entrada": {
+        "ph_agua": 6.1,
+        "indice_smp": 6.3,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 140,
+        "ca": 6.0,
+        "mg": 0.3,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F4-02",
+      "bloco": "fator_determinante",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Ca na classe mais baixa, Mg alto",
+      "entrada": {
+        "ph_agua": 6.1,
+        "indice_smp": 6.3,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 140,
+        "ca": 1.6,
+        "mg": 1.6,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F4-03",
+      "bloco": "fator_determinante",
+      "cultura": "macieira",
+      "grupo_sistema": "frutiferas",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Ca e Mg na faixa intermediaria",
+      "entrada": {
+        "ph_agua": 6.6,
+        "indice_smp": 6.7,
+        "argila": 48,
+        "mo": 4.2,
+        "p_mehlich1": 32.0,
+        "k_mehlich1": 150,
+        "ca": 3.0,
+        "mg": 0.8,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.5,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F5-01",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "CTC na classe mais baixa",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.6,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 90,
+        "ca": 4.6,
+        "mg": 1.4,
+        "al": 0.0,
+        "ctc_ph7": 7.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F5-02",
+      "bloco": "fator_determinante",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "CTC na faixa media",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.5,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 100,
+        "ca": 6.0,
+        "mg": 1.8,
+        "al": 0.0,
+        "ctc_ph7": 12.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F5-03",
+      "bloco": "fator_determinante",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "CTC alta",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 50,
+        "mo": 4.5,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 150,
+        "ca": 10.0,
+        "mg": 3.0,
+        "al": 0.0,
+        "ctc_ph7": 20.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F6-01",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "MO na classe mais baixa",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 48,
+        "mo": 1.8,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 140,
+        "ca": 7.0,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 17.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F6-02",
+      "bloco": "fator_determinante",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "MO na faixa intermediaria",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 48,
+        "mo": 3.5,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 140,
+        "ca": 7.0,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 17.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F6-03",
+      "bloco": "fator_determinante",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "MO alta",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 48,
+        "mo": 6.2,
+        "p_mehlich1": 30.0,
+        "k_mehlich1": 140,
+        "ca": 7.0,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 17.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F7-01",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "argila classe 4, demais fatores altos",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.5,
+        "argila": 15,
+        "mo": 4.0,
+        "p_mehlich1": 45.0,
+        "k_mehlich1": 160,
+        "ca": 7.0,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 17.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F7-02",
+      "bloco": "fator_determinante",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "argila classe 3",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.5,
+        "argila": 32,
+        "mo": 4.0,
+        "p_mehlich1": 32.0,
+        "k_mehlich1": 150,
+        "ca": 7.0,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 17.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F7-03",
+      "bloco": "fator_determinante",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "argila classe 2",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 50,
+        "mo": 4.0,
+        "p_mehlich1": 28.0,
+        "k_mehlich1": 150,
+        "ca": 7.0,
+        "mg": 2.4,
+        "al": 0.0,
+        "ctc_ph7": 17.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-01",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH exatamente 5,5",
+      "entrada": {
+        "ph_agua": 5.5,
+        "indice_smp": 5.9,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 120,
+        "ca": 5.0,
+        "mg": 1.8,
+        "al": 0.2,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-02",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH 5,4 (logo abaixo de 5,5)",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.8,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 120,
+        "ca": 5.0,
+        "mg": 1.8,
+        "al": 0.2,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-03",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH exatamente igual ao pH de referencia 6,0",
+      "entrada": {
+        "ph_agua": 6.0,
+        "indice_smp": 6.2,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-05",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "argila exatamente 20,0 (limite classes 4/3)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 20.0,
+        "mo": 4.0,
+        "p_mehlich1": 20.0,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-06",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "argila 20,1",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 20.1,
+        "mo": 4.0,
+        "p_mehlich1": 20.0,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-07",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "argila exatamente 40,0 (limite classes 3/2)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 40.0,
+        "mo": 4.0,
+        "p_mehlich1": 18.0,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-09",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "P exatamente 12,0 (argila cl.3, grupo 2)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 30,
+        "mo": 4.0,
+        "p_mehlich1": 12.0,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-10",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "P exatamente 12,1 (argila cl.3, grupo 2)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 30,
+        "mo": 4.0,
+        "p_mehlich1": 12.1,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-13",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "P 36,1 (entra em Muito alto -> alerta ambiental)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 30,
+        "mo": 4.0,
+        "p_mehlich1": 36.1,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-14",
+      "bloco": "fronteira",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "CTC exatamente 7,5 (limite Baixa/Media)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.6,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 90,
+        "ca": 5.0,
+        "mg": 1.5,
+        "al": 0.0,
+        "ctc_ph7": 7.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-17",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "K exatamente 90 (grupo 2, CTC Media)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 90,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 12.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-18",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "K exatamente 91 (grupo 2, CTC Media)",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 91,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 12.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-19",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "MO exatamente 2,5",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.4,
+        "argila": 45,
+        "mo": 2.5,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 120,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-21",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Ca exatamente 2,0 / Mg exatamente 0,5",
+      "entrada": {
+        "ph_agua": 6.0,
+        "indice_smp": 6.2,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 120,
+        "ca": 2.0,
+        "mg": 0.5,
+        "al": 0.0,
+        "ctc_ph7": 10.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-22",
+      "bloco": "fronteira",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Ca exatamente 4,0 / Mg exatamente 1,0",
+      "entrada": {
+        "ph_agua": 6.1,
+        "indice_smp": 6.3,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 120,
+        "ca": 4.0,
+        "mg": 1.0,
+        "al": 0.0,
+        "ctc_ph7": 12.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-23",
+      "bloco": "fronteira",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH<5,5 com m% exatamente 30,0",
+      "entrada": {
+        "ph_agua": 5.2,
+        "indice_smp": 5.7,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 195.5,
+        "ca": 2.0,
+        "mg": 1.0,
+        "al": 1.5,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-FR-24",
+      "bloco": "fronteira",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "pH<5,5 com m% exatamente 50,0",
+      "entrada": {
+        "ph_agua": 5.0,
+        "indice_smp": 5.5,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 25.0,
+        "k_mehlich1": 195.5,
+        "ca": 1.0,
+        "mg": 0.5,
+        "al": 2.0,
+        "ctc_ph7": 13.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-01",
+      "bloco": "cenario_potencial",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "POTENCIAL",
+      "intencao_do_caso": "Cenario POTENCIAL; rodar tambem em ATUAL para medir o delta",
+      "entrada": {
+        "ph_agua": 4.9,
+        "indice_smp": 5.6,
+        "argila": 48,
+        "mo": 4.2,
+        "p_mehlich1": 3.0,
+        "k_mehlich1": 25,
+        "ca": 1.8,
+        "mg": 0.6,
+        "al": 1.4,
+        "ctc_ph7": 15.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-01-ATU",
+      "bloco": "cenario_potencial",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Avaliacao ATUAL do par de cenario; o delta vs POTENCIAL e o ganho da recomendacao",
+      "entrada": {
+        "ph_agua": 4.9,
+        "indice_smp": 5.6,
+        "argila": 48,
+        "mo": 4.2,
+        "p_mehlich1": 3.0,
+        "k_mehlich1": 25,
+        "ca": 1.8,
+        "mg": 0.6,
+        "al": 1.4,
+        "ctc_ph7": 15.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-02",
+      "bloco": "cenario_potencial",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "POTENCIAL",
+      "intencao_do_caso": "Cenario POTENCIAL; rodar tambem em ATUAL para medir o delta",
+      "entrada": {
+        "ph_agua": 5.0,
+        "indice_smp": 6.4,
+        "argila": 12,
+        "mo": 1.9,
+        "p_mehlich1": 6.0,
+        "k_mehlich1": 20,
+        "ca": 1.4,
+        "mg": 0.4,
+        "al": 0.6,
+        "ctc_ph7": 6.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-02-ATU",
+      "bloco": "cenario_potencial",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Avaliacao ATUAL do par de cenario; o delta vs POTENCIAL e o ganho da recomendacao",
+      "entrada": {
+        "ph_agua": 5.0,
+        "indice_smp": 6.4,
+        "argila": 12,
+        "mo": 1.9,
+        "p_mehlich1": 6.0,
+        "k_mehlich1": 20,
+        "ca": 1.4,
+        "mg": 0.4,
+        "al": 0.6,
+        "ctc_ph7": 6.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-03",
+      "bloco": "cenario_potencial",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "POTENCIAL",
+      "intencao_do_caso": "Cenario POTENCIAL; rodar tambem em ATUAL para medir o delta",
+      "entrada": {
+        "ph_agua": 4.3,
+        "indice_smp": 4.4,
+        "argila": 55,
+        "mo": 4.8,
+        "p_mehlich1": 4.0,
+        "k_mehlich1": 30,
+        "ca": 0.6,
+        "mg": 0.2,
+        "al": 4.0,
+        "ctc_ph7": 20.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-03-ATU",
+      "bloco": "cenario_potencial",
+      "cultura": "trigo",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Avaliacao ATUAL do par de cenario; o delta vs POTENCIAL e o ganho da recomendacao",
+      "entrada": {
+        "ph_agua": 4.3,
+        "indice_smp": 4.4,
+        "argila": 55,
+        "mo": 4.8,
+        "p_mehlich1": 4.0,
+        "k_mehlich1": 30,
+        "ca": 0.6,
+        "mg": 0.2,
+        "al": 4.0,
+        "ctc_ph7": 20.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-04",
+      "bloco": "cenario_potencial",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "POTENCIAL",
+      "intencao_do_caso": "Cenario POTENCIAL; rodar tambem em ATUAL para medir o delta",
+      "entrada": {
+        "ph_agua": 5.2,
+        "indice_smp": 5.8,
+        "argila": 50,
+        "mo": 4.5,
+        "p_mehlich1": 15.0,
+        "k_mehlich1": 90,
+        "ca": 2.5,
+        "mg": 0.9,
+        "al": 1.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "plantio_direto_consolidado"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-04-ATU",
+      "bloco": "cenario_potencial",
+      "cultura": "soja",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Avaliacao ATUAL do par de cenario; o delta vs POTENCIAL e o ganho da recomendacao",
+      "entrada": {
+        "ph_agua": 5.2,
+        "indice_smp": 5.8,
+        "argila": 50,
+        "mo": 4.5,
+        "p_mehlich1": 15.0,
+        "k_mehlich1": 90,
+        "ca": 2.5,
+        "mg": 0.9,
+        "al": 1.0,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "plantio_direto_consolidado"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PT-05",
+      "bloco": "cenario_potencial",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "POTENCIAL",
+      "intencao_do_caso": "Cenario POTENCIAL; rodar tambem em ATUAL para medir o delta",
+      "entrada": {
+        "ph_agua": 4.8,
+        "indice_smp": 5.4,
+        "argila": 40,
+        "mo": 3.6,
+        "p_mehlich1": 6.0,
+        "k_mehlich1": 45,
+        "ca": 1.5,
+        "mg": 0.5,
+        "al": 1.8,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-PT-05-ATU",
+      "bloco": "cenario_potencial",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Avaliacao ATUAL do par de cenario; o delta vs POTENCIAL e o ganho da recomendacao",
+      "entrada": {
+        "ph_agua": 4.8,
+        "indice_smp": 5.4,
+        "argila": 40,
+        "mo": 3.6,
+        "p_mehlich1": 6.0,
+        "k_mehlich1": 45,
+        "ca": 1.5,
+        "mg": 0.5,
+        "al": 1.8,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-RB-01",
+      "bloco": "ramo_b_sem_ph_referencia",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "V% acima de 40, pH baixo (nao deve pesar)",
+      "entrada": {
+        "ph_agua": 4.9,
+        "indice_smp": 5.4,
+        "argila": 45,
+        "mo": 4.0,
+        "p_mehlich1": 12.0,
+        "k_mehlich1": 90,
+        "ca": 4.5,
+        "mg": 1.6,
+        "al": 0.8,
+        "ctc_ph7": 15.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-RB-02",
+      "bloco": "ramo_b_sem_ph_referencia",
+      "cultura": "erva_mate",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "V% abaixo de 40 sem excecao Ca/Mg",
+      "entrada": {
+        "ph_agua": 5.0,
+        "indice_smp": 5.5,
+        "argila": 40,
+        "mo": 3.8,
+        "p_mehlich1": 10.0,
+        "k_mehlich1": 70,
+        "ca": 1.8,
+        "mg": 0.6,
+        "al": 1.5,
+        "ctc_ph7": 14.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-RB-03",
+      "bloco": "ramo_b_sem_ph_referencia",
+      "cultura": "acacia_negra",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "V% abaixo de 40 mas Ca>=4,0 e Mg>=1,0",
+      "entrada": {
+        "ph_agua": 5.1,
+        "indice_smp": 5.6,
+        "argila": 42,
+        "mo": 4.0,
+        "p_mehlich1": 11.0,
+        "k_mehlich1": 80,
+        "ca": 4.2,
+        "mg": 1.2,
+        "al": 1.0,
+        "ctc_ph7": 15.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-RB-04",
+      "bloco": "ramo_b_sem_ph_referencia",
+      "cultura": "pastagem_natural",
+      "grupo_sistema": "forrageiras",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "V% exatamente 40,0",
+      "entrada": {
+        "ph_agua": 5.0,
+        "indice_smp": 5.5,
+        "argila": 35,
+        "mo": 3.5,
+        "p_mehlich1": 8.0,
+        "k_mehlich1": 78.2,
+        "ca": 3.6,
+        "mg": 1.2,
+        "al": 1.2,
+        "ctc_ph7": 12.5,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-RB-05",
+      "bloco": "ramo_b_sem_ph_referencia",
+      "cultura": "eucalipto",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "argila classe 4 + CTC baixa em florestal",
+      "entrada": {
+        "ph_agua": 5.3,
+        "indice_smp": 6.0,
+        "argila": 14,
+        "mo": 2.2,
+        "p_mehlich1": 9.0,
+        "k_mehlich1": 60,
+        "ca": 2.6,
+        "mg": 0.9,
+        "al": 0.4,
+        "ctc_ph7": 7.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-RB-06",
+      "bloco": "ramo_b_sem_ph_referencia",
+      "cultura": "erva_mate",
+      "grupo_sistema": "florestais",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "P e K muito baixos p/ grupo 3",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.9,
+        "argila": 48,
+        "mo": 4.2,
+        "p_mehlich1": 1.2,
+        "k_mehlich1": 14,
+        "ca": 5.0,
+        "mg": 1.8,
+        "al": 0.3,
+        "ctc_ph7": 16.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    }
+  ]
+}

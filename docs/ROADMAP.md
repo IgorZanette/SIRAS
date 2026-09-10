@@ -40,13 +40,13 @@ Se houver atraso, o escopo é reduzido por camadas, nesta ordem — nunca sacrif
 
 | | Etapa | Estado |
 |---|---|---|
-| a | Estruturação da base de conhecimento (JSON) | em andamento — `dados/comum/` e a adubação dos 6 grupos (grãos, hortaliças, tubérculos, outras, frutíferas, erva-mate) transcritas e conferidas; falta `corretivos.json` (Cap. 8) e dados de aptidão (bloqueados por P1) |
+| a | Estruturação da base de conhecimento (JSON) | em andamento — `dados/comum/` e a adubação dos 6 grupos (grãos, hortaliças, tubérculos, outras, frutíferas, erva-mate) transcritas e conferidas; falta `corretivos.json` (Cap. 8) e três lacunas que a conformidade da aptidão expôs: `grupo_p`/`grupo_k` da **alfafa** e do **gengibre** (Anexo 2, p. 361-366) e o mapeamento das **espécies florestais** em `mapa_culturas.json` para o critério `erva_mate_e_florestais` — ver CCAE-v1.1.md, Apêndice B, B-2 a B-4 |
 | b | Definição formal das regras SE-ENTÃO | em andamento |
 | c | Definição dos critérios de aptidão edáfica | concluído — `docs/CCAE-v1.0.md`, F1-F7 rastreados ao Manual e a Ramalho Filho &amp; Beek (1995); motor em `siras/motor/aptidao.py` (docs/decisoes/0005) |
 | d | Módulo de entrada de dados | pendente |
 | e | Motor de inferência | em andamento |
-| f | Módulos de recomendação e aptidão | em andamento — `siras/motor/aptidao.py` implementado e testado contra o CCAE-v1.0.md; falta preencher `testes/casos/casos_aptidao.json` (gabarito à mão, autor) para a verificação de conformidade da etapa g |
-| g | Conjunto de casos de teste e oráculo | em andamento |
+| f | Módulos de recomendação e aptidão | em andamento — `siras/motor/aptidao.py` implementado e verificado contra o `docs/CCAE-v1.1.md`; contrato de 3 argumentos do CCAE exposto por `avaliar_aptidao_ccae()`; sinonímia de nomes de cultura resolvida em duas camadas (`siras/dominio/nomes.py` + `dados/comum/aliases_culturas.json`) |
+| g | Conjunto de casos de teste e oráculo | em andamento — conjunto de 84 casos integrado (`testes/casos/entradas_aptidao.json` + `gabarito_aptidao.csv`, separados para preservar a independência do gabarito); runner em `testes/unidade/test_conformidade_aptidao.py`. `validar_anexo1.py` passa 32/32 contra as Tab. A.2/A.3 do Anexo 1 (oráculo externo). Conformidade de classe e de fator determinante: **77/80 = 96,25%**. As 3 divergências e mais 1 de gabarito estão em CCAE-v1.1.md, Apêndice B (B-1 a B-4) — todas por lacuna da base de conhecimento ou do gabarito, nenhuma por defeito do motor; todas dependem do autor |
 | h | Validação e análise dos resultados | pendente |
 | i | Avaliação de usabilidade | pendente |
 | j | Redação final | pendente |

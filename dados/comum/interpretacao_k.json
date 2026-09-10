@@ -69,9 +69,10 @@
       "tabela": "6.9",
       "culturas_texto": "culturas de graos; pastagens exceto pastagem natural; frutiferas; mandioca; hortalicas exceto Grupo 1",
       "culturas": [
-        "mandioca"
+        "mandioca",
+        "alfafa"
       ],
-      "culturas_fonte": "Manual RS/SC 2016, Anexo 2 (p. 361-366) - transcricao parcial, conferida pelo autor em 2026-09-07. Mandioca diverge de P (grupo_p=3, grupo_k=2) - ver interpretacao_p.json."
+      "culturas_fonte": "Manual RS/SC 2016, Anexo 2 (p. 361-366) - transcricao parcial, conferida pelo autor em 2026-09-07; alfafa acrescentada em 2026-09-10. Mandioca diverge de P (grupo_p=3, grupo_k=2) - ver interpretacao_p.json. Alfafa (Medicago sativa, secao FORRAGEIRAS) e 2 nos dois eixos."
     },
     {
       "grupo": "grupo_3",
@@ -86,9 +87,10 @@
         "erva-mate",
         "eucalipto",
         "pinus",
-        "pastagem-natural"
+        "pastagem-natural",
+        "gengibre"
       ],
-      "culturas_fonte": "Manual RS/SC 2016, Anexo 2 (p. 361-366) - transcricao parcial, conferida pelo autor em 2026-09-07",
+      "culturas_fonte": "Manual RS/SC 2016, Anexo 2 (p. 361-366) - transcricao parcial, conferida pelo autor em 2026-09-07; gengibre acrescentado em 2026-09-10. Gengibre (Zingiber officinale, secao MEDICINAIS) e grupo_p=2 e grupo_k=3: a Tab. 6.2 o nomeia no Grupo 2 de P, a Tab. 6.7 nao o inclui nos Grupos 1 nem 2 de K.",
       "culturas_pendente": "Anexo 2 tem ~150 culturas; so as listadas acima (as sem pH de referencia da Tabela 5.1) foram conferidas ate agora. 'culturas_texto' continua sendo so descricao, nao lista exaustiva - grupo_exigencia() so resolve pelas 'culturas' explicitas ou pelo fallback de graos."
     }
   ],

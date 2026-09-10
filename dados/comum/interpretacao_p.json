@@ -44,7 +44,12 @@
       "grupo": "grupo_2",
       "descricao": "exigentes (teor critico igual graos)",
       "tabela": "6.4",
-      "culturas_texto": "culturas de graos exceto arroz irrigado; hortalicas exceto Grupo 1; pastagens exceto pastagem natural; frutiferas; gengibre"
+      "culturas_texto": "culturas de graos exceto arroz irrigado; hortalicas exceto Grupo 1; pastagens exceto pastagem natural; frutiferas; gengibre",
+      "culturas": [
+        "alfafa",
+        "gengibre"
+      ],
+      "culturas_fonte": "Manual RS/SC 2016, Anexo 2 (p. 361-366) - transcricao parcial, conferida pelo autor em 2026-09-10. Alfafa (Medicago sativa, secao FORRAGEIRAS) grupo_p=2, grupo_k=2. Gengibre (Zingiber officinale, secao MEDICINAIS) grupo_p=2, grupo_k=3 - diverge de K, ver interpretacao_k.json."
     },
     {
       "grupo": "grupo_3",

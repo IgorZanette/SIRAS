@@ -2,8 +2,9 @@
 
 - **Status:** aceito
 - **Data:** 2026-09-07
-- **Contexto:** implementação do módulo de aptidão edáfica (docs/CCAE-v1.0.md, aprovado
-  pelo orientador, tag `criterios-v1.0`), etapa "c"/"f" do ROADMAP, pendência P1
+- **Contexto:** implementação do módulo de aptidão edáfica (docs/CCAE-v1.0.md, depois
+  substituído pela v1.1 — aprovada por escrito pelo orientador em 10/09/2026, ver Apêndice D
+  do `docs/CCAE-v1.1.md`), etapa "c"/"f" do ROADMAP, pendência P1
 - **Substitui/complementa:** 0002 (políticas do motor), 0003 (modelagem de entrada), 0004
   (normalização de doses) — nenhuma revogada; este ADR é específico de `motor/aptidao.py`
 

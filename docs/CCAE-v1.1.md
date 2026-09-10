@@ -1,8 +1,8 @@
 # Caderno de Critérios de Aptidão Edáfica (CCAE)
 
 **Versão:** 1.1
-**Status:** aprovado pelo orientador (registrar data e referência do e-mail aqui: _______________)
-**Data de congelamento:** _______________
+**Status:** aprovado pelo orientador — e-mail do Prof. Dr. Rafael Rieder em 10/09/2026, 14:04 (transcrito no Apêndice D)
+**Data de congelamento:** 2026-09-10
 **Tag Git prevista:** `criterios-v1.1`
 **Sistema:** SIRAS — Sistema de Recomendação e Aptidão do Solo
 
@@ -617,6 +617,52 @@ Toda escolha não determinada pelas fontes. É a lista que vai ao auditor e à b
 |---|---|---|---|---|
 | 1.0 | | Versão inicial | — | — |
 | 1.1 | 2026-09-09 | Correção do mapeamento de §8.1 já previsto no texto; IDs canônicos de F1–F7; fechamento de A-10 pela convenção de limite superior; ajuste do protocolo §9 para 14 calibração + 62 conformidade; correção dos casos CONF-PT-03 e CONF-PT-04. | Auditoria de consistência do gabarito v1.0 e correção de casos malformados. | Sim — qualquer gabarito anterior à v1.1 é inválido como evidência de conformidade. |
+
+## Apêndice D — Registro da aprovação do orientador
+
+Evidência exigida pela §9.1 (congelamento do Caderno) e pela etapa 2 da ordem de trabalho de `docs/CCAE-implementacao.md`.
+
+| Campo | Valor |
+|---|---|
+| Orientador | Prof. Dr. Rafael Rieder (UPF — LABRV, PPGCA, PPGAGRO) |
+| Meio | E-mail |
+| Data e hora do recebimento | 10/09/2026, 14:04 |
+| Objeto | Caderno de Critérios de Aptidão Edáfica, v1.1 — em especial as decisões de julgamento do Apêndice A relativas à calagem |
+| Resultado | Aprovado. Autorização explícita para seguir na linha proposta |
+
+### D.1 Transcrição integral do e-mail
+
+> Olá Igor, boa tarde!
+>
+> Creio que sua decisão está embasada no conhecimento empírico seu em relação a calagem (experiência prática, observação do cotidiano e eventual tentativa e erro). Pode seguir nessa linha. Podemos usar isso no artigo na hora de justificar eventuais escolhas.
+>
+> De todo modo, se conseguir encontrar na literatura algum outro autor que já fez algo similar, ou adotou determinado parâmetro que você escolheu, podemos usá-lo para fortalecer a justificativa, citando-o. Isso dará mais robustez, mostrando que não tomou por base somente o manual da Embrapa.
+>
+> Conversamos a noite. Abraço!
+>
+> --
+> []s
+> Prof. Dr. Rafael Rieder
+> University of Passo Fundo (UPF)
+> Head of Virtual Reality and Computer Vision Research Lab (LABRV)
+> Graduate Program in Applied Computing (PPGCA)
+> Graduate Program in Agronomy (PPGAGRO)
+> Lattes: http://lattes.cnpq.br/3010497094377497
+> ORCID: https://orcid.org/0000-0002-7435-9054
+> Scopus Author ID: 24597781600
+> Web of Science ResearcherID: G-5808-2011
+
+*Nota de precisão terminológica:* a fonte normativa do SIRAS é o Manual de Calagem e Adubação para os Estados do RS e SC (CQFS-RS/SC, 11. ed., 2016, publicado pela SBCS — Núcleo Regional Sul), não uma publicação da Embrapa. A menção do e-mail é transcrita como recebida; a citação correta consta das Referências deste Caderno.
+
+### D.2 Consequências normativas
+
+1. **As decisões de julgamento do Apêndice A ficam aprovadas como estão.** A base declarada da aprovação é o conhecimento empírico do autor sobre calagem — experiência prática, observação de campo e tentativa e erro. Isso não altera o princípio P1: os limiares continuam rastreados ao Manual; o que a aprovação cobre é o conjunto de escolhas do autor listadas em A-1 a A-9, que por definição não têm limiar publicado.
+2. **A justificativa dessas escolhas passa a ter status de argumento defensável na monografia e no artigo**, com a origem empírica declarada abertamente em vez de omitida.
+3. **Encaminhamento aberto (do autor):** buscar na literatura autores que tenham adotado parâmetro ou procedimento equivalente, para citar em reforço à justificativa. Não é condição da aprovação — é robustez adicional pedida pelo orientador. Registrado como pendência P4 no `docs/ROADMAP.md`.
+
+### D.3 Observação de cronologia
+
+O e-mail de aprovação é de 10/09/2026. A v1.1 do Caderno foi fechada em 09/09/2026 e a implementação do motor de aptidão ocorreu entre 07/09 e 09/09/2026 (commits `492c563` a `cd1c0df`), sob a v1.0/v1.1 já escrita. A alegação de não-circularidade da §9.1 se sustenta sobre o fato de a **especificação ter sido escrita antes do código** e o gabarito ter sido aplicado a partir dela, não sobre a data do e-mail. Ao redigir a Seção de metodologia, descrever a sequência real: especificação → implementação → verificação → aprovação escrita registrada aqui. Nenhum critério foi alterado após a aprovação.
 
 ---
 

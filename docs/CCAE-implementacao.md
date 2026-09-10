@@ -368,8 +368,8 @@ Testes obrigatórios adicionais:
 | # | Etapa | Saída |
 |---|---|---|
 | 1 | Conferir a pendência A-10 no Manual impresso | Apêndice A atualizado |
-| 2 | Aprovar o CCAE com o orientador | E-mail datado |
-| 3 | `git tag criterios-v1.0` | Tag no repositório |
+| 2 | Aprovar o CCAE com o orientador | E-mail datado — **concluído:** e-mail do Prof. Dr. Rafael Rieder em 10/09/2026, 14:04, transcrito no Apêndice D do `CCAE-v1.1.md` |
+| 3 | `git tag criterios-v1.0` | Tag no repositório — **pendente:** a aprovação recaiu sobre a v1.1; a tag a criar é `criterios-v1.1` |
 | 4 | Transcrever tabelas para JSON + conferência manual | `criterios_aptidao.json` |
 | 5 | Preencher `gabarito_conformidade.csv` à mão | 60 casos com data e autor |
 | 6 | Implementar `faixas.py`, `interpretacao.py`, `aptidao.py` | Módulos |

@@ -7,9 +7,10 @@ Atualize a coluna **Estado** ao concluir cada etapa. Legenda: `pendente` · `em 
 
 | # | Pendência | Por quê | Estado |
 |---|---|---|---|
-| P1 | Definir o oráculo da aptidão edáfica (fonte independente + agrônomo para classificação às cegas) | Sem isso, a H1.2 é circular e o teste não mede nada | resolvido — H0.2/H1.2 removidas da proposta; aptidão migrou de hipótese de validação para objetivo de projeto, verificado por conformidade da implementação frente ao Caderno de Critérios de Aptidão Edáfica (`docs/CCAE-v1.0.md`, aprovado pelo orientador, tag `criterios-v1.0`), não por painel de especialistas. Auditoria agronômica qualitativa (parecer do orientador sobre laudos gerados) registrada como complemento, sem percentual — ver CCAE §10 |
+| P1 | Definir o oráculo da aptidão edáfica (fonte independente + agrônomo para classificação às cegas) | Sem isso, a H1.2 é circular e o teste não mede nada | resolvido — H0.2/H1.2 removidas da proposta; aptidão migrou de hipótese de validação para objetivo de projeto, verificado por conformidade da implementação frente ao Caderno de Critérios de Aptidão Edáfica (`docs/CCAE-v1.1.md`, aprovado pelo orientador por e-mail em 10/09/2026 14:04 — transcrição no Apêndice D do Caderno; tag prevista `criterios-v1.1`), não por painel de especialistas. Auditoria agronômica qualitativa (parecer do orientador sobre laudos gerados) registrada como complemento, sem percentual — ver CCAE §10 |
 | P2 | Confirmar necessidade de CEP/TCLE para o teste de usabilidade | Trâmite leva semanas; descobrir em novembro inviabiliza o capítulo | concluído — Confirmado que a avaliação de usabilidade não requer submissão ao CEP. Será aplicado TCLE aos participantes. (confirmado com o orientador Rafael Rieder) |
 | P3 | Corrigir a proposta: método de calagem (SMP), atribuição do SUS, referência Ramalho Filho & Beek | Erros conhecidos no texto atual | em andamento |
+| P4 | Localizar na literatura autores que tenham adotado parâmetro ou procedimento equivalente às decisões de julgamento do Apêndice A do CCAE (calagem) | Pedido do orientador no e-mail de aprovação de 10/09/2026: citar terceiros dá robustez à justificativa e mostra que a escolha não se apoia apenas no manual. Não é condição da aprovação, que já está dada | pendente — busca do autor; alvo: monografia e artigo |
 
 ## Sprints
 
@@ -42,7 +43,7 @@ Se houver atraso, o escopo é reduzido por camadas, nesta ordem — nunca sacrif
 |---|---|---|
 | a | Estruturação da base de conhecimento (JSON) | em andamento — `dados/comum/` e a adubação dos 6 grupos (grãos, hortaliças, tubérculos, outras, frutíferas, erva-mate) transcritas e conferidas; falta `corretivos.json` (Cap. 8) e três lacunas que a conformidade da aptidão expôs: `grupo_p`/`grupo_k` da **alfafa** e do **gengibre** (Anexo 2, p. 361-366) e o mapeamento das **espécies florestais** em `mapa_culturas.json` para o critério `erva_mate_e_florestais` — ver CCAE-v1.1.md, Apêndice B, B-2 a B-4 |
 | b | Definição formal das regras SE-ENTÃO | em andamento |
-| c | Definição dos critérios de aptidão edáfica | concluído — `docs/CCAE-v1.0.md`, F1-F7 rastreados ao Manual e a Ramalho Filho &amp; Beek (1995); motor em `siras/motor/aptidao.py` (docs/decisoes/0005) |
+| c | Definição dos critérios de aptidão edáfica | concluído — `docs/CCAE-v1.1.md` (aprovado pelo orientador em 10/09/2026, Apêndice D), F1-F7 rastreados ao Manual e a Ramalho Filho &amp; Beek (1995); motor em `siras/motor/aptidao.py` (docs/decisoes/0005) |
 | d | Módulo de entrada de dados | pendente |
 | e | Motor de inferência | em andamento |
 | f | Módulos de recomendação e aptidão | em andamento — `siras/motor/aptidao.py` implementado e verificado contra o `docs/CCAE-v1.1.md`; contrato de 3 argumentos do CCAE exposto por `avaliar_aptidao_ccae()`; sinonímia de nomes de cultura resolvida em duas camadas (`siras/dominio/nomes.py` + `dados/comum/aliases_culturas.json`) |

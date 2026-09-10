@@ -1,8 +1,8 @@
 # Caderno de Critérios de Aptidão Edáfica (CCAE)
 
 **Versão:** 1.0
-**Status:** aprovado pelo orientador (registrar data e referência do e-mail aqui: _______________)
-**Data de congelamento:** _______________
+**Status:** superada pela v1.1 (`docs/CCAE-v1.1.md`). Mantida apenas como registro histórico — a aprovação do orientador de 10/09/2026 recai sobre a v1.1, não sobre este texto
+**Data de congelamento:** — (não congelada; ver v1.1)
 **Tag Git prevista:** `criterios-v1.0`
 **Sistema:** SIRAS — Sistema de Recomendação e Aptidão do Solo
 

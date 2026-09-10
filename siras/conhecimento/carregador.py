@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from jsonschema import Draft202012Validator, ValidationError
 
+from siras.dominio.nomes import normalizar_nome_cultura
+
 
 class ErroCarregamento(Exception):
     """Erro ao carregar ou validar base de conhecimento."""
@@ -594,6 +596,30 @@ class Carregador:
                 "NC_MAX_INCORPORADO_T_HA"
             )
 
+    def validar_aliases_culturas(self, dados: Dict) -> None:
+        """
+        Valida a invariante que torna a resolução por sinônimo determinística: um mesmo
+        nome não pode aparecer em dois grupos, senão a cultura teria duas equivalências
+        concorrentes e a ordem de leitura do arquivo decidiria o resultado.
+
+        A comparação usa a mesma normalização do motor (minúsculas, sem acento,
+        separador '-'), para que 'Erva-Mate' e 'erva mate' contem como o mesmo nome.
+
+        Raises:
+            ErroCarregamento: se um nome aparecer em mais de um grupo
+        """
+        origem: Dict[str, int] = {}
+        for indice, grupo in enumerate(dados["grupos_de_sinonimos"]):
+            for nome in grupo["nomes"]:
+                chave = normalizar_nome_cultura(nome)
+                if chave in origem and origem[chave] != indice:
+                    raise ErroCarregamento(
+                        f"aliases_culturas.json: o nome '{nome}' aparece nos grupos "
+                        f"{origem[chave]} e {indice}; um nome só pode pertencer a um "
+                        f"grupo de sinônimos"
+                    )
+                origem[chave] = indice
+
     def validar_graos_adubacao_n(self, dados: Dict) -> None:
         """
         Valida invariantes de graos_adubacao_n.json contra o checksum já transcrito:
@@ -931,6 +957,15 @@ class Carregador:
             resultado["config_aptidao"] = dados
         except ErroCarregamento as e:
             raise ErroCarregamento(f"config_aptidao.json: {e}")
+
+        # Carregar aliases_culturas.json
+        try:
+            dados = self._carregar_json(dados_dir / "aliases_culturas.json")
+            self._validar_schema_json("aliases_culturas.json", "aliases_culturas_v1", dados)
+            self.validar_aliases_culturas(dados)
+            resultado["aliases_culturas"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"aliases_culturas.json: {e}")
 
         return resultado
 

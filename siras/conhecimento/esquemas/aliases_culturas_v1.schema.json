@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aliases_culturas_v1.schema.json",
+  "title": "Equivalencias de nome de cultura entre a Tabela 5.1 e o Anexo 2 do Manual",
+  "type": "object",
+  "required": ["descricao", "fonte", "grupos_de_sinonimos"],
+  "properties": {
+    "descricao": {"type": "string", "minLength": 1},
+    "fonte": {
+      "type": "object",
+      "required": ["documento", "manual"],
+      "properties": {
+        "documento": {"type": "string", "minLength": 1},
+        "manual": {"type": "string", "minLength": 1}
+      }
+    },
+    "nota_normalizacao": {"type": "string"},
+    "nota_precedencia": {"type": "string"},
+    "nota_pendencia": {"type": "string"},
+    "grupos_de_sinonimos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["nomes", "nota"],
+        "additionalProperties": false,
+        "properties": {
+          "nomes": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "nota": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

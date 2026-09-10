@@ -1,0 +1,36 @@
+{
+  "descricao": "Equivalencias de NOME entre a Tabela 5.1 (pH de referencia) e o Anexo 2 (grupos de exigencia de P e K) do Manual. A mesma cultura aparece com denominacoes diferentes nas duas fontes; sem este mapa, uma cultura que existe nas duas tabelas fica INDETERMINADA por divergencia de nomenclatura, nao por lacuna de dado.",
+  "fonte": {
+    "documento": "docs/HANDOFF-aptidao.md, Sec. 7 (sinonimia declarada pelo autor)",
+    "manual": "CQFS-RS/SC, 11. ed., 2016, Tabela 5.1 (p. 68) e Anexo 2 (p. 361-366)"
+  },
+  "nota_normalizacao": "Maiusculas, acentos, hifens, underscores e espacos NAO entram aqui: sao resolvidos por _normalizar_nome_cultura() em siras/motor/aptidao.py, que e normalizacao ortografica pura, sem conteudo agronomico. Este arquivo lista somente equivalencias que exigem julgamento (nomes realmente distintos para a mesma cultura).",
+  "nota_precedencia": "A busca exata (e depois a normalizada) sempre vence. Um grupo de sinonimos so e consultado quando nenhum nome do grupo resolve por si; portanto acrescentar um grupo nunca altera a resolucao de uma cultura que ja resolvia.",
+  "nota_pendencia": "Alguns grupos abaixo ainda nao resolvem nada porque o lado do Anexo 2 depende de transcricao pendente (aromaticas, palmeiras, arroz). Ficam registrados para valer assim que a transcricao avancar. Conferir com o autor antes de tratar como completo.",
+  "grupos_de_sinonimos": [
+    {
+      "nomes": ["mirtilo", "mirtileiro"],
+      "nota": "Tab. 5.1 usa 'Mirtilo'; Anexo 2 usa 'Mirtileiro'. Ambos ja presentes na base."
+    },
+    {
+      "nomes": ["tomate", "tomateiro"],
+      "nota": "Tab. 5.1 usa 'Tomate'; Anexo 2 usa 'Tomateiro'. Ambos ja presentes na base."
+    },
+    {
+      "nomes": ["almeirao", "chicoria"],
+      "nota": "Tab. 5.1 usa 'Almeirao'; Anexo 2 usa 'Chicoria'. Hoje ambos resolvem sozinhos; o grupo e inerte por precedencia."
+    },
+    {
+      "nomes": ["manjericao", "alfavaca"],
+      "nota": "Tab. 5.1 usa 'Manjericao'; Anexo 2 usa 'Alfavaca'. Inerte ate a transcricao das aromaticas."
+    },
+    {
+      "nomes": ["palmeira-real", "palmeira real australiana"],
+      "nota": "Tab. 5.1 usa 'Palmeira-real'; Anexo 2 usa 'Palmeira real australiana'. Inerte ate a transcricao das palmeiras."
+    },
+    {
+      "nomes": ["arroz-de-sequeiro", "arroz"],
+      "nota": "Tab. 5.1 usa 'Arroz de sequeiro'; Anexo 2 usa 'Arroz'. NAO alcanca o arroz irrigado por alagamento, que e outro nome e esta fora de escopo (CCAE Sec. 1.3)."
+    }
+  ]
+}

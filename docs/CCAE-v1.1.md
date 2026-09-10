@@ -625,7 +625,7 @@ Evidência exigida pela §9.1 (congelamento do Caderno) e pela etapa 2 da ordem 
 | Campo | Valor |
 |---|---|
 | Orientador | Prof. Dr. Rafael Rieder (UPF — LABRV, PPGCA, PPGAGRO) |
-| Meio | E-mail |
+| Meio | E-mail, confirmando aval verbal dado anteriormente em orientação |
 | Data e hora do recebimento | 10/09/2026, 14:04 |
 | Objeto | Caderno de Critérios de Aptidão Edáfica, v1.1 — em especial as decisões de julgamento do Apêndice A relativas à calagem |
 | Resultado | Aprovado. Autorização explícita para seguir na linha proposta |
@@ -660,9 +660,21 @@ Evidência exigida pela §9.1 (congelamento do Caderno) e pela etapa 2 da ordem 
 2. **A justificativa dessas escolhas passa a ter status de argumento defensável na monografia e no artigo**, com a origem empírica declarada abertamente em vez de omitida.
 3. **Encaminhamento aberto (do autor):** buscar na literatura autores que tenham adotado parâmetro ou procedimento equivalente, para citar em reforço à justificativa. Não é condição da aprovação — é robustez adicional pedida pelo orientador. Registrado como pendência P4 no `docs/ROADMAP.md`.
 
-### D.3 Observação de cronologia
+### D.3 Cronologia da aprovação
 
-O e-mail de aprovação é de 10/09/2026. A v1.1 do Caderno foi fechada em 09/09/2026 e a implementação do motor de aptidão ocorreu entre 07/09 e 09/09/2026 (commits `492c563` a `cd1c0df`), sob a v1.0/v1.1 já escrita. A alegação de não-circularidade da §9.1 se sustenta sobre o fato de a **especificação ter sido escrita antes do código** e o gabarito ter sido aplicado a partir dela, não sobre a data do e-mail. Ao redigir a Seção de metodologia, descrever a sequência real: especificação → implementação → verificação → aprovação escrita registrada aqui. Nenhum critério foi alterado após a aprovação.
+A aprovação dos critérios foi **dada verbalmente pelo orientador em orientação anterior**, antes da implementação do motor de aptidão; o e-mail de 10/09/2026 é a **confirmação por escrito** desse aval, obtida para servir de evidência documental exigida pela §9.1. A ordem efetiva foi, portanto:
+
+| # | Evento | Data |
+|---|---|---|
+| 1 | Redação do Caderno como especificação, sem código de aptidão existente | anterior a 07/09/2026 |
+| 2 | Aval verbal do orientador aos critérios, em orientação | anterior à implementação |
+| 3 | Implementação do motor de aptidão (commits `492c563` a `cd1c0df`) | 07/09 a 09/09/2026 |
+| 4 | Fechamento da v1.1 e verificação de conformidade (77/80) | 09/09/2026 |
+| 5 | Confirmação escrita da aprovação — e-mail transcrito em D.1 | 10/09/2026, 14:04 |
+| 6 | Reunião de acompanhamento sobre o concluído e o andamento do projeto | 10/09/2026, à noite |
+| 7 | Congelamento do Caderno: tag `criterios-v1.1` | 10/09/2026 |
+
+A alegação de não-circularidade da §9.1 se sustenta sobre o fato de a **especificação ter sido escrita antes do código** e o gabarito ter sido aplicado a partir dela — a data do e-mail é registro do aval, não o momento em que ele foi dado. Nenhum critério foi alterado após a aprovação.
 
 ---
 

@@ -18,7 +18,7 @@ Escopo geográfico: RS e SC. Fonte normativa: Manual de Calagem e Adubação par
 
 Este módulo **não é uma hipótese de pesquisa** do TCC. É um artefato de projeto avaliado por **verificação de conformidade**: mede se a implementação reproduz a especificação, não se a especificação está agronomicamente correta.
 
-A consequência prática: o CCAE foi **escrito e congelado como especificação antes** da implementação, e **aprovado por escrito pelo orientador** (e-mail de 10/09/2026, transcrito no Apêndice D do `CCAE-v1.1.md`). Ele é a autoridade. Se o código divergir do CCAE, o código está errado — mesmo que a saída pareça mais razoável agronomicamente. Divergências vão para o Apêndice B do CCAE e, se for caso de ambiguidade da especificação, geram nova versão do Caderno; nunca "correção silenciosa" no código.
+A consequência prática: o CCAE foi **escrito e aprovado pelo orientador antes** da implementação — aval verbal em orientação, confirmado por escrito no e-mail de 10/09/2026, transcrito no Apêndice D do `CCAE-v1.1.md`. Ele é a autoridade. Se o código divergir do CCAE, o código está errado — mesmo que a saída pareça mais razoável agronomicamente. Divergências vão para o Apêndice B do CCAE e, se for caso de ambiguidade da especificação, geram nova versão do Caderno; nunca "correção silenciosa" no código.
 
 ---
 

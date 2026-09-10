@@ -84,9 +84,18 @@ class TestF1AcidezComPhReferencia:
         r = _avaliar(_analise(ph_agua=5.5))
         assert _fator(r, "F1_acidez").rotulo == "LIGEIRO"
 
-    def test_ph_abaixo_5_5_m_percent_30_e_moderado(self):
-        r = _avaliar(_analise(ph_agua=5.4, saturacao_al=30.0))
+    def test_ph_abaixo_5_5_m_percent_29_9_e_moderado(self):
+        r = _avaliar(_analise(ph_agua=5.4, saturacao_al=29.9))
         assert _fator(r, "F1_acidez").rotulo == "MODERADO"
+
+    def test_ph_abaixo_5_5_m_percent_30_e_forte(self):
+        """CCAE §F1 escreve "m% < 30" / "30 <= m% <= 50" / "m% > 50": o limite 30,0 está
+        na faixa do meio, logo é FORTE. Este teste afirmava MODERADO até 2026-09-09,
+        aplicando a convenção de limite superior das tabelas de P/K, que não vale aqui
+        (docs/HANDOFF-aptidao.md §4). O gabarito de conformidade CONF-FR-23, construído
+        com m% = 30,0 exatos por aritmética reversa, é o oráculo desta linha."""
+        r = _avaliar(_analise(ph_agua=5.4, saturacao_al=30.0))
+        assert _fator(r, "F1_acidez").rotulo == "FORTE"
 
     def test_ph_abaixo_5_5_m_percent_30_1_e_forte(self):
         r = _avaliar(_analise(ph_agua=5.4, saturacao_al=30.1))

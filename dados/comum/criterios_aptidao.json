@@ -98,6 +98,20 @@
       "arroz-irrigado-semeadura-em-solo-seco"
     ]
   },
+  "faixas_entrada": {
+    "_fonte": "CCAE-v1.1.md Sec. 5.1 (tabela de variaveis obrigatorias) e Sec. 5.4 (valor fora da faixa valida rejeita a entrada, nao trunca)",
+    "_nota": "Faixas de aceitacao de ENTRADA do modulo de aptidao, transcritas do CCAE, nao do Manual. Sao mais estreitas que a validacao fisica de AnaliseSolo (ex.: pH 3,0-9,0 aqui contra 0-14 la), por isso existem separadamente. CONFERIR com o autor contra o CCAE Sec. 5.1 antes de tratar como definitivo.",
+    "ph_agua": {"minimo": 3.0, "maximo": 9.0},
+    "indice_smp": {"minimo": 4.0, "maximo": 7.5},
+    "argila": {"minimo": 0.0, "maximo": 100.0},
+    "mo": {"minimo": 0.0, "maximo": 20.0},
+    "p_mehlich1": {"minimo": 0.0, "maximo": 500.0},
+    "k_mehlich1": {"minimo": 0.0, "maximo": 2000.0},
+    "ca": {"minimo": 0.0, "maximo": 40.0},
+    "mg": {"minimo": 0.0, "maximo": 20.0},
+    "al": {"minimo": 0.0, "maximo": 20.0},
+    "ctc_ph7": {"minimo": 0.0, "maximo": 60.0}
+  },
   "corrigibilidade": {
     "_fonte": "CCAE-v1.0.md Sec. 7.1",
     "F1_acidez": "CORRIGIVEL",

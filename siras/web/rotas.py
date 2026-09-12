@@ -7,6 +7,7 @@ Mapa previsto (PLANO-FRONTEND §9.1), implementado por etapas:
     /analise/dados     etapa 2, análise de solo       — pronto
     /analise/laudo     etapa 3, laudo                 — pronto
     /api/interpretar   POST, leitura ao vivo          — pronto
+    /tabelas           as tabelas transcritas         — pronto
 
 As rotas montam AnaliseSolo e Contexto a partir do formulário e chamam gerar_laudo().
 Nenhuma interpretação acontece aqui nem em JavaScript: fonte única de verdade é o motor
@@ -30,6 +31,7 @@ from siras.motor.aptidao import ErroAptidao
 from siras.motor.calagem import ErroCalagem
 from siras.motor.laudo import ErroLaudo, gerar_laudo
 from siras.motor.leitura import interpretar_parcial
+from siras.relatorio import tabelas as tabelas_do_manual
 from siras.relatorio.apresentacao import (
     apresentar_laudo,
     apresentar_leitura,
@@ -85,6 +87,25 @@ def inicio():
     template: número de vitrine que diverge do escopo real é o tipo de erro que só
     aparece quando alguém da banca conta."""
     return render_template("inicio.html", total_de_culturas=TOTAL_DE_CULTURAS_NO_ESCOPO)
+
+
+@bp.get("/tabelas")
+def tabelas():
+    """As tabelas do Manual como o SIRAS as transcreveu.
+
+    Serve à conferência — quem desconfiar de uma dose abre a tabela que a produziu sem
+    sair do sistema — e ao valor didático que o plano atribui à leitura ao vivo (§9.3):
+    ver a estrutura da tabela converte a ferramenta de caixa-preta em material de estudo.
+    """
+    return render_template("tabelas.html", catalogo=tabelas_do_manual.CATALOGO)
+
+
+@bp.get("/tabelas/<identificador>")
+def tabela(identificador: str):
+    construida = tabelas_do_manual.construir(identificador, carregar_dados_comum())
+    if construida is None:
+        return redirect(url_for("siras.tabelas"))
+    return render_template("tabela.html", tabela=construida)
 
 
 @bp.get("/analise")

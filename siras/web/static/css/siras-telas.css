@@ -12,6 +12,29 @@
 .env { max-width: 1200px; margin: 0 auto; padding: 0 var(--e-5); }
 .oculto { display: none !important; }
 
+/* =========================================================================
+   Correcoes sobre o tema entregue
+   -------------------------------------------------------------------------
+   siras-theme.css nao se edita. O que segue ajusta comportamentos que so
+   aparecem no uso real, e cada bloco diz o que estava errado.
+   ====================================================================== */
+
+/* O menu suspenso de um <select> e desenhado pelo sistema operacional, nao pelo
+   CSS da pagina. Sem declarar o esquema de cor, o Windows abre a lista com fundo
+   claro enquanto o texto herda a cor clara do tema: texto branco sobre branco, e
+   a opcao so aparece quando esta selecionada. color-scheme resolve o caso geral;
+   as cores explicitas em option cobrem os navegadores que a ignoram. */
+.campo__caixa select { color-scheme: dark; }
+.campo__caixa select option,
+.campo__caixa select optgroup {
+  background: var(--n-800);
+  color: var(--n-100);
+}
+
+/* A seta do select precisa de espaco: sem isto ela encosta no texto da opcao
+   mais longa, que e o caso das condicoes de area transcritas do Manual. */
+.campo__caixa select { padding-right: 2rem; }
+
 /* --- Barra ------------------------------------------------------------- */
 .barra {
   position: sticky; top: 0; z-index: 50;
@@ -20,13 +43,14 @@
 }
 .barra__int { display: flex; align-items: center; justify-content: space-between;
               gap: var(--e-5); min-height: 68px; }
-.logo { display: flex; align-items: center; gap: .625rem; text-decoration: none; }
-.logo__txt { font-family: var(--ff-display); font-size: 1.375rem; font-weight: 700;
-             letter-spacing: -.03em; color: var(--n-000); line-height: 1; }
-.logo__sub { font-size: 10px; font-weight: 600; color: var(--n-400);
-             letter-spacing: .02em; white-space: nowrap; }
-@media (max-width:860px){ .logo__sub { display:none; } }
+.logo { display: flex; align-items: center; text-decoration: none; flex: none; }
+/* A logo oficial ja traz nome e assinatura desenhados; a altura e o unico ajuste.
+   width:auto impede que o atributo width do <img> achate a imagem. */
+.logo__img { height: 46px; width: auto; display: block; }
+@media (max-width:640px){ .logo__img { height: 38px; } }
 .barra__nav { display: flex; align-items: center; gap: var(--e-3); }
+/* Em tela estreita a logo e a acao primaria e que precisam do espaco. */
+@media (max-width:760px){ .barra__secundario { display: none; } }
 
 /* --- Hero -------------------------------------------------------------- */
 .hero { position: relative; overflow: hidden; padding: var(--e-10) 0 var(--e-9); }
@@ -49,7 +73,8 @@
   font-size: var(--fs-2xs); font-weight: 700; color: var(--v-300);
   margin-bottom: var(--e-5);
 }
-.hero h1 { max-width: 11ch; }
+/* 11ch quebrava o titulo em cinco linhas e deixava a coluna desequilibrada. */
+.hero h1 { max-width: 16ch; }
 .hero h1 em { font-style: normal; color: var(--v-400); }
 .hero__texto { margin-top: var(--e-5); max-width: 46ch; }
 .hero__acoes { display: flex; flex-wrap: wrap; gap: var(--e-3); margin-top: var(--e-6); }
@@ -129,11 +154,20 @@
 .grupo__desc { font-size: var(--fs-xs); color: var(--n-400); line-height: 1.45; }
 
 .culturas { display: flex; flex-wrap: wrap; gap: var(--e-2); }
-.cultura { font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
-           min-height: 40px; padding: 0 .9rem; border-radius: var(--r-pilula);
-           background: var(--n-800); color: var(--n-300); border: var(--borda);
-           transition: all var(--tr); }
-.cultura:hover { color: var(--n-000); border-color: rgba(140,226,63,.4); }
+/* Serve a <button> e a <a>. Como link, precisa de text-decoration:none e de
+   display:inline-flex -- sem eles a pilula sai sublinhada e min-height nao vale,
+   porque altura nao se aplica a elemento inline. */
+.cultura {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--ff-ui); font-size: var(--fs-sm); font-weight: 600;
+  line-height: 1.2; text-decoration: none; cursor: pointer;
+  min-height: 42px; padding: .35rem .95rem; border-radius: var(--r-pilula);
+  background: var(--n-800); color: var(--n-200); border: var(--borda);
+  transition: background var(--tr), color var(--tr), border-color var(--tr);
+}
+.cultura:hover, .cultura:focus-visible {
+  color: #07120A; background: var(--v-400); border-color: transparent;
+}
 .cultura.is-sel { background: var(--v-400); color: #07120A; border-color: transparent; }
 
 /* --- Etapa 2: análise de solo ------------------------------------------ */
@@ -168,6 +202,15 @@
 .linha__nome { font-size: var(--fs-sm); font-weight: 700; }
 .linha__val { font-family: var(--ff-display); font-size: var(--fs-sm); font-weight: 700;
               color: var(--n-300); }
+.linha__ficha { margin-bottom: .45rem; }
+.linha__nota { margin-top: .45rem; }
+/* A estimativa de calcario e a unica linha do painel que e uma DOSE, e nao uma leitura:
+   o realce diz isso sem precisar de rotulo extra. */
+.linha--destaque { background: rgba(140,226,63,.06); border-radius: var(--r-campo);
+                   padding: var(--e-4) var(--e-3); margin: var(--e-2) calc(-1 * var(--e-3));
+                   border-bottom: 0; }
+.linha--destaque .linha__val { color: var(--v-300); font-size: var(--fs-md); }
+
 .vazio { display: grid; gap: var(--e-3); justify-items: center; text-align: center;
          padding: var(--e-6) var(--e-2); color: var(--n-500); font-size: var(--fs-xs); }
 .vazio .ico { color: var(--n-600); }
@@ -216,6 +259,33 @@
 .atributo .regua__faixa.is-atual { opacity: 1; box-shadow: none; }
 .atributo .regua__marcador { background: #0D1410; }
 .atributo .t-aux { color: #5C6F64; }
+
+/* Os dois cenarios de aptidao, lado a lado com a seta no meio. A comparacao E a
+   informacao (CCAE par. 7): mostrar so um dos dois perderia o ganho atribuivel a
+   recomendacao, que e o que integra os dois modulos do sistema. */
+.cenarios { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--e-5);
+            align-items: center; }
+@media (max-width:720px){
+  .cenarios { grid-template-columns: 1fr; gap: var(--e-4); }
+  .cenarios__seta { transform: rotate(90deg); justify-self: center; }
+}
+.cenario { display: grid; gap: var(--e-3); justify-items: center; text-align: center; }
+/* aspect-ratio fixo estoura com "Inapta sem correcao": o texto sai da caixa. Aqui a
+   altura minima substitui a proporcao, e o selo cresce com o rotulo. */
+.cenario .aptidao__selo { width: 100%; max-width: 210px; aspect-ratio: auto;
+                          min-height: 150px; padding: var(--e-5) var(--e-4); }
+.cenario__rotulo { font-size: var(--fs-2xs); font-weight: 800; letter-spacing: .04em;
+                   text-transform: uppercase; color: #5C6F64; }
+.cenario__nota { font-size: var(--fs-xs); color: #405146; line-height: 1.5; max-width: 34ch; }
+.cenarios__seta { display: grid; gap: var(--e-2); justify-items: center;
+                  color: var(--v-600); }
+.cenarios__seta span { font-size: var(--fs-3xs); color: #5C6F64; max-width: 11ch;
+                       text-align: center; line-height: 1.3; }
+
+.aptidao__leitura { margin-top: var(--e-6); color: #405146; max-width: 70ch;
+                    line-height: 1.6; }
+.aptidao__titulo { margin: var(--e-6) 0 var(--e-3); color: #5C6F64; }
+.aptidao__ressalva { margin-top: var(--e-3); color: #5C6F64; }
 
 .aptidao { display: grid; grid-template-columns: 190px minmax(0,1fr); gap: var(--e-6);
            align-items: start; }
@@ -298,3 +368,51 @@
   /* O laudo e entregue, nao navegado: endereco de link nao interessa em papel. */
   a[href]::after { content: none; }
 }
+
+/* =========================================================================
+   Tabelas do Manual
+   ====================================================================== */
+.pilar--link { text-decoration: none; color: inherit; transition: border-color var(--tr); }
+.pilar--link:hover { border-color: rgba(140,226,63,.34); }
+.pilar__ir { font-size: var(--fs-xs); font-weight: 700; color: var(--v-400);
+             display: inline-flex; align-items: center; gap: .35rem; }
+
+/* Nove colunas nao cabem em tela estreita. A rolagem fica DENTRO do envelope: se a
+   pagina inteira rolasse de lado, o refluxo de 320px quebraria (WCAG 1.4.10). */
+.tabela-envelope { margin-top: var(--e-5); overflow-x: auto; padding: var(--e-2); }
+.tabela-dados { width: 100%; border-collapse: collapse; font-size: var(--fs-sm);
+                white-space: nowrap; }
+.tabela-dados th, .tabela-dados td { padding: var(--e-3) var(--e-4); text-align: left;
+                                     border-bottom: var(--borda); }
+.tabela-dados thead th { position: sticky; top: 0; z-index: 1;
+                         background: var(--n-850); color: var(--n-300);
+                         font-size: var(--fs-2xs); font-weight: 800;
+                         letter-spacing: .02em; text-transform: uppercase; }
+.tabela-dados tbody th { font-family: var(--ff-display); font-weight: 600;
+                         color: var(--n-100); }
+.tabela-dados tbody td { font-family: var(--ff-display); color: var(--n-300); }
+.tabela-dados tbody tr:hover { background: rgba(140,226,63,.05); }
+.tabela-dados tbody tr:last-child th,
+.tabela-dados tbody tr:last-child td { border-bottom: 0; }
+
+.notas { margin: var(--e-5) 0 0; padding-left: var(--e-5); max-width: var(--largura-leitura);
+         color: var(--n-400); font-size: var(--fs-xs); line-height: 1.6; }
+.notas li + li { margin-top: var(--e-2); }
+
+/* O bloco recolhido da subsuperficie usa <summary> como cabecalho flex. O triangulo
+   padrao do navegador entra no fluxo e empurra o icone por cima do titulo; list-style
+   resolve no Firefox, ::-webkit-details-marker no Chrome e no Edge. */
+.bloco > summary { list-style: none; }
+.bloco > summary::-webkit-details-marker { display: none; }
+.bloco > summary::marker { content: ""; }
+/* Uma seta propria, alinhada a direita, que gira ao abrir. */
+.bloco > summary::after {
+  content: ""; margin-left: auto; width: 9px; height: 9px; flex: none;
+  border-right: 2px solid var(--n-400); border-bottom: 2px solid var(--n-400);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--tr);
+}
+.bloco[open] > summary::after { transform: rotate(-135deg) translate(-2px, -2px); }
+.bloco > summary:hover::after { border-color: var(--v-400); }
+/* Sem isto o cabecalho recolhido fica com a margem inferior de um bloco aberto. */
+details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }

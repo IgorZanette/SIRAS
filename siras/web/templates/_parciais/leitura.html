@@ -10,16 +10,22 @@
 
 {% if linhas %}
   {% for linha in linhas %}
-  <div class="linha">
+  <div class="linha{% if linha.destaque %} linha--destaque{% endif %}">
     <div class="linha__topo">
       <span class="linha__nome">{{ linha.nome }}</span>
       <span class="linha__val">{{ linha.valor }}</span>
     </div>
+    {# Ficha sempre que houver classe; régua só onde a escala é a de cinco classes do
+       Manual. MO, Ca, Mg e CTC têm escalas próprias e ganham só a ficha. #}
     {% if linha.sigla %}
-    <div style="margin-bottom:.45rem">{{ f.ficha(linha.sigla, linha.rotulo) }}</div>
-    {{ r.regua(linha.indice, linha.posicao) }}
+    <div class="linha__ficha">{{ f.ficha(linha.sigla, linha.rotulo) }}</div>
     {% endif %}
-    <p class="t-aux" style="margin-top:.45rem">{{ linha.nota }}</p>
+    {# linha.get(), e não linha.indice: chave ausente vira Undefined, e no Jinja
+       `Undefined is not none` é VERDADEIRO — a régua saía nas dez linhas. #}
+    {% if linha.get("indice") is not none %}
+    {{ r.regua(linha.indice, linha.get("posicao")) }}
+    {% endif %}
+    {% if linha.nota %}<p class="t-aux linha__nota">{{ linha.nota }}</p>{% endif %}
   </div>
   {% endfor %}
 {% else %}

@@ -392,35 +392,74 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
     ]
 
 
+#: Classes das escalas de três e quatro faixas de interpretacao_geral.json (MO, CTC, Ca,
+#: Mg). Reaproveitam as cores da escala diagnóstica, mas não ganham régua: a régua tem
+#: cinco estratos porque são as cinco classes de disponibilidade do Manual, e esticá-la
+#: sobre outra escala afirmaria uma leitura que o Manual não faz.
+_SIGLA_POR_CLASSE_GERAL = {
+    "baixo": "b", "medio": "m", "alto": "a",
+    "baixa": "b", "media": "m", "alta": "a", "muito_alta": "ma",
+}
+_ROTULO_POR_CLASSE_GERAL = {
+    "baixo": "Baixo", "medio": "Médio", "alto": "Alto",
+    "baixa": "Baixa", "media": "Média", "alta": "Alta", "muito_alta": "Muito alta",
+}
+
+#: (chave em leitura["gerais"], nome de tela, unidade, casas decimais)
+_LINHAS_GERAIS = (
+    ("mo", "Matéria orgânica", "%", 1),
+    ("ca", "Cálcio trocável", "cmolc/dm³", 1),
+    ("mg", "Magnésio trocável", "cmolc/dm³", 1),
+    ("ctc_ph7", "CTC a pH 7,0", "cmolc/dm³", 1),
+)
+
+
+def _linha_de_teor(chave, nome, unidade, item, casas, nota) -> Dict[str, Any]:
+    """Linha com régua: só para P e K, as duas escalas de cinco classes do Manual."""
+    classe = item["classe"]
+    return {
+        "id": chave,
+        "nome": nome,
+        "valor": f"{formatar_numero(item['valor'], casas)} {unidade}",
+        "sigla": sigla_da_classe(classe),
+        "rotulo": rotulo_da_classe(classe),
+        "indice": indice_da_classe(classe),
+        "posicao": posicao_na_regua(item["valor"], item["faixas"], classe),
+        "nota": nota,
+    }
+
+
 def apresentar_leitura(leitura: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Modelo de exibição do painel de leitura ao vivo.
 
     Recebe o que motor/leitura.py conseguiu interpretar e devolve linhas prontas. O que
-    veio None não vira linha: o painel mostra o que já é sabido e cala sobre o resto, em
+    veio vazio não vira linha: o painel mostra o que já é sabido e cala sobre o resto, em
     vez de exibir um traço para cada campo ainda em branco.
+
+    A ordem acompanha a do formulário — acidez e corretivo primeiro, fertilidade depois —
+    para que o olho encontre a leitura na mesma sequência em que digitou.
     """
     linhas: List[Dict[str, Any]] = []
+    gerais = leitura.get("gerais") or {}
 
-    for chave, nome, unidade, casas in (
-        ("fosforo", "Fósforo", "mg/dm³", 1),
-        ("potassio", "Potássio", "mg/dm³", 0),
-    ):
-        item = leitura.get(chave)
-        if not item:
-            continue
-        classe = item["classe"]
+    acidez = leitura.get("acidez")
+    if acidez:
+        partes = []
+        if acidez.get("ph_gatilho") is not None:
+            partes.append(
+                f"o critério desta cultura indica calagem com pH abaixo de "
+                f"{formatar_numero(acidez['ph_gatilho'])}"
+            )
+        if acidez.get("ph_alvo") is not None:
+            partes.append(f"dose calculada para o pH {formatar_numero(acidez['ph_alvo'])}")
+        nota = "; ".join(partes)
+        if acidez.get("fonte"):
+            nota = f"{nota}. {acidez['fonte']}." if nota else f"{acidez['fonte']}."
         linhas.append({
-            "id": chave,
-            "nome": nome,
-            "valor": f"{formatar_numero(item['valor'], casas)} {unidade}",
-            "sigla": sigla_da_classe(classe),
-            "rotulo": rotulo_da_classe(classe),
-            "indice": indice_da_classe(classe),
-            "posicao": posicao_na_regua(item["valor"], item["faixas"], classe),
-            "nota": (
-                f"Classe de argila {item['classe_argila']}."
-                if chave == "fosforo" else f"Faixa de CTC {item['faixa_ctc']}."
-            ),
+            "id": "acidez",
+            "nome": "Acidez",
+            "valor": f"pH {formatar_numero(acidez['valor'])}",
+            "nota": nota,
         })
 
     if leitura.get("saturacao_al") is not None:
@@ -431,18 +470,65 @@ def apresentar_leitura(leitura: Dict[str, Any]) -> List[Dict[str, Any]]:
             "nota": "Calculada pela CTC efetiva quando não informada no laudo.",
         })
 
+    if leitura.get("v_percent") is not None:
+        linhas.append({
+            "id": "v_percent",
+            "nome": "Saturação por bases",
+            "valor": f"{formatar_numero(leitura['v_percent'], 1)} %",
+            "nota": "Base do critério de calagem das culturas sem pH de referência.",
+        })
+
     calagem = leitura.get("calagem")
     if calagem:
         criterio = calagem.get("criterio", {})
-        alvo = criterio.get("dose", {}).get("ph_alvo")
+        modo = criterio.get("modo_aplicacao")
+        nota = f"Critério {criterio.get('id', '—')}"
+        if modo:
+            nota += f", aplicação {modo}"
         linhas.append({
             "id": "calagem",
             "nome": "Calcário estimado",
             "valor": f"{formatar_numero(calagem['nc_t_ha'], 1)} t/ha",
-            "nota": (
-                f"Critério {criterio.get('id', '—')}"
-                + (f", alvo pH {formatar_numero(alvo)}." if alvo else ".")
-            ),
+            "nota": nota + ".",
+            "destaque": True,
+        })
+
+    if "mo" in gerais:
+        item = gerais["mo"]
+        linhas.append({
+            "id": "mo",
+            "nome": "Matéria orgânica",
+            "valor": f"{formatar_numero(item['valor'], 1)} %",
+            "sigla": _SIGLA_POR_CLASSE_GERAL.get(item["classe"]),
+            "rotulo": _ROTULO_POR_CLASSE_GERAL.get(item["classe"], item["classe"]),
+            "nota": "Define a faixa da dose de nitrogênio.",
+        })
+
+    if leitura.get("fosforo"):
+        item = leitura["fosforo"]
+        linhas.append(_linha_de_teor(
+            "fosforo", "Fósforo", "mg/dm³", item, 1,
+            f"Interpretado pela classe de argila {item['classe_argila']}.",
+        ))
+
+    if leitura.get("potassio"):
+        item = leitura["potassio"]
+        linhas.append(_linha_de_teor(
+            "potassio", "Potássio", "mg/dm³", item, 0,
+            f"Interpretado pela faixa de CTC {item['faixa_ctc']}.",
+        ))
+
+    for chave, nome, unidade, casas in _LINHAS_GERAIS:
+        if chave == "mo" or chave not in gerais:
+            continue
+        item = gerais[chave]
+        linhas.append({
+            "id": chave,
+            "nome": nome,
+            "valor": f"{formatar_numero(item['valor'], casas)} {unidade}",
+            "sigla": _SIGLA_POR_CLASSE_GERAL.get(item["classe"]),
+            "rotulo": _ROTULO_POR_CLASSE_GERAL.get(item["classe"], item["classe"]),
+            "nota": None,
         })
 
     return linhas

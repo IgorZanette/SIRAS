@@ -14,6 +14,14 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin
       href="{{ url_for('static', filename='fonts/manrope-latin.woff2') }}">
 
+{# Ícone de aba. O SVG é o símbolo vetorial do sprite — nítido em qualquer tamanho e com
+   cerca de meio quilobyte; os PNG atendem os navegadores e o iOS, que ignoram SVG aqui. #}
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+<link rel="icon" type="image/png" sizes="32x32"
+      href="{{ url_for('static', filename='img/marca/siras-icone-32.png') }}">
+<link rel="apple-touch-icon"
+      href="{{ url_for('static', filename='img/marca/siras-icone-180.png') }}">
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/siras-fontes.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/siras-theme.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/siras-telas.css') }}">
@@ -25,14 +33,19 @@
 
 <header class="barra nao-imprime">
   <div class="env barra__int">
+    {# A logo oficial já traz o nome e a assinatura desenhados. Repeti-los em HTML ao
+       lado escreveria "SIRAS" duas vezes na mesma barra. #}
     <a class="logo" href="{{ url_for('siras.inicio') }}">
-      <svg class="ico" style="width:34px;height:34px" role="img" aria-label="SIRAS"><use href="{{ url_for('static', filename='img/siras-icons.svg') }}#i-marca"></use></svg>
-      <span>
-        <span class="logo__txt">SIRAS</span><br>
-        <span class="logo__sub">Interpretação e recomendação agronômica de solo</span>
-      </span>
+      <img class="logo__img" src="{{ url_for('static', filename='img/marca/siras-logo.png') }}"
+           alt="SIRAS — interpretação e recomendação agronômica de solo"
+           width="460" height="230">
     </a>
     <nav class="barra__nav">
+      {# Acesso permanente às tabelas: o técnico que desconfia de um número precisa
+         chegar à fonte de qualquer tela, e não só da que o produziu. #}
+      <a class="btn btn--fantasma barra__secundario" href="{{ url_for('siras.tabelas') }}">
+        Tabelas do Manual
+      </a>
       {% block barra_nav %}{% endblock %}
     </nav>
   </div>

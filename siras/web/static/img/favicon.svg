@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <!-- Símbolo do SIRAS: perfil estratificado de solo com broto rompendo a superfície.
+       É o mesmo desenho de #i-marca em siras-icons.svg, aqui como arquivo próprio porque
+       favicon não pode referenciar um symbol de sprite. Vetorial: nítido a 16px e a 512px,
+       com meio quilobyte. -->
+  <rect x="3" y="13" width="34" height="25" rx="9" fill="#8CE23F"/>
+  <defs><clipPath id="solo"><rect x="3" y="13" width="34" height="25" rx="9"/></clipPath></defs>
+  <g clip-path="url(#solo)" fill="none" stroke="#0A0F0C" stroke-linecap="round" stroke-width="3.2">
+    <path d="M1 24.5c5-3.4 9 3.4 14 0s9 3.4 14 0 6 2 9 .6"/>
+    <path d="M1 31.5c5-3.4 9 3.4 14 0s9 3.4 14 0 6 2 9 .6" opacity=".42"/>
+  </g>
+  <path d="M20 14.8V8.6" stroke="#8CE23F" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M19.6 11.8C15.8 11.8 13.4 9 13.1 4.6c4.4-.4 6.8 2.5 6.5 7.2z" fill="#B6F56A"/>
+  <path d="M20.9 10.8c3.3 0 5.5-2.3 5.9-6-3.8-.4-5.9 2-5.9 6z" fill="#8CE23F"/>
+</svg>

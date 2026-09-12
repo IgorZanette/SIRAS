@@ -23,6 +23,7 @@ from typing import Any, Dict, Optional
 from siras.conhecimento.carregador import carregar_dados_comum
 from siras.dominio.analise import AnaliseSolo, Contexto, derivar_saturacao_al
 from siras.motor.adubacao import (
+    classificar_faixa,
     classificar_fosforo,
     classificar_potassio,
     grupo_exigencia,
@@ -77,6 +78,66 @@ def _grupos_de_exigencia(
     return {"p": f"grupo_{declarado['p']}", "k": f"grupo_{declarado['k']}"}
 
 
+#: Atributos que interpretacao_geral.json classifica em faixas próprias (Tab. 6.1, 6.11 e
+#: 6.12), e o campo de AnaliseSolo que alimenta cada um. Escala de três classes — não é a
+#: de cinco da disponibilidade de P e K, e por isso não ganham régua.
+_ATRIBUTOS_GERAIS = (
+    ("mo", "materia_organica"),
+    ("ctc_ph7", "ctc_ph7"),
+    ("ca", "calcio"),
+    ("mg", "magnesio"),
+)
+
+
+def _classificar_atributos_gerais(
+    campos: Dict[str, Optional[float]], dados: Dict[str, Any]
+) -> Dict[str, Dict[str, Any]]:
+    """Classe de cada atributo geral já digitado, pelas faixas transcritas."""
+    faixas_por_atributo = {
+        atributo["atributo"]: atributo["faixas"]
+        for atributo in dados["interpretacao_geral"]["atributos"]
+    }
+    lidos: Dict[str, Dict[str, Any]] = {}
+    for campo, atributo in _ATRIBUTOS_GERAIS:
+        valor = campos.get(campo)
+        faixas = faixas_por_atributo.get(atributo)
+        if valor is None or not faixas:
+            continue
+        lidos[campo] = {
+            "classe": classificar_faixa(valor, faixas),
+            "faixas": faixas,
+            "valor": valor,
+        }
+    return lidos
+
+
+def _criterio_da_acidez(
+    criterio_id: Optional[str], ph: Optional[float], dados: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    """O que o critério da cultura declara sobre acidez, ao lado do pH digitado.
+
+    Não avalia o disparo: quem decide se a calagem é indicada é motor/calagem.py, e a
+    resposta aparece na linha do calcário quando a análise estiver completa. Aqui só se
+    põe lado a lado o valor digitado e o limiar que o Manual transcreveu para a cultura —
+    reavaliar a condição aqui criaria uma segunda leitura da mesma regra.
+    """
+    if criterio_id is None or ph is None:
+        return None
+    criterio = next(
+        (c for c in dados["criterios_calagem"]["criterios"] if c["id"] == criterio_id), None
+    )
+    if criterio is None:
+        return None
+    decisao = criterio.get("decisao", {})
+    return {
+        "valor": ph,
+        "ph_gatilho": decisao.get("ph"),
+        "ph_referencia": criterio.get("ph_referencia"),
+        "ph_alvo": criterio.get("dose", {}).get("ph_alvo"),
+        "fonte": criterio.get("fonte"),
+    }
+
+
 def interpretar_parcial(
     campos: Dict[str, Optional[float]],
     cultura_id: str,
@@ -96,14 +157,21 @@ def interpretar_parcial(
         prnt: PRNT do corretivo, necessário só para a estimativa de calcário
 
     Returns:
-        Dict com "fosforo", "potassio", "saturacao_al" e "calagem". Cada chave vem None
-        quando falta dado — nunca com um valor de preenchimento.
+        Dict com "acidez", "gerais", "fosforo", "potassio", "saturacao_al", "v_percent"
+        e "calagem". Cada chave vem None (ou vazia) quando falta dado — nunca com um valor
+        de preenchimento.
     """
     dados = dados if dados is not None else carregar_dados_comum()
     grupos = _grupos_de_exigencia(cultura_id, grupo, dados) if cultura_id else None
 
     resultado: Dict[str, Any] = {
-        "fosforo": None, "potassio": None, "saturacao_al": None, "calagem": None,
+        "acidez": _criterio_da_acidez(criterio_id, campos.get("ph_agua"), dados),
+        "gerais": _classificar_atributos_gerais(campos, dados),
+        "fosforo": None,
+        "potassio": None,
+        "saturacao_al": None,
+        "v_percent": campos.get("v_percent"),
+        "calagem": None,
     }
 
     if grupos and _tem(campos, "argila", "p"):

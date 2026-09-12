@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% import "_macros/ico.html" as i %}
+
+{% block titulo %}Tabelas do Manual — SIRAS{% endblock %}
+
+{% block barra_nav %}
+<a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">Iniciar análise</a>
+{% endblock %}
+
+{% block conteudo %}
+<main class="env" style="padding:var(--e-7) 0 var(--e-10)">
+  <h1 class="t-tela">Tabelas do Manual, como o SIRAS as transcreveu</h1>
+  <p class="t-corpo" style="margin-top:var(--e-3);font-size:var(--fs-md)">
+    São os mesmos dados que o motor lê para calcular. Servem para conferir um número do
+    laudo sem abrir o PDF do Manual, e para ver a estrutura das tabelas por trás de cada
+    classe.
+  </p>
+
+  <div class="pilares" style="margin-top:var(--e-6)">
+    {% for item in catalogo %}
+    <a class="painel pilar pilar--link" href="{{ url_for('siras.tabela', identificador=item.id) }}">
+      <span class="pilar__ico">{{ i.ico(item.icone, "ico ico--lg") }}</span>
+      <h3>{{ item.titulo }}</h3>
+      <p>{{ item.resumo }}</p>
+      <span class="pilar__ir">Abrir {{ i.ico("avanca", "ico ico--sm") }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <p class="t-aux" style="margin-top:var(--e-7);max-width:var(--largura-leitura)">
+    Fonte normativa: Comissão de Química e Fertilidade do Solo — RS/SC.
+    <em>Manual de Calagem e Adubação para os Estados do Rio Grande do Sul e de Santa
+    Catarina.</em> 11. ed. 2016. A transcrição é conferida contra o Manual e travada por
+    testes automatizados; em caso de divergência, o Manual prevalece.
+  </p>
+</main>
+{% endblock %}

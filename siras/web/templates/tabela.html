@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% import "_macros/ico.html" as i %}
+{% import "_macros/aviso.html" as av %}
+
+{% block titulo %}{{ tabela.titulo }} — SIRAS{% endblock %}
+
+{% block barra_nav %}
+<a class="btn btn--contorno" href="{{ url_for('siras.tabelas') }}">
+  {{ i.ico("volta", "ico ico--sm") }} Todas as tabelas
+</a>
+{% endblock %}
+
+{% block conteudo %}
+<main class="env" style="padding:var(--e-6) 0 var(--e-10)">
+  <a class="btn btn--fantasma" href="{{ url_for('siras.tabelas') }}"
+     style="padding-left:0;margin-bottom:var(--e-3)">
+    {{ i.ico("volta", "ico ico--sm") }} Tabelas do Manual
+  </a>
+
+  <h1 class="t-tela">{{ tabela.titulo }}</h1>
+  <p class="t-aux" style="margin-top:var(--e-2)">{{ tabela.fonte }}</p>
+  {% if tabela.descricao %}
+  <p class="t-corpo" style="margin-top:var(--e-4);font-size:var(--fs-md)">{{ tabela.descricao }}</p>
+  {% endif %}
+
+  {% if tabela.aviso %}
+  <div style="margin-top:var(--e-5);max-width:var(--largura-leitura)">
+    {{ av.aviso("info", "Como ler esta tabela", tabela.aviso) }}
+  </div>
+  {% endif %}
+
+  {# A tabela rola dentro do próprio contêiner: a interpretação de P tem nove colunas e
+     em telas estreitas a página inteira é que rolaria de lado (WCAG 1.4.10). #}
+  <div class="painel tabela-envelope">
+    <table class="tabela-dados">
+      <thead>
+        <tr>{% for coluna in tabela.colunas %}<th scope="col">{{ coluna }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for linha in tabela.linhas %}
+        <tr>
+          {% for celula in linha %}
+          {% if loop.first %}<th scope="row">{{ celula }}</th>{% else %}<td>{{ celula }}</td>{% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="t-aux" style="margin-top:var(--e-3)">
+    {{ tabela.linhas|length }} {{ "linha" if tabela.linhas|length == 1 else "linhas" }}
+    transcritas.
+  </p>
+
+  {% if tabela.notas %}
+  <ul class="notas">
+    {% for nota in tabela.notas %}<li>{{ nota }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</main>
+{% endblock %}

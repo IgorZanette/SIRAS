@@ -1,0 +1,16 @@
+{# Ícone do sprite autoral. Nenhum ícone de biblioteca, nenhum emoji — todos vêm de
+   static/img/siras-icons.svg (PLANO-FRONTEND §6).
+
+   nome:    id do símbolo SEM o prefixo 'i-' (ex.: 'perfil' -> #i-perfil)
+   classe:  ico | ico--sm | ico--lg | ico--xl
+   rotulo:  quando o ícone carrega informação que o texto ao lado não repete. Sem
+            rótulo o ícone é decorativo e sai da árvore de acessibilidade — que é o
+            caso da maioria deles, porque o rótulo textual sempre acompanha (WCAG 1.4.1).
+#}
+{% macro ico(nome, classe="ico", rotulo=None) -%}
+{% if rotulo %}
+<svg class="{{ classe }}" role="img" aria-label="{{ rotulo }}"><use href="{{ url_for('static', filename='img/siras-icons.svg') }}#i-{{ nome }}"></use></svg>
+{% else %}
+<svg class="{{ classe }}" aria-hidden="true"><use href="{{ url_for('static', filename='img/siras-icons.svg') }}#i-{{ nome }}"></use></svg>
+{% endif %}
+{%- endmacro %}

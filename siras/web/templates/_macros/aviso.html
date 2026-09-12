@@ -1,0 +1,20 @@
+{# Aviso (PLANO-FRONTEND §7.4).
+
+   Erros dizem o que aconteceu e o que fazer. Sem "Ops!", sem pedido de desculpa e sem
+   vaguidão: "O laudo não foi gerado. Faltam valores em: índice SMP, teor de argila."
+
+   tipo: info | atencao | erro | ok
+#}
+{% import "_macros/ico.html" as i %}
+
+{% set _ICONE_POR_TIPO = {"info": "info", "atencao": "alerta", "erro": "alerta", "ok": "confere"} %}
+
+{% macro aviso(tipo, titulo, corpo) %}
+  <div class="aviso aviso--{{ tipo }}"{% if tipo == "erro" %} role="alert"{% endif %}>
+    {{ i.ico(_ICONE_POR_TIPO[tipo]) }}
+    <div>
+      <strong>{{ titulo }}</strong>
+      <p>{{ corpo }}</p>
+    </div>
+  </div>
+{% endmacro %}

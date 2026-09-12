@@ -1,0 +1,38 @@
+{# Régua de horizonte — componente-assinatura (PLANO-FRONTEND §7.3).
+
+   Cinco estratos contíguos = as cinco classes do Manual. Responde de uma olhada a três
+   perguntas que a ficha sozinha não responde: em que classe estou, quão perto da borda
+   dessa classe, e para que lado preciso caminhar.
+
+   posicao_pct — posição do marcador, de 0 a 100, ao longo da régua inteira.
+
+   Sem posicao_pct o marcador NÃO é desenhado, de propósito. O protótipo centralizava o
+   marcador na faixa atual, o que afirma "estou no meio da classe" quando o teor pode
+   estar rente ao limite. Um P de 11,9 mg/dm³ e um de 6,2 são ambos "Baixo" e contam
+   histórias diferentes — é exatamente a pergunta 2 que justifica a régua existir.
+   A posição real depende dos limites de/até da faixa, que vêm da base de conhecimento;
+   enquanto a camada de apresentação não os repassar, a régua mostra a classe e cala
+   sobre a posição, em vez de afirmar uma que não conhece.
+#}
+
+{% set _SIGLAS = ["mb", "b", "m", "a", "ma"] %}
+{% set _ROTULOS = ["M. baixo", "Baixo", "Médio", "Alto", "M. alto"] %}
+{% set _NOMES = ["Muito baixo", "Baixo", "Médio", "Alto", "Muito alto"] %}
+
+{% macro regua(indice, posicao_pct=None) %}
+  <div class="regua" role="img" aria-label="Classe {{ _NOMES[indice] }}, de cinco classes de disponibilidade">
+    <div class="regua__faixas">
+      {% for sigla in _SIGLAS %}
+      <span class="regua__faixa f-{{ sigla }}{% if loop.index0 == indice %} is-atual{% endif %}"></span>
+      {% endfor %}
+      {% if posicao_pct is not none %}
+      <span class="regua__marcador" style="--pos:{{ posicao_pct }}%"></span>
+      {% endif %}
+    </div>
+    <div class="regua__rotulos" aria-hidden="true">
+      {% for rotulo in _ROTULOS %}
+      <span{% if loop.index0 == indice %} class="is-atual"{% endif %}>{{ rotulo }}</span>
+      {% endfor %}
+    </div>
+  </div>
+{% endmacro %}

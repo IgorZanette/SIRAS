@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0F0C">
+<title>{% block titulo %}SIRAS — interpretação e recomendação agronômica de solo{% endblock %}</title>
+
+{# Fontes auto-hospedadas. O sistema roda offline em localhost: nenhuma requisição a
+   CDN, nem a fonts.googleapis.com. Um participante do teste SUS que veja fonte de
+   fallback estaria avaliando um problema que não é do produto. #}
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="{{ url_for('static', filename='fonts/sora-latin.woff2') }}">
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="{{ url_for('static', filename='fonts/manrope-latin.woff2') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/siras-fontes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/siras-theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/siras-telas.css') }}">
+{% block estilos %}{% endblock %}
+</head>
+<body class="malha">
+
+{% import "_macros/ico.html" as i %}
+
+<header class="barra nao-imprime">
+  <div class="env barra__int">
+    <a class="logo" href="{{ url_for('siras.inicio') }}">
+      <svg class="ico" style="width:34px;height:34px" role="img" aria-label="SIRAS"><use href="{{ url_for('static', filename='img/siras-icons.svg') }}#i-marca"></use></svg>
+      <span>
+        <span class="logo__txt">SIRAS</span><br>
+        <span class="logo__sub">Interpretação e recomendação agronômica de solo</span>
+      </span>
+    </a>
+    <nav class="barra__nav">
+      {% block barra_nav %}{% endblock %}
+    </nav>
+  </div>
+</header>
+
+{% block conteudo %}{% endblock %}
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

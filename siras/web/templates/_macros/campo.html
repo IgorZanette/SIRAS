@@ -1,0 +1,50 @@
+{# Campo numérico da análise de solo (PLANO-FRONTEND §7.1).
+
+   A unidade fica DENTRO do campo, à direita, e não numa legenda abaixo: o usuário a lê
+   no exato ponto em que digita. Confundir mg/dm³ com cmolc/dm³ em potássio produz
+   recomendação fora de ordem de grandeza — é o erro mais caro que este formulário pode
+   induzir.
+
+   `valor` existe para o re-render depois de um erro de validação: o formulário volta
+   preenchido, em vez de exigir que o técnico redigite os onze campos por causa de um.
+#}
+{% macro campo(id, rotulo, unidade=None, ajuda=None, obrigatorio=False,
+               passo="0.1", placeholder="", valor=None, erro=False) %}
+  <label class="campo{% if erro %} campo--erro{% endif %}" for="{{ id }}">
+    <span class="campo__label">
+      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% endif %}
+    </span>
+    <span class="campo__caixa">
+      <input type="number" step="{{ passo }}" id="{{ id }}" name="{{ id }}"
+             inputmode="decimal" placeholder="{{ placeholder }}"
+             {% if valor is not none %}value="{{ valor }}"{% endif %}
+             {% if ajuda %}aria-describedby="{{ id }}-ajuda"{% endif %}
+             {% if obrigatorio %}required{% endif %}>
+      {% if unidade %}<span class="campo__unidade">{{ unidade }}</span>{% endif %}
+    </span>
+    {% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}
+  </label>
+{% endmacro %}
+
+{# Campo de escolha. Mesmo invólucro visual do campo numérico, porque para o usuário é
+   o mesmo tipo de objeto: um dado da análise que ele informa.
+
+   opcoes: lista de (valor, rótulo)
+#}
+{% macro campo_escolha(id, rotulo, opcoes, ajuda=None, obrigatorio=False, valor=None) %}
+  <label class="campo" for="{{ id }}">
+    <span class="campo__label">
+      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% endif %}
+    </span>
+    <span class="campo__caixa">
+      <select id="{{ id }}" name="{{ id }}"
+              {% if ajuda %}aria-describedby="{{ id }}-ajuda"{% endif %}
+              {% if obrigatorio %}required{% endif %}>
+        {% for opcao_valor, opcao_rotulo in opcoes %}
+        <option value="{{ opcao_valor }}"{% if valor == opcao_valor %} selected{% endif %}>{{ opcao_rotulo }}</option>
+        {% endfor %}
+      </select>
+    </span>
+    {% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}
+  </label>
+{% endmacro %}

@@ -1,0 +1,49 @@
+{# PROVISÓRIO — a landing real é a etapa 7 do plano de front-end, deliberadamente a
+   última: é a que melhor rende em screenshot para a monografia e a que menos afeta o
+   escore SUS. Se o cronograma apertar, ela é a primeira coisa a cortar.
+
+   Esta página existe para que a casca seja verificável desde já: tema, fontes
+   auto-hospedadas, sprite de ícones e macros, todos servidos de static/, com a rede
+   desligada. #}
+{% extends "base.html" %}
+{% import "_macros/ico.html" as i %}
+{% import "_macros/aviso.html" as a %}
+
+{% block conteudo %}
+<main class="env" style="padding:var(--e-8) 0 var(--e-10)">
+  <h1 class="t-tela">Interpretação e recomendação agronômica de solo</h1>
+  <p class="t-corpo" style="margin-top:var(--e-4)">
+    Uma análise de solo e uma cultura produzem calagem, adubação e aptidão edáfica, com
+    a tabela do Manual que gerou cada número. Sem cadastro e sem enviar dado para
+    servidor nenhum.
+  </p>
+
+  <div style="margin-top:var(--e-6);max-width:var(--largura-leitura)">
+    {% set _corpo %}O motor de inferência já calcula calagem, adubação e aptidão para as
+      culturas de grãos. As telas de análise e de laudo entram nas próximas etapas do
+      plano de front-end.{% endset %}
+    {{ a.aviso("info", "Interface em construção", _corpo) }}
+  </div>
+
+  <section class="pilares" style="margin-top:var(--e-7)">
+    <article class="painel pilar">
+      <span class="pilar__ico">{{ i.ico("calagem", "ico ico--lg") }}</span>
+      <h3>Calagem</h3>
+      <p>Dose de calcário pelo índice SMP, dirigida pelo critério de grupo da cultura e
+         ajustada ao PRNT do corretivo.</p>
+    </article>
+    <article class="painel pilar">
+      <span class="pilar__ico">{{ i.ico("alvo", "ico ico--lg") }}</span>
+      <h3>Adubação</h3>
+      <p>N, P<sub>2</sub>O<sub>5</sub> e K<sub>2</sub>O em kg/ha pela classe de
+         disponibilidade do solo e pela expectativa de rendimento.</p>
+    </article>
+    <article class="painel pilar">
+      <span class="pilar__ico">{{ i.ico("aptidao", "ico ico--lg") }}</span>
+      <h3>Aptidão edáfica</h3>
+      <p>Grau de aptidão da cultura na área e os atributos que limitam, nos cenários
+         atual e potencial.</p>
+    </article>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,13 @@
+{# Classe de disponibilidade como pílula colorida (PLANO-FRONTEND §7.2).
+
+   A cor NUNCA aparece sozinha: o rótulo textual é obrigatório (WCAG 1.4.1). Cerca de 8%
+   dos homens têm alguma deficiência na visão de cores e o público-alvo é
+   majoritariamente masculino — num sistema onde coral e verde carregam significados
+   opostos, isso não é detalhe de conformidade, é o laudo sendo lido errado.
+
+   sigla: mb | b | m | a | ma   (a tradução de 'muito_baixo' -> 'mb' é da camada de
+          apresentação; a macro não conhece o vocabulário do motor)
+#}
+{% macro ficha(sigla, rotulo) -%}
+<span class="ficha f-{{ sigla }}">{{ rotulo }}</span>
+{%- endmacro %}

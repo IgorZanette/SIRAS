@@ -1,0 +1,369 @@
+/* ============================================================================
+   SIRAS — Tema visual v2  ·  "Instrumento"
+   ----------------------------------------------------------------------------
+   Direção: superfície de instrumento escura, verde vivo como energia do sistema,
+   documento claro como entregável. Preto / branco / cinza / verde são o núcleo;
+   âmbar, aqua e coral existem apenas como sinal de diagnóstico, nunca como
+   decoração.
+
+   Regra estruturante: O SISTEMA É ESCURO, O DOCUMENTO É CLARO.
+   Tudo que é ferramenta (navegação, formulário, leitura ao vivo) vive no tema
+   escuro. O laudo — que será impresso, anexado a projeto de crédito e assinado
+   por um responsável técnico — é uma superfície branca dentro da aplicação.
+   A troca de tema marca a fronteira entre operar e entregar.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   1. TOKENS
+   ------------------------------------------------------------------------ */
+:root {
+  /* --- Neutros -------------------------------------------------------------
+     Não são cinzas puros: carregam ~6% de verde na matiz, o que faz o verde
+     vivo assentar sobre eles em vez de vibrar. Também evita o preto-azulado
+     que qualquer template escuro usa.                                       */
+  --n-950: #050807;
+  --n-900: #0A0F0C;   /* fundo da aplicação                    */
+  --n-880: #0E1512;   /* fundo de seção alternada              */
+  --n-850: #121B16;   /* superfície de painel                  */
+  --n-800: #18231D;   /* superfície elevada / campo            */
+  --n-750: #1E2B24;
+  --n-700: #26362D;   /* borda forte                           */
+  --n-600: #3A4F43;
+  --n-500: #5A7266;
+  --n-400: #82998C;   /* texto terciário sobre escuro          */
+  --n-300: #A9BCB1;   /* texto secundário sobre escuro         */
+  --n-200: #CFDCD4;
+  --n-100: #E9F0EB;   /* texto primário sobre escuro           */
+  --n-050: #F4F8F5;
+  --n-000: #FFFFFF;
+
+  /* --- Verde: a cor do sistema --------------------------------------------
+     Descendente direto do #6AAA33 do símbolo, empurrado para saturação alta
+     porque em superfície escura o verde original lê como cinza-oliva.       */
+  --v-200: #D9FBAE;
+  --v-300: #B6F56A;   /* realce, hover                         */
+  --v-400: #8CE23F;   /* PRIMÁRIA — ação, alvo, marca          */
+  --v-500: #6CC72A;
+  --v-600: #4E9A2A;   /* verde legível sobre branco            */
+  --v-700: #34701F;
+  --v-900: #16301166; /* véus e glows                          */
+
+  /* --- Sinais de diagnóstico ----------------------------------------------
+     Três acentos, e só. Cada um tem um significado fixo no sistema inteiro;
+     nenhum deles pode ser usado por motivo estético.                        */
+  --sig-coral: #FF6B4A;   /* deficiência severa, erro           */
+  --sig-laranja: #FF9F3D; /* deficiência                        */
+  --sig-ambar: #FFC93D;   /* abaixo do teor crítico, atenção    */
+  --sig-aqua: #2BE0C8;    /* excesso, risco ambiental, info     */
+
+  /* --- Escala diagnóstica (ver §3 do plano) -------------------------------
+     Divergente: o alvo é ALTO, não o extremo. "Muito alto" não é "melhor
+     ainda" — é teor acima da demanda, com risco de transferência para as
+     águas. Por isso o topo da escala é aqua, e não um verde mais forte.     */
+  --d-mb: var(--sig-coral);
+  --d-b:  var(--sig-laranja);
+  --d-m:  var(--sig-ambar);
+  --d-a:  var(--v-400);
+  --d-ma: var(--sig-aqua);
+
+  /* --- Tipografia ---------------------------------------------------------
+     Sora   — display e números. Geométrica, terminais retos, numerais de
+              desenho quase técnico. Carrega o tom "instrumento".
+     Manrope— interface e texto corrido. Humanista, altura-x generosa,
+              excelente em corpo pequeno e em tela de campo sob sol.         */
+  --ff-display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --ff-ui: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* Escala de razão 1,25 sobre base 16 */
+  --fs-3xs: 0.6875rem; --fs-2xs: 0.75rem;  --fs-xs: 0.8125rem;
+  --fs-sm:  0.875rem;  --fs-md:  1rem;     --fs-lg: 1.125rem;
+  --fs-xl:  1.375rem;  --fs-2xl: 1.75rem;  --fs-3xl: 2.25rem;
+  --fs-4xl: 3rem;      --fs-5xl: 3.75rem;
+  --fs-hero: clamp(2.75rem, 7vw, 5.25rem);
+
+  /* --- Espaçamento: grade de 4px ------------------------------------------ */
+  --e-1: .25rem;  --e-2: .5rem;   --e-3: .75rem;  --e-4: 1rem;
+  --e-5: 1.5rem;  --e-6: 2rem;    --e-7: 3rem;    --e-8: 4rem;
+  --e-9: 6rem;    --e-10: 8rem;
+
+  /* --- Raio: comunica a natureza do objeto, não é uniforme ---------------- */
+  --r-campo: 10px;   /* controles                               */
+  --r-painel: 16px;  /* superfícies de ferramenta               */
+  --r-marca: 22px;   /* blocos que ecoam o squircle do símbolo  */
+  --r-doc: 4px;      /* documento: papel tem canto vivo         */
+  --r-pilula: 999px;
+
+  /* --- Profundidade -------------------------------------------------------
+     Em tema escuro, elevação é LUZ, não sombra: borda superior clara + um
+     brilho interno. Sombra preta sobre preto não comunica nada.             */
+  --borda: 1px solid rgba(233, 240, 235, .09);
+  --borda-forte: 1px solid rgba(233, 240, 235, .16);
+  --luz-topo: inset 0 1px 0 rgba(255, 255, 255, .06);
+  --glow-v: 0 0 0 1px rgba(140, 226, 63, .35), 0 8px 32px -8px rgba(140, 226, 63, .35);
+  --sombra-doc: 0 24px 64px -24px rgba(0, 0, 0, .75);
+
+  --largura-leitura: 66ch;
+  --tr: 160ms cubic-bezier(.2, 0, .2, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   2. BASE
+   ------------------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--ff-ui);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  color: var(--n-100);
+  background: var(--n-900);
+  font-variant-numeric: tabular-nums;   /* colunas de dose precisam alinhar */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 { margin: 0; font-family: var(--ff-display); font-weight: 700; line-height: 1.15; }
+p { margin: 0; }
+svg { display: block; }
+
+:focus-visible {
+  outline: 2px solid var(--v-400);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   3. ÍCONE
+   Uso: <svg class="ico"><use href="#i-perfil"/></svg>
+   Nenhum ícone de biblioteca, nenhum emoji. Todos vêm de siras-icons.svg.
+   ------------------------------------------------------------------------ */
+.ico { width: 20px; height: 20px; flex: none; color: inherit; }
+.ico--sm { width: 16px; height: 16px; }
+.ico--lg { width: 26px; height: 26px; }
+.ico--xl { width: 40px; height: 40px; }
+
+/* ---------------------------------------------------------------------------
+   4. TIPOGRAFIA APLICADA
+   ------------------------------------------------------------------------ */
+.t-hero {
+  font-family: var(--ff-display);
+  font-size: var(--fs-hero);
+  font-weight: 700;
+  line-height: .98;
+  letter-spacing: -.042em;
+}
+.t-tela  { font-size: var(--fs-2xl); letter-spacing: -.028em; }
+.t-secao { font-size: var(--fs-xl);  letter-spacing: -.02em; }
+.t-rotulo{ font-family: var(--ff-ui); font-size: var(--fs-2xs); font-weight: 700;
+           color: var(--n-400); }
+.t-aux   { font-size: var(--fs-xs); color: var(--n-400); line-height: 1.5; }
+.t-corpo { font-size: var(--fs-lg); line-height: 1.62; color: var(--n-300);
+           max-width: var(--largura-leitura); }
+
+/* Número-veredito: o dado que o usuário veio buscar. */
+.numero {
+  font-family: var(--ff-display);
+  font-size: var(--fs-4xl); font-weight: 700;
+  line-height: .92; letter-spacing: -.04em;
+  font-feature-settings: "tnum" 1;
+}
+.numero--sec { font-size: var(--fs-3xl); }
+.numero__un  { font-family: var(--ff-ui); font-size: var(--fs-sm);
+               font-weight: 700; color: var(--n-400); }
+
+/* ---------------------------------------------------------------------------
+   5. SUPERFÍCIES
+   ------------------------------------------------------------------------ */
+.painel {
+  background: linear-gradient(180deg, var(--n-850), var(--n-880));
+  border: var(--borda);
+  border-radius: var(--r-painel);
+  box-shadow: var(--luz-topo);
+}
+.painel--marca { border-radius: var(--r-marca); }
+
+/* Documento claro dentro do app escuro. */
+.doc {
+  background: var(--n-000);
+  color: #0D1410;
+  border-radius: var(--r-doc);
+  box-shadow: var(--sombra-doc);
+  --n-100: #0D1410; --n-300: #405146; --n-400: #5C6F64; --n-500: #7A8C82;
+}
+
+/* Malha de fundo: retícula de 40px, quase invisível, que dá ao fundo escuro a
+   leitura de superfície de instrumento em vez de vazio. Um recurso, uma vez. */
+.malha {
+  background-image:
+    linear-gradient(rgba(233,240,235,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(233,240,235,.028) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ---------------------------------------------------------------------------
+   6. BOTÕES
+   ------------------------------------------------------------------------ */
+.btn {
+  font-family: var(--ff-ui); font-size: var(--fs-sm); font-weight: 700;
+  line-height: 1; letter-spacing: -.01em;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2);
+  min-height: 46px; padding: 0 1.25rem;         /* 46px: alvo confortável em campo */
+  border: 1px solid transparent; border-radius: var(--r-campo);
+  cursor: pointer; transition: all var(--tr);
+  text-decoration: none;
+}
+.btn--primario {
+  background: var(--v-400); color: #07120A;
+  box-shadow: 0 0 0 0 rgba(140,226,63,0);
+}
+.btn--primario:hover { background: var(--v-300); box-shadow: var(--glow-v); }
+
+.btn--contorno {
+  background: rgba(233,240,235,.04); color: var(--n-100);
+  border-color: rgba(233,240,235,.16);
+}
+.btn--contorno:hover { border-color: var(--v-400); color: var(--v-300); }
+
+.btn--fantasma { background: none; border: 0; color: var(--n-300); padding: 0 .5rem; }
+.btn--fantasma:hover { color: var(--v-300); }
+
+.btn[disabled] { opacity: .35; cursor: not-allowed; box-shadow: none; }
+.btn[disabled]:hover { background: var(--v-400); }
+
+/* ---------------------------------------------------------------------------
+   7. CAMPOS
+   ------------------------------------------------------------------------ */
+.campo { display: flex; flex-direction: column; gap: var(--e-2); min-width: 0; }
+.campo__label {
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--n-300);
+  display: flex; align-items: center; gap: var(--e-1);
+}
+.campo__label b { color: var(--v-400); font-weight: 700; }
+
+.campo__caixa {
+  display: flex; align-items: stretch; min-width: 0;
+  background: var(--n-800);
+  border: 1px solid rgba(233,240,235,.11);
+  border-radius: var(--r-campo);
+  transition: border-color var(--tr), box-shadow var(--tr), background var(--tr);
+}
+.campo__caixa:focus-within {
+  border-color: var(--v-400);
+  background: var(--n-750);
+  box-shadow: 0 0 0 4px rgba(140,226,63,.13);
+}
+.campo__caixa input, .campo__caixa select {
+  flex: 1; min-width: 0; width: 100%;
+  font-family: var(--ff-display); font-size: var(--fs-lg); font-weight: 600;
+  padding: .7rem .875rem;
+  background: none; border: 0; color: var(--n-100);
+  border-radius: inherit;
+}
+.campo__caixa input:focus, .campo__caixa select:focus { outline: none; }
+.campo__caixa input::placeholder { color: var(--n-500); font-weight: 500; }
+/* Spinners não servem para transcrever um valor impresso num laudo. */
+.campo__caixa input[type=number] { -moz-appearance: textfield; }
+.campo__caixa input[type=number]::-webkit-inner-spin-button,
+.campo__caixa input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* A unidade fica DENTRO do campo: o usuário a lê no ponto em que digita.
+   Confundir mg/dm³ com cmolc/dm³ erra a dose em ordem de grandeza. */
+.campo__unidade {
+  display: flex; align-items: center; padding: 0 .875rem;
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--n-400);
+  background: rgba(0,0,0,.28);
+  border-left: 1px solid rgba(233,240,235,.08);
+  border-radius: 0 var(--r-campo) var(--r-campo) 0;
+  white-space: nowrap;
+}
+.campo__ajuda { font-size: var(--fs-3xs); color: var(--n-500); }
+.campo--erro .campo__caixa { border-color: var(--sig-coral); background: rgba(255,107,74,.07); }
+
+/* ---------------------------------------------------------------------------
+   8. FICHA DE CLASSE
+   Cor nunca aparece sozinha: sempre acompanhada do rótulo textual.
+   ------------------------------------------------------------------------ */
+.ficha {
+  display: inline-flex; align-items: center; gap: .375rem;
+  padding: .25rem .625rem .3rem;
+  border-radius: var(--r-pilula);
+  font-size: var(--fs-3xs); font-weight: 800; letter-spacing: .01em;
+  color: var(--cor); border: 1px solid color-mix(in srgb, var(--cor) 45%, transparent);
+  background: color-mix(in srgb, var(--cor) 13%, transparent);
+}
+.ficha::before {
+  content: ""; width: 6px; height: 6px; border-radius: 2px;
+  background: var(--cor); flex: none;
+}
+.f-mb { --cor: var(--d-mb); } .f-b { --cor: var(--d-b); } .f-m { --cor: var(--d-m); }
+.f-a  { --cor: var(--d-a); }  .f-ma { --cor: var(--d-ma); }
+
+/* ---------------------------------------------------------------------------
+   9. RÉGUA DE HORIZONTE — componente-assinatura
+   Cinco estratos contíguos = as cinco classes do Manual. Marcador na posição
+   do valor. Responde de uma olhada: em que classe estou, quão perto da borda,
+   e para que lado preciso caminhar.
+   ------------------------------------------------------------------------ */
+.regua { display: grid; gap: .4rem; }
+.regua__faixas {
+  position: relative; display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 2px; height: 9px;
+}
+.regua__faixa { border-radius: 2px; background: var(--cor); opacity: .3; transition: opacity var(--tr); }
+.regua__faixa.f-mb { --cor: var(--d-mb); } .regua__faixa.f-b { --cor: var(--d-b); }
+.regua__faixa.f-m  { --cor: var(--d-m); }  .regua__faixa.f-a { --cor: var(--d-a); }
+.regua__faixa.f-ma { --cor: var(--d-ma); }
+/* A faixa-alvo e a faixa atual são as únicas acesas: o olho vai ao alvo. */
+.regua__faixa.f-a { opacity: .55; }
+.regua__faixa.is-atual { opacity: 1; box-shadow: 0 0 14px -2px var(--cor); }
+
+.regua__marcador {
+  position: absolute; top: -5px; bottom: -5px; left: var(--pos, 50%);
+  width: 2px; margin-left: -1px; border-radius: 2px;
+  background: var(--n-000);
+}
+.regua__rotulos {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;
+  font-size: var(--fs-3xs); color: var(--n-500);
+}
+.regua__rotulos span { text-align: center; }
+.regua__rotulos .is-atual { color: var(--n-100); font-weight: 800; }
+
+/* ---------------------------------------------------------------------------
+   10. AVISO
+   Erro diz o que houve e o que fazer. Não pede desculpa, não é vago.
+   ------------------------------------------------------------------------ */
+.aviso {
+  display: flex; gap: var(--e-3); align-items: flex-start;
+  padding: var(--e-4); border-radius: var(--r-campo);
+  font-size: var(--fs-sm);
+  border: 1px solid color-mix(in srgb, var(--cor) 32%, transparent);
+  background: color-mix(in srgb, var(--cor) 9%, transparent);
+}
+.aviso .ico { color: var(--cor); margin-top: 1px; }
+.aviso strong { display: block; color: var(--cor); margin-bottom: 2px; }
+.aviso p { color: var(--n-300); }
+.aviso--info { --cor: var(--sig-aqua); }
+.aviso--atencao { --cor: var(--sig-ambar); }
+.aviso--erro { --cor: var(--sig-coral); }
+.aviso--ok { --cor: var(--v-400); }
+
+/* ---------------------------------------------------------------------------
+   11. IMPRESSÃO — o laudo sai em papel sem retrabalho
+   ------------------------------------------------------------------------ */
+@media print {
+  body { background: #fff; color: #0D1410; font-size: 10.5pt; }
+  .nao-imprime { display: none !important; }
+  .doc { box-shadow: none; border: 1px solid #CCC; }
+  .regua__faixa, .ficha { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  section, .painel { break-inside: avoid; }
+  @page { margin: 15mm 13mm; }
+}

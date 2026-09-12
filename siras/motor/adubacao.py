@@ -259,6 +259,14 @@ def calcular_fosforo_potassio(
         "classe_k": classe_k,
         "p2o5": p2o5,
         "k2o": k2o,
+        # As faixas que ESTA chamada usou, e não uma releitura. A camada de apresentação
+        # precisa delas para posicionar o marcador da régua (quão perto da borda da
+        # classe o teor está); recalculá-las lá fora exigiria repetir a seleção por
+        # classe de argila e por faixa de CTC, e uma divergência colocaria o marcador
+        # numa faixa diferente da classe exibida. Mesmo motivo de
+        # ResultadoAptidao.derivados em motor/aptidao.py.
+        "faixas_p": faixas_p,
+        "faixas_k": bloco_k["faixas"],
     }
 
 

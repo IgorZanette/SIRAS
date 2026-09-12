@@ -867,7 +867,7 @@ class Carregador:
         Returns:
             Dict com chaves 'calagem_smp', 'criterios_calagem', 'ph_referencia', 'mapa_culturas',
             'interpretacao_geral', 'interpretacao_k', 'interpretacao_p', 'criterios_aptidao',
-            'config_aptidao'
+            'config_aptidao', 'aliases_culturas', 'catalogo_anexo2'
 
         Raises:
             ErroCarregamento: se algum arquivo falhar na validação
@@ -966,6 +966,19 @@ class Carregador:
             resultado["aliases_culturas"] = dados
         except ErroCarregamento as e:
             raise ErroCarregamento(f"aliases_culturas.json: {e}")
+
+        # Carregar catalogo_anexo2.json
+        # Entra aqui como fonte do nome de exibicao das culturas na interface. A
+        # coerencia interna do catalogo (141 culturas, grupos de exigencia, sinonimos)
+        # continua travada por testes/unidade/test_integridade_catalogo_anexo2.py, e o
+        # refactor que faz grupo_exigencia() resolver por esta fonte unica segue
+        # pendente (docs/ROADMAP.md, etapa a).
+        try:
+            dados = self._carregar_json(dados_dir / "catalogo_anexo2.json")
+            self._validar_schema_json("catalogo_anexo2.json", "catalogo_anexo2_v1", dados)
+            resultado["catalogo_anexo2"] = dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"catalogo_anexo2.json: {e}")
 
         return resultado
 

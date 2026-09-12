@@ -191,6 +191,9 @@
 @media (max-width:860px){ .veredito { grid-template-columns: repeat(2,1fr);} }
 .dose { padding: var(--e-4); border-radius: var(--r-doc); border: 1px solid #E3EAE5;
         border-top: 3px solid var(--cor); background: #FAFCFA; }
+/* Dose sem classe de teor por trás (calcário e N): borda neutra. Pintá-la com um sinal
+   de diagnóstico seria usar cor por motivo estético, que o plano proibe (par. 2.1). */
+.dose--neutra { border-top-color: #D8E2DB; }
 .dose__nome { font-size: var(--fs-2xs); font-weight: 800; color: #405146; }
 .dose__val { display: flex; align-items: baseline; gap: .4rem; margin: var(--e-3) 0 var(--e-2); }
 .dose__val .numero, .dose__val .numero--sec { color: #0D1410; }

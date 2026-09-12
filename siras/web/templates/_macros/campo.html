@@ -15,12 +15,13 @@
       {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% endif %}
     </span>
     <span class="campo__caixa">
+      {# Os espaços antes de cada {% raw %}{% if %}{% endraw %} são necessários: trim_blocks remove a quebra de
+         linha que separaria os atributos, e sem eles sai value="5,4"required. #}
       <input type="number" step="{{ passo }}" id="{{ id }}" name="{{ id }}"
-             inputmode="decimal" placeholder="{{ placeholder }}"
-             {% if valor is not none %}value="{{ valor }}"{% endif %}
-             {% if ajuda %}aria-describedby="{{ id }}-ajuda"{% endif %}
-             {% if obrigatorio %}required{% endif %}>
-      {% if unidade %}<span class="campo__unidade">{{ unidade }}</span>{% endif %}
+             inputmode="decimal" placeholder="{{ placeholder }}"{% if valor is not none %} value="{{ valor }}"{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}{% if obrigatorio %} required{% endif %}>
+      {# |safe: a unidade traz marcação (cmol<sub>c</sub>/dm<sup>3</sup>) e é constante
+         escrita no código, nunca texto vindo do usuário. #}
+      {% if unidade %}<span class="campo__unidade">{{ unidade|safe }}</span>{% endif %}
     </span>
     {% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}
   </label>

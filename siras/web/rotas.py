@@ -4,27 +4,97 @@ Mapa previsto (PLANO-FRONTEND §9.1), implementado por etapas:
 
     /                  landing                        — etapa 7, hoje um provisório
     /analise           etapa 1, escolha da cultura    — etapa 5
-    /analise/dados     etapa 2, análise de solo       — etapa 2
-    /analise/laudo     etapa 3, laudo                 — etapa 2
+    /analise/dados     etapa 2, análise de solo       — pronto
+    /analise/laudo     etapa 3, laudo                 — pronto
     /api/interpretar   POST, leitura ao vivo          — etapa 4
 
-Cada rota, quando existir, monta AnaliseSolo e Contexto e chama gerar_laudo(). Nenhuma
-interpretação acontece aqui nem em JavaScript: fonte única de verdade é o motor Python
-(PLANO-FRONTEND §9.4, opção B).
+As rotas montam AnaliseSolo e Contexto a partir do formulário e chamam gerar_laudo().
+Nenhuma interpretação acontece aqui nem em JavaScript: fonte única de verdade é o motor
+Python (PLANO-FRONTEND §9.4, opção B).
 """
 
 from __future__ import annotations
 
-from flask import Blueprint, render_template
+from typing import Any, Dict
+
+from flask import Blueprint, redirect, render_template, request, url_for
+
+from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_graos
+from siras.motor.adubacao import ErroAdubacao
+from siras.motor.aptidao import ErroAptidao
+from siras.motor.calagem import ErroCalagem
+from siras.motor.laudo import ErroLaudo, gerar_laudo
+from siras.relatorio.apresentacao import apresentar_laudo
+from siras.web import formulario
 
 bp = Blueprint("siras", __name__)
+
+#: Único grupo que gerar_laudo() despacha hoje (docs/ROADMAP.md, S2/M1).
+_GRUPO = "graos"
+
+
+def _opcoes_do_formulario() -> Dict[str, Any]:
+    """Tudo que os selects da tela de dados oferecem sai da base de conhecimento.
+
+    Nenhuma lista de cultura, de manejo ou de antecedente é escrita no template: se a
+    base ganhar uma cultura, a tela ganha junto, e se perder, a tela não oferece uma
+    opção que o motor recusaria.
+    """
+    dados = carregar_dados_comum()
+    dados_graos = carregar_dados_graos()
+    return {
+        "dados": dados,
+        "culturas": formulario.culturas_disponiveis(dados, _GRUPO),
+        "manejos": formulario.opcoes_de_manejo(dados, _GRUPO),
+        "antecedentes": formulario.antecedentes_disponiveis(dados_graos),
+        "culturas_com_antecedente": formulario.culturas_que_exigem_antecedente(dados_graos, dados),
+        "campos_acidez": formulario.CAMPOS_ACIDEZ,
+        "campos_fertilidade": formulario.CAMPOS_FERTILIDADE,
+        "campos_subsuperficie": formulario.CAMPOS_SUBSUPERFICIE,
+        "campos_contexto": formulario.CAMPOS_CONTEXTO,
+    }
+
+
+def _tela_de_dados(leitura: formulario.LeituraFormulario = None, erro_do_motor: str = None):
+    return render_template(
+        "dados.html",
+        leitura=leitura or formulario.LeituraFormulario(),
+        erro_do_motor=erro_do_motor,
+        **_opcoes_do_formulario(),
+    )
 
 
 @bp.get("/")
 def inicio():
-    """Provisório até a etapa 7 (landing).
-
-    Existe para que a casca — tema, fontes auto-hospedadas, sprite de ícones e macros —
-    seja verificável desde já, com a rede desligada.
-    """
+    """Provisório até a etapa 7 (landing)."""
     return render_template("inicio.html")
+
+
+@bp.get("/analise/dados")
+def dados():
+    return _tela_de_dados()
+
+
+@bp.get("/analise/laudo")
+def laudo_sem_dados():
+    """O laudo nasce de um POST. Chegar aqui por link ou recarga volta ao formulário em
+    vez de mostrar uma página de erro sobre um método HTTP."""
+    return redirect(url_for("siras.dados"))
+
+
+@bp.post("/analise/laudo")
+def laudo():
+    dados_comuns = carregar_dados_comum()
+    leitura = formulario.ler(request.form, dados_comuns, _GRUPO)
+
+    if not leitura.ok:
+        return _tela_de_dados(leitura), 422
+
+    try:
+        resultado = gerar_laudo(leitura.analise, leitura.contexto.cultura_id, leitura.contexto)
+    except (ErroLaudo, ErroCalagem, ErroAdubacao, ErroAptidao) as erro:
+        # Erro de escopo ou de base incompleta, não de digitação: o formulário volta
+        # preenchido e a mensagem do motor aparece inteira, sem tradução que a apague.
+        return _tela_de_dados(leitura, erro_do_motor=str(erro)), 422
+
+    return render_template("laudo.html", laudo=apresentar_laudo(resultado, dados_comuns))

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% import "_macros/ico.html" as i %}
+{% import "_macros/ficha.html" as f %}
+{% import "_macros/regua.html" as r %}
+
+{% block titulo %}Laudo de recomendação — {{ laudo.cultura }} — SIRAS{% endblock %}
+
+{% block conteudo %}
+<main class="env" style="padding-bottom:var(--e-10)">
+
+  <ol class="etapas nao-imprime">
+    <li class="etapa is-feita"><span class="etapa__n">1</span><span class="etapa__t">Cultura</span></li>
+    <li class="etapa is-feita"><span class="etapa__n">2</span><span class="etapa__t">Análise de solo</span></li>
+    <li class="etapa is-ativa"><span class="etapa__n">3</span><span class="etapa__t">Laudo</span></li>
+  </ol>
+
+  <div class="rodape-acoes nao-imprime" style="margin:0 0 var(--e-5)">
+    <a class="btn btn--contorno" href="{{ url_for('siras.dados') }}">
+      {{ i.ico("edita", "ico ico--sm") }} Editar a análise
+    </a>
+    {# window.print() em vez de gerar PDF no servidor: é a rota mais confiável, mantém o
+       texto selecionável e não acrescenta dependência ao projeto. #}
+    <button class="btn btn--primario" type="button" onclick="window.print()">
+      {{ i.ico("imprime", "ico ico--sm") }} Salvar em PDF
+    </button>
+  </div>
+
+  {# A troca de tema marca a fronteira entre operar e entregar: daqui para baixo é
+     documento, não ferramenta. #}
+  <article class="doc">
+    <header class="doc__cab">
+      <div>
+        <h2>Laudo de recomendação</h2>
+        <div class="doc__meta">
+          Critério de calagem: {{ laudo.criterio_calagem.id }} ·
+          {{ laudo.criterio_calagem.fonte }} ·
+          PRNT {{ laudo.prnt }}% ·
+          incorporação a {{ laudo.profundidade }} cm
+        </div>
+      </div>
+      <div class="doc__cultura">
+        <div class="t-rotulo">Cultura</div>
+        <strong>{{ laudo.cultura }}</strong>
+      </div>
+    </header>
+
+    <div class="doc__corpo">
+
+      {# ——— 1. Veredito: os quatro números que o usuário veio buscar ——— #}
+      <section class="veredito">
+        {% for dose in laudo.veredito %}
+        <div class="dose{% if not dose.sigla %} dose--neutra{% endif %}"
+             {% if dose.sigla %}style="--cor:var(--d-{{ dose.sigla }})"{% endif %}>
+          <div class="dose__nome">{{ dose.nome|safe }}</div>
+          <div class="dose__val">
+            <span class="numero{% if not dose.destaque %} numero--sec{% endif %}">{{ dose.valor }}</span>
+            <span class="numero__un">{{ dose.unidade }}</span>
+          </div>
+          <p class="dose__obs">{{ dose.observacao }}</p>
+        </div>
+        {% endfor %}
+      </section>
+
+      {# ——— 2. Interpretação dos atributos ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("regua") }}<h3>Interpretação dos atributos</h3></div>
+        <div class="atributos">
+          {% for teor in laudo.teores %}
+          <div class="atributo">
+            <div class="linha__topo">
+              <span class="linha__nome">{{ teor.nome }}</span>
+              <span class="linha__val">{{ teor.valor }} {{ teor.unidade|safe }}</span>
+            </div>
+            <div style="margin:.4rem 0 .6rem">{{ f.ficha(teor.sigla, teor.rotulo) }}</div>
+            {{ r.regua(teor.indice, teor.posicao) }}
+            <p class="t-aux" style="margin-top:.5rem">{{ teor.nota }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      {# ——— 3. Aptidão edáfica ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("aptidao") }}<h3>Aptidão edáfica</h3></div>
+        <div class="aptidao">
+          <div class="aptidao__selo" style="--cor:{{ laudo.aptidao.atual.cor }}">
+            {{ i.ico(laudo.aptidao.atual.icone, "ico ico--lg") }}
+            <div class="aptidao__grau">{{ laudo.aptidao.atual.rotulo }}</div>
+            <div class="aptidao__sub">situação atual</div>
+          </div>
+          <div>
+            <p style="color:#405146;max-width:62ch">
+              {% if laudo.aptidao.houve_ganho %}
+              Aplicadas integralmente as recomendações acima, a aptidão passa a
+              <b>{{ laudo.aptidao.potencial.rotulo }}</b>. A diferença entre os dois cenários
+              é o ganho atribuível a esta recomendação.
+              {% else %}
+              Aplicadas integralmente as recomendações acima, a aptidão permanece
+              <b>{{ laudo.aptidao.potencial.rotulo }}</b>: o que limita esta área não é
+              corrigível por calagem nem por adubação.
+              {% endif %}
+              A avaliação considera exclusivamente os atributos químicos e físicos
+              informados. Relevo, clima, deficiência hídrica e suscetibilidade à erosão
+              estão fora do escopo.
+            </p>
+
+            <div class="limitantes">
+              {% for fator in laudo.aptidao.atual.fatores %}
+              {% if fator.grau > 0 %}
+              <div class="limitante">
+                <span class="limitante__barra"><i style="width:{{ fator.peso }}%"></i></span>
+                <span><b>{{ fator.nome }}:</b> limitação {{ fator.rotulo|lower }}. {{ fator.evidencia }}</span>
+              </div>
+              {% endif %}
+              {% else %}
+              <div class="limitante"><span>Nenhum atributo limitante identificado nesta amostra.</span></div>
+              {% endfor %}
+            </div>
+
+            {% if laudo.aptidao.atual.rebaixamento_aplicado %}
+            <p class="t-aux" style="margin-top:var(--e-3);color:#5C6F64">
+              Classe rebaixada por acúmulo de fatores com limitação moderada ou maior.
+            </p>
+            {% endif %}
+            {% for alerta in laudo.aptidao.atual.alertas %}
+            <p class="t-aux" style="margin-top:var(--e-2);color:#5C6F64">{{ alerta }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      {# ——— 4. Trilha: o diferencial declarado do SIRAS, em seção própria ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("rastro") }}<h3>De onde vem cada número</h3></div>
+        <p style="color:#405146;max-width:66ch;margin-bottom:var(--e-4)">
+          Toda saída do SIRAS é rastreável até a regra e a tabela do Manual que a
+          produziram. Esta seção existe para que o técnico possa conferir e para que o
+          laudo tenha valor em análise de crédito rural.
+        </p>
+
+        {# Agrupado por módulo e na ordem em que o laudo os apresenta. Nenhum passo é
+           filtrado: a calagem aparece duas vezes porque a aptidão potencial recalcula a
+           dose para testar a exequibilidade (CCAE §7.2), e essa é uma decisão que o
+           sistema realmente tomou. #}
+        {% for modulo in ["Calagem", "Adubação", "Aptidão edáfica"] %}
+        {% set passos = laudo.trilha|selectattr("modulo", "equalto", modulo)|list %}
+        {% if passos %}
+        <h4 class="t-rotulo" style="margin-top:var(--e-5);color:#5C6F64">{{ modulo }}</h4>
+        {% for passo in passos %}
+        <div class="trilha__item">
+          <span class="trilha__ref">{{ i.ico("rastro", "ico ico--sm") }}{{ passo.rotulo }}</span>
+          <span class="trilha__txt">
+            {{ passo.regra }}<br>
+            <span style="color:#5C6F64">{{ passo.fonte }}</span>
+          </span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+      </section>
+
+      <footer class="doc__rodape">
+        Fonte normativa: Comissão de Química e Fertilidade do Solo — RS/SC.
+        <em>Manual de Calagem e Adubação para os Estados do Rio Grande do Sul e de Santa
+        Catarina.</em> 11. ed. 2016. Critérios de aptidão edáfica conforme o Caderno de
+        Critérios de Aptidão Edáfica, versão {{ laudo.aptidao.versao_criterios }}.<br>
+        O SIRAS é ferramenta de apoio à decisão e não substitui a responsabilidade técnica
+        de profissional habilitado na emissão de recomendações oficiais de correção e
+        adubação.
+      </footer>
+    </div>
+  </article>
+</main>
+{% endblock %}

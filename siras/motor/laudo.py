@@ -84,10 +84,14 @@ def _calagem(
 ) -> RecomendacaoCalagem:
     criterio_id = resolver_criterio_id(cultura_id, contexto, dados)
     resultado = calcular_calagem(analise, criterio_id, contexto, trace)
+    criterio = next(
+        c for c in dados["criterios_calagem"]["criterios"] if c["id"] == criterio_id
+    )
     return RecomendacaoCalagem(
         nc_t_ha=resultado["nc_t_ha"],
         motivo=resultado["motivo"],
         criterio_id=criterio_id,
+        criterio=criterio,
     )
 
 
@@ -193,6 +197,8 @@ def _adubacao_graos(
         classe_k=resultado_pk["classe_k"],
         faixa_mo=resultado_n["faixa_mo"],
         motivo_n=resultado_n["motivo"],
+        faixas_p=resultado_pk["faixas_p"],
+        faixas_k=resultado_pk["faixas_k"],
     )
 
 

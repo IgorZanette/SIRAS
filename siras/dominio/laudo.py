@@ -14,7 +14,7 @@ siras.dominio.laudo` arrastaria o motor inteiro junto.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from siras.dominio.analise import AnaliseSolo, Contexto
 
@@ -33,6 +33,10 @@ class RecomendacaoCalagem:
     motivo: Optional[str]
     #: id do critério em dados/comum/criterios_calagem.json (Tab. 5.3 a 5.7)
     criterio_id: str
+    #: o registro inteiro do critério aplicado, como está transcrito na base. O laudo
+    #: precisa dele para dizer em que camada amostrar, como aplicar, qual o pH alvo e
+    #: quais notas do Manual valem — tudo transcrito, nada redigido pela interface.
+    criterio: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -54,6 +58,11 @@ class RecomendacaoAdubacao:
     faixa_mo: Optional[str] = None
     #: preenchido quando a cultura não recebe N (leguminosas, fixação biológica)
     motivo_n: Optional[str] = None
+    #: as faixas de/até que classificaram P e K nesta análise — vêm da mesma chamada que
+    #: produziu classe_p/classe_k. É o que permite à régua dizer quão perto da borda da
+    #: classe o teor está, sem reclassificar nada na camada de apresentação.
+    faixas_p: List[Dict[str, Any]] = field(default_factory=list)
+    faixas_k: List[Dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

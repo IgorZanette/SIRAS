@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% import "_macros/ico.html" as i %}
+{% import "_macros/campo.html" as c %}
+{% import "_macros/aviso.html" as av %}
+
+{% block titulo %}Análise de solo — SIRAS{% endblock %}
+
+{% block conteudo %}
+<main class="env" style="padding-bottom:var(--e-10)">
+
+  {# A numeração é legítima porque o conteúdo É uma sequência: a cultura precede a
+     análise porque define o critério de calagem e o grupo de exigência em P e K. #}
+  <ol class="etapas nao-imprime">
+    <li class="etapa is-feita"><span class="etapa__n">1</span><span class="etapa__t">Cultura</span></li>
+    <li class="etapa is-ativa"><span class="etapa__n">2</span><span class="etapa__t">Análise de solo</span></li>
+    <li class="etapa"><span class="etapa__n">3</span><span class="etapa__t">Laudo</span></li>
+  </ol>
+
+  <h1 class="t-tela">Resultados da análise de solo</h1>
+  <p class="t-corpo" style="margin-top:var(--e-3);font-size:var(--fs-md)">
+    Transcreva os valores do laudo do laboratório. Cada número sai do motor com a tabela
+    do Manual que o gerou.
+  </p>
+
+  {% if leitura.faltando or leitura.invalidos %}
+  <div style="margin-top:var(--e-5)">
+    {% set _corpo %}
+      {% if leitura.faltando %}Faltam valores em: {{ leitura.faltando|join(", ") }}.{% endif %}
+      {% if leitura.invalidos %} {{ leitura.invalidos|join("; ") }}. Confira a unidade no laudo do laboratório.{% endif %}
+    {% endset %}
+    {{ av.aviso("erro", "O laudo não foi gerado", _corpo) }}
+  </div>
+  {% endif %}
+
+  {% if erro_do_motor %}
+  <div style="margin-top:var(--e-5)">
+    {{ av.aviso("erro", "O laudo não foi gerado", erro_do_motor) }}
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('siras.laudo') }}" style="margin-top:var(--e-5)">
+
+    <div class="painel bloco">
+      <div class="bloco__cab">
+        {{ i.ico("broto") }}
+        <h3>Cultura e manejo</h3>
+      </div>
+      <div class="grade">
+        {{ c.campo_escolha("cultura_id", "Cultura", culturas, obrigatorio=True,
+                           ajuda="Define o critério de calagem e o grupo de exigência em P e K",
+                           valor=leitura.valores.get("cultura_id")) }}
+        {{ c.campo_escolha("criterio_id", "Sistema de manejo", manejos, obrigatorio=True,
+                           ajuda="Define a condição de disparo, o pH alvo e o modo de aplicação",
+                           valor=leitura.valores.get("criterio_id")) }}
+        {{ c.campo_escolha("cultivo", "Cultivo",
+                           [("1", "1º cultivo — dose de correção completa"),
+                            ("2", "2º cultivo — dose reduzida, em rotação")],
+                           ajuda="Altera a fração da adubação de correção de P e K",
+                           valor=leitura.valores.get("cultivo")) }}
+        {{ c.campo_escolha("profundidade_incorporacao_cm", "Profundidade de incorporação",
+                           [("20", "20 cm — padrão"), ("30", "30 cm")],
+                           ajuda="As duas profundidades que o Manual discute",
+                           valor=leitura.valores.get("profundidade_incorporacao_cm")) }}
+        {{ c.campo_escolha("antecedente", "Cultura antecedente",
+                           [("", "Não se aplica")] + antecedentes,
+                           ajuda="Exigida por: " + culturas_com_antecedente|join(", "),
+                           valor=leitura.valores.get("antecedente")) }}
+        {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_contexto %}
+        {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="painel bloco">
+      <div class="bloco__cab">
+        {{ i.ico("calagem") }}
+        <h3>Acidez e corretivo</h3>
+        <span class="t-aux">Camada de referência</span>
+      </div>
+      <div class="grade">
+        {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_acidez %}
+        {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="painel bloco">
+      <div class="bloco__cab">
+        {{ i.ico("analise") }}
+        <h3>Fertilidade e textura</h3>
+        <span class="t-aux">Extrator Mehlich-1</span>
+      </div>
+      <div class="grade">
+        {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_fertilidade %}
+        {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Subsuperfície: só o critério de plantio direto consolidado COM restrições lê esta
+       camada, e é ele que decide por ela (Tab. 5.3, notas 6-7). Fica recolhida para não
+       cobrar de quem planta em sistema convencional sete campos que não lhe dizem
+       respeito. Abrir sozinha quando o manejo a exige é a etapa 5. #}
+    <details class="painel bloco">
+      <summary class="bloco__cab" style="cursor:pointer;list-style:none">
+        {{ i.ico("perfil") }}
+        <h3>Subsuperfície, 10–20 cm</h3>
+        <span class="t-aux">Exigida pelo plantio direto consolidado com restrições</span>
+      </summary>
+      <div class="grade">
+        {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_subsuperficie %}
+        {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+        {% endfor %}
+      </div>
+    </details>
+
+    <div class="rodape-acoes">
+      <span class="t-aux">Os campos marcados com <b style="color:var(--v-400)">*</b> são obrigatórios.</span>
+      <button class="btn btn--primario" type="submit">
+        Gerar laudo {{ i.ico("laudo", "ico ico--sm") }}
+      </button>
+    </div>
+  </form>
+</main>
+{% endblock %}

@@ -14,11 +14,11 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin
       href="{{ url_for('static', filename='fonts/manrope-latin.woff2') }}">
 
-{# Ícone de aba. O SVG é o símbolo vetorial do sprite — nítido em qualquer tamanho e com
-   cerca de meio quilobyte; os PNG atendem os navegadores e o iOS, que ignoram SVG aqui. #}
+{# Ícone de aba em SVG: uma forma só serve de 16 px a 512 px, e a 16 px o desenho
+   reduzido (o S que também é estrato) sobrevive, enquanto o símbolo completo viraria
+   mancha. O apple-touch-icon fica em PNG porque o iOS ignora SVG aqui — e ali o
+   tamanho é 180 px, onde o símbolo completo tem espaço para ser lido. #}
 <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
-<link rel="icon" type="image/png" sizes="32x32"
-      href="{{ url_for('static', filename='img/marca/siras-icone-32.png') }}">
 <link rel="apple-touch-icon"
       href="{{ url_for('static', filename='img/marca/siras-icone-180.png') }}">
 
@@ -33,12 +33,18 @@
 
 <header class="barra nao-imprime">
   <div class="env barra__int">
-    {# A logo oficial já traz o nome e a assinatura desenhados. Repeti-los em HTML ao
-       lado escreveria "SIRAS" duas vezes na mesma barra. #}
-    <a class="logo" href="{{ url_for('siras.inicio') }}">
-      <img class="logo__img" src="{{ url_for('static', filename='img/marca/siras-logo.png') }}"
-           alt="SIRAS — interpretação e recomendação agronômica de solo"
-           width="460" height="230">
+    {# Assinatura montada: símbolo vetorial + nome em Sora, em vez de uma imagem única.
+       O nome renderiza na tipografia do sistema, fica nítido em qualquer densidade de
+       tela, pesa dois quilobytes e acompanha a paleta — um PNG achatava o texto e
+       obrigava a escolher um tamanho. #}
+    <a class="logo" href="{{ url_for('siras.inicio') }}"
+       aria-label="SIRAS — interpretação e recomendação agronômica de solo">
+      <img class="logo__simbolo" src="{{ url_for('static', filename='img/marca/siras-simbolo.svg') }}"
+           alt="" width="64" height="64">
+      <span class="logo__assinatura">
+        <span class="logo__nome">SIRAS</span>
+        <span class="logo__sub">Interpretação e recomendação agronômica de solo</span>
+      </span>
     </a>
     <nav class="barra__nav">
       {# Acesso permanente às tabelas: o técnico que desconfia de um número precisa

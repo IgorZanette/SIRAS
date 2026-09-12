@@ -1,15 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
-  <!-- Símbolo do SIRAS: perfil estratificado de solo com broto rompendo a superfície.
-       É o mesmo desenho de #i-marca em siras-icons.svg, aqui como arquivo próprio porque
-       favicon não pode referenciar um symbol de sprite. Vetorial: nítido a 16px e a 512px,
-       com meio quilobyte. -->
-  <rect x="3" y="13" width="34" height="25" rx="9" fill="#8CE23F"/>
-  <defs><clipPath id="solo"><rect x="3" y="13" width="34" height="25" rx="9"/></clipPath></defs>
-  <g clip-path="url(#solo)" fill="none" stroke="#0A0F0C" stroke-linecap="round" stroke-width="3.2">
-    <path d="M1 24.5c5-3.4 9 3.4 14 0s9 3.4 14 0 6 2 9 .6"/>
-    <path d="M1 31.5c5-3.4 9 3.4 14 0s9 3.4 14 0 6 2 9 .6" opacity=".42"/>
-  </g>
-  <path d="M20 14.8V8.6" stroke="#8CE23F" stroke-width="2.8" stroke-linecap="round"/>
-  <path d="M19.6 11.8C15.8 11.8 13.4 9 13.1 4.6c4.4-.4 6.8 2.5 6.5 7.2z" fill="#B6F56A"/>
-  <path d="M20.9 10.8c3.3 0 5.5-2.3 5.9-6-3.8-.4-5.9 2-5.9 6z" fill="#8CE23F"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SIRAS">
+  <!-- ==========================================================================
+       FAVICON DO SIRAS
+       --------------------------------------------------------------------------
+       O símbolo completo — bloco, três horizontes e broto — tem detalhe demais para
+       16 px: a essa escala as ondas viram uma mancha. Aqui o desenho é reduzido ao
+       gesto que identifica a marca.
+
+       A ideia: a onda de horizonte do SIRAS é uma curva em S dupla. Desenhada
+       sozinha, grossa e centrada, ela lê ao mesmo tempo como o ESTRATO DE SOLO da
+       marca e como o S de SIRAS. Duas leituras, uma forma — e três elementos no
+       total, que é o que sobrevive a 16 px: fundo, S e folha.
+
+       Fundo escuro (--n-900) em vez de verde: na aba do navegador o ícone disputa
+       com favicons majoritariamente claros, e o bloco escuro com o traço verde vivo
+       se destaca em vez de sumir.
+       ====================================================================== */ -->
+  <defs>
+    <linearGradient id="f-s" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#6CC72A"/>
+      <stop offset="1" stop-color="#B6F56A"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="16" fill="#0A0F0C"/>
+
+  <!-- A curva em S: horizonte do perfil e inicial da marca. -->
+  <path d="M14 40c7.5-8 14.5 4 22-4s7.5-14 0-14"
+        fill="none" stroke="url(#f-s)" stroke-width="7" stroke-linecap="round"/>
+  <!-- Segundo estrato, mais fraco: dá profundidade sem competir com o S. -->
+  <path d="M14 51c7.5-6 14.5 3 22-3"
+        fill="none" stroke="#8CE23F" stroke-width="4" stroke-linecap="round" opacity=".38"/>
+  <!-- A folha fecha o traço superior e é o que diz "isto é solo, não tipografia". -->
+  <path d="M40.5 15c3.6-4.4 8.8-5 12-4.2-1 4.8-5.2 7.6-10.6 7.4z" fill="#D9FBAE"/>
 </svg>

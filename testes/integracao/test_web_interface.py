@@ -59,18 +59,19 @@ def test_a_cultura_e_um_link_de_verdade(cliente):
 
 # --- marca --------------------------------------------------------------------
 
-def test_a_barra_usa_a_logo_oficial_sem_repetir_o_nome(cliente):
-    """A logo já traz 'SIRAS' desenhado; escrevê-lo de novo ao lado duplicava o nome."""
+def test_a_assinatura_e_montada_e_nao_uma_imagem_unica(cliente):
+    """Símbolo vetorial + nome em Sora. Como imagem única, o nome ficava achatado na
+    altura da barra e obrigava a escolher um tamanho de arquivo."""
     html = cliente.get("/").get_data(as_text=True)
 
-    assert "img/marca/siras-logo.png" in html
-    assert 'class="logo__txt"' not in html
+    assert "img/marca/siras-simbolo.svg" in html
+    assert 'class="logo__nome"' in html
+    assert "siras-logo.png" not in html, "voltou a usar a logo achatada em PNG"
 
 
 @pytest.mark.parametrize(
     "arquivo",
-    ["img/favicon.svg", "img/marca/siras-logo.png",
-     "img/marca/siras-icone-32.png", "img/marca/siras-icone-180.png"],
+    ["img/favicon.svg", "img/marca/siras-simbolo.svg", "img/marca/siras-icone-180.png"],
 )
 def test_os_arquivos_de_marca_sao_servidos(cliente, arquivo):
     assert cliente.get(f"/static/{arquivo}").status_code == 200
@@ -83,15 +84,14 @@ def test_a_pagina_declara_o_favicon(cliente):
     assert 'rel="apple-touch-icon"' in html
 
 
-def test_os_arquivos_de_marca_cabem_numa_tela(cliente):
-    """Os originais somam 1,5 MB. Servi-los reduzidos por CSS custaria isso a cada
-    carregamento e ainda renderizaria pior, porque o navegador reamostra a cada pintura."""
-    total = sum(
-        len(cliente.get(f"/static/img/marca/{nome}").data)
-        for nome in ("siras-logo.png", "siras-icone-32.png", "siras-icone-180.png")
-    )
+def test_a_marca_de_tela_e_vetorial_e_leve(cliente):
+    """O que a tela carrega em toda página é só o símbolo em SVG: uma forma que serve de
+    16 px a 512 px, sem reamostragem e sem escolher tamanho."""
+    simbolo = cliente.get("/static/img/marca/siras-simbolo.svg")
+    favicon = cliente.get("/static/img/favicon.svg")
 
-    assert total < 120 * 1024, f"{total // 1024} KB de marca numa tela"
+    assert b"<svg" in simbolo.data and b"<svg" in favicon.data
+    assert len(simbolo.data) + len(favicon.data) < 12 * 1024
 
 
 # --- leitura ao vivo ----------------------------------------------------------
@@ -143,3 +143,86 @@ def test_o_laudo_separa_os_fatores_que_permanecem(cliente):
     html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
 
     assert "O que permanece depois da correção" in html
+
+
+# --- variáveis condicionais ---------------------------------------------------
+
+def test_massa_verde_da_erva_mate_e_campo_numerico_unico(cliente):
+    """Defeito encontrado no uso: a massa verde saía como lista de escolha SEM nenhuma
+    opção — obrigatória e impossível de preencher — e ainda duplicada ao lado.
+
+    A causa estava em ignorar a base: erva_mate_adubacao.json declara a variável com
+    `"tipo": "numero"`, e o código forçava escolha em tudo que fosse declarado."""
+    html = cliente.get("/analise/dados?cultura_id=erva-mate").get_data(as_text=True)
+
+    assert html.count('name="massa_verde_t_ha"') == 1, "campo duplicado"
+    assert re.search(r'<input[^>]*id="massa_verde_t_ha"', html), "deveria ser campo numérico"
+    assert not re.search(r'<select[^>]*id="massa_verde_t_ha"', html)
+
+
+def test_a_ajuda_da_variavel_vem_da_propria_base(cliente):
+    """A base descreve a variável em `descricao`. Essa frase é transcrição e é melhor
+    ajuda do que qualquer texto que a interface inventasse."""
+    html = cliente.get("/analise/dados?cultura_id=erva-mate").get_data(as_text=True)
+
+    assert "massa verde de erva-mate comercial produzida" in html
+
+
+@pytest.mark.parametrize(
+    "cultura, campo",
+    [
+        ("erva-mate", "programa"), ("erva-mate", "manejo_galho_grosso"),
+        ("videira", "fase"), ("videira", "tipo_uva"),
+        ("cana_de_acucar", "ciclo"), ("tabaco", "tipo"),
+    ],
+)
+def test_todo_campo_fora_do_laudo_de_laboratorio_tem_ajuda(cliente, cultura, campo):
+    """Nada disso está no laudo do laboratório: sem uma frase dizendo de onde o valor
+    vem, o técnico precisa adivinhar o que informar."""
+    html = cliente.get(f"/analise/dados?cultura_id={cultura}").get_data(as_text=True)
+
+    assert re.search(rf'id="{campo}-ajuda"', html), f"'{campo}' sem texto de ajuda"
+
+
+def test_os_valores_de_escolha_sao_legiveis(cliente):
+    """'manejo_1_retido' é identificador de base, não texto de tela."""
+    html = cliente.get("/analise/dados?cultura_id=erva-mate").get_data(as_text=True)
+
+    assert "galho grosso retido" in html
+    assert "manejo_1_retido<" not in html
+
+
+# --- tela de cálculo ----------------------------------------------------------
+
+def test_a_tela_de_calculo_existe_e_comeca_oculta(cliente):
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert re.search(r'id="calculando"[^>]*hidden', html)
+    assert 'aria-live="polite"' in html
+
+
+def test_a_tela_de_calculo_lista_os_modulos_reais_do_motor(cliente):
+    """A sequência não é enfeite: são os módulos que gerar_laudo() percorre, na ordem em
+    que os chama. Quem espera aprende o que o sistema faz."""
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert html.count("data-passo") == 5
+    for passo in ("Lendo a análise de solo", "Calculando a calagem",
+                  "Classificando fósforo e potássio", "Avaliando a aptidão edáfica",
+                  "Montando a trilha"):
+        assert passo in html
+
+
+def test_a_tela_de_calculo_nao_e_impressa(cliente):
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert re.search(r'class="calculando nao-imprime"', html)
+
+
+def test_a_animacao_para_com_prefers_reduced_motion():
+    """Animação em laço é a que causa desconforto vestibular. A informação continua
+    inteira; só para de se mexer."""
+    assert re.search(
+        r"@media \(prefers-reduced-motion: reduce\) \{[^}]*\.calculando[^}]*animation: none",
+        _TELAS_CSS, re.S,
+    )

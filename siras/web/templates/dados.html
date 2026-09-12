@@ -91,10 +91,11 @@
         {{ c.campo_escolha(variavel.campo, variavel.rotulo,
                            ([] if variavel.obrigatorio else [("", "Não se aplica")]) + variavel.valores,
                            obrigatorio=variavel.obrigatorio,
-                           ajuda=variavel.condicao,
+                           ajuda=variavel.ajuda or variavel.condicao,
                            valor=leitura.valores.get(variavel.campo)) }}
         {% else %}
-        {{ c.campo(variavel.campo, variavel.rotulo, variavel.unidade, None,
+        {{ c.campo(variavel.campo, variavel.rotulo, variavel.unidade,
+                   variavel.ajuda or variavel.condicao,
                    variavel.obrigatorio, "0.1", "",
                    leitura.valores.get(variavel.campo),
                    variavel.campo in leitura.campos_com_erro) }}
@@ -176,8 +177,11 @@
   </aside>
   </div>
 </main>
+
+{% include "_parciais/gerando.html" %}
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/leitura-ao-vivo.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/gerando.js') }}" defer></script>
 {% endblock %}

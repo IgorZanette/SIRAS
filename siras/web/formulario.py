@@ -201,11 +201,62 @@ _NUMERICAS_POR_GRUPO = {
     "erva_mate": (("massa_verde_t_ha", "t/ha"),),
 }
 
+#: Rótulo de tela dos valores das variáveis condicionais. São traduções do próprio
+#: identificador transcrito ('manejo_1_retido' -> "galho grosso retido"), nunca afirmação
+#: agronômica acrescentada: o que cada manejo faz com a dose está na base, não aqui.
+_ROTULO_DE_VALOR = {
+    "desde_o_plantio": "Desde o plantio",
+    "recuperacao": "Recuperação de erval",
+    "plantio_e_crescimento": "Plantio e crescimento",
+    "formacao_da_copa": "Formação da copa",
+    "producao": "Produção",
+    "manejo_1_retido": "Manejo 1 — galho grosso retido",
+    "manejo_2_retirado": "Manejo 2 — galho grosso retirado",
+    "pre_plantio": "Pré-plantio",
+    "crescimento": "Crescimento",
+    "manutencao": "Manutenção",
+    "cana_planta": "Cana-planta",
+    "cana_soca": "Cana-soca",
+    "virginia": "Virgínia",
+    "burley": "Burley",
+    "vinho": "Uva para vinho",
+    "mesa": "Uva de mesa",
+    "leguminosa": "Leguminosa",
+    "graminea": "Gramínea",
+    "consorciacao_ou_pousio": "Consorciação ou pousio",
+}
+
+_UNIDADE_DE_VARIAVEL = {
+    "massa_verde_t_ha": "t/ha",
+    "produtividade_t_ha": "t/ha",
+    "produtividade_estimada": "t/ha",
+}
+
+#: Ajuda das variáveis que a base não descreve. Cada frase diz de onde o número vem —
+#: nenhuma delas está no laudo do laboratório, e sem isso o técnico precisa adivinhar
+#: se informa histórico, meta ou média.
+_AJUDA_DE_VARIAVEL = {
+    "fase": "Etapa do pomar: o Manual publica tabela própria para cada uma",
+    "programa": "Erval novo segue o programa desde o plantio; erval degradado, o de recuperação",
+    "momento": "Momento da aplicação dentro da fase",
+    "manejo_galho_grosso": "O galho grosso retirado da área exporta nutrientes e eleva a dose",
+    "tipo_uva": "A correspondência entre solo e tecido difere entre uva de vinho e de mesa",
+    "ciclo": "Cana-planta é o primeiro ciclo; cana-soca, a rebrota",
+    "tipo": "Virgínia e Burley têm tabelas de adubação distintas",
+    "ano": "Anos completos desde o plantio do pomar",
+    "produtividade_estimada": "Média das últimas safras da área, não a meta",
+    "produtividade_t_ha": "Média das últimas safras da área, não a meta",
+    "massa_verde_t_ha": "Massa verde comercial colhida por hectare",
+}
+
 
 def _rotular(identificador: str) -> str:
-    return _ROTULO_DE_VARIAVEL.get(
-        identificador, identificador.replace("_", " ").capitalize()
-    )
+    """Rótulo de tela de um identificador, seja campo ou valor."""
+    if identificador in _ROTULO_DE_VARIAVEL:
+        return _ROTULO_DE_VARIAVEL[identificador]
+    if identificador in _ROTULO_DE_VALOR:
+        return _ROTULO_DE_VALOR[identificador]
+    return identificador.replace("_", " ").capitalize()
 
 
 def variaveis_condicionais(
@@ -237,28 +288,45 @@ def variaveis_condicionais(
                 "tipo": "escolha",
                 "obrigatorio": True,
                 "valores": [(fase, _rotular(fase)) for fase in fases],
+                "ajuda": _AJUDA_DE_VARIAVEL.get("fase"),
             })
 
     declaradas = entrada.get("variavel_adicional") or []
     if isinstance(declaradas, dict):
         declaradas = [declaradas]
     for declarada in declaradas:
+        valores = declarada.get("valores") or ()
+        # O tipo vem da base quando ela o declara, e só então se presume escolha pela
+        # presença de valores. Forçar tudo a escolha transformava a massa verde da
+        # erva-mate — que a base declara como número — numa lista sem nenhuma opção:
+        # obrigatória, vazia e impossível de preencher.
+        tipo = declarada.get("tipo") or ("escolha" if valores else "numero")
         variaveis.append({
             "campo": declarada["campo"],
             "rotulo": _rotular(declarada["campo"]),
-            "tipo": "escolha",
+            "tipo": tipo,
             "obrigatorio": bool(declarada.get("obrigatorio")),
-            "valores": [(valor, _rotular(valor)) for valor in declarada.get("valores", ())],
+            "valores": [(valor, _rotular(valor)) for valor in valores],
             "condicao": declarada.get("condicao"),
+            # A base já explica o que a variável significa. Essa frase é transcrição, e
+            # é melhor ajuda do que qualquer texto que a interface inventasse.
+            "ajuda": declarada.get("descricao") or _AJUDA_DE_VARIAVEL.get(declarada["campo"]),
+            "unidade": _UNIDADE_DE_VARIAVEL.get(declarada["campo"]),
         })
 
+    ja_declaradas = {variavel["campo"] for variavel in variaveis}
     for campo, unidade in _NUMERICAS_POR_GRUPO.get(grupo, ()):
+        # Sem esta guarda o campo aparecia duas vezes lado a lado quando a base já o
+        # declarava — foi o que aconteceu com a massa verde da erva-mate.
+        if campo in ja_declaradas:
+            continue
         variaveis.append({
             "campo": campo,
             "rotulo": _rotular(campo),
             "tipo": "numero",
             "obrigatorio": False,
             "unidade": unidade,
+            "ajuda": _AJUDA_DE_VARIAVEL.get(campo),
         })
 
     return variaveis

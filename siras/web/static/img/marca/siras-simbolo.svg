@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img"
+     aria-label="Símbolo do SIRAS: perfil de solo com broto">
+  <!-- ==========================================================================
+       SÍMBOLO DO SIRAS
+       --------------------------------------------------------------------------
+       Um perfil de solo em corte, visto de frente: bloco squircle, três horizontes
+       separados por ondas, e um broto rompendo a superfície.
+
+       Por que vetorial e não PNG: este desenho aparece de 16px (aba do navegador)
+       a 96px (hero). PNG obriga a escolher um tamanho e reamostrar nos outros; em
+       SVG a mesma geometria serve os dois extremos, pesa 2 KB e acompanha a cor do
+       tema. Também é desenho nosso, e não imagem gerada — cada curva aqui é
+       editável.
+
+       A geometria conversa com o resto do sistema: a onda de horizonte é a mesma
+       curva em S dupla que assina todos os ícones de siras-icons.svg, e os verdes
+       são os tokens --v-300 e --v-400 do tema.
+       ====================================================================== */ -->
+  <defs>
+    <linearGradient id="s-solo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8CE23F"/>
+      <stop offset="1" stop-color="#4E9A2A"/>
+    </linearGradient>
+    <linearGradient id="s-folha" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#6CC72A"/>
+      <stop offset="1" stop-color="#D9FBAE"/>
+    </linearGradient>
+    <clipPath id="s-bloco">
+      <rect x="6" y="24" width="52" height="36" rx="13"/>
+    </clipPath>
+  </defs>
+
+  <!-- Bloco de solo -->
+  <rect x="6" y="24" width="52" height="36" rx="13" fill="url(#s-solo)"/>
+
+  <!-- Horizontes. A mesma onda em S dupla dos ícones, em três profundidades e com
+       opacidade decrescente: o perfil fica mais escuro e mais compacto para baixo. -->
+  <g clip-path="url(#s-bloco)" fill="none" stroke="#07120A" stroke-linecap="round">
+    <path d="M2 36c7-4.6 12.6 4.6 19.6 0s12.6 4.6 19.6 0 8.4 2.8 12.6.8" stroke-width="4.4" opacity=".92"/>
+    <path d="M2 46c7-4.6 12.6 4.6 19.6 0s12.6 4.6 19.6 0 8.4 2.8 12.6.8" stroke-width="4.4" opacity=".55"/>
+    <path d="M2 56c7-4.6 12.6 4.6 19.6 0s12.6 4.6 19.6 0 8.4 2.8 12.6.8" stroke-width="4.4" opacity=".28"/>
+  </g>
+
+  <!-- Broto: caule + duas folhas assimétricas, uma de cada lado. -->
+  <path d="M32 27V13" stroke="#8CE23F" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+  <path d="M31.2 19.6C24.6 19.6 20.4 14.8 20 7.2c7.6-.7 11.8 4.3 11.2 12.4z" fill="url(#s-folha)"/>
+  <path d="M33.6 17.4c5.7 0 9.5-4 10.2-10.4-6.6-.7-10.2 3.5-10.2 10.4z" fill="#8CE23F"/>
+</svg>

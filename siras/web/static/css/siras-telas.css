@@ -43,11 +43,23 @@
 }
 .barra__int { display: flex; align-items: center; justify-content: space-between;
               gap: var(--e-5); min-height: 68px; }
-.logo { display: flex; align-items: center; text-decoration: none; flex: none; }
-/* A logo oficial ja traz nome e assinatura desenhados; a altura e o unico ajuste.
-   width:auto impede que o atributo width do <img> achate a imagem. */
-.logo__img { height: 46px; width: auto; display: block; }
-@media (max-width:640px){ .logo__img { height: 38px; } }
+.logo { display: flex; align-items: center; gap: .7rem; text-decoration: none; flex: none; }
+.logo__simbolo { width: 40px; height: 40px; display: block; flex: none;
+                 transition: transform var(--tr); }
+.logo:hover .logo__simbolo { transform: translateY(-2px); }
+.logo__assinatura { display: grid; gap: 1px; }
+/* O nome na tipografia do sistema: Sora 800, tracking fechado, caixa alta. A regua
+   colorida abaixo repete a escala diagnostica e amarra a marca ao componente que a
+   plataforma usa para interpretar. */
+.logo__nome { font-family: var(--ff-display); font-size: 1.3rem; font-weight: 800;
+              letter-spacing: .06em; line-height: 1; color: var(--n-000); }
+.logo__sub { font-size: 9.5px; font-weight: 600; color: var(--n-400);
+             letter-spacing: .01em; white-space: nowrap; line-height: 1.2; }
+@media (max-width:860px){ .logo__sub { display: none; } }
+@media (max-width:640px){
+  .logo__simbolo { width: 34px; height: 34px; }
+  .logo__nome { font-size: 1.1rem; }
+}
 .barra__nav { display: flex; align-items: center; gap: var(--e-3); }
 /* Em tela estreita a logo e a acao primaria e que precisam do espaco. */
 @media (max-width:760px){ .barra__secundario { display: none; } }
@@ -416,3 +428,111 @@
 .bloco > summary:hover::after { border-color: var(--v-400); }
 /* Sem isto o cabecalho recolhido fica com a margem inferior de um bloco aberto. */
 details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
+
+/* =========================================================================
+   Tela de calculo
+   -------------------------------------------------------------------------
+   O par. 5 do plano proibe animacao que DECORA entrada e permite a que RESPONDE
+   a acao. Esta responde: existe porque o usuario clicou em gerar, some quando o
+   laudo chega, e o que ela anima e a sequencia real de modulos do motor.
+   ====================================================================== */
+.calculando {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-items: center; padding: var(--e-5);
+  background: rgba(5, 8, 7, .94);
+  backdrop-filter: blur(10px);
+  animation: entrar-veu 220ms cubic-bezier(.2, 0, .2, 1) both;
+}
+@keyframes entrar-veu { from { opacity: 0 } to { opacity: 1 } }
+
+/* O unico outro halo do projeto alem do hero, e pelo mesmo motivo: e o momento em
+   que a tela inteira e uma coisa so. */
+.calculando__halo {
+  position: absolute; width: min(760px, 92vw); aspect-ratio: 1;
+  background: radial-gradient(circle at 50% 50%,
+              rgba(140,226,63,.16), rgba(43,224,200,.05) 45%, transparent 68%);
+  animation: respirar 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes respirar {
+  0%, 100% { transform: scale(1);    opacity: .85 }
+  50%      { transform: scale(1.08); opacity: 1 }
+}
+
+.calculando__conteudo {
+  position: relative; width: min(560px, 100%);
+  display: grid; justify-items: center; text-align: center; gap: var(--e-4);
+}
+
+.calculando__marca { position: relative; display: grid; place-items: center;
+                     width: 96px; height: 96px; }
+.calculando__simbolo { width: 64px; height: 64px; position: relative; z-index: 1;
+                       animation: brotar 2.6s ease-in-out infinite; }
+/* O simbolo e um broto: a animacao dele e crescer, nao girar. */
+@keyframes brotar {
+  0%, 100% { transform: translateY(2px) scale(.97) }
+  50%      { transform: translateY(-3px) scale(1.03) }
+}
+/* Anel que se expande a partir do simbolo, como a agua no solo. */
+.calculando__pulso {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid var(--v-400);
+  animation: pulsar 2.6s cubic-bezier(.2, 0, .2, 1) infinite;
+}
+@keyframes pulsar {
+  0%   { transform: scale(.62); opacity: .55 }
+  70%  { transform: scale(1.18); opacity: 0 }
+  100% { opacity: 0 }
+}
+
+.calculando__titulo { font-size: var(--fs-xl); letter-spacing: -.02em; max-width: 22ch; }
+.calculando__sub { font-size: var(--fs-sm); color: var(--n-400); max-width: 42ch; }
+
+/* Os cinco passos, acendendo na ordem em que gerar_laudo() chama os modulos. */
+.passos { list-style: none; margin: var(--e-3) 0 0; padding: 0; width: 100%;
+          display: grid; gap: var(--e-2); text-align: left; }
+.passo {
+  display: grid; grid-template-columns: 38px minmax(0,1fr) 20px;
+  align-items: center; gap: var(--e-3);
+  padding: var(--e-3); border-radius: var(--r-campo);
+  border: 1px solid transparent; background: rgba(233,240,235,.03);
+  color: var(--n-500);
+  transition: color var(--tr), background var(--tr), border-color var(--tr);
+}
+.passo__ico { display: grid; place-content: center; width: 38px; height: 38px;
+              border-radius: 11px; background: rgba(233,240,235,.05); }
+.passo__txt { display: grid; gap: 1px; min-width: 0; }
+.passo__txt b { font-size: var(--fs-sm); font-weight: 700; }
+.passo__txt small { font-size: var(--fs-3xs); color: var(--n-600); }
+.passo__marca { opacity: 0; color: var(--v-400); transition: opacity var(--tr); }
+
+.passo.is-ativo {
+  color: var(--n-100); background: rgba(140,226,63,.08);
+  border-color: rgba(140,226,63,.3);
+}
+.passo.is-ativo .passo__ico { background: rgba(140,226,63,.16); color: var(--v-400);
+                              animation: bater 1s ease-in-out infinite; }
+.passo.is-ativo .passo__txt small { color: var(--n-400); }
+@keyframes bater { 50% { transform: scale(1.08) } }
+
+.passo.is-feito { color: var(--n-300); background: rgba(233,240,235,.04); }
+.passo.is-feito .passo__ico { color: var(--v-600); }
+.passo.is-feito .passo__marca { opacity: 1; }
+
+.calculando__barra { width: 100%; height: 4px; border-radius: 999px;
+                     background: rgba(233,240,235,.08); overflow: hidden; }
+.calculando__barra i {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--v-600), var(--v-400), var(--v-200));
+  border-radius: inherit;
+  transition: width 420ms cubic-bezier(.3, 0, .2, 1);
+}
+
+/* prefers-reduced-motion: a informacao continua inteira, so para de se mexer. O
+   tema ja zera as transicoes; aqui as animacoes em laco tambem param, porque sao
+   as que causam desconforto vestibular. */
+@media (prefers-reduced-motion: reduce) {
+  .calculando, .calculando__halo, .calculando__simbolo,
+  .calculando__pulso, .passo.is-ativo .passo__ico { animation: none !important; }
+  .calculando__pulso { opacity: .3; }
+}

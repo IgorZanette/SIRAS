@@ -1,0 +1,74 @@
+{# Tela de cálculo, entre o "Gerar laudo" e o laudo.
+
+   Não é enfeite: os cinco passos abaixo são os módulos que o motor realmente percorre,
+   na ordem em que gerar_laudo() os chama, e cada um cita a tabela que consulta. Quem
+   espera aprende o que o sistema está fazendo — é o mesmo valor didático que justifica a
+   leitura ao vivo (PLANO-FRONTEND §9.3), aplicado ao único momento em que o usuário não
+   tem nada para fazer além de olhar.
+
+   Fica no HTML da página, e não montada por JavaScript, para que a sequência use os
+   mesmos ícones e componentes do resto do sistema. #}
+{% import "_macros/ico.html" as i %}
+
+<div class="calculando nao-imprime" id="calculando" hidden aria-hidden="true">
+  <div class="calculando__halo" aria-hidden="true"></div>
+
+  <div class="calculando__conteudo" role="status" aria-live="polite">
+    <div class="calculando__marca">
+      <img class="calculando__simbolo"
+           src="{{ url_for('static', filename='img/marca/siras-simbolo.svg') }}"
+           alt="" width="64" height="64">
+      <span class="calculando__pulso" aria-hidden="true"></span>
+    </div>
+
+    <h2 class="calculando__titulo">Estamos calculando as melhores doses para você</h2>
+    <p class="calculando__sub">
+      Cada número sai das tabelas do Manual RS/SC — e o laudo vai mostrar de qual.
+    </p>
+
+    <ol class="passos">
+      <li class="passo" data-passo>
+        <span class="passo__ico">{{ i.ico("analise") }}</span>
+        <span class="passo__txt">
+          <b>Lendo a análise de solo</b>
+          <small>Validando faixas e derivando saturação por alumínio</small>
+        </span>
+        <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
+      </li>
+      <li class="passo" data-passo>
+        <span class="passo__ico">{{ i.ico("calagem") }}</span>
+        <span class="passo__txt">
+          <b>Calculando a calagem</b>
+          <small>Critério da cultura, índice SMP e ajuste pelo PRNT</small>
+        </span>
+        <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
+      </li>
+      <li class="passo" data-passo>
+        <span class="passo__ico">{{ i.ico("regua") }}</span>
+        <span class="passo__txt">
+          <b>Classificando fósforo e potássio</b>
+          <small>Por classe de argila e por faixa de CTC</small>
+        </span>
+        <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
+      </li>
+      <li class="passo" data-passo>
+        <span class="passo__ico">{{ i.ico("aptidao") }}</span>
+        <span class="passo__txt">
+          <b>Avaliando a aptidão edáfica</b>
+          <small>Nos cenários de hoje e depois da correção</small>
+        </span>
+        <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
+      </li>
+      <li class="passo" data-passo>
+        <span class="passo__ico">{{ i.ico("rastro") }}</span>
+        <span class="passo__txt">
+          <b>Montando a trilha</b>
+          <small>Cada dose com a regra e a tabela que a produziram</small>
+        </span>
+        <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
+      </li>
+    </ol>
+
+    <div class="calculando__barra" aria-hidden="true"><i></i></div>
+  </div>
+</div>

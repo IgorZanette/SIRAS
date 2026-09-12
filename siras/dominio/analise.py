@@ -1,11 +1,16 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 
-def _derivar_saturacao_al(al: float, ca: float, mg: float, k: float) -> float:
-    """m% = Al / (Ca + Mg + K_cmolc + Al) x 100, com K_cmolc = k (mg/dm3) / 391 (D4)."""
+def derivar_saturacao_al(al: float, ca: float, mg: float, k: float) -> float:
+    """m% = Al / (Ca + Mg + K_cmolc + Al) x 100, com K_cmolc = k (mg/dm3) / 391 (D4).
+
+    Publica porque a leitura ao vivo precisa do mesmo calculo antes de existir uma
+    AnaliseSolo completa. Reimplementa-la la fora criaria duas formulas para o mesmo
+    m%, que e exatamente o que motor/leitura.py existe para evitar.
+    """
     k_cmolc = k / 391
     ctc_efetiva = ca + mg + k_cmolc + al
     if ctc_efetiva <= 0:
@@ -50,7 +55,7 @@ class Camada:
         CTC efetiva quando ausente."""
         if self.saturacao_al is not None:
             return self.saturacao_al
-        return _derivar_saturacao_al(self.al or 0.0, self.ca or 0.0, self.mg or 0.0, self.k or 0.0)
+        return derivar_saturacao_al(self.al or 0.0, self.ca or 0.0, self.mg or 0.0, self.k or 0.0)
 
 
 @dataclass
@@ -83,7 +88,7 @@ class AnaliseSolo:
         """
         if self.saturacao_al is not None:
             return self.saturacao_al
-        return _derivar_saturacao_al(self.al, self.ca, self.mg, self.k)
+        return derivar_saturacao_al(self.al, self.ca, self.mg, self.k)
 
     def _validar_campos_obrigatorios(self) -> None:
         campos = {
@@ -171,6 +176,15 @@ class Contexto:
     #: cultura antecedente, exigida só pelas culturas de grãos cujo modelo de N é
     #: 'mo_x_antecedente' (graos_adubacao_n.json). None nas demais.
     antecedente: Optional[str] = None
+    #: Variáveis condicionais: exigidas por alguns grupos e sem sentido nos demais —
+    #: fase do pomar, ano após o plantio e tipo de uva nas frutíferas; ciclo da cana;
+    #: tipo do tabaco; programa e fase da erva-mate (docs/decisoes/0004).
+    #:
+    #: Um dicionário, e não um campo por variável, porque promovê-las a campo obrigaria
+    #: quem planta soja a carregar 'ciclo' e 'tipo_uva' nulos, e cada cultura nova do
+    #: Manual acrescentaria mais um. Quem sabe quais são exigidas é a função de adubação
+    #: do grupo, que já as valida e já nomeia a que faltar.
+    variaveis: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self._validar_campos_obrigatorios()

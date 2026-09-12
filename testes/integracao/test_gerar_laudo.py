@@ -133,8 +133,9 @@ def test_cultura_divergente_do_contexto_e_recusada():
         gerar_laudo(_analise(entrada), "milho", _contexto(entrada))
 
 
-def test_grupo_ainda_nao_implementado_falha_de_forma_explicita():
-    """Macieira tem motor de adubação, mas gerar_laudo() ainda não despacha frutíferas."""
+def test_variavel_condicional_ausente_falha_com_mensagem_de_dominio():
+    """Frutífera exige a fase do pomar. Sem a guarda, a ausência estoura como TypeError
+    de argumento posicional — mensagem de interpretador Python chegando ao técnico."""
     entrada = _casos()["ADU-01"]["entrada"]
     contexto = Contexto(
         cultura_id="macieira",
@@ -144,7 +145,7 @@ def test_grupo_ainda_nao_implementado_falha_de_forma_explicita():
         profundidade_incorporacao_cm=entrada["profundidade_incorporacao_cm"],
     )
 
-    with pytest.raises(ErroLaudo, match="ainda não é coberto"):
+    with pytest.raises(ErroLaudo, match="informe fase"):
         gerar_laudo(_analise(entrada), "macieira", contexto)
 
 

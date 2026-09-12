@@ -215,6 +215,17 @@ def _observacao_do_nitrogenio(laudo: Laudo) -> str:
     return f"Dose definida pela faixa de matéria orgânica da amostra ({faixa})."
 
 
+def _observacao_da_classe(nutriente: str, classe: Optional[str]) -> str:
+    """Nem toda recomendação passa pela classe de teor: a frutífera em crescimento dosa
+    por matéria orgânica e ano após o plantio. Dizer isso é melhor que omitir a linha."""
+    if classe is None:
+        return (
+            f"Dose publicada pelo Manual para esta fase sem passar pela classe de teor de "
+            f"{nutriente} no solo."
+        )
+    return f"Disponibilidade de {nutriente} no solo classificada como “{rotulo_da_classe(classe)}”."
+
+
 def _veredito(laudo: Laudo) -> List[Dict[str, Any]]:
     """Os quatro números que o usuário veio buscar.
 
@@ -246,18 +257,16 @@ def _veredito(laudo: Laudo) -> List[Dict[str, Any]]:
             "nome": "Fósforo (P<sub>2</sub>O<sub>5</sub>)",
             "valor": formatar_dose(laudo.adubacao.p2o5),
             "unidade": "kg/ha",
-            "observacao": f"Disponibilidade de P no solo classificada como "
-                          f"“{rotulo_da_classe(laudo.adubacao.classe_p)}”.",
-            "sigla": sigla_da_classe(laudo.adubacao.classe_p),
+            "observacao": _observacao_da_classe("P", laudo.adubacao.classe_p),
+            "sigla": sigla_da_classe(laudo.adubacao.classe_p) if laudo.adubacao.classe_p else None,
             "destaque": False,
         },
         {
             "nome": "Potássio (K<sub>2</sub>O)",
             "valor": formatar_dose(laudo.adubacao.k2o),
             "unidade": "kg/ha",
-            "observacao": f"Disponibilidade de K no solo classificada como "
-                          f"“{rotulo_da_classe(laudo.adubacao.classe_k)}”.",
-            "sigla": sigla_da_classe(laudo.adubacao.classe_k),
+            "observacao": _observacao_da_classe("K", laudo.adubacao.classe_k),
+            "sigla": sigla_da_classe(laudo.adubacao.classe_k) if laudo.adubacao.classe_k else None,
             "destaque": False,
         },
     ]
@@ -268,7 +277,16 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
     de disponibilidade — esticar a régua de cinco faixas sobre pH ou MO, que têm outras
     escalas, seria inventar uma leitura."""
     derivados = laudo.aptidao_atual.derivados or {}
-    return [
+
+    # Sem classe não há régua: há fases de adubação que não dosam pela classe de teor
+    # (frutífera em crescimento, por exemplo). Omitir a linha é mais honesto do que
+    # exibir uma faixa acesa que a recomendação não usou.
+    if laudo.adubacao.classe_p is None and laudo.adubacao.classe_k is None:
+        return []
+
+    linhas = []
+    if laudo.adubacao.classe_p is not None:
+        linhas.append(
         {
             "nome": "Fósforo",
             "valor": formatar_numero(laudo.analise.p, 1),
@@ -281,7 +299,10 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
                                         laudo.adubacao.classe_p),
             "nota": f"Interpretado pela classe de argila {derivados.get('classe_argila', '—')} "
                     f"({formatar_numero(laudo.analise.argila, 0)}%), extrator Mehlich-1.",
-        },
+        })
+
+    if laudo.adubacao.classe_k is not None:
+        linhas.append(
         {
             "nome": "Potássio",
             "valor": formatar_numero(laudo.analise.k, 0),
@@ -294,8 +315,9 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
                                         laudo.adubacao.classe_k),
             "nota": f"Interpretado pela CTC a pH 7,0 de "
                     f"{formatar_numero(laudo.analise.ctc_ph7, 1)} cmolc/dm³.",
-        },
-    ]
+        })
+
+    return linhas
 
 
 def _aptidao(laudo: Laudo) -> Dict[str, Any]:

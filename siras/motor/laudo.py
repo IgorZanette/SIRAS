@@ -19,18 +19,48 @@ esse mapeamento a calagem não resolve o critério — ver ErroLaudo em _resolve
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
-from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_graos
+from siras.conhecimento.carregador import (
+    carregar_dados_comum,
+    carregar_dados_erva_mate,
+    carregar_dados_frutiferas,
+    carregar_dados_graos,
+    carregar_dados_hortalicas,
+    carregar_dados_outras,
+    carregar_dados_tuberculos,
+)
 from siras.dominio.analise import AnaliseSolo, Contexto
 from siras.dominio.laudo import Laudo, RecomendacaoAdubacao, RecomendacaoCalagem
-from siras.motor.adubacao import calcular_fosforo_potassio, calcular_nitrogenio
+from siras.motor.adubacao import (
+    calcular_adubacao_erva_mate,
+    calcular_adubacao_frutiferas,
+    calcular_adubacao_hortalicas,
+    calcular_adubacao_outras,
+    calcular_adubacao_tuberculos,
+    calcular_fosforo_potassio,
+    calcular_nitrogenio,
+    classificar_fosforo,
+    classificar_potassio,
+)
 from siras.motor.aptidao import avaliar_aptidao
 from siras.motor.calagem import calcular_calagem, resolver_criterio_id
 from siras.motor.trace import Trace
 
-#: Grupos de mapa_culturas.json que gerar_laudo() sabe adubar hoje.
-_GRUPOS_IMPLEMENTADOS = ("graos",)
+#: Carregador da adubação de cada grupo.
+_CARREGADOR_POR_GRUPO = {
+    "graos": carregar_dados_graos,
+    "hortalicas": carregar_dados_hortalicas,
+    "tuberculos": carregar_dados_tuberculos,
+    "outras": carregar_dados_outras,
+    "frutiferas": carregar_dados_frutiferas,
+    "erva_mate": carregar_dados_erva_mate,
+}
+
+#: Grupos de mapa_culturas.json que gerar_laudo() sabe adubar.
+_GRUPOS_IMPLEMENTADOS = (
+    "graos", "hortalicas", "tuberculos", "outras", "frutiferas", "erva_mate",
+)
 
 
 class ErroLaudo(Exception):
@@ -202,9 +232,203 @@ def _adubacao_graos(
     )
 
 
+def _adubacao_de_grupo_publicado(
+    calcular,
+    carregar,
+    chave_dados: str,
+    extras_permitidos: Tuple[str, ...],
+    obrigatorias: Tuple[str, ...] = (),
+):
+    """Monta o despacho de um grupo cuja adubação já vem publicada por classe de teor.
+
+    Grãos são a exceção do Manual: publicam correção e manutenção em separado, com um
+    algoritmo de dose por cultivo. Os outros cinco grupos publicam a dose pronta por
+    classe, e por isso cabem num despacho só — o que varia entre eles é a lista de
+    variáveis condicionais que a função da cultura exige (fase, ciclo, tipo, programa),
+    e isso vem de Contexto.variaveis.
+    """
+
+    def despachar(
+        analise: AnaliseSolo,
+        cultura_id: str,
+        contexto: Contexto,
+        trace: Trace,
+        dados: Dict[str, Any],
+    ) -> RecomendacaoAdubacao:
+        dados_grupo = carregar()
+        extras = {
+            nome: valor
+            for nome, valor in contexto.variaveis.items()
+            if nome in extras_permitidos and valor is not None
+        }
+        # Sem isto, a variável condicional ausente estoura como TypeError de argumento
+        # posicional — mensagem de interpretador Python chegando ao técnico em campo.
+        faltando = [nome for nome in obrigatorias if nome not in extras]
+        if faltando:
+            raise ErroLaudo(
+                f"cultura '{cultura_id}': informe {', '.join(faltando)} — "
+                f"o Manual publica recomendações distintas por {', '.join(faltando)} "
+                f"para este grupo"
+            )
+        resultado = calcular(
+            cultura_id,
+            mo=analise.mo,
+            argila=analise.argila,
+            p_solo=analise.p,
+            k_solo=analise.k,
+            ctc_ph7=analise.ctc_ph7,
+            dados_comuns=dados,
+            **{chave_dados: dados_grupo},
+            **extras,
+        )
+        return _montar_adubacao(analise, cultura_id, contexto, trace, dados, dados_grupo, resultado)
+
+    return despachar
+
+
+def _faixas_da_classe(
+    analise: AnaliseSolo, cultura_id: str, dados_grupo: Dict[str, Any], dados: Dict[str, Any],
+    resultado: Dict[str, Any],
+) -> Tuple[list, list]:
+    """Recupera as faixas que classificaram P e K, para a régua do laudo.
+
+    As funções dos cinco grupos publicados devolvem a classe, não a faixa. Em vez de
+    reclassificar por fora, esta função repete a MESMA seleção com o grupo de exigência
+    declarado na cultura e confere que a classe encontrada bate com a que a adubação
+    usou. Se divergirem, é erro de dado ou de resolução de grupo, e é melhor estourar
+    aqui do que desenhar uma régua apontando para outra faixa.
+    """
+    entrada = dados_grupo["adubacao"].get("culturas", {}).get(cultura_id, {})
+    declarado = entrada.get("grupo_exigencia")
+    if not declarado:
+        return [], []
+
+    leitura_p = classificar_fosforo(f"grupo_{declarado['p']}", analise.argila, analise.p, dados)
+    leitura_k = classificar_potassio(f"grupo_{declarado['k']}", analise.ctc_ph7, analise.k, dados)
+
+    faixas = {"classe_p": [], "classe_k": []}
+    for eixo, leitura in (("classe_p", leitura_p), ("classe_k", leitura_k)):
+        classe_usada = resultado.get(eixo)
+        # Classe ausente não é divergência: há fases que não dosam pela classe de teor
+        # (frutífera em crescimento dosa N pela MO e pelo ano, por exemplo). Sem classe
+        # não há régua a desenhar, e afirmar uma seria inventar leitura.
+        if classe_usada is None:
+            continue
+        if classe_usada != leitura["classe"]:
+            raise ErroLaudo(
+                f"cultura '{cultura_id}': a adubação classificou {eixo}="
+                f"'{classe_usada}' e a releitura das faixas deu '{leitura['classe']}' "
+                f"— grupo de exigência divergente entre as duas leituras"
+            )
+        faixas[eixo] = leitura["faixas"]
+    return faixas["classe_p"], faixas["classe_k"]
+
+
+def _montar_adubacao(
+    analise: AnaliseSolo,
+    cultura_id: str,
+    contexto: Contexto,
+    trace: Trace,
+    dados: Dict[str, Any],
+    dados_grupo: Dict[str, Any],
+    resultado: Dict[str, Any],
+) -> RecomendacaoAdubacao:
+    faixas_p, faixas_k = _faixas_da_classe(analise, cultura_id, dados_grupo, dados, resultado)
+
+    trace.registrar(
+        regra="R-ADU-01: classificação do teor de P (por classe de argila) e de K (por CTC a pH 7,0)",
+        entradas={
+            "argila": analise.argila, "p": analise.p,
+            "ctc_ph7": analise.ctc_ph7, "k": analise.k,
+        },
+        saida={"classe_p": resultado.get("classe_p"), "classe_k": resultado.get("classe_k")},
+        fonte=(
+            f"{_fonte_legivel(dados['interpretacao_p']['fonte'])} (P) e "
+            f"{_fonte_legivel(dados['interpretacao_k']['fonte'])} (K)"
+        ),
+    )
+    trace.registrar(
+        regra="R-ADU-04: dose de N, P2O5 e K2O publicada por classe de teor e faixa de MO",
+        entradas={
+            "cultura_id": cultura_id, "mo": analise.mo,
+            "variaveis_condicionais": dict(contexto.variaveis),
+        },
+        saida={
+            "n": resultado.get("n"), "p2o5": resultado.get("p2o5"), "k2o": resultado.get("k2o"),
+        },
+        fonte=_fonte_legivel(dados_grupo["adubacao"]["fonte"]),
+    )
+
+    return RecomendacaoAdubacao(
+        n=resultado.get("n"),
+        p2o5=resultado.get("p2o5"),
+        k2o=resultado.get("k2o"),
+        classe_p=resultado.get("classe_p"),
+        classe_k=resultado.get("classe_k"),
+        motivo_n=resultado.get("motivo_n"),
+        faixas_p=faixas_p,
+        faixas_k=faixas_k,
+    )
+
+
+def _adubacao_erva_mate(
+    analise: AnaliseSolo, cultura_id: str, contexto: Contexto, trace: Trace, dados: Dict[str, Any]
+) -> RecomendacaoAdubacao:
+    """Erva-mate não recebe cultura_id: a tabela é indexada por programa e fase, e a
+    espécie é uma só (Seção 6.6.5)."""
+    dados_grupo = carregar_dados_erva_mate()
+    programa = contexto.variaveis.get("programa")
+    if not programa:
+        raise ErroLaudo(
+            "erva-mate: informe o programa de adubação ('desde_o_plantio' ou 'recuperacao')"
+        )
+    extras = {
+        nome: valor
+        for nome, valor in contexto.variaveis.items()
+        if nome in ("fase", "momento", "manejo_galho_grosso", "massa_verde_t_ha")
+        and valor is not None
+    }
+    resultado = calcular_adubacao_erva_mate(
+        programa,
+        mo=analise.mo, argila=analise.argila, p_solo=analise.p,
+        k_solo=analise.k, ctc_ph7=analise.ctc_ph7,
+        dados_erva_mate=dados_grupo, dados_comuns=dados,
+        **extras,
+    )
+    return _montar_adubacao(analise, cultura_id, contexto, trace, dados, dados_grupo, resultado)
+
+
 _ADUBACAO_POR_GRUPO = {
     "graos": _adubacao_graos,
+    "hortalicas": _adubacao_de_grupo_publicado(
+        calcular_adubacao_hortalicas, carregar_dados_hortalicas, "dados_hortalicas",
+        ("expectativa_rendimento", "fase", "fase_n", "fase_pk"),
+    ),
+    "tuberculos": _adubacao_de_grupo_publicado(
+        calcular_adubacao_tuberculos, carregar_dados_tuberculos, "dados_tuberculos",
+        ("expectativa_rendimento",),
+    ),
+    "outras": _adubacao_de_grupo_publicado(
+        calcular_adubacao_outras, carregar_dados_outras, "dados_outras",
+        ("ciclo", "tipo", "produtividade_t_ha"),
+    ),
+    "frutiferas": _adubacao_de_grupo_publicado(
+        calcular_adubacao_frutiferas, carregar_dados_frutiferas, "dados_frutiferas",
+        ("fase", "ano", "produtividade_estimada", "tipo_uva", "analise_de_tecido",
+         "ano_de_alternancia"),
+        obrigatorias=("fase",),
+    ),
+    "erva_mate": _adubacao_erva_mate,
 }
+
+
+def dados_do_grupo(grupo: str) -> Optional[Dict[str, Any]]:
+    """Culturas transcritas na adubação de um grupo, ou None quando o grupo não as
+    indexa por cultura (erva-mate indexa por programa e fase)."""
+    carregar = _CARREGADOR_POR_GRUPO.get(grupo)
+    if carregar is None:
+        return None
+    return carregar()["adubacao"].get("culturas")
 
 
 def gerar_laudo(

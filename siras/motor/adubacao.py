@@ -99,6 +99,62 @@ def grupo_exigencia(cultura_id: str, mapa_culturas: Dict[str, Any], grupos_exige
     )
 
 
+def classificar_fosforo(
+    grupo_p: str, argila: float, p_solo: float, dados_comuns: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Classe de disponibilidade de P, pela classe de argila e pelo grupo de exigência.
+
+    Pública porque três chamadores precisam exatamente desta seleção: a adubação de
+    grãos, a dos demais grupos e a leitura ao vivo. Enquanto cada uma escolhia a própria
+    faixa, a mesma regra existia em duas cópias — e uma leitura que discordasse da dose
+    exibiria a classe certa com a faixa errada.
+
+    A resolução do GRUPO continua fora daqui, porque difere por grupo de cultura: grãos
+    resolvem por grupo_exigencia() sobre as listas de interpretacao_p.json, e os demais
+    leem o campo declarado na própria cultura.
+
+    Returns:
+        Dict com "classe", "faixas" (as usadas, para posicionar a régua) e "classe_argila".
+    """
+    faixas_argila = next(
+        atributo["faixas"]
+        for atributo in dados_comuns["interpretacao_geral"]["atributos"]
+        if atributo["atributo"] == "argila"
+    )
+    classe_argila = classificar_faixa(argila, faixas_argila)
+    tabela = next(t for t in dados_comuns["interpretacao_p"]["tabelas"] if t["grupo"] == grupo_p)
+    faixas = next(
+        bloco["faixas"] for bloco in tabela["por_classe_argila"]
+        if bloco["classe_argila"] == classe_argila
+    )
+    return {
+        "classe": classificar_faixa(p_solo, faixas),
+        "faixas": faixas,
+        "classe_argila": classe_argila,
+    }
+
+
+def classificar_potassio(
+    grupo_k: str, ctc_ph7: float, k_solo: float, dados_comuns: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Classe de disponibilidade de K, pela faixa de CTC a pH 7,0 e pelo grupo de exigência.
+
+    Mesma razão de ser de classificar_fosforo(). Ver a nota lá sobre a resolução do grupo.
+
+    Returns:
+        Dict com "classe", "faixas" (as usadas) e "faixa_ctc".
+    """
+    interpretacao_k = dados_comuns["interpretacao_k"]
+    faixa_ctc = classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
+    tabela = next(t for t in interpretacao_k["tabelas"] if t["grupo"] == grupo_k)
+    bloco = next(b for b in tabela["por_faixa_ctc"] if b["faixa_ctc"] == faixa_ctc)
+    return {
+        "classe": classificar_faixa(k_solo, bloco["faixas"]),
+        "faixas": bloco["faixas"],
+        "faixa_ctc": faixa_ctc,
+    }
+
+
 def calcular_nitrogenio(
     cultura_id: str,
     mo: float,
@@ -218,26 +274,13 @@ def calcular_fosforo_potassio(
     if manutencao is None:
         raise ErroAdubacao(f"cultura '{cultura_id}' não encontrada em manutencao_por_cultura")
 
-    faixas_argila = next(
-        atributo["faixas"]
-        for atributo in dados_comuns["interpretacao_geral"]["atributos"]
-        if atributo["atributo"] == "argila"
-    )
-    classe_argila = classificar_faixa(argila, faixas_argila)
-
     grupo_p = grupo_exigencia(cultura_id, mapa_culturas, interpretacao_p["grupos_exigencia"], "interpretacao_p.json")
-    tabela_p = next(t for t in interpretacao_p["tabelas"] if t["grupo"] == grupo_p)
-    faixas_p = next(
-        bloco["faixas"] for bloco in tabela_p["por_classe_argila"] if bloco["classe_argila"] == classe_argila
-    )
-    classe_p = classificar_faixa(p_solo, faixas_p)
-
-    faixa_ctc = classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
-
     grupo_k = grupo_exigencia(cultura_id, mapa_culturas, interpretacao_k["grupos_exigencia"], "interpretacao_k.json")
-    tabela_k = next(t for t in interpretacao_k["tabelas"] if t["grupo"] == grupo_k)
-    bloco_k = next(bloco for bloco in tabela_k["por_faixa_ctc"] if bloco["faixa_ctc"] == faixa_ctc)
-    classe_k = classificar_faixa(k_solo, bloco_k["faixas"])
+
+    leitura_p = classificar_fosforo(grupo_p, argila, p_solo, dados_comuns)
+    leitura_k = classificar_potassio(grupo_k, ctc_ph7, k_solo, dados_comuns)
+    classe_p, faixas_p = leitura_p["classe"], leitura_p["faixas"]
+    classe_k = leitura_k["classe"]
 
     rendimento_referencia = manutencao["rendimento_referencia_t_ha"]
     delta_rendimento = 0.0
@@ -266,7 +309,7 @@ def calcular_fosforo_potassio(
         # numa faixa diferente da classe exibida. Mesmo motivo de
         # ResultadoAptidao.derivados em motor/aptidao.py.
         "faixas_p": faixas_p,
-        "faixas_k": bloco_k["faixas"],
+        "faixas_k": leitura_k["faixas"],
     }
 
 
@@ -336,28 +379,10 @@ def _classificar_p_e_k(
     if grupo_exigencia is None:
         raise ErroAdubacao(f"cultura '{cultura_id}' não declara 'grupo_exigencia'")
 
-    interpretacao_p = dados_comuns["interpretacao_p"]
-    faixas_argila = next(
-        atributo["faixas"]
-        for atributo in dados_comuns["interpretacao_geral"]["atributos"]
-        if atributo["atributo"] == "argila"
-    )
-    classe_argila = classificar_faixa(argila, faixas_argila)
-    grupo_p = f"grupo_{grupo_exigencia['p']}"
-    tabela_p = next(t for t in interpretacao_p["tabelas"] if t["grupo"] == grupo_p)
-    faixas_p = next(
-        bloco["faixas"] for bloco in tabela_p["por_classe_argila"] if bloco["classe_argila"] == classe_argila
-    )
-    classe_p = classificar_faixa(p_solo, faixas_p)
+    leitura_p = classificar_fosforo(f"grupo_{grupo_exigencia['p']}", argila, p_solo, dados_comuns)
+    leitura_k = classificar_potassio(f"grupo_{grupo_exigencia['k']}", ctc_ph7, k_solo, dados_comuns)
 
-    interpretacao_k = dados_comuns["interpretacao_k"]
-    faixa_ctc = classificar_faixa(ctc_ph7, interpretacao_k["faixas_ctc"], chave_rotulo="faixa")
-    grupo_k = f"grupo_{grupo_exigencia['k']}"
-    tabela_k = next(t for t in interpretacao_k["tabelas"] if t["grupo"] == grupo_k)
-    bloco_k = next(bloco for bloco in tabela_k["por_faixa_ctc"] if bloco["faixa_ctc"] == faixa_ctc)
-    classe_k = classificar_faixa(k_solo, bloco_k["faixas"])
-
-    return classe_p, classe_k
+    return leitura_p["classe"], leitura_k["classe"]
 
 
 def _nome_indice_extra(tipo: str) -> Optional[str]:

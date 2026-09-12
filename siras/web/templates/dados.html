@@ -18,8 +18,9 @@
 
   <h1 class="t-tela">Resultados da análise de solo</h1>
   <p class="t-corpo" style="margin-top:var(--e-3);font-size:var(--fs-md)">
-    Transcreva os valores do laudo do laboratório. Cada número sai do motor com a tabela
-    do Manual que o gerou.
+    Transcreva os valores do laudo do laboratório para <b>{{ cultura_nome }}</b>.
+    Cada número sai do motor com a tabela do Manual que o gerou.
+    <a href="{{ url_for('siras.cultura') }}" style="color:var(--v-400)">Trocar de cultura</a>.
   </p>
 
   {% if leitura.faltando or leitura.invalidos %}
@@ -47,12 +48,11 @@
         <h3>Cultura e manejo</h3>
       </div>
       <div class="grade">
-        {{ c.campo_escolha("cultura_id", "Cultura", culturas, obrigatorio=True,
-                           ajuda="Define o critério de calagem e o grupo de exigência em P e K",
-                           valor=leitura.valores.get("cultura_id")) }}
+        <input type="hidden" name="cultura_id" value="{{ cultura_id }}">
         {{ c.campo_escolha("criterio_id", "Sistema de manejo", manejos, obrigatorio=True,
                            ajuda="Define a condição de disparo, o pH alvo e o modo de aplicação",
                            valor=leitura.valores.get("criterio_id")) }}
+        {% if grupo == "graos" %}
         {{ c.campo_escolha("cultivo", "Cultivo",
                            [("1", "1º cultivo — dose de correção completa"),
                             ("2", "2º cultivo — dose reduzida, em rotação")],
@@ -66,12 +66,43 @@
                            [("", "Não se aplica")] + antecedentes,
                            ajuda="Exigida por: " + culturas_com_antecedente|join(", "),
                            valor=leitura.valores.get("antecedente")) }}
+        {% endif %}
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_contexto %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
                    leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
         {% endfor %}
       </div>
     </div>
+
+    {# Divulgação progressiva (§9.2): este bloco só existe para as culturas cuja
+       recomendação o Manual publica por fase, ciclo, tipo ou programa. Quem planta soja
+       nunca vê "fase do pomar"; a macieira sempre vê. Quais campos aparecem e com quais
+       valores vem de `variavel_adicional`, transcrito na própria cultura. #}
+    {% if variaveis %}
+    <div class="painel bloco">
+      <div class="bloco__cab">
+        {{ i.ico("broto") }}
+        <h3>Manejo da cultura</h3>
+        <span class="t-aux">O Manual publica recomendações distintas para {{ cultura_nome }}</span>
+      </div>
+      <div class="grade">
+        {% for variavel in variaveis %}
+        {% if variavel.tipo == "escolha" %}
+        {{ c.campo_escolha(variavel.campo, variavel.rotulo,
+                           ([] if variavel.obrigatorio else [("", "Não se aplica")]) + variavel.valores,
+                           obrigatorio=variavel.obrigatorio,
+                           ajuda=variavel.condicao,
+                           valor=leitura.valores.get(variavel.campo)) }}
+        {% else %}
+        {{ c.campo(variavel.campo, variavel.rotulo, variavel.unidade, None,
+                   variavel.obrigatorio, "0.1", "",
+                   leitura.valores.get(variavel.campo),
+                   variavel.campo in leitura.campos_com_erro) }}
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
 
     <div class="painel bloco">
       <div class="bloco__cab">

@@ -16,6 +16,24 @@ from __future__ import annotations
 import unicodedata
 
 
+def buscar_por_nome(indice, nome: str):
+    """Procura `nome` num dicionário indexado por identificador de cultura.
+
+    Tenta a grafia exata e, só então, a normalizada. É necessário porque os arquivos não
+    concordam: mapa_culturas.json escreve 'erva-mate' com hífen e
+    erva_mate_adubacao.json escreve 'erva_mate' com underscore. Sem isto a cultura existe
+    nos dois lados e mesmo assim não é encontrada — o mesmo defeito que
+    aliases_culturas.json resolve para a sinonímia de nomes de verdade.
+    """
+    if nome in indice:
+        return indice[nome]
+    alvo = normalizar_nome_cultura(nome)
+    for chave, valor in indice.items():
+        if normalizar_nome_cultura(chave) == alvo:
+            return valor
+    return None
+
+
 def normalizar_nome_cultura(nome: str) -> str:
     """Forma canônica de comparação: minúsculas, sem acento, separador '-'.
 

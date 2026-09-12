@@ -59,29 +59,26 @@ def _formulario_do_caso(caso: dict) -> dict:
 
 
 def test_formulario_abre(cliente):
-    resposta = cliente.get("/analise/dados")
+    resposta = cliente.get("/analise/dados?cultura_id=soja")
     assert resposta.status_code == 200
     html = resposta.get_data(as_text=True)
     assert 'name="indice_smp"' in html
     assert 'name="prnt"' in html
 
 
-def test_formulario_oferece_as_21_culturas_de_graos(cliente):
-    html = cliente.get("/analise/dados").get_data(as_text=True)
-    dados = carregar_dados_comum()
-    esperadas = [
-        cultura_id for cultura_id, entrada in dados["mapa_culturas"]["culturas"].items()
-        if entrada.get("grupo") == "graos"
-    ]
-    assert len(esperadas) == 21
-    for cultura_id in esperadas:
-        assert f'value="{cultura_id}"' in html, f"{cultura_id} não aparece no formulário"
+def test_formulario_sem_cultura_volta_para_a_escolha(cliente):
+    """Quais campos existem depende da cultura: montar a tela sem ela daria um formulário
+    pela metade."""
+    resposta = cliente.get("/analise/dados")
+
+    assert resposta.status_code == 302
+    assert resposta.headers["Location"].endswith("/analise")
 
 
 def test_formulario_nao_oferece_criterio_fora_de_escopo(cliente):
     """Arroz irrigado está fora do escopo do SIRAS pelas próprias notas do critério:
     oferecê-lo na tela seria convidar o usuário a um erro garantido."""
-    html = cliente.get("/analise/dados").get_data(as_text=True)
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
     assert "arroz_irrigado_solo_seco" not in html
     assert "arroz_irrigado_pregerminado" not in html
 

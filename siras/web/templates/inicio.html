@@ -1,49 +1,170 @@
-{# PROVISÓRIO — a landing real é a etapa 7 do plano de front-end, deliberadamente a
-   última: é a que melhor rende em screenshot para a monografia e a que menos afeta o
-   escore SUS. Se o cronograma apertar, ela é a primeira coisa a cortar.
-
-   Esta página existe para que a casca seja verificável desde já: tema, fontes
-   auto-hospedadas, sprite de ícones e macros, todos servidos de static/, com a rede
-   desligada. #}
 {% extends "base.html" %}
 {% import "_macros/ico.html" as i %}
-{% import "_macros/aviso.html" as a %}
+{% import "_macros/ficha.html" as f %}
+
+{% block barra_nav %}
+<a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">Iniciar análise</a>
+{% endblock %}
 
 {% block conteudo %}
-<main class="env" style="padding:var(--e-8) 0 var(--e-10)">
-  <h1 class="t-tela">Interpretação e recomendação agronômica de solo</h1>
-  <p class="t-corpo" style="margin-top:var(--e-4)">
-    Uma análise de solo e uma cultura produzem calagem, adubação e aptidão edáfica, com
-    a tabela do Manual que gerou cada número. Sem cadastro e sem enviar dado para
-    servidor nenhum.
-  </p>
+<main>
+  <section class="hero">
+    {# O único halo do projeto. Não se repete em outra tela: gradiente decorativo
+       espalhado por todas as seções é o que faz uma página parecer template. #}
+    <div class="hero__halo" aria-hidden="true"></div>
+    <div class="env hero__grade">
+      <div>
+        <span class="selo">
+          {{ i.ico("confere", "ico ico--sm") }}
+          Manual de Calagem e Adubação RS/SC · 2016
+        </span>
+        <h1 class="t-hero">Uma análise de solo. <em>Três decisões</em> de manejo.</h1>
+        <p class="t-corpo hero__texto">
+          Informe o laudo do laboratório e a cultura. O SIRAS calcula calagem, adubação e
+          aptidão edáfica — e mostra qual tabela do Manual gerou cada número. Sem cadastro
+          e sem enviar dado para servidor nenhum.
+        </p>
+        <div class="hero__acoes">
+          <a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">
+            Iniciar análise {{ i.ico("avanca", "ico ico--sm") }}
+          </a>
+        </div>
+        <div class="hero__prova">
+          <div>
+            <div class="prova__n">{{ total_de_culturas }}</div>
+            <div class="prova__r">culturas e grupos de culturas do escopo</div>
+          </div>
+          <div>
+            <div class="prova__n">3</div>
+            <div class="prova__r">saídas por análise: calagem, adubação e aptidão</div>
+          </div>
+          <div>
+            <div class="prova__n">2</div>
+            <div class="prova__r">cenários de aptidão: o atual e o depois da correção</div>
+          </div>
+        </div>
+      </div>
 
-  <div style="margin-top:var(--e-6);max-width:var(--largura-leitura)">
-    {% set _corpo %}O motor de inferência já calcula calagem, adubação e aptidão para as
-      culturas de grãos. As telas de análise e de laudo entram nas próximas etapas do
-      plano de front-end.{% endset %}
-    {{ a.aviso("info", "Interface em construção", _corpo) }}
-  </div>
+      {# A régua, explicada — e não uma amostra de solo inventada para a vitrine. O que
+         esta peça mostra é a própria escala do Manual, que é uma afirmação verificável;
+         um laudo fictício no hero seria número agronômico fabricado. #}
+      <div class="painel painel--marca perfil-viz">
+        <div class="perfil-viz__cab">
+          <div style="display:flex;align-items:center;gap:.6rem">
+            {{ i.ico("regua") }}
+            <strong style="font-size:var(--fs-sm)">As cinco classes do Manual</strong>
+          </div>
+          <span class="t-aux" style="font-size:10px">disponibilidade de P e K</span>
+        </div>
+        <div class="perfil-viz__corpo">
+          <div class="regua" role="img"
+               aria-label="Escala de cinco classes de disponibilidade, com o alvo na classe Alto">
+            <div class="regua__faixas">
+              <span class="regua__faixa f-mb"></span>
+              <span class="regua__faixa f-b"></span>
+              <span class="regua__faixa f-m"></span>
+              <span class="regua__faixa f-a is-atual"></span>
+              <span class="regua__faixa f-ma"></span>
+            </div>
+            <div class="regua__rotulos" aria-hidden="true">
+              <span>M. baixo</span><span>Baixo</span><span>Médio</span>
+              <span class="is-atual">Alto</span><span>M. alto</span>
+            </div>
+          </div>
 
-  <section class="pilares" style="margin-top:var(--e-7)">
-    <article class="painel pilar">
-      <span class="pilar__ico">{{ i.ico("calagem", "ico ico--lg") }}</span>
-      <h3>Calagem</h3>
-      <p>Dose de calcário pelo índice SMP, dirigida pelo critério de grupo da cultura e
-         ajustada ao PRNT do corretivo.</p>
-    </article>
-    <article class="painel pilar">
-      <span class="pilar__ico">{{ i.ico("alvo", "ico ico--lg") }}</span>
-      <h3>Adubação</h3>
-      <p>N, P<sub>2</sub>O<sub>5</sub> e K<sub>2</sub>O em kg/ha pela classe de
-         disponibilidade do solo e pela expectativa de rendimento.</p>
-    </article>
-    <article class="painel pilar">
-      <span class="pilar__ico">{{ i.ico("aptidao", "ico ico--lg") }}</span>
-      <h3>Aptidão edáfica</h3>
-      <p>Grau de aptidão da cultura na área e os atributos que limitam, nos cenários
-         atual e potencial.</p>
-    </article>
+          <p class="t-aux" style="margin-top:var(--e-4)">
+            O alvo da adubação é a classe {{ f.ficha("a", "Alto") }}, onde o Manual
+            situa a máxima resposta econômica — e não o extremo da escala.
+          </p>
+          <p class="t-aux">
+            {{ f.ficha("ma", "Muito alto") }} começa no dobro do teor crítico e indica
+            teor acima da demanda da cultura: dose baixa ou nula, e atenção ao limite
+            crítico ambiental. Por isso a escala não é um semáforo.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faixa faixa--alt">
+    <div class="env">
+      <div class="cab-secao">
+        <h2 class="t-tela">Três saídas de uma única análise</h2>
+        <p>Com a regra visível por trás de cada uma.</p>
+      </div>
+      <div class="pilares">
+        <article class="painel pilar">
+          <span class="pilar__ico">{{ i.ico("calagem", "ico ico--lg") }}</span>
+          <h3>Calagem</h3>
+          <p>Dose de calcário pelo índice SMP, dirigida pelo critério de grupo da cultura
+             e pelo sistema de manejo, e ajustada ao PRNT do corretivo informado.</p>
+        </article>
+        <article class="painel pilar">
+          <span class="pilar__ico">{{ i.ico("alvo", "ico ico--lg") }}</span>
+          <h3>Adubação</h3>
+          <p>N, P<sub>2</sub>O<sub>5</sub> e K<sub>2</sub>O em kg/ha pela classe de
+             disponibilidade do solo e pela expectativa de rendimento da área.</p>
+        </article>
+        <article class="painel pilar">
+          <span class="pilar__ico">{{ i.ico("aptidao", "ico ico--lg") }}</span>
+          <h3>Aptidão edáfica</h3>
+          <p>Grau de aptidão da cultura naquela área e os atributos que limitam, na
+             situação atual e na que resulta das correções recomendadas.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="faixa">
+    <div class="env">
+      <div class="cab-secao">
+        <h2 class="t-tela">De onde vem cada número</h2>
+        <p>Toda saída do SIRAS é rastreável até a regra e a tabela do Manual que a
+           produziram. O laudo traz essa trilha em seção própria — não como nota de
+           rodapé —, para que o técnico possa conferir e para que o documento tenha
+           utilidade em análise de crédito rural.</p>
+      </div>
+      <div class="pilares">
+        <article class="painel pilar">
+          <span class="pilar__ico">{{ i.ico("rastro", "ico ico--lg") }}</span>
+          <h3>Cada dose cita a tabela</h3>
+          <p>A trilha registra a regra aplicada, as entradas que ela leu e a página do
+             Manual de onde saiu o valor.</p>
+        </article>
+        <article class="painel pilar">
+          <span class="pilar__ico">{{ i.ico("imprime", "ico ico--lg") }}</span>
+          <h3>Sai em papel sem retrabalho</h3>
+          <p>O laudo é uma superfície branca dentro do sistema, com folha de impressão
+             própria em A4.</p>
+        </article>
+        <article class="painel pilar">
+          <span class="pilar__ico">{{ i.ico("perfil", "ico ico--lg") }}</span>
+          <h3>Roda local e offline</h3>
+          <p>Sem cadastro, sem banco de dados e sem chamada de rede. A análise não sai
+             da máquina de quem a digitou.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="faixa faixa--alt">
+    <div class="env" style="display:grid;gap:var(--e-5);justify-items:start">
+      <h2 class="t-secao">Comece pela cultura</h2>
+      <p class="t-corpo">
+        Ela define o critério de calagem, o grupo de exigência em fósforo e potássio e
+        quais informações de manejo o Manual pede.
+      </p>
+      <a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">
+        Iniciar análise {{ i.ico("avanca", "ico ico--sm") }}
+      </a>
+      <p class="t-aux" style="max-width:var(--largura-leitura)">
+        O SIRAS é ferramenta de apoio à decisão e não substitui a responsabilidade técnica
+        de profissional habilitado na emissão de recomendações oficiais de correção e
+        adubação. Fonte normativa: Comissão de Química e Fertilidade do Solo — RS/SC,
+        <em>Manual de Calagem e Adubação para os Estados do Rio Grande do Sul e de Santa
+        Catarina</em>, 11. ed., 2016.
+      </p>
+    </div>
   </section>
 </main>
 {% endblock %}

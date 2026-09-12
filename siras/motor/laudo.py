@@ -12,9 +12,10 @@ Toda regra agronômica continua nos três módulos; aqui só existe despacho por
 cultura, montagem do Laudo e registro no Trace dos passos que os módulos de adubação não
 registram sozinhos (eles não recebem Trace — ver _registrar_adubacao_no_trace).
 
-Escopo implementado: grupo 'graos' (docs/ROADMAP.md, S2/M1). Os demais grupos já têm
-motor de adubação pronto, mas dados/comum/mapa_culturas.json ainda não os mapeia, e sem
-esse mapeamento a calagem não resolve o critério — ver ErroLaudo em _resolver_grupo().
+Escopo: os seis grupos do escopo de recomendação. Grãos têm caminho próprio porque são a
+exceção do Manual — publicam correção e manutenção em separado, com algoritmo de dose por
+cultivo; os outros cinco publicam a dose pronta por classe de teor e compartilham um
+despacho só, parametrizado pelas variáveis condicionais que cada um exige.
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ from siras.conhecimento.carregador import (
 )
 from siras.dominio.analise import AnaliseSolo, Contexto
 from siras.dominio.laudo import Laudo, RecomendacaoAdubacao, RecomendacaoCalagem
+from siras.dominio.nomes import buscar_por_nome
 from siras.motor.adubacao import (
     calcular_adubacao_erva_mate,
     calcular_adubacao_frutiferas,
@@ -298,7 +300,7 @@ def _faixas_da_classe(
     usou. Se divergirem, é erro de dado ou de resolução de grupo, e é melhor estourar
     aqui do que desenhar uma régua apontando para outra faixa.
     """
-    entrada = dados_grupo["adubacao"].get("culturas", {}).get(cultura_id, {})
+    entrada = buscar_por_nome(dados_grupo["adubacao"].get("culturas", {}), cultura_id) or {}
     declarado = entrada.get("grupo_exigencia")
     if not declarado:
         return [], []
@@ -428,7 +430,11 @@ def dados_do_grupo(grupo: str) -> Optional[Dict[str, Any]]:
     carregar = _CARREGADOR_POR_GRUPO.get(grupo)
     if carregar is None:
         return None
-    return carregar()["adubacao"].get("culturas")
+    carregado = carregar()
+    # Grãos são o único grupo com dois arquivos (N e PK) em vez de um: o de N é o que
+    # lista as culturas.
+    bloco = carregado.get("adubacao") or carregado.get("adubacao_n") or {}
+    return bloco.get("culturas")
 
 
 def gerar_laudo(

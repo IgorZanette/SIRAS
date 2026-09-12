@@ -2,8 +2,8 @@
 
 Mapa previsto (PLANO-FRONTEND §9.1), implementado por etapas:
 
-    /                  landing                        — etapa 7, hoje um provisório
-    /analise           etapa 1, escolha da cultura    — etapa 5
+    /                  landing                        — pronto
+    /analise           etapa 1, escolha da cultura    — pronto
     /analise/dados     etapa 2, análise de solo       — pronto
     /analise/laudo     etapa 3, laudo                 — pronto
     /api/interpretar   POST, leitura ao vivo          — pronto
@@ -20,35 +20,49 @@ from typing import Any, Dict
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_graos
+from siras.dominio.escopo import (
+    TOTAL_DE_CULTURAS_NO_ESCOPO,
+    no_escopo_de_recomendacao,
+)
+from siras.motor.laudo import dados_do_grupo
 from siras.motor.adubacao import ErroAdubacao
 from siras.motor.aptidao import ErroAptidao
 from siras.motor.calagem import ErroCalagem
 from siras.motor.laudo import ErroLaudo, gerar_laudo
 from siras.motor.leitura import interpretar_parcial
-from siras.relatorio.apresentacao import apresentar_laudo, apresentar_leitura
+from siras.relatorio.apresentacao import (
+    apresentar_laudo,
+    apresentar_leitura,
+    nome_de_exibicao,
+)
 from siras.web import formulario
 
 bp = Blueprint("siras", __name__)
 
-#: Único grupo que gerar_laudo() despacha hoje (docs/ROADMAP.md, S2/M1).
-_GRUPO = "graos"
+def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
+    """Tudo que a tela de dados oferece sai da base de conhecimento.
 
-
-def _opcoes_do_formulario() -> Dict[str, Any]:
-    """Tudo que os selects da tela de dados oferecem sai da base de conhecimento.
-
-    Nenhuma lista de cultura, de manejo ou de antecedente é escrita no template: se a
-    base ganhar uma cultura, a tela ganha junto, e se perder, a tela não oferece uma
-    opção que o motor recusaria.
+    Nenhuma lista de cultura, de manejo, de antecedente ou de variável condicional é
+    escrita no template: se a base ganhar uma cultura, a tela ganha junto, e se perder, a
+    tela não oferece uma opção que o motor recusaria.
     """
     dados = carregar_dados_comum()
     dados_graos = carregar_dados_graos()
+    grupo = formulario.grupo_da_cultura(cultura_id, dados)
     return {
         "dados": dados,
-        "culturas": formulario.culturas_disponiveis(dados, _GRUPO),
-        "manejos": formulario.opcoes_de_manejo(dados, _GRUPO),
-        "antecedentes": formulario.antecedentes_disponiveis(dados_graos),
-        "culturas_com_antecedente": formulario.culturas_que_exigem_antecedente(dados_graos, dados),
+        "cultura_id": cultura_id,
+        "cultura_nome": nome_de_exibicao(cultura_id, dados) if cultura_id else "",
+        "grupo": grupo,
+        "manejos": formulario.opcoes_de_manejo(dados, grupo),
+        "antecedentes": formulario.antecedentes_disponiveis(dados_graos) if grupo == "graos" else [],
+        "culturas_com_antecedente": (
+            formulario.culturas_que_exigem_antecedente(dados_graos, dados)
+            if grupo == "graos" else []
+        ),
+        "variaveis": formulario.variaveis_condicionais(
+            cultura_id, grupo, dados_do_grupo(grupo)
+        ),
         "campos_acidez": formulario.CAMPOS_ACIDEZ,
         "campos_fertilidade": formulario.CAMPOS_FERTILIDADE,
         "campos_subsuperficie": formulario.CAMPOS_SUBSUPERFICIE,
@@ -56,24 +70,47 @@ def _opcoes_do_formulario() -> Dict[str, Any]:
     }
 
 
-def _tela_de_dados(leitura: formulario.LeituraFormulario = None, erro_do_motor: str = None):
+def _tela_de_dados(cultura_id: str, leitura=None, erro_do_motor: str = None):
     return render_template(
         "dados.html",
         leitura=leitura or formulario.LeituraFormulario(),
         erro_do_motor=erro_do_motor,
-        **_opcoes_do_formulario(),
+        **_opcoes_do_formulario(cultura_id),
     )
 
 
 @bp.get("/")
 def inicio():
-    """Provisório até a etapa 7 (landing)."""
-    return render_template("inicio.html")
+    """Landing. O total de culturas vem de siras/dominio/escopo.py, e não escrito no
+    template: número de vitrine que diverge do escopo real é o tipo de erro que só
+    aparece quando alguém da banca conta."""
+    return render_template("inicio.html", total_de_culturas=TOTAL_DE_CULTURAS_NO_ESCOPO)
+
+
+@bp.get("/analise")
+def cultura():
+    """Etapa 1. A cultura precede a análise porque define o critério de calagem, o grupo
+    de exigência em P e K e quais campos condicionais existem (PLANO-FRONTEND §9.1)."""
+    return render_template(
+        "cultura.html", grupos=formulario.grupos_com_culturas(carregar_dados_comum())
+    )
 
 
 @bp.get("/analise/dados")
 def dados():
-    return _tela_de_dados()
+    """Sem cultura escolhida não há formulário a montar: quais campos existem depende
+    dela. Volta para a etapa 1 em vez de exibir uma tela pela metade."""
+    cultura_id = (request.args.get("cultura_id") or "").strip()
+    dados_comuns = carregar_dados_comum()
+    if (
+        not cultura_id
+        or not formulario.grupo_da_cultura(cultura_id, dados_comuns)
+        or not no_escopo_de_recomendacao(cultura_id)
+    ):
+        # Espécie florestal está mapeada para a aptidão e fora do escopo de recomendação
+        # (docs/decisoes/0006): o formulário de recomendação não abre para ela.
+        return redirect(url_for("siras.cultura"))
+    return _tela_de_dados(cultura_id)
 
 
 @bp.get("/analise/laudo")
@@ -132,16 +169,18 @@ def interpretar():
 @bp.post("/analise/laudo")
 def laudo():
     dados_comuns = carregar_dados_comum()
-    leitura = formulario.ler(request.form, dados_comuns, _GRUPO)
+    cultura_id = (request.form.get("cultura_id") or "").strip()
+    grupo = formulario.grupo_da_cultura(cultura_id, dados_comuns)
+    leitura = formulario.ler(request.form, dados_comuns, dados_do_grupo(grupo))
 
     if not leitura.ok:
-        return _tela_de_dados(leitura), 422
+        return _tela_de_dados(cultura_id, leitura), 422
 
     try:
         resultado = gerar_laudo(leitura.analise, leitura.contexto.cultura_id, leitura.contexto)
     except (ErroLaudo, ErroCalagem, ErroAdubacao, ErroAptidao) as erro:
         # Erro de escopo ou de base incompleta, não de digitação: o formulário volta
         # preenchido e a mensagem do motor aparece inteira, sem tradução que a apague.
-        return _tela_de_dados(leitura, erro_do_motor=str(erro)), 422
+        return _tela_de_dados(cultura_id, leitura, erro_do_motor=str(erro)), 422
 
     return render_template("laudo.html", laudo=apresentar_laudo(resultado, dados_comuns))

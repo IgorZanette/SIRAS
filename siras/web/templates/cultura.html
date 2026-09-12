@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% import "_macros/ico.html" as i %}
+
+{% block titulo %}Escolha da cultura — SIRAS{% endblock %}
+
+{% block conteudo %}
+<main class="env" style="padding-bottom:var(--e-10)">
+
+  <ol class="etapas nao-imprime">
+    <li class="etapa is-ativa"><span class="etapa__n">1</span><span class="etapa__t">Cultura</span></li>
+    <li class="etapa"><span class="etapa__n">2</span><span class="etapa__t">Análise de solo</span></li>
+    <li class="etapa"><span class="etapa__n">3</span><span class="etapa__t">Laudo</span></li>
+  </ol>
+
+  <h1 class="t-tela">Qual cultura vai entrar na área?</h1>
+  <p class="t-corpo" style="margin-top:var(--e-3);font-size:var(--fs-md)">
+    A cultura define o critério de calagem, o grupo de exigência em fósforo e potássio e
+    quais informações de manejo o Manual pede adiante.
+  </p>
+
+  {# Seleção por reconhecimento, não por recordação (heurística 6 de Nielsen): as 61
+     culturas ficam visíveis, agrupadas como o Capítulo 6 do Manual as organiza, em vez
+     de escondidas atrás de um campo de busca que exige saber o nome exato.
+
+     Cada pílula é um <a>, não um <div> clicável: navega, funciona com teclado e com o
+     JavaScript desligado (WCAG 2.1.1). #}
+  {% for grupo in grupos %}
+  {% if grupo.culturas %}
+  <section class="painel bloco" style="margin-top:var(--e-4)">
+    <div class="bloco__cab">
+      {{ i.ico(grupo.icone) }}
+      <h3>{{ grupo.nome }}</h3>
+      <span class="t-aux">{{ grupo.culturas|length }}
+        {{ "cultura" if grupo.culturas|length == 1 else "culturas" }}</span>
+    </div>
+    <p class="t-aux" style="margin:calc(-1 * var(--e-3)) 0 var(--e-4)">{{ grupo.descricao }}</p>
+    <div class="culturas">
+      {% for cultura_id, nome in grupo.culturas %}
+      <a class="cultura" href="{{ url_for('siras.dados', cultura_id=cultura_id) }}">{{ nome }}</a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+  {% endfor %}
+</main>
+{% endblock %}

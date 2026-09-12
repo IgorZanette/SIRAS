@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from siras.dominio.analise import AnaliseSolo, Camada, Contexto
 from siras.dominio.escopo import no_escopo_de_recomendacao
+from siras.dominio.nomes import buscar_por_nome
 
 #: Campos da camada de referência de fertilidade (0-20 cm por padrão).
 #: (id, rótulo, unidade em HTML, ajuda, obrigatório, passo, exemplo)
@@ -140,6 +141,129 @@ def opcoes_de_manejo(dados: Dict[str, Any], grupo: str = "graos") -> List[Tuple[
     return opcoes
 
 
+#: Os seis grupos do escopo, na ordem em que as seções aparecem no Capítulo 6 do Manual.
+#: (chave em mapa_culturas.json, ícone do sprite, nome de tela, o que caracteriza o grupo)
+GRUPOS = (
+    ("graos", "graos", "Culturas de grãos",
+     "Seção 6.1. Dose de N pela matéria orgânica; P e K por correção mais manutenção."),
+    ("hortalicas", "hortalicas", "Hortaliças",
+     "Seção 6.3. Dose publicada por classe de teor. Só o aspargo tem pH de referência próprio."),
+    ("tuberculos", "tuberculos", "Tubérculos",
+     "Seção 6.3. Batata e batata-doce, com tabela completa de N, P e K."),
+    ("frutiferas", "frutiferas", "Frutíferas",
+     "Seção 6.5. A recomendação muda com a fase do pomar, que o sistema pergunta adiante."),
+    ("erva_mate", "erva", "Erva-mate",
+     "Seção 6.6.5. Sem pH de referência: a calagem só supre cálcio e magnésio."),
+    ("outras", "comerciais", "Outras comerciais",
+     "Seções 6.6.1 e 6.6.2. Cana-de-açúcar e tabaco, com calagem indicada abaixo de pH 5,5."),
+)
+
+
+def grupos_com_culturas(dados: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Os seis grupos com as culturas de cada um, para a tela de escolha."""
+    return [
+        {
+            "id": identificador,
+            "icone": icone,
+            "nome": nome,
+            "descricao": descricao,
+            "culturas": culturas_disponiveis(dados, identificador),
+        }
+        for identificador, icone, nome, descricao in GRUPOS
+    ]
+
+
+#: Fases de adubação das frutíferas (Seção 6.5 do Manual). São nomes de seção, não
+#: valores agronômicos; quais delas existem para cada espécie sai do próprio arquivo.
+_FASES_DE_FRUTIFERA = ("pre_plantio", "crescimento", "manutencao")
+
+#: Rótulo de tela dos identificadores das variáveis condicionais.
+_ROTULO_DE_VARIAVEL = {
+    "fase": "Fase do pomar",
+    "programa": "Programa de adubação",
+    "momento": "Momento da aplicação",
+    "manejo_galho_grosso": "Manejo do galho grosso",
+    "tipo_uva": "Tipo de uva",
+    "ciclo": "Ciclo da cana",
+    "tipo": "Tipo cultivado",
+    "ano": "Ano após o plantio",
+    "produtividade_estimada": "Produtividade estimada",
+    "produtividade_t_ha": "Produtividade estimada",
+    "massa_verde_t_ha": "Massa verde colhida",
+}
+
+#: Variáveis numéricas que as funções de adubação aceitam além das declaradas em
+#: `variavel_adicional`. São nomes de parâmetro, e a obrigatoriedade de cada uma depende
+#: da fase — quem sabe disso é a função do grupo, que já nomeia a que faltar.
+_NUMERICAS_POR_GRUPO = {
+    "frutiferas": (("ano", None), ("produtividade_estimada", "t/ha")),
+    "outras": (("produtividade_t_ha", "t/ha"),),
+    "erva_mate": (("massa_verde_t_ha", "t/ha"),),
+}
+
+
+def _rotular(identificador: str) -> str:
+    return _ROTULO_DE_VARIAVEL.get(
+        identificador, identificador.replace("_", " ").capitalize()
+    )
+
+
+def variaveis_condicionais(
+    cultura_id: str, grupo: str, entradas: Optional[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    """Campos que existem só para certas culturas (PLANO-FRONTEND §9.2).
+
+    Quem planta soja nunca vê "fase do pomar", e a macieira sempre vê — não por uma lista
+    escrita no template, mas porque a base declara, em `variavel_adicional`, qual campo
+    cada cultura exige e com que valores. Videira declara `tipo_uva`, cana declara
+    `ciclo`, tabaco declara `tipo`, erva-mate declara quatro. Acrescentar uma cultura com
+    variável nova na base faz a tela ganhar o campo sem uma linha de código.
+
+    As fases das frutíferas são a exceção: não vêm declaradas, e saem das chaves de fase
+    presentes na própria cultura.
+    """
+    entrada = buscar_por_nome(entradas, cultura_id) if entradas else None
+    if not entrada:
+        return []
+
+    variaveis: List[Dict[str, Any]] = []
+
+    if grupo == "frutiferas":
+        fases = [fase for fase in _FASES_DE_FRUTIFERA if fase in entrada]
+        if fases:
+            variaveis.append({
+                "campo": "fase",
+                "rotulo": _rotular("fase"),
+                "tipo": "escolha",
+                "obrigatorio": True,
+                "valores": [(fase, _rotular(fase)) for fase in fases],
+            })
+
+    declaradas = entrada.get("variavel_adicional") or []
+    if isinstance(declaradas, dict):
+        declaradas = [declaradas]
+    for declarada in declaradas:
+        variaveis.append({
+            "campo": declarada["campo"],
+            "rotulo": _rotular(declarada["campo"]),
+            "tipo": "escolha",
+            "obrigatorio": bool(declarada.get("obrigatorio")),
+            "valores": [(valor, _rotular(valor)) for valor in declarada.get("valores", ())],
+            "condicao": declarada.get("condicao"),
+        })
+
+    for campo, unidade in _NUMERICAS_POR_GRUPO.get(grupo, ()):
+        variaveis.append({
+            "campo": campo,
+            "rotulo": _rotular(campo),
+            "tipo": "numero",
+            "obrigatorio": False,
+            "unidade": unidade,
+        })
+
+    return variaveis
+
+
 def antecedentes_disponiveis(dados_graos: Dict[str, Any]) -> List[Tuple[str, str]]:
     """Antecedentes declarados pelas culturas cujo modelo de N depende delas."""
     vistos: Dict[str, None] = {}
@@ -169,13 +293,51 @@ def _montar_subsuperficie(numeros: Dict[str, Optional[float]]) -> Optional[Camad
     return Camada(de_cm=10, ate_cm=20, **informados)
 
 
+def grupo_da_cultura(cultura_id: str, dados: Dict[str, Any]) -> str:
+    """Grupo da cultura em mapa_culturas.json, ou string vazia se não houver."""
+    return dados["mapa_culturas"]["culturas"].get(cultura_id, {}).get("grupo", "")
+
+
+def _ler_variaveis(
+    form: Mapping[str, str],
+    cultura_id: str,
+    grupo: str,
+    entradas_do_grupo: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Recolhe do formulário só as variáveis condicionais que esta cultura declara.
+
+    Filtrar pelo que a cultura declara, em vez de aceitar qualquer campo que venha no
+    POST, impede que um valor colado de outra cultura (um 'ciclo' sobrando de uma escolha
+    anterior) chegue à função de adubação e mude a dose sem aparecer na tela.
+    """
+    recolhidas: Dict[str, Any] = {}
+    for variavel in variaveis_condicionais(cultura_id, grupo, entradas_do_grupo):
+        bruto = (form.get(variavel["campo"]) or "").strip()
+        if not bruto:
+            continue
+        if variavel["tipo"] == "numero":
+            numero = para_numero(bruto)
+            if numero is not None:
+                recolhidas[variavel["campo"]] = (
+                    int(numero) if variavel["campo"] == "ano" else numero
+                )
+        else:
+            recolhidas[variavel["campo"]] = bruto
+    return recolhidas
+
+
 def ler(
-    form: Mapping[str, str], dados: Dict[str, Any], grupo: str = "graos"
+    form: Mapping[str, str],
+    dados: Dict[str, Any],
+    entradas_do_grupo: Optional[Dict[str, Any]] = None,
 ) -> LeituraFormulario:
     """Lê o formulário e devolve AnaliseSolo + Contexto, ou o que impediu.
 
     Coleta TODOS os campos em branco antes de desistir, em vez de parar no primeiro: o
     técnico corrige uma vez, não onze.
+
+    `entradas_do_grupo` são as culturas transcritas na adubação do grupo, usadas para
+    saber quais variáveis condicionais esta cultura exige.
     """
     leitura = LeituraFormulario(valores={chave: form.get(chave, "") for chave in form})
 
@@ -195,12 +357,15 @@ def ler(
         numeros[campo_id] = valor
 
     cultura_id = (form.get("cultura_id") or "").strip()
+    grupo = grupo_da_cultura(cultura_id, dados)
     validas = {identificador for identificador, _ in culturas_disponiveis(dados, grupo)}
     if not cultura_id:
         leitura.faltando.append("Cultura")
         leitura.campos_com_erro.append("cultura_id")
     elif cultura_id not in validas:
-        leitura.invalidos.append(f"Cultura: “{cultura_id}” não está no catálogo de {grupo}")
+        leitura.invalidos.append(
+            f"Cultura: “{cultura_id}” não está no catálogo de culturas do escopo"
+        )
         leitura.campos_com_erro.append("cultura_id")
 
     criterio_id = (form.get("criterio_id") or "").strip()
@@ -248,6 +413,7 @@ def ler(
             expectativa_rendimento=numeros["expectativa_rendimento"],
             cultivo=int(form.get("cultivo") or 1),
             antecedente=(form.get("antecedente") or "").strip() or None,
+            variaveis=_ler_variaveis(form, cultura_id, grupo, entradas_do_grupo),
         )
     except ValueError as erro:
         leitura.analise = None
@@ -266,6 +432,8 @@ __all__ = [
     "para_numero",
     "culturas_disponiveis",
     "culturas_que_exigem_antecedente",
+    "grupo_da_cultura",
+    "variaveis_condicionais",
     "ler",
     "opcoes_de_manejo",
 ]

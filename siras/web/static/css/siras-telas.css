@@ -244,3 +244,57 @@
 
 .doc__rodape { margin-top: var(--e-7); padding-top: var(--e-4); border-top: 1px solid #D8E2DB;
                font-size: var(--fs-xs); color: #5C6F64; line-height: 1.55; }
+
+/* =========================================================================
+   Folha de impressao
+   -------------------------------------------------------------------------
+   siras-theme.css ja cobre o essencial: fundo branco, .nao-imprime oculto,
+   print-color-adjust nas faixas e fichas, margem de pagina. O que esta aqui e o
+   que depende do LAYOUT das telas, e por isso nao cabia no tema.
+
+   O laudo e o unico documento que vai a papel. Ele sai de window.print(), que
+   mantem o texto selecionavel e nao acrescenta dependencia ao projeto.
+   ====================================================================== */
+@media print {
+
+  /* A malha e textura de instrumento: em tela da ao fundo escuro a leitura de
+     superficie, em papel seria so toner gasto. */
+  body.malha { background-image: none; }
+
+  /* O envelope deixa de ser cartao centrado e passa a ser a propria pagina --
+     a margem quem da e a @page, nao o CSS de tela. */
+  .env { max-width: none; padding: 0; }
+  .doc { border: 0; border-radius: 0; }
+  .doc__cab { padding: 0 0 var(--e-4); }
+  .doc__corpo { padding: var(--e-5) 0 0; }
+
+  /* Corpo tipografico de tela nao serve para papel: 48px de numero-veredito sao
+     desproporcionais numa folha A4. A hierarquia entre os quatro numeros e
+     preservada -- o calcario continua maior que os demais. */
+  .numero { font-size: 20pt; }
+  .numero--sec { font-size: 15pt; }
+  .doc__cab h2 { font-size: 16pt; }
+  .sec__cab h3 { font-size: 12pt; }
+  .dose__obs, .campo__ajuda, .t-aux { font-size: 8pt; }
+
+  /* Quebra de pagina: o que nao pode partir e o ITEM, nao a secao inteira.
+     O tema aplica break-inside:avoid a section, o que funciona para blocos
+     curtos e atrapalha nos longos: a trilha tem mais de vinte passos e e mais
+     alta que uma folha, entao a restricao acaba ignorada pelo navegador depois
+     de empurrar a secao para a pagina seguinte -- sobra meia folha em branco e a
+     secao quebra do mesmo jeito. Restringir item a item quebra onde deve. */
+  section, .painel { break-inside: auto; }
+  .dose, .atributo, .trilha__item, .limitante, .aptidao__selo { break-inside: avoid; }
+
+  /* Titulo orfao no pe da pagina e o defeito mais visivel de um laudo impresso. */
+  .sec__cab, h2, h3, h4 { break-after: avoid; }
+  .doc__rodape { break-before: avoid; }
+  p { orphans: 3; widows: 3; }
+
+  /* A regua sem cor nao diz nada, e e o componente que carrega a interpretacao. */
+  .regua__faixa, .regua__marcador, .ficha, .dose, .limitante__barra i,
+  .aptidao__selo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* O laudo e entregue, nao navegado: endereco de link nao interessa em papel. */
+  a[href]::after { content: none; }
+}

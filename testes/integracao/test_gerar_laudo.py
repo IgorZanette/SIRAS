@@ -149,10 +149,16 @@ def test_grupo_ainda_nao_implementado_falha_de_forma_explicita():
 
 
 def test_cultura_fora_do_mapa_falha_apontando_o_arquivo():
-    """A mensagem precisa dizer onde falta o dado — é transcrição pendente, não bug."""
+    """A mensagem precisa dizer onde falta o dado — é transcrição pendente, não bug.
+
+    O identificador é um sentinela, e não uma cultura real de propósito: quando a
+    transcrição do mapa avança, uma cultura real deixa de servir de exemplo e o teste
+    passa a falhar por motivo errado. Foi o que aconteceu com 'tomate'.
+    """
     entrada = _casos()["ADU-01"]["entrada"]
+    inexistente = "cultura_nao_mapeada_para_teste"
     contexto = Contexto(
-        cultura_id="tomate",
+        cultura_id=inexistente,
         sistema_manejo="convencional",
         condicao_area=_CONDICAO_AREA_GRAOS_CONVENCIONAL,
         prnt=entrada["prnt"],
@@ -160,4 +166,4 @@ def test_cultura_fora_do_mapa_falha_apontando_o_arquivo():
     )
 
     with pytest.raises(ErroLaudo, match="mapa_culturas.json"):
-        gerar_laudo(_analise(entrada), "tomate", contexto)
+        gerar_laudo(_analise(entrada), inexistente, contexto)

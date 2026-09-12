@@ -1,100 +1,79 @@
 {
-  "descricao": "Mapeia cultura para o grupo usado em criterios_calagem.json (Tab. 5.3/5.5/5.6/5.7). Para grupos genericos (graos, hortalicas, outras), o criterio exato e resolvido cruzando grupo + sistema_manejo + condicao_area do Contexto contra criterios_calagem.json. Quando o criterio ja e especifico da especie (campo criterio_calagem presente), esse campo tem prioridade e ignora sistema_manejo/condicao_area. As 21 culturas de graos abaixo espelham dados/culturas/graos/graos_adubacao_n.json (mesma checksum: 21 culturas). As seis especies florestais (Anexo 2, secao FLORESTAIS, p. 364) declaram grupo 'erva_mate' porque esse e o grupo do criterio erva_mate_e_florestais em criterios_calagem.json, que as cobre junto com a erva-mate (Tab. 5.6); o campo grupo aqui nomeia o grupo do criterio de calagem, nao o grupo de adubacao da especie.",
+  "descricao": "Mapeia cultura para o grupo usado em criterios_calagem.json (Tab. 5.3/5.5/5.6/5.7). Para grupos genericos (graos, hortalicas, tuberculos, outras), o criterio exato e resolvido cruzando grupo + sistema_manejo + condicao_area do Contexto contra criterios_calagem.json. Quando o criterio ja e especifico da especie (campo criterio_calagem presente), esse campo tem prioridade e ignora sistema_manejo/condicao_area â usado para aspargo (unica hortalica com pH de referencia proprio, 6,5, dentro do grupo hortalicas) e para todas as frutiferas (as 3 linhas do criterio em frutiferas se distinguem por especie, nao por sistema_manejo/condicao_area, entao toda frutifera exige o campo). As 21 culturas de graos abaixo espelham dados/culturas/graos/graos_adubacao_n.json (mesma checksum: 21 culturas). RESOLVIDO (conferido no sumario do Manual, p. 183 em diante): a secao 6.5.16 e conjunta para pessegueiro e nectarineira (1 cultura, pessegueiro_nectarineira), mas 6.5.17 (quivizeiro) e 6.5.18 (videira) sao secoes independentes, cada uma com diagnose foliar propria â portanto sao 2 culturas separadas, nao 1. Com essa correcao o escopo aprovado fecha em 61 culturas (21 graos + 18 hortalicas + 2 tuberculos + 17 frutiferas + 1 erva-mate + 2 outras), descontando as florestais. Identificadores de hortalicas conferidos contra dados/culturas/hortalicas/hortalicas_adubacao.json (fonte de verdade para agrupamento por secao do Manual): alface entra no mesmo grupo de almeirao/chicoria/rucula/salsa (5 especies, secao 6.3.3, uma cultura so), repolho e tomate sao duas culturas separadas (secoes 6.3.19 e 6.3.20, com grupo_exigencia de K diferente entre elas), e as chaves compostas usam concatenacao direta por underscore, sem conector '_e_' (abobora_abobrinha_moranga, beterraba_cenoura, brocolis_couve_flor, melancia_melao, nabo_rabanete). ESCOPO DE RECOMENDACAO x MAPEAMENTO: sao eixos distintos (ver ADR 0006, docs/decisoes/0006-especies-florestais-fora-do-escopo-de-recomendacao.md). As 6 florestais abaixo permanecem mapeadas para o criterio erva_mate_e_florestais porque sao avaliadas pelo modulo de aptidao (11 casos de conformidade dependem disso), mas nao fazem parte das 61 culturas do escopo de recomendacao da Proposta_TCC_v9 â esse filtro e aplicado em codigo (siras/dominio/escopo.py, culturas_disponiveis() / no_escopo_de_recomendacao()), nao aqui.",
   "culturas": {
-    "soja": {
-      "grupo": "graos"
-    },
-    "milho": {
-      "grupo": "graos"
-    },
-    "trigo": {
-      "grupo": "graos"
-    },
-    "amendoim": {
-      "grupo": "graos"
-    },
-    "arroz_de_sequeiro": {
-      "grupo": "graos"
-    },
-    "aveia_branca": {
-      "grupo": "graos"
-    },
-    "aveia_preta": {
-      "grupo": "graos"
-    },
-    "canola": {
-      "grupo": "graos"
-    },
-    "centeio": {
-      "grupo": "graos"
-    },
-    "cevada": {
-      "grupo": "graos"
-    },
-    "ervilha_seca_e_forrageira": {
-      "grupo": "graos"
-    },
-    "ervilhaca": {
-      "grupo": "graos"
-    },
-    "feijao": {
-      "grupo": "graos"
-    },
-    "girassol": {
-      "grupo": "graos"
-    },
-    "linho": {
-      "grupo": "graos"
-    },
-    "milho_pipoca": {
-      "grupo": "graos"
-    },
-    "nabo_forrageiro": {
-      "grupo": "graos"
-    },
-    "painco": {
-      "grupo": "graos"
-    },
-    "sorgo": {
-      "grupo": "graos"
-    },
-    "tremoco": {
-      "grupo": "graos"
-    },
-    "triticale": {
-      "grupo": "graos"
-    },
-    "macieira": {
-      "grupo": "frutiferas",
-      "criterio_calagem": "macieira_oliveira"
-    },
-    "erva-mate": {
-      "grupo": "erva_mate",
-      "criterio_calagem": "erva_mate_e_florestais"
-    },
-    "acácia-negra": {
-      "grupo": "erva_mate",
-      "criterio_calagem": "erva_mate_e_florestais"
-    },
-    "araucária": {
-      "grupo": "erva_mate",
-      "criterio_calagem": "erva_mate_e_florestais"
-    },
-    "bracatinga": {
-      "grupo": "erva_mate",
-      "criterio_calagem": "erva_mate_e_florestais"
-    },
-    "cedro-australiano": {
-      "grupo": "erva_mate",
-      "criterio_calagem": "erva_mate_e_florestais"
-    },
-    "eucalipto": {
-      "grupo": "erva_mate",
-      "criterio_calagem": "erva_mate_e_florestais"
-    },
-    "pinus": {
-      "grupo": "erva_mate",
-      "criterio_calagem": "erva_mate_e_florestais"
-    }
+    "soja": { "grupo": "graos" },
+    "milho": { "grupo": "graos" },
+    "trigo": { "grupo": "graos" },
+    "amendoim": { "grupo": "graos" },
+    "arroz_de_sequeiro": { "grupo": "graos" },
+    "aveia_branca": { "grupo": "graos" },
+    "aveia_preta": { "grupo": "graos" },
+    "canola": { "grupo": "graos" },
+    "centeio": { "grupo": "graos" },
+    "cevada": { "grupo": "graos" },
+    "ervilha_seca_e_forrageira": { "grupo": "graos" },
+    "ervilhaca": { "grupo": "graos" },
+    "feijao": { "grupo": "graos" },
+    "girassol": { "grupo": "graos" },
+    "linho": { "grupo": "graos" },
+    "milho_pipoca": { "grupo": "graos" },
+    "nabo_forrageiro": { "grupo": "graos" },
+    "painco": { "grupo": "graos" },
+    "sorgo": { "grupo": "graos" },
+    "tremoco": { "grupo": "graos" },
+    "triticale": { "grupo": "graos" },
+
+    "abobora_abobrinha_moranga": { "grupo": "hortalicas" },
+    "alcachofra": { "grupo": "hortalicas" },
+    "alface_almeirao_chicoria_rucula_salsa": { "grupo": "hortalicas" },
+    "alho": { "grupo": "hortalicas" },
+    "aspargo": { "grupo": "hortalicas", "criterio_calagem": "aspargo" },
+    "berinjela": { "grupo": "hortalicas" },
+    "beterraba_cenoura": { "grupo": "hortalicas" },
+    "brocolis_couve_flor": { "grupo": "hortalicas" },
+    "cebola": { "grupo": "hortalicas" },
+    "chuchu": { "grupo": "hortalicas" },
+    "ervilha": { "grupo": "hortalicas" },
+    "mandioquinha_salsa": { "grupo": "hortalicas" },
+    "melancia_melao": { "grupo": "hortalicas" },
+    "nabo_rabanete": { "grupo": "hortalicas" },
+    "pepino": { "grupo": "hortalicas" },
+    "pimentao": { "grupo": "hortalicas" },
+    "repolho": { "grupo": "hortalicas" },
+    "tomate": { "grupo": "hortalicas" },
+
+    "batata": { "grupo": "tuberculos" },
+    "batata_doce": { "grupo": "tuberculos" },
+
+    "macieira": { "grupo": "frutiferas", "criterio_calagem": "macieira_oliveira" },
+    "oliveira": { "grupo": "frutiferas", "criterio_calagem": "macieira_oliveira" },
+
+    "amoreira_preta": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_ph55" },
+    "mirtileiro": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_ph55" },
+
+    "abacateiro": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "ameixeira": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "bananeira": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "caquizeiro": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "citros": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "figueira": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "maracujazeiro": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "morangueiro": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "nogueira_peca": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "pereira": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "pessegueiro_nectarineira": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "quivizeiro": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+    "videira": { "grupo": "frutiferas", "criterio_calagem": "frutiferas_demais" },
+
+    "cana_de_acucar": { "grupo": "outras" },
+    "tabaco": { "grupo": "outras" },
+
+    "erva-mate": { "grupo": "erva_mate", "criterio_calagem": "erva_mate_e_florestais" },
+    "acácia-negra": { "grupo": "erva_mate", "criterio_calagem": "erva_mate_e_florestais" },
+    "araucária": { "grupo": "erva_mate", "criterio_calagem": "erva_mate_e_florestais" },
+    "bracatinga": { "grupo": "erva_mate", "criterio_calagem": "erva_mate_e_florestais" },
+    "cedro-australiano": { "grupo": "erva_mate", "criterio_calagem": "erva_mate_e_florestais" },
+    "eucalipto": { "grupo": "erva_mate", "criterio_calagem": "erva_mate_e_florestais" },
+    "pinus": { "grupo": "erva_mate", "criterio_calagem": "erva_mate_e_florestais" }
   }
 }

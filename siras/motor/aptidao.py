@@ -62,7 +62,7 @@ _CARREGADORES_GRUPO_EXIGENCIA = (
 
 #: Versão do CCAE que este motor implementa. Aparece em ResultadoAptidao.versao_criterios
 #: e é o que o conjunto de conformidade declara ter gabaritado (CCAE §9.1).
-_VERSAO_CRITERIOS = "1.1"
+_VERSAO_CRITERIOS = "1.2"
 
 
 class _CulturaOuDadoIndeterminado(Exception):

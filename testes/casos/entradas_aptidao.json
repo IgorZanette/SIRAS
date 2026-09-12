@@ -1,5 +1,5 @@
 {
-  "versao_criterios": "1.1",
+  "versao_criterios": "1.2",
   "descricao": "Entradas dos casos de teste de aptidao edafica. NAO contem as respostas esperadas: o gabarito vive em testes/casos/gabarito_aptidao.csv e so o runner de teste o le.",
   "casos": [
     {

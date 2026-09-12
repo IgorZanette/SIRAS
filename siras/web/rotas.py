@@ -6,7 +6,7 @@ Mapa previsto (PLANO-FRONTEND §9.1), implementado por etapas:
     /analise           etapa 1, escolha da cultura    — etapa 5
     /analise/dados     etapa 2, análise de solo       — pronto
     /analise/laudo     etapa 3, laudo                 — pronto
-    /api/interpretar   POST, leitura ao vivo          — etapa 4
+    /api/interpretar   POST, leitura ao vivo          — pronto
 
 As rotas montam AnaliseSolo e Contexto a partir do formulário e chamam gerar_laudo().
 Nenhuma interpretação acontece aqui nem em JavaScript: fonte única de verdade é o motor
@@ -17,14 +17,15 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_graos
 from siras.motor.adubacao import ErroAdubacao
 from siras.motor.aptidao import ErroAptidao
 from siras.motor.calagem import ErroCalagem
 from siras.motor.laudo import ErroLaudo, gerar_laudo
-from siras.relatorio.apresentacao import apresentar_laudo
+from siras.motor.leitura import interpretar_parcial
+from siras.relatorio.apresentacao import apresentar_laudo, apresentar_leitura
 from siras.web import formulario
 
 bp = Blueprint("siras", __name__)
@@ -80,6 +81,52 @@ def laudo_sem_dados():
     """O laudo nasce de um POST. Chegar aqui por link ou recarga volta ao formulário em
     vez de mostrar uma página de erro sobre um método HTTP."""
     return redirect(url_for("siras.dados"))
+
+
+@bp.post("/api/interpretar")
+def interpretar():
+    """Leitura ao vivo: interpreta o que já foi digitado (PLANO-FRONTEND §9.3 e §9.4).
+
+    Opção B da §9.4: a interpretação roda no mesmo motor Python que os casos de teste
+    validam. A opção A — reimplementar a classificação em JavaScript — pareceria mais
+    simples e criaria uma segunda implementação não testada da regra que a hipótese H1.1
+    mede.
+
+    Devolve a marcação já renderizada pelo Jinja, e não dados para o JS montar: assim a
+    régua e a ficha do painel são literalmente os mesmos componentes do laudo.
+    """
+    payload = request.get_json(silent=True) or {}
+    dados_comuns = carregar_dados_comum()
+
+    campos = {
+        nome: formulario.para_numero(valor)
+        for nome, valor in payload.items()
+        if nome not in ("cultura_id", "criterio_id")
+    }
+    cultura_id = (payload.get("cultura_id") or "").strip()
+    criterio_id = (payload.get("criterio_id") or "").strip() or None
+    grupo = dados_comuns["mapa_culturas"]["culturas"].get(cultura_id, {}).get("grupo", "")
+
+    leitura = interpretar_parcial(
+        campos,
+        cultura_id=cultura_id,
+        grupo=grupo,
+        criterio_id=criterio_id,
+        prnt=campos.get("prnt"),
+        profundidade_incorporacao_cm=campos.get("profundidade_incorporacao_cm") or 20.0,
+        dados=dados_comuns,
+    )
+    linhas = apresentar_leitura(leitura)
+
+    return jsonify({
+        "html": render_template("_parciais/leitura.html", linhas=linhas),
+        # Estruturado ao lado do HTML para que os testes afirmem sobre a classe, e não
+        # sobre marcação — asserção em HTML quebra a cada ajuste de layout.
+        "classes": {
+            "p": (leitura.get("fosforo") or {}).get("classe"),
+            "k": (leitura.get("potassio") or {}).get("classe"),
+        },
+    })
 
 
 @bp.post("/analise/laudo")

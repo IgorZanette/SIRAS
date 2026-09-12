@@ -1,0 +1,31 @@
+{# Conteúdo do painel de leitura ao vivo.
+
+   Renderizado pelo Jinja e devolvido pronto por POST /api/interpretar. É de propósito:
+   se o JavaScript montasse esta marcação, a régua e a ficha existiriam em duas versões —
+   a do laudo impresso e a do painel — e divergiriam na primeira mudança de componente.
+   O JS só troca o innerHTML. #}
+{% import "_macros/ficha.html" as f %}
+{% import "_macros/regua.html" as r %}
+{% import "_macros/ico.html" as i %}
+
+{% if linhas %}
+  {% for linha in linhas %}
+  <div class="linha">
+    <div class="linha__topo">
+      <span class="linha__nome">{{ linha.nome }}</span>
+      <span class="linha__val">{{ linha.valor }}</span>
+    </div>
+    {% if linha.sigla %}
+    <div style="margin-bottom:.45rem">{{ f.ficha(linha.sigla, linha.rotulo) }}</div>
+    {{ r.regua(linha.indice, linha.posicao) }}
+    {% endif %}
+    <p class="t-aux" style="margin-top:.45rem">{{ linha.nota }}</p>
+  </div>
+  {% endfor %}
+{% else %}
+  {# Vazio é convite, não lamento. #}
+  <div class="vazio">
+    {{ i.ico("regua", "ico ico--xl") }}
+    <p>A interpretação de cada atributo aparece aqui assim que você digitar o primeiro valor.</p>
+  </div>
+{% endif %}

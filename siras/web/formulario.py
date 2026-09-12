@@ -84,8 +84,14 @@ class LeituraFormulario:
         return self.analise is not None and self.contexto is not None
 
 
-def _para_float(texto: str) -> Optional[float]:
-    """Converte aceitando vírgula decimal. Um laudo brasileiro imprime '5,4'."""
+def para_numero(texto) -> Optional[float]:
+    """Converte aceitando vírgula decimal. Um laudo brasileiro imprime '5,4'.
+
+    Pública porque a leitura ao vivo recebe os mesmos textos por JSON e precisa
+    convertê-los do mesmo jeito — inclusive aceitando a vírgula.
+    """
+    if texto is None:
+        return None
     try:
         return float(texto.strip().replace(",", "."))
     except (TypeError, ValueError):
@@ -182,7 +188,7 @@ def ler(
                 leitura.campos_com_erro.append(campo_id)
             numeros[campo_id] = None
             continue
-        valor = _para_float(bruto)
+        valor = para_numero(bruto)
         if valor is None:
             leitura.invalidos.append(f"{rotulo}: “{bruto}” não é um número")
             leitura.campos_com_erro.append(campo_id)
@@ -257,6 +263,7 @@ __all__ = [
     "CAMPOS_SUBSUPERFICIE",
     "LeituraFormulario",
     "antecedentes_disponiveis",
+    "para_numero",
     "culturas_disponiveis",
     "culturas_que_exigem_antecedente",
     "ler",

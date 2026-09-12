@@ -392,6 +392,62 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
     ]
 
 
+def apresentar_leitura(leitura: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Modelo de exibição do painel de leitura ao vivo.
+
+    Recebe o que motor/leitura.py conseguiu interpretar e devolve linhas prontas. O que
+    veio None não vira linha: o painel mostra o que já é sabido e cala sobre o resto, em
+    vez de exibir um traço para cada campo ainda em branco.
+    """
+    linhas: List[Dict[str, Any]] = []
+
+    for chave, nome, unidade, casas in (
+        ("fosforo", "Fósforo", "mg/dm³", 1),
+        ("potassio", "Potássio", "mg/dm³", 0),
+    ):
+        item = leitura.get(chave)
+        if not item:
+            continue
+        classe = item["classe"]
+        linhas.append({
+            "id": chave,
+            "nome": nome,
+            "valor": f"{formatar_numero(item['valor'], casas)} {unidade}",
+            "sigla": sigla_da_classe(classe),
+            "rotulo": rotulo_da_classe(classe),
+            "indice": indice_da_classe(classe),
+            "posicao": posicao_na_regua(item["valor"], item["faixas"], classe),
+            "nota": (
+                f"Classe de argila {item['classe_argila']}."
+                if chave == "fosforo" else f"Faixa de CTC {item['faixa_ctc']}."
+            ),
+        })
+
+    if leitura.get("saturacao_al") is not None:
+        linhas.append({
+            "id": "saturacao_al",
+            "nome": "Saturação por alumínio",
+            "valor": f"{formatar_numero(leitura['saturacao_al'], 1)} %",
+            "nota": "Calculada pela CTC efetiva quando não informada no laudo.",
+        })
+
+    calagem = leitura.get("calagem")
+    if calagem:
+        criterio = calagem.get("criterio", {})
+        alvo = criterio.get("dose", {}).get("ph_alvo")
+        linhas.append({
+            "id": "calagem",
+            "nome": "Calcário estimado",
+            "valor": f"{formatar_numero(calagem['nc_t_ha'], 1)} t/ha",
+            "nota": (
+                f"Critério {criterio.get('id', '—')}"
+                + (f", alvo pH {formatar_numero(alvo)}." if alvo else ".")
+            ),
+        })
+
+    return linhas
+
+
 def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
     """Monta o modelo de exibição do laudo. O template só itera sobre o que sai daqui."""
     return {

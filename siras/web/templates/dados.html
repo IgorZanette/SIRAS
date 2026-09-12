@@ -38,7 +38,8 @@
   </div>
   {% endif %}
 
-  <form method="post" action="{{ url_for('siras.laudo') }}" style="margin-top:var(--e-5)">
+  <div class="oficina" style="margin-top:var(--e-5)">
+  <form method="post" action="{{ url_for('siras.laudo') }}" data-formulario-analise>
 
     <div class="painel bloco">
       <div class="bloco__cab">
@@ -125,5 +126,27 @@
       </button>
     </div>
   </form>
+
+  {# Painel de leitura ao vivo. Abaixo de 1040px o CSS o move para o fim do
+     formulário — desce, não some: é onde o erro de transcrição é percebido no campo
+     em que ocorreu, e não três telas adiante. #}
+  <aside class="painel painel--marca leitura nao-imprime">
+    <div class="leitura__cab">
+      {{ i.ico("regua") }}
+      <div>
+        <h3>Leitura ao vivo</h3>
+        <p>Interpretação conforme você digita</p>
+      </div>
+    </div>
+    <div class="leitura__corpo" id="leitura" aria-live="polite"
+         data-url="{{ url_for('siras.interpretar') }}">
+      {% include "_parciais/leitura.html" %}
+    </div>
+  </aside>
+  </div>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/leitura-ao-vivo.js') }}" defer></script>
 {% endblock %}

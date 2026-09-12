@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from siras.dominio.analise import AnaliseSolo, Camada, Contexto
+from siras.dominio.escopo import no_escopo_de_recomendacao
 
 #: Campos da camada de referência de fertilidade (0-20 cm por padrão).
 #: (id, rótulo, unidade em HTML, ajuda, obrigatório, passo, exemplo)
@@ -92,13 +93,19 @@ def _para_float(texto: str) -> Optional[float]:
 
 
 def culturas_disponiveis(dados: Dict[str, Any], grupo: str = "graos") -> List[Tuple[str, str]]:
-    """(id, nome de exibição) das culturas de um grupo, em ordem alfabética de nome."""
+    """(id, nome de exibição) das culturas de um grupo, em ordem alfabética de nome.
+
+    Estar mapeada em mapa_culturas.json não basta: a cultura precisa estar no escopo de
+    recomendação da Proposta (§4.2.1). As seis espécies florestais estão mapeadas porque
+    o módulo de aptidão precisa resolver o critério de calagem delas, e mesmo assim não
+    são oferecidas aqui — ver siras/dominio/escopo.py e docs/decisoes/0006.
+    """
     from siras.relatorio.apresentacao import nome_de_exibicao
 
     ids = [
         cultura_id
         for cultura_id, entrada in dados["mapa_culturas"]["culturas"].items()
-        if entrada.get("grupo") == grupo
+        if entrada.get("grupo") == grupo and no_escopo_de_recomendacao(cultura_id)
     ]
     return sorted(
         ((cultura_id, nome_de_exibicao(cultura_id, dados)) for cultura_id in ids),

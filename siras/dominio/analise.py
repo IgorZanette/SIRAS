@@ -161,7 +161,16 @@ class Contexto:
     condicao_area: str
     prnt: float
     profundidade_incorporacao_cm: float
-    expectativa_rendimento: Optional[str] = None
+    #: rendimento esperado em t/ha. Acima do rendimento de referência da cultura, soma o
+    #: adicional por tonelada à manutenção de P e K (graos_adubacao_pk.json).
+    expectativa_rendimento: Optional[float] = None
+    #: 1 = dose de correção completa; 2 = dose reduzida, em rotação (Tab. 6.1.4, p. 108).
+    #: A faixa válida é guardada por calcular_fosforo_potassio(), que também é chamável
+    #: direto — validar aqui também duplicaria a mesma regra em dois lugares.
+    cultivo: int = 1
+    #: cultura antecedente, exigida só pelas culturas de grãos cujo modelo de N é
+    #: 'mo_x_antecedente' (graos_adubacao_n.json). None nas demais.
+    antecedente: Optional[str] = None
 
     def __post_init__(self) -> None:
         self._validar_campos_obrigatorios()

@@ -23,7 +23,11 @@
 (function () {
   "use strict";
 
-  var ESPERA_MINIMA_MS = 4200;
+  var ESPERA_MINIMA_MS = 6000;
+
+  /* A confirmacao ocupa a ultima fatia: o broto precisa de um instante para abrir
+     a folha final antes de a pagina trocar. */
+  var FATIA_DO_PRONTO_MS = 900;
 
   var formulario = document.querySelector("[data-formulario-analise]");
   var veu = document.getElementById("calculando");
@@ -65,11 +69,7 @@
     }
   }
 
-  function rodarSequencia() {
-    /* A confirmacao ocupa a ultima fatia: o broto precisa de um instante para abrir
-       a folha final antes de a pagina trocar. */
-    var FATIA_DO_PRONTO_MS = 700;
-    var intervalo = (ESPERA_MINIMA_MS - FATIA_DO_PRONTO_MS) / passos.length;
+  function rodarSequencia(intervalo) {
     passos.forEach(function (_, indice) {
       window.setTimeout(function () { acender(indice); }, intervalo * indice);
     });
@@ -92,10 +92,15 @@
     enviando = true;
     evento.preventDefault();
 
+    /* A duracao de cada passo vai para o CSS como variavel: a barra e o traco do
+       passo ativo enchem continuamente nesse tempo, em vez de saltar de degrau. */
+    var intervalo = (ESPERA_MINIMA_MS - FATIA_DO_PRONTO_MS) / passos.length;
+    veu.style.setProperty("--passo-ms", Math.round(intervalo) + "ms");
+
     veu.hidden = false;
     veu.setAttribute("aria-hidden", "false");
     acender(0);
-    rodarSequencia();
+    rodarSequencia(intervalo);
 
     window.setTimeout(function () { formulario.submit(); }, ESPERA_MINIMA_MS);
   });

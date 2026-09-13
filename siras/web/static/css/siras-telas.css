@@ -1426,6 +1426,68 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
   70%      { transform: rotate(2.4deg); }
 }
 
+/* --- 4. Os minerais da camada corrigida cintilam ------------------------- */
+.cena__brilho { fill: var(--calcario); opacity: 0; transform: scale(.4);
+                transform-box: fill-box; transform-origin: 50% 50%; }
+.calculando[data-etapa="4"] .cena__brilho { animation: cintilar 1.4s ease-in-out infinite; }
+.calculando[data-etapa="4"] .cena__brilho:nth-child(2) { animation-delay: .45s; }
+.calculando[data-etapa="4"] .cena__brilho:nth-child(3) { animation-delay: .9s; }
+@keyframes cintilar {
+  0%, 100% { opacity: 0;   transform: scale(.4) rotate(0deg); }
+  45%      { opacity: .9;  transform: scale(1) rotate(45deg); }
+}
+
+/* --- A etiqueta do que se consulta, uma por passo ---------------------------
+   As cinco ocupam o mesmo lugar e trocam por esmaecimento: a leitura do pe do
+   monolito acompanha a lista sem que o olho precise ir ate ela. */
+.cena__etiqueta { opacity: 0; transform: translateY(4px);
+                  transition: opacity 320ms ease, transform 320ms ease; }
+.cena__etiqueta rect { fill: rgba(5, 8, 7, .62); stroke: var(--leitura); stroke-width: .8; }
+.cena__etiqueta text { fill: #E9F0EB; font: 700 7.4px var(--ff-ui);
+                       text-anchor: middle; dominant-baseline: central; letter-spacing: .02em; }
+.calculando[data-etapa="1"] .cena__etiqueta--1,
+.calculando[data-etapa="2"] .cena__etiqueta--2,
+.calculando[data-etapa="3"] .cena__etiqueta--3,
+.calculando[data-etapa="4"] .cena__etiqueta--4,
+.calculando[data-etapa="5"] .cena__etiqueta--5 { opacity: 1; transform: none; }
+
+/* --- Uma regra do Manual por passo, abaixo do titulo ----------------------- */
+.calculando__dica { position: relative; display: grid; min-height: 2.9em; max-width: 46ch;
+                    margin: 0; font-size: var(--fs-xs); line-height: 1.45;
+                    color: var(--n-300); }
+.dica-passo { grid-area: 1 / 1; opacity: 0; transform: translateY(5px);
+              transition: opacity 360ms ease, transform 360ms ease; }
+.dica-passo::before { content: "Você sabia? "; font-weight: 800; color: var(--leitura); }
+.calculando[data-etapa="1"] .dica-passo--1,
+.calculando[data-etapa="2"] .dica-passo--2,
+.calculando[data-etapa="3"] .dica-passo--3,
+.calculando[data-etapa="4"] .dica-passo--4,
+.calculando[data-etapa="5"] .dica-passo--5 { opacity: 1; transform: none; }
+:root[data-tema="claro"] .calculando__dica { color: var(--n-700); }
+:root[data-tema="claro"] .dica-passo::before { color: var(--v-700); }
+
+/* --- O tempo de cada passo, continuo ----------------------------------------
+   O script informa a duracao do passo em --passo-ms. A barra enche em linha
+   reta nesse tempo, e o passo ativo ganha um traco que corre por baixo dele:
+   a espera anda o tempo todo, e nao aos saltos. */
+.calculando__barra i { transition: width var(--passo-ms, 420ms) linear; }
+.passo { position: relative; overflow: hidden; }
+.passo::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+  background: var(--leitura); opacity: .75;
+}
+.passo.is-ativo::after { width: 100%; transition: width var(--passo-ms, 420ms) linear; }
+.passo.is-feito::after { opacity: 0; }
+
+/* Pronto: um anel se abre em volta da confirmacao, uma vez. */
+.calculando[data-etapa="pronto"] .calculando__pronto .ico {
+  border-radius: 999px; animation: anel 900ms cubic-bezier(.2, 0, .2, 1) 1 both;
+}
+@keyframes anel {
+  from { box-shadow: 0 0 0 0 rgba(140, 226, 63, .55); }
+  to   { box-shadow: 0 0 0 16px rgba(140, 226, 63, 0); }
+}
+
 /* --- Telas baixas: a cena cede espaco, os passos continuam inteiros ------- */
 @media (max-height: 820px) {
   .cena { width: min(270px, 100%); }
@@ -1440,6 +1502,8 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
    degrau. So para o que se repete em laco - a varredura, a queda, a subida, o
    balanco -, que e o que causa desconforto vestibular. */
 @media (prefers-reduced-motion: reduce) {
+  .calculando[data-etapa] .cena__brilho,
+  .calculando[data-etapa="pronto"] .calculando__pronto .ico,
   .calculando[data-etapa] .cena__leitura,
   .calculando[data-etapa] .cena__calcario circle,
   .calculando[data-etapa] .cena__nutriente,
@@ -1491,3 +1555,45 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
   .doc__marca-palavra { height: 14px; }
   .doc__marca { padding-bottom: 8pt; }
 }
+
+/* =========================================================================
+   Verdes claros no tema claro: os estados que precisam ser vistos
+   -------------------------------------------------------------------------
+   scripts/conferir_contraste.py mede --v-200 a --v-500 abaixo de 3:1 sobre o
+   fundo claro. A varredura dos usos (debito 9 do roadmap) achou onde isso
+   importava de verdade: nos indicadores de FOCO.
+
+   - O anel global de foco e o do "i" usavam --v-400, 1,51:1 sobre o claro.
+   - A borda do campo em foco perdia para a regra do tema claro, que tem
+     especificidade maior: o campo focado ficava com a borda quase invisivel.
+
+   Foco que nao se ve reprova WCAG 2.4.7 e 1.4.11 - e e o que guia quem navega
+   o formulario pelo teclado.
+
+   O que ficou de proposito, e por que: o fundo do botao primario continua
+   --v-400 no claro, porque quem identifica o botao e o texto escuro sobre
+   ele, e nao o contraste do fundo contra a pagina. Botao desabilitado nao e
+   estado de interacao. A lista explicita esta em
+   testes/integracao/test_contraste_tema_claro.py.
+   ====================================================================== */
+:root[data-tema="claro"] :focus-visible { outline-color: var(--v-700); }
+:root[data-tema="claro"] .dica__gatilho:focus-visible { outline-color: var(--v-700); }
+
+/* O campo INVALIDO mantem a borda coral mesmo em foco: o erro e informacao, e
+   o foco nao pode esconde-lo justamente quando a pessoa volta para corrigir. */
+:root[data-tema="claro"] .campo:not(.campo--invalido):not(.campo--erro) .campo__caixa:focus-within {
+  border-color: var(--v-700);
+  box-shadow: 0 0 0 3px rgba(52, 112, 31, .2);
+}
+
+:root[data-tema="claro"] .bloco > summary:hover::after { border-color: var(--v-700); }
+
+/* A ponta clara do gradiente (--v-200, 1,07:1) sumia no fundo claro: a barra
+   parecia parar antes de onde realmente estava. */
+:root[data-tema="claro"] .progresso i,
+:root[data-tema="claro"] .calculando__barra i {
+  background: linear-gradient(90deg, var(--v-700), var(--v-600));
+}
+
+/* A correcao do solo na cena segue o verde da planta, que ja muda com o tema. */
+.cena__correcao { fill: var(--broto); }

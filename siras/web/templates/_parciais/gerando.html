@@ -16,6 +16,11 @@
      4. aptidão   — a camada corrigida ganha o tom de solo tratado;
      5. trilha    — um traço liga as leituras, como a trilha liga cada dose à tabela.
 
+   Em cada passo, uma etiqueta no pé do monólito diz o que está sendo consultado, os
+   minerais da camada corrigida cintilam quando a aptidão é avaliada, e uma frase abaixo
+   do título explica uma regra do Manual que aquele passo aplica. As frases são as regras
+   já fixadas do sistema (CLAUDE.md), nunca curiosidade inventada.
+
    E o broto cresce com o progresso: raiz primeiro, depois caule e folhas, e a última
    folha abre quando o laudo fica pronto. É a única licença da cena — a de mostrar,
    numa planta, que a espera está andando.
@@ -115,6 +120,22 @@
           <path d="M176 101 C177 110 182 116 186 124"/>
           <path d="M176 102 L176 118"/>
         </g>
+
+        {# 4. aptidão: os minerais da camada corrigida cintilam. #}
+        <g class="cena__brilhos">
+          <path class="cena__brilho" d="M84 112 l2 4 l4 2 l-4 2 l-2 4 l-2 -4 l-4 -2 l4 -2 Z"/>
+          <path class="cena__brilho" d="M214 108 l2 4 l4 2 l-4 2 l-2 4 l-2 -4 l-4 -2 l4 -2 Z"/>
+          <path class="cena__brilho" d="M282 118 l2 4 l4 2 l-4 2 l-2 4 l-2 -4 l-4 -2 l4 -2 Z"/>
+        </g>
+
+        {# O que cada passo consulta, numa etiqueta no pé do monólito. #}
+        <g class="cena__etiquetas">
+          <g class="cena__etiqueta cena__etiqueta--1"><rect x="48" y="176" width="112" height="15" rx="7.5"/><text x="104" y="184">pH · SMP · argila · MO</text></g>
+          <g class="cena__etiqueta cena__etiqueta--2"><rect x="48" y="176" width="112" height="15" rx="7.5"/><text x="104" y="184">Cap. 5 · calagem</text></g>
+          <g class="cena__etiqueta cena__etiqueta--3"><rect x="48" y="176" width="112" height="15" rx="7.5"/><text x="104" y="184">Cap. 6 · P e K</text></g>
+          <g class="cena__etiqueta cena__etiqueta--4"><rect x="48" y="176" width="112" height="15" rx="7.5"/><text x="104" y="184">CCAE · F1 a F7</text></g>
+          <g class="cena__etiqueta cena__etiqueta--5"><rect x="48" y="176" width="112" height="15" rx="7.5"/><text x="104" y="184">regra → tabela → dose</text></g>
+        </g>
       </g>
 
       <rect class="cena__vitrine" x="40" y="40" width="272" height="156" rx="14"/>
@@ -142,6 +163,16 @@
     <h2 class="calculando__titulo">Estamos calculando as melhores doses para você</h2>
     <p class="calculando__sub">
       Cada número sai das tabelas do Manual RS/SC — e o laudo vai mostrar de qual.
+    </p>
+
+    {# Uma regra por passo. aria-hidden: o leitor de tela já ouve os passos, e anunciar
+       a frase a cada troca seria ruído sobre a informação principal. #}
+    <p class="calculando__dica" aria-hidden="true">
+      <span class="dica-passo dica-passo--1">O pH de referência não dispara a calagem sozinho: o gatilho vem das Tabelas 5.3 a 5.7.</span>
+      <span class="dica-passo dica-passo--2">A primeira calagem usa o índice SMP, e o PRNT do seu calcário ajusta a dose final.</span>
+      <span class="dica-passo dica-passo--3">Fósforo é interpretado pela classe de argila; potássio, pela CTC a pH 7,0.</span>
+      <span class="dica-passo dica-passo--4">A aptidão sai em dois cenários: o solo de hoje e o solo depois da correção.</span>
+      <span class="dica-passo dica-passo--5">Cada dose do laudo aponta a regra e a tabela do Manual que a produziu.</span>
     </p>
 
     <ol class="passos">

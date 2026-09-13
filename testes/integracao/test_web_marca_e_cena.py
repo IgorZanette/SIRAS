@@ -165,11 +165,11 @@ def test_a_cena_para_de_se_mexer_com_menos_movimento():
 
 
 def test_a_espera_continua_curta():
-    """O pedido original era de três a cinco segundos: tempo de ler os passos, e não de
-    esperar por eles."""
+    """O pedido original era de três a cinco segundos; em 13/09/2026 o autor pediu mais
+    1,8 s (4,2 -> 6,0 s), para ler a regra de cada passo. Tempo de ler, e não de esperar."""
     espera = int(re.search(r"var ESPERA_MINIMA_MS = (\d+);", _GERANDO_JS).group(1))
 
-    assert 3000 <= espera <= 5000
+    assert espera == 6000
 
 
 def test_a_animacao_antiga_saiu_por_inteiro():
@@ -196,6 +196,30 @@ def test_a_conformidade_do_ccae_fica_na_camada_rapida():
     )
 
     assert "mark.lenta" not in codigo
+
+
+@pytest.mark.parametrize("etapa", ["1", "2", "3", "4", "5"])
+def test_cada_passo_tem_etiqueta_e_regra_proprias(cliente, etapa):
+    """A etiqueta diz o que o passo consulta; a frase, uma regra que ele aplica."""
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert f"cena__etiqueta--{etapa}" in html
+    assert f"dica-passo--{etapa}" in html
+    assert f'.calculando[data-etapa="{etapa}"] .cena__etiqueta--{etapa}' in _TELAS_CSS
+    assert f'.calculando[data-etapa="{etapa}"] .dica-passo--{etapa}' in _TELAS_CSS
+
+
+def test_a_espera_anda_continua_e_nao_aos_saltos():
+    """O script dá a duração do passo ao CSS, e a barra enche nesse tempo."""
+    assert '"--passo-ms"' in _GERANDO_JS
+    assert re.search(r"\.calculando__barra i \{ transition: width var\(--passo-ms", _TELAS_CSS)
+
+
+def test_o_cintilar_para_com_menos_movimento():
+    blocos = re.findall(r"@media \(prefers-reduced-motion: reduce\) \{(.*?)\n\}", _TELAS_CSS, re.S)
+    da_cena = next(bloco for bloco in blocos if ".cena__" in bloco)
+
+    assert ".cena__brilho" in da_cena
 
 
 def _coletados(*argumentos) -> str:

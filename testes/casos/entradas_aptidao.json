@@ -1,5 +1,5 @@
 {
-  "versao_criterios": "1.2",
+  "versao_criterios": "1.3",
   "descricao": "Entradas dos casos de teste de aptidao edafica. NAO contem as respostas esperadas: o gabarito vive em testes/casos/gabarito_aptidao.csv e so o runner de teste o le.",
   "casos": [
     {
@@ -2181,6 +2181,214 @@
       },
       "referencia_cultura": {
         "ph_referencia": null,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-F7-04-ARGILA-20-FRONTEIRA",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Teste da fronteira inferior de F7: argila exatamente em 20%, que pertence à classe de argila 4 e recebe grau MODERADO. MO permanece em faixa LIGEIRO para verificar que F7 seja efetivamente o fator determinante.",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.3,
+        "argila": 20.0,
+        "mo": 3.5,
+        "p_mehlich1": 40.0,
+        "k_mehlich1": 121.0,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F7-05-ARGILA-21-FRONTEIRA",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Teste da transição de F7 em 21% de argila. A passagem de 20,0 para 21,0% deve reduzir F7 de MODERADO para LIGEIRO. MO acima de 5,0% torna F6 NULO, isolando F7 como fator determinante.",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.3,
+        "argila": 21.0,
+        "mo": 5.5,
+        "p_mehlich1": 40.0,
+        "k_mehlich1": 121.0,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-F7-06-ARGILA-40-LIMITE-SUPERIOR",
+      "bloco": "fator_determinante",
+      "cultura": "milho",
+      "grupo_sistema": "graos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Teste do limite superior da classe 3 de argila: 40% ainda pertence à faixa 21-40%, portanto F7 permanece LIGEIRO. MO acima de 5,0% mantém F6 em NULO.",
+      "entrada": {
+        "ph_agua": 6.2,
+        "indice_smp": 6.3,
+        "argila": 40.0,
+        "mo": 5.5,
+        "p_mehlich1": 40.0,
+        "k_mehlich1": 121.0,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 2,
+        "grupo_k": 2
+      }
+    },
+    {
+      "id_caso": "CONF-PH55-01-REF55-PH-EXATO",
+      "bloco": "fronteira",
+      "cultura": "batata",
+      "grupo_sistema": "tuberculos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Cultura com pH de referência 5,5, avaliando a igualdade exata entre pH observado e pH de referência.",
+      "entrada": {
+        "ph_agua": 5.5,
+        "indice_smp": 5.9,
+        "argila": 30.0,
+        "mo": 3.5,
+        "p_mehlich1": 40.0,
+        "k_mehlich1": 220.0,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 5.5,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CONF-PH55-02-REF55-PH-ABAIXO",
+      "bloco": "fronteira",
+      "cultura": "batata",
+      "grupo_sistema": "tuberculos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Cultura com pH de referência 5,5, avaliando pH ligeiramente abaixo da referência, mas ainda abaixo do limiar de 5,5 e com m% inferior a 30%.",
+      "entrada": {
+        "ph_agua": 5.4,
+        "indice_smp": 5.8,
+        "argila": 30.0,
+        "mo": 3.5,
+        "p_mehlich1": 40.0,
+        "k_mehlich1": 220.0,
+        "ca": 5.0,
+        "mg": 2.0,
+        "al": 0.5,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 5.5,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CONF-PH55-03-REF55-PH-ACIMA",
+      "bloco": "fronteira",
+      "cultura": "batata",
+      "grupo_sistema": "tuberculos",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Cultura com pH de referência 5,5, avaliando pH acima da referência.",
+      "entrada": {
+        "ph_agua": 5.6,
+        "indice_smp": 6.0,
+        "argila": 30.0,
+        "mo": 3.5,
+        "p_mehlich1": 40.0,
+        "k_mehlich1": 220.0,
+        "ca": 6.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 18.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 5.5,
+        "grupo_p": 1,
+        "grupo_k": 1
+      }
+    },
+    {
+      "id_caso": "CONF-CANA-01-GRUPO3",
+      "bloco": "fator_determinante",
+      "cultura": "cana-de-açúcar",
+      "grupo_sistema": "outras",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Cana-de-açúcar como cultura real do Grupo 3 de P e K, verificando a separação entre grupos de exigência e o pH de referência 6,0.",
+      "entrada": {
+        "ph_agua": 6.0,
+        "indice_smp": 6.2,
+        "argila": 30.0,
+        "mo": 3.5,
+        "p_mehlich1": 12.0,
+        "k_mehlich1": 78.0,
+        "ca": 5.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 10.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
+        "grupo_p": 3,
+        "grupo_k": 3
+      }
+    },
+    {
+      "id_caso": "CONF-TABACO-01-GRUPO3",
+      "bloco": "fator_determinante",
+      "cultura": "tabaco",
+      "grupo_sistema": "outras",
+      "cenario": "ATUAL",
+      "intencao_do_caso": "Tabaco como cultura real do Grupo 3 de P e K, verificando o mesmo enquadramento de grupo e pH de referência da cana-de-açúcar.",
+      "entrada": {
+        "ph_agua": 6.0,
+        "indice_smp": 6.2,
+        "argila": 30.0,
+        "mo": 3.5,
+        "p_mehlich1": 12.0,
+        "k_mehlich1": 78.0,
+        "ca": 5.0,
+        "mg": 2.0,
+        "al": 0.0,
+        "ctc_ph7": 10.0,
+        "sistema_manejo": "convencional"
+      },
+      "referencia_cultura": {
+        "ph_referencia": 6.0,
         "grupo_p": 3,
         "grupo_k": 3
       }

@@ -249,6 +249,16 @@ def _observacao_da_calagem(laudo: Laudo) -> str:
         excecao = criterio.get("decisao", {}).get("nao_aplicar_se", {})
         if excecao.get("motivo") == laudo.calagem.motivo and excecao.get("texto"):
             return f"Calagem não indicada: {excecao['texto']} ({excecao.get('fonte', '')})."
+        if laudo.calagem.motivo is None:
+            # O critério disparou e a dose calculada é zero, ou tão pequena que arredonda
+            # a zero. É o ponto V% = 40 do ramo (b), onde NC = (40 - 40)/100 x CTC, e a
+            # faixa logo abaixo dele. Sem este ramo a frase saía "Calagem não indicada —
+            # None." num documento assinado; e mesmo sem o None, "indicada, 0,0 t/ha" é o
+            # ruído que o CCAE v1.2 §7.1(b) manda suprimir no laudo.
+            return (
+                "Calagem não indicada: o critério da cultura é atingido, mas a dose "
+                "calculada é de 0,0 t/ha."
+            )
         return f"Calagem não indicada — {_TEXTO_POR_MOTIVO.get(laudo.calagem.motivo, laudo.calagem.motivo)}."
 
     dose_cfg = criterio.get("dose", {})

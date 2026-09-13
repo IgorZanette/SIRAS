@@ -355,7 +355,7 @@ def calcular_calagem(
     dose_real = nc_com_fator * 100 / contexto.prnt
     nc_t_ha = _arredondar(dose_real, 1)
 
-    return trace.registrar(
+    saida = trace.registrar(
         regra=f"{criterio_id}: disparo confirmado, dose calculada ({origem_nc})",
         entradas={
             "ph_agua": analise.ph_agua,
@@ -368,6 +368,10 @@ def calcular_calagem(
         saida={"nc_t_ha": nc_t_ha, "motivo": None},
         fonte=f"{criterio['fonte']} e Manual 2016, Tab. 5.2, p. 70",
     )
+    # A dose antes do arredondamento vai para quem decide (exequibilidade do cenário
+    # POTENCIAL, CCAE v1.3 §7.2), e FORA da saída do Trace: a trilha exibe a saída, e a
+    # NC de decisão nunca é exibida (CCAE §7.1) — o laudo mostra só a dose arredondada.
+    return {**saida, "nc_bruta_t_ha": dose_real}
 
 
 def calcular_calagem_por_cultura(

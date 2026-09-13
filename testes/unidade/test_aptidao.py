@@ -1,11 +1,11 @@
 """
-Testes de siras/motor/aptidao.py contra as regras já congeladas em docs/CCAE-v1.0.md.
+Testes de siras/motor/aptidao.py contra as regras do CCAE (docs/CCAE-v1.3.md).
 
 Estes são testes de unidade/fronteira escritos pelo desenvolvedor para verificar que o
 código aplica corretamente a especificação — não são o conjunto de conformidade oficial.
-Esse é testes/casos/casos_aptidao.json, cujo campo "referencia" só o autor preenche, à
-mão, a partir do Manual, sem consultar este arquivo (CLAUDE.md, regra absoluta de dados
-agronômicos; CCAE-v1.0.md Seção 9.1).
+Esse é testes/casos/entradas_aptidao.json + gabarito_aptidao.csv, cujas respostas só o
+autor gera, à mão, sem consultar este arquivo (CLAUDE.md, regra absoluta de dados
+agronômicos; CCAE Seção 9.1).
 """
 
 import copy
@@ -146,22 +146,18 @@ class TestCatalogoGrupoPK:
     def test_florestais_sao_grupo_3_em_p_e_k(self):
         for cultura in ("araucária", "acácia-negra", "bracatinga", "cedro-australiano", "eucalipto", "pinus"):
             assert grupo_exigencia(
-                cultura, _DADOS["mapa_culturas"], _DADOS["interpretacao_p"]["grupos_exigencia"],
-                "interpretacao_p.json",
+                cultura, _DADOS["mapa_culturas"], _DADOS["catalogo_anexo2"], "p"
             ) == "grupo_3"
             assert grupo_exigencia(
-                cultura, _DADOS["mapa_culturas"], _DADOS["interpretacao_k"]["grupos_exigencia"],
-                "interpretacao_k.json",
+                cultura, _DADOS["mapa_culturas"], _DADOS["catalogo_anexo2"], "k"
             ) == "grupo_3"
 
     def test_mandioca_diverge_grupo_p_3_grupo_k_2(self):
         assert grupo_exigencia(
-            "mandioca", _DADOS["mapa_culturas"], _DADOS["interpretacao_p"]["grupos_exigencia"],
-            "interpretacao_p.json",
+            "mandioca", _DADOS["mapa_culturas"], _DADOS["catalogo_anexo2"], "p"
         ) == "grupo_3"
         assert grupo_exigencia(
-            "mandioca", _DADOS["mapa_culturas"], _DADOS["interpretacao_k"]["grupos_exigencia"],
-            "interpretacao_k.json",
+            "mandioca", _DADOS["mapa_culturas"], _DADOS["catalogo_anexo2"], "k"
         ) == "grupo_2"
 
 
@@ -365,6 +361,46 @@ class TestCenarioPotencial:
         r = _avaliar(analise, cenario="POTENCIAL", dados=dados)
         assert _fator(r, "F1_acidez").rotulo == "LIGEIRO"
         assert "correcao_parcelada" in r.alertas
+
+
+class TestExequibilidadeLeNcAntesDoArredondamento:
+    """CCAE v1.3, §7.2 — decisão A do autor (13/09/2026). Os valores de V% e CTC são
+    entradas de teste; a dose sai da fórmula do ramo (b) que a base já declara."""
+
+    def test_dose_que_arredonda_a_zero_ainda_projeta_correcao(self):
+        # V% 39,9 e CTC 10: NC = 0,01 t/ha, que a calagem apresenta como 0,0. Antes da
+        # decisão A, o POTENCIAL mantinha F1 em MODERADO com calcário "0,0 t/ha".
+        analise = _analise(v_percent=39.9, ctc_ph7=10.0, ca=2.0, mg=0.8)
+        contexto = _contexto(cultura_id="erva-mate")
+
+        atual = _avaliar(analise, "erva-mate", "ATUAL", contexto)
+        potencial = _avaliar(analise, "erva-mate", "POTENCIAL", contexto)
+
+        assert _fator(atual, "F1_acidez").rotulo == "MODERADO"
+        assert _fator(potencial, "F1_acidez").rotulo == "NULO"
+
+    def test_o_teto_compara_a_dose_antes_do_arredondamento(self):
+        # NC = 0,64 t/ha, apresentada como 0,6. Com teto 0,62 a dose arredondada caberia
+        # e a real não: vale a real.
+        dados = copy.deepcopy(_DADOS)
+        dados["config_aptidao"]["NC_MAX_INCORPORADO_T_HA"] = 0.62
+        analise = _analise(v_percent=32.0, ctc_ph7=8.0, ca=2.0, mg=0.8)
+        contexto = _contexto(cultura_id="erva-mate")
+
+        r = _avaliar(analise, "erva-mate", "POTENCIAL", contexto, dados=dados)
+
+        assert _fator(r, "F1_acidez").rotulo == "LIGEIRO"
+        assert "correcao_parcelada" in r.alertas
+
+    def test_a_nc_bruta_nao_entra_na_trilha(self):
+        """A NC de decisão nunca é exibida (CCAE §7.1): a trilha mostra a saída do Trace."""
+        analise = _analise(v_percent=39.9, ctc_ph7=10.0, ca=2.0, mg=0.8)
+        contexto = _contexto(cultura_id="erva-mate")
+        trace = Trace()
+
+        avaliar_aptidao(analise, "erva-mate", "POTENCIAL", contexto, trace, dados=_DADOS)
+
+        assert all("nc_bruta_t_ha" not in passo.saida for passo in trace)
 
 
 def test_cenario_invalido_levanta_value_error():

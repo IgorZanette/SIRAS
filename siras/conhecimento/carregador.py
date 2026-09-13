@@ -968,11 +968,10 @@ class Carregador:
             raise ErroCarregamento(f"aliases_culturas.json: {e}")
 
         # Carregar catalogo_anexo2.json
-        # Entra aqui como fonte do nome de exibicao das culturas na interface. A
+        # Fonte unica do grupo de exigencia de P e K (motor/adubacao.py,
+        # grupo_exigencia()) e do nome de exibicao das culturas na interface. A
         # coerencia interna do catalogo (141 culturas, grupos de exigencia, sinonimos)
-        # continua travada por testes/unidade/test_integridade_catalogo_anexo2.py, e o
-        # refactor que faz grupo_exigencia() resolver por esta fonte unica segue
-        # pendente (docs/ROADMAP.md, etapa a).
+        # continua travada por testes/unidade/test_integridade_catalogo_anexo2.py.
         try:
             dados = self._carregar_json(dados_dir / "catalogo_anexo2.json")
             self._validar_schema_json("catalogo_anexo2.json", "catalogo_anexo2_v1", dados)

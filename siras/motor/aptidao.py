@@ -12,7 +12,7 @@ Reaproveita a base de conhecimento e os motores já existentes em vez de duplic�
   D5.6/D5.7): primeiro tenta `grupo_exigencia.p`/`.k`, já transcrito do Anexo 2 por
   cultura nos arquivos de adubação por grupo (hortaliças, tubérculos, outras, frutíferas,
   erva-mate — S3/S4 do ROADMAP, ~50 culturas); só cai para grupo_exigencia() de
-  motor/adubacao.py (catálogo de interpretacao_p.json/interpretacao_k.json + fallback de
+  motor/adubacao.py (catálogo do Anexo 2, catalogo_anexo2.json, + fallback de
   grãos) quando a cultura não aparece em nenhum dos cinco arquivos — é o caso de grãos e
   das poucas culturas sem adubação implementada mas com grupo P/K conhecido (ramo b de F1);
 - a exequibilidade da calagem no cenário POTENCIAL (CCAE §7.2) chama
@@ -21,7 +21,7 @@ Só a camada de grau/classe que não vem do Manual (Ramalho Filho e Beek, Sobral
 e as decisões do autor no Apêndice A do CCAE) mora em dados/comum/criterios_aptidao.json
 e config_aptidao.json.
 
-Cultura fora dos catálogos (ph_referencia.json, interpretacao_p.json/interpretacao_k.json
+Cultura fora dos catálogos (ph_referencia.json, catalogo_anexo2.json
 + mapa_culturas.json) não levanta exceção: retorna ResultadoAptidao com
 classe="INDETERMINADA" (CCAE P5, Seção 3) — decisão registrada em docs/decisoes/0005,
 deliberadamente diferente do estilo de exceção de motor/calagem.py e motor/adubacao.py,
@@ -50,8 +50,8 @@ from siras.motor.calagem import ErroCalagem, calcular_calagem_por_cultura, resol
 from siras.motor.trace import Trace
 
 # Arquivos de adubação por grupo cujas culturas já trazem grupo_exigencia.p/.k
-# transcrito do Anexo 2 (S3/S4 do ROADMAP) — consultados antes do catálogo genérico de
-# interpretacao_p.json/interpretacao_k.json (docs/decisoes/0005, D5.7).
+# transcrito do Anexo 2 (S3/S4 do ROADMAP) — consultados antes do catálogo do Anexo 2
+# (catalogo_anexo2.json), a fonte única de grupo_exigencia() (docs/decisoes/0005, D5.7).
 _CARREGADORES_GRUPO_EXIGENCIA = (
     carregar_dados_hortalicas,
     carregar_dados_tuberculos,
@@ -62,7 +62,7 @@ _CARREGADORES_GRUPO_EXIGENCIA = (
 
 #: Versão do CCAE que este motor implementa. Aparece em ResultadoAptidao.versao_criterios
 #: e é o que o conjunto de conformidade declara ter gabaritado (CCAE §9.1).
-_VERSAO_CRITERIOS = "1.2"
+_VERSAO_CRITERIOS = "1.3"
 
 
 class _CulturaOuDadoIndeterminado(Exception):
@@ -156,33 +156,6 @@ def _classificar_faixa_fechada_no_meio(
     raise ErroAdubacao(f"valor {valor} não se encaixa em nenhuma faixa de {contexto}: {faixas}")
 
 
-def _grafias_do_catalogo(
-    candidatos: Tuple[str, ...], dados: Dict[str, Any], eixo: str
-) -> Tuple[str, ...]:
-    """Acrescenta aos candidatos a grafia EXATA usada pelos catálogos consultados na
-    camada 2. grupo_exigencia() compara por igualdade literal, e interpretacao_p.json
-    escreve 'acácia-negra' com acento enquanto o caso de teste manda 'acacia_negra' —
-    sem traduzir de volta para a grafia do catálogo, a cultura existe e mesmo assim não é
-    encontrada."""
-    interp = dados["interpretacao_p"] if eixo == "p" else dados["interpretacao_k"]
-    indice: Dict[str, str] = {}
-    for grupo in interp["grupos_exigencia"]:
-        for cultura in grupo.get("culturas", ()):
-            indice.setdefault(normalizar_nome_cultura(cultura), cultura)
-    for cultura in dados["mapa_culturas"]["culturas"]:
-        indice.setdefault(normalizar_nome_cultura(cultura), cultura)
-
-    extras = [
-        indice[normalizar_nome_cultura(nome)]
-        for nome in candidatos
-        if normalizar_nome_cultura(nome) in indice
-    ]
-    vistos: set = set()
-    return tuple(
-        nome for nome in (*candidatos, *extras) if not (nome in vistos or vistos.add(nome))
-    )
-
-
 def _nomes_candidatos(cultura_id: str, dados: Dict[str, Any]) -> Tuple[str, ...]:
     """Grafias sob as quais procurar a cultura, em ordem de precedência.
 
@@ -244,8 +217,8 @@ def _buscar_grupo_exigencia_transcrito(candidatos: Tuple[str, ...]) -> Optional[
 def _resolver_grupo_p_ou_k(cultura_id: str, eixo: str, dados: Dict[str, Any]) -> str:
     """Resolve o grupo de exigência (P ou K) em duas camadas (docs/decisoes/0005, D5.7):
     1) grupo_exigencia.p/.k já transcrito por cultura nos arquivos de adubação por grupo;
-    2) grupo_exigencia() de motor/adubacao.py (catálogo de interpretacao_p.json/
-       interpretacao_k.json + fallback de grãos), só quando (1) não encontra a cultura.
+    2) grupo_exigencia() de motor/adubacao.py (catálogo do Anexo 2 + fallback de grãos),
+       só quando (1) não encontra a cultura.
     Cada camada é tentada com todas as grafias de _nomes_candidatos().
     """
     candidatos = _nomes_candidatos(cultura_id, dados)
@@ -254,12 +227,10 @@ def _resolver_grupo_p_ou_k(cultura_id: str, eixo: str, dados: Dict[str, Any]) ->
     if transcrito is not None:
         return f"grupo_{transcrito[eixo]}"
 
-    nome_arquivo = "interpretacao_p.json" if eixo == "p" else "interpretacao_k.json"
-    interp = dados["interpretacao_p"] if eixo == "p" else dados["interpretacao_k"]
     ultimo_erro: Optional[ErroAdubacao] = None
-    for nome in _grafias_do_catalogo(candidatos, dados, eixo):
+    for nome in candidatos:
         try:
-            return grupo_exigencia(nome, dados["mapa_culturas"], interp["grupos_exigencia"], nome_arquivo)
+            return grupo_exigencia(nome, dados["mapa_culturas"], dados["catalogo_anexo2"], eixo)
         except ErroAdubacao as e:
             ultimo_erro = e
     raise _CulturaOuDadoIndeterminado(str(ultimo_erro)) from ultimo_erro
@@ -270,6 +241,49 @@ def _aplicar_teto(grau: int, rotulo: str, teto_nome: str, graus: Dict[str, int])
     if grau > teto_grau:
         return teto_grau, teto_nome
     return grau, rotulo
+
+
+def necessidade_de_calcario_ramo_b(v_percent: float, ctc_ph7: float, v_alvo: float) -> float:
+    """NC = (v_alvo - V%)/100 x CTC_pH7 — Tabelas 5.4, 5.6 e 5.7 do Manual (CCAE v1.2 §7.1(b)).
+
+    Grandeza de DECISÃO do F1, e não de recomendação: lida antes de qualquer
+    arredondamento e nunca exibida no laudo — a dose que o laudo mostra é a do módulo de
+    calagem. Lida antes do arredondamento, NC > 0 é equivalente a V% < v_alvo; arredondar
+    antes do corte faria a classe depender da CTC por um caminho que nenhuma tabela do
+    Manual especifica (CCAE v1.2, cláusula de precisão).
+
+    A mesma expressão existe em motor/calagem.py. A duplicação é deliberada — o F1 não
+    chama a calagem porque a pastagem natural não tem critério de calagem mapeado — e só
+    é aceitável porque testes/unidade/test_nc_ramo_b.py compara as duas.
+    """
+    return ((v_alvo - v_percent) / 100) * ctc_ph7
+
+
+def _bases_deficientes(analise: AnaliseSolo, sem: Dict[str, Any]) -> bool:
+    """Se há deficiência de bases no ramo (b), pela derivação que a base declara.
+
+    O operador vive em criterios_aptidao.json (F1_acidez.sem_ph_referencia.tipo), e não
+    aqui, pelo mesmo motivo que a calagem lê "v_menor_igual" da própria base: o 40 na base
+    e o ">=" no código foi a fresta por onde a divergência B-6 passou sem que nenhum teste
+    a enxergasse (CCAE v1.2, Apêndice B).
+
+    Duas derivações, e só uma vigente:
+    - "nc_maior_que_zero" (v1.2, vigente): há limitação se e somente se NC > 0;
+    - "v_menor_que" (v1.1): há limitação se V% < limiar. Mantida para que a equivalência
+      entre as versões seja MEDIDA, e não só afirmada (Apêndice C) —
+      testes/unidade/test_equivalencia_ccae_v11_v12.py.
+
+    As duas coincidem sempre que a CTC é positiva. Com CTC = 0 a v1.2 dá NC = 0, sem
+    limitação, e a v1.1 olharia só o V%; o contrato do CCAE já recusa CTC nula (§5.2).
+    """
+    tipo = sem["tipo"]
+    if tipo == "nc_maior_que_zero":
+        return necessidade_de_calcario_ramo_b(analise.v_percent, analise.ctc_ph7, sem["v_minimo"]) > 0
+    if tipo == "v_menor_que":
+        return analise.v_percent < sem["v_minimo"]
+    raise ErroAptidao(
+        f"criterios_aptidao.json: F1_acidez.sem_ph_referencia.tipo '{tipo}' desconhecido"
+    )
 
 
 def _avaliar_f1_acidez(
@@ -308,7 +322,7 @@ def _avaliar_f1_acidez(
         sem = crit_f1["sem_ph_referencia"]
         fonte = sem["_fonte"]
         excecao = analise.ca >= sem["excecao_ca_minimo"] and analise.mg >= sem["excecao_mg_minimo"]
-        if analise.v_percent >= sem["v_minimo"] or excecao:
+        if excecao or not _bases_deficientes(analise, sem):
             grau, rotulo = graus["NULO"], "NULO"
             evidencia = (
                 f"cultura sem pH de referência; V% {analise.v_percent} >= {sem['v_minimo']} "
@@ -475,7 +489,13 @@ def _resolver_f1_potencial(
     exequível; permanece um grau acima de NULO (LIGEIRO) se a dose exceder o teto
     operacional; permanece inalterado se a calagem nem chega a ser disparada (F1 já era
     NULO/LIGEIRO no cenário ATUAL — o Manual não recomenda calcário nesse caso, então não
-    há correção real a projetar)."""
+    há correção real a projetar).
+
+    A exequibilidade lê a NC ANTES do arredondamento (CCAE v1.3, §7.2 — decisão A do
+    autor, 13/09/2026), como o F1 do cenário ATUAL já lê (§7.1). Lendo a dose arredondada,
+    a faixa logo abaixo do gatilho do ramo (b) — dose real positiva que arredonda a 0,0 —
+    mantinha F1 em MODERADO no POTENCIAL: a acidez era limitação no ATUAL e, com dose
+    0,0, nenhuma correção era projetada."""
     graus = dados["criterios_aptidao"]["graus"]
 
     if f1_atual.grau == graus["NULO"]:
@@ -489,8 +509,10 @@ def _resolver_f1_potencial(
             "da correção de F1 no cenário POTENCIAL; grau de F1 mantido"
         ]
 
+    # Sem disparo (ou exceção aplicada) a calagem não devolve dose bruta: nada a projetar.
     nc_t_ha = resultado_calagem["nc_t_ha"]
-    if not nc_t_ha:
+    nc_bruta = resultado_calagem.get("nc_bruta_t_ha", 0.0)
+    if nc_bruta <= 0:
         return f1_atual, []
 
     criterio_id = resolver_criterio_id(cultura_id, contexto, dados)
@@ -499,7 +521,7 @@ def _resolver_f1_potencial(
     config = dados["config_aptidao"]
     teto = config["NC_MAX_INCORPORADO_T_HA"] if modo == "incorporado" else config["NC_MAX_SUPERFICIAL_T_HA"]
 
-    if nc_t_ha <= teto:
+    if nc_bruta <= teto:
         fator = AvaliacaoFator(
             "F1_acidez", graus["NULO"], "NULO",
             f"{f1_atual.evidencia} -> corrigido: NC {nc_t_ha} t/ha ({modo}) <= teto {teto} t/ha",

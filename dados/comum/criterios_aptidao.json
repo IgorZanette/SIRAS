@@ -34,7 +34,8 @@
       ]
     },
     "sem_ph_referencia": {
-      "_fonte": "Manual RS/SC 2016, Tab. 5.6 e 5.7",
+      "_fonte": "Manual RS/SC 2016, Tab. 5.4 (p. 78), 5.6 (p. 83) e 5.7; excecao Ca/Mg com limites minimos: Tab. 5.6, nota (2) (a Tab. 5.4, nota (6), a redige com igualdade)",
+      "tipo": "nc_maior_que_zero",
       "v_minimo": 40.0,
       "excecao_ca_minimo": 4.0,
       "excecao_mg_minimo": 1.0,

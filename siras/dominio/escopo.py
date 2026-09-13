@@ -11,7 +11,7 @@ confusão já produziu uma contagem errada do escopo:
 
 As seis espécies florestais tolerantes à acidez estão no primeiro conjunto e fora do
 segundo: o módulo de aptidão precisa delas mapeadas para calcular F1 no cenário POTENCIAL
-(onze dos 84 casos de conformidade as usam, e desmapeá-las derruba o CONF-PT-05), mas a
+(onze dos casos de conformidade as usam, e desmapeá-las derruba o CONF-PT-05), mas a
 Proposta as exclui explicitamente do escopo de recomendação, porque não têm pH de
 referência e a lógica de calagem delas não cabe no modelo padronizado.
 

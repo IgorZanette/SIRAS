@@ -392,6 +392,73 @@
       "memoria_calculo": "Secao 6.5.3, p. 198-199. N (p.198): MO 3,5% cai na faixa '2,6 a 5,0'. Ano 4 -> coluna 'a partir do 3o ano' (1o ano e 'nao aplicar'; 2o ano tem colunas proprias - 'ano' nao e indice ordinal). Produtividade 12 t/ha > 10 -> subcoluna '>10' -> 117 kg de N/ha. P e K (p.199): amoreira-preta e grupo P2 e K2 (Anexo 2). Argila 45% -> classe de solo 2 (41 a 60%); Tab.6.4 classe 2: Alto = 12,1 a 24,0 mg/dm3 -> P=15,0 e ALTO. CTC 9,5 -> faixa 7,6-15,0; Tab.6.9: Medio = 61 a 90 -> K=80 e MEDIO (classe diferente da de P no mesmo caso, de proposito - detecta contaminacao entre nutrientes). Produtividade 12 -> coluna '10-15'. Linha Alto, coluna 10-15 -> 70 kg de P2O5/ha. Linha Medio, coluna 10-15 -> 171 kg de K2O/ha.",
       "origem_referencia": "Autor - Calculado a mão, confirmado na p. 199 em 2026-08-23",
       "conferido_por_autor_em": "2026-08-23"
+    },
+    {
+      "id": "ADU-16",
+      "descricao": "Maracujazeiro, manutencao: N por MO; P e K por produtividade, com taxas em intervalo por tonelada",
+      "entrada": {
+        "cultura": "maracujazeiro",
+        "fase": "manutencao",
+        "produtividade_estimada": 20,
+        "mo": 3.5,
+        "argila": 35,
+        "p": 15.0,
+        "k": 80,
+        "ctc_ph7": 12.0
+      },
+      "referencia": {
+        "n": 80,
+        "p2o5": {
+          "min": 20,
+          "max": 40
+        },
+        "k2o": {
+          "min": 60,
+          "max": 100
+        }
+      },
+      "verificacao_cruzada": {
+        "n": 80,
+        "p2o5": {
+          "min": 20,
+          "max": 40
+        },
+        "k2o": {
+          "min": 60,
+          "max": 100
+        }
+      },
+      "memoria_calculo": "Secao 6.5.9, p. 210-211. N (p.210-211): na manutencao, a partir do segundo ano, MO de 3,5% cai na faixa '2,6 a 5,0' -> 80 kg de N/ha. P e K (p.211): a partir do segundo ano, aplicar 1,0 a 2,0 kg/ha/ano de P2O5 e 3,0 a 5,0 kg/ha/ano de K2O por tonelada estimada de fruto. Produtividade 20 t/ha: P2O5 = 20 x (1,0 a 2,0) = 20 a 40 kg/ha; K2O = 20 x (3,0 a 5,0) = 60 a 100 kg/ha. Os valores de p, argila e ctc_ph7 sao mantidos na entrada no formato ADU-15, mas nao participam diretamente desse calculo de manutencao no Manual.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-09-13"
+    },
+    {
+      "id": "ADU-17",
+      "descricao": "Videira, crescimento: N por MO x ano x tipo de uva; P e K sem dose na fase de crescimento quando houve adubacao de pre-plantio",
+      "entrada": {
+        "cultura": "videira",
+        "fase": "crescimento",
+        "ano": 2,
+        "tipo_uva": "vinho",
+        "mo": 3.5,
+        "argila": 35,
+        "p": 15.0,
+        "k": 80,
+        "ctc_ph7": 12.0
+      },
+      "referencia": {
+        "n": 20,
+        "p2o5": 0,
+        "k2o": 0
+      },
+      "verificacao_cruzada": {
+        "n": 20,
+        "p2o5": 0,
+        "k2o": 0
+      },
+      "memoria_calculo": "Secao 6.5.18, p. 228-231. Crescimento (p.228-229): as quantidades de N variam com MO, tipo de uva e idade do vinhedo. Para MO de 3,5%, faixa '2,6 a 5,0', ano 2 e uva para vinho, a Tabela de N indica 20 kg de N/ha. P e K: o Manual informa na p.228 que, nos pomares adubados com P e K em pre-plantio, nao ha necessidade de adicionar esses nutrientes durante a fase de crescimento. Portanto, para o caso de teste, P2O5 = 0 e K2O = 0, sob essa condicao. As paginas 230-231 apresentam as doses de manutencao, nao aplicaveis a este caso de fase 'crescimento'. Os valores de p, argila e ctc_ph7 sao mantidos na entrada no formato ADU-15, mas nao participam diretamente desse calculo.",
+      "origem_referencia": "Autor - Calculado a mão",
+      "conferido_por_autor_em": "2026-09-13"
     }
   ]
 }

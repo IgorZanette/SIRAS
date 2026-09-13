@@ -49,7 +49,7 @@ def _grupos_de_exigencia(
     """Resolve os grupos de exigência em P e K da cultura, do mesmo jeito que a adubação
     do grupo dela resolve.
 
-    Grãos resolvem pelas listas de interpretacao_p/k.json; os demais grupos declaram o
+    Grãos resolvem pelo catálogo do Anexo 2 (grupo_exigencia()); os demais grupos declaram o
     campo `grupo_exigencia` na própria cultura (ADR 0004). Seguir cada caminho onde ele
     já está evita criar aqui uma terceira regra de resolução.
     """
@@ -57,12 +57,10 @@ def _grupos_de_exigencia(
         try:
             return {
                 "p": grupo_exigencia(
-                    cultura_id, dados["mapa_culturas"],
-                    dados["interpretacao_p"]["grupos_exigencia"], "interpretacao_p.json",
+                    cultura_id, dados["mapa_culturas"], dados["catalogo_anexo2"], "p"
                 ),
                 "k": grupo_exigencia(
-                    cultura_id, dados["mapa_culturas"],
-                    dados["interpretacao_k"]["grupos_exigencia"], "interpretacao_k.json",
+                    cultura_id, dados["mapa_culturas"], dados["catalogo_anexo2"], "k"
                 ),
             }
         except Exception:

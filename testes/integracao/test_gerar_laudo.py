@@ -12,7 +12,7 @@ campo `referencia`, calculado à mão pelo autor. Nenhum número agronômico é 
 A aptidão não é conferida contra referência neste arquivo: os casos de recomendação não
 trazem Ca, Mg nem V%, e os testes completam esses campos com zero (mesma convenção de
 test_casos_validados.py). Um laudo com Ca=0 e Mg=0 tem calagem e adubação válidas e
-aptidão sem sentido agronômico — quem valida a aptidão é o conjunto de 84 casos de
+aptidão sem sentido agronômico — quem valida a aptidão é o conjunto de casos de
 testes/unidade/test_conformidade_aptidao.py.
 """
 

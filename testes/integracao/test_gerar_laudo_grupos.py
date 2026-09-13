@@ -5,8 +5,9 @@ Grãos já são cobertos por test_gerar_laudo.py. Aqui entram os cinco grupos qu
 publica com a dose pronta por classe de teor, e que passaram a ser despachados pelo
 orquestrador — hortaliças, tubérculos, outras comerciais, frutíferas e erva-mate.
 
-O caso ADU-15 (amoreira-preta em manutenção) é o único dos demais grupos com `referencia`
-no arquivo de casos, e por isso é o único com valores conferidos aqui. Para os outros a
+Os casos ADU-15 (amoreira-preta em manutenção), ADU-16 (maracujazeiro em manutenção) e
+ADU-17 (videira em crescimento) são os dos demais grupos com `referencia` no arquivo de
+casos, e por isso os únicos com valores conferidos aqui. Para os outros a
 verificação é de contrato: o laudo sai, sai completo e sai com trilha — os valores de cada
 grupo já são conferidos célula a célula em testes/unidade/test_adubacao_grupos.py.
 """
@@ -112,6 +113,30 @@ def test_adu_15_amoreira_preta_bate_com_a_referencia():
     )
 
     laudo = gerar_laudo(analise, entrada["cultura"], contexto)
+
+    assert laudo.adubacao.n == referencia["n"]
+    assert laudo.adubacao.p2o5 == referencia["p2o5"]
+    assert laudo.adubacao.k2o == referencia["k2o"]
+
+
+@pytest.mark.parametrize("id_caso", ["ADU-16", "ADU-17"])
+def test_frutiferas_conferidas_em_2026_09_13_batem_no_laudo(id_caso):
+    casos = json.loads(_CAMINHO_CASOS.read_text(encoding="utf-8"))["casos"]
+    caso = next(c for c in casos if c["id"] == id_caso)
+    entrada, referencia = caso["entrada"], caso["referencia"]
+
+    analise = AnaliseSolo(
+        ph_agua=6.0, indice_smp=6.2,
+        argila=entrada["argila"], mo=entrada["mo"], p=entrada["p"], k=entrada["k"],
+        ctc_ph7=entrada["ctc_ph7"], al=0.0, ca=0.0, mg=0.0, v_percent=0.0,
+    )
+    variaveis = {
+        chave: entrada[chave]
+        for chave in ("fase", "ano", "produtividade_estimada", "tipo_uva")
+        if chave in entrada
+    }
+
+    laudo = gerar_laudo(analise, entrada["cultura"], _contexto(entrada["cultura"], variaveis))
 
     assert laudo.adubacao.n == referencia["n"]
     assert laudo.adubacao.p2o5 == referencia["p2o5"]

@@ -15,8 +15,6 @@ adivinhado):
 - Frutíferas cuja manutenção depende de teor foliar sem correspondência solo-tecido
   declarada pelo Manual (ameixeira, macieira, pessegueiro/nectarineira — `dados/`
   já marca `requer_analise_foliar: true`, `implementado_no_siras: false`).
-- Frutíferas com indexação de manutenção própria e ainda sem caso de teste calculado à
-  mão (amoreira-preta, mirtileiro, morangueiro, nogueira-pecã).
 - Videira: N e P (correspondência solo→tecido declarada, Tab. 6.5.18, nota 1) estão
   implementados; K não tem correspondência declarada pelo Manual — o próprio `dados/`
   registra o alerta ("alerta" em `correspondencia_solo_tecido.k`).
@@ -36,6 +34,7 @@ from siras.conhecimento.carregador import (
     carregar_dados_outras,
     carregar_dados_tuberculos,
 )
+from siras.dominio.nomes import normalizar_nome_cultura
 
 
 class ErroAdubacao(Exception):
@@ -71,31 +70,52 @@ def classificar_faixa(valor: float, faixas: List[Dict[str, Any]], chave_rotulo: 
     raise ErroAdubacao(f"valor {valor} não se encaixa em nenhuma faixa: {faixas}")
 
 
-def grupo_exigencia(cultura_id: str, mapa_culturas: Dict[str, Any], grupos_exigencia: List[Dict[str, Any]],
-                      nome_arquivo: str) -> str:
-    """Resolve o grupo de exigência (P ou K) de uma cultura.
+def grupo_exigencia(cultura_id: str, mapa_culturas: Dict[str, Any],
+                    catalogo_anexo2: Dict[str, Any], eixo: str) -> str:
+    """Resolve o grupo de exigência (P ou K) de uma cultura pelo catálogo do Anexo 2.
 
-    Primeiro tenta a lista explícita de culturas de cada grupo (dado transcrito). Se a
-    cultura não aparecer em nenhuma lista explícita mas pertencer ao grupo "graos" em
-    mapa_culturas.json, cai no grupo_2 — que os dois arquivos descrevem em texto como
-    "culturas de grãos exceto arroz irrigado" (interpretacao_p.json/interpretacao_k.json,
-    grupos_exigencia[].culturas_texto). Arroz irrigado é fora de escopo do SIRAS e nunca
-    aparece com grupo "graos" nesse fallback.
+    Fonte única: dados/comum/catalogo_anexo2.json, as 141 culturas do Anexo 2 do Manual
+    (p. 361-365). Até 13/09/2026 esta função lia as listas `culturas` de
+    interpretacao_p.json e interpretacao_k.json, que eram parciais — cobriam só as culturas
+    conferidas até então, e o catálogo cobre o Anexo inteiro. Nas culturas em que as listas
+    resolviam, os dois dão o mesmo grupo (testes/unidade/test_grupo_exigencia_catalogo.py),
+    e as três transcrições do dado concordam integralmente
+    (testes/unidade/test_integridade_catalogo_anexo2.py).
 
-    Pública porque motor/aptidao.py reaproveita esta mesma resolução para F2/F3
-    (docs/decisoes/0005) — uma só fonte para grupo_p/grupo_k evita a divergência que o
-    CCAE (Seção 3, "Armadilha conhecida") alerta ser um erro clássico.
+    A comparação é pela forma normalizada do nome (siras/dominio/nomes.py): o catálogo
+    escreve 'acacia_negra' e o Manual, 'acácia-negra'. Sinônimos não são resolvidos aqui —
+    quem chama com um nome do Manual passa as grafias candidatas, como motor/aptidao.py já
+    faz.
+
+    Se a cultura não estiver no catálogo mas for do grupo "graos" em mapa_culturas.json,
+    cai no grupo_2, que o Manual descreve como "culturas de grãos exceto arroz irrigado".
+    Das 21 culturas de grãos do mapa, só o arroz de sequeiro depende desse fallback: está
+    em mapa_culturas.json e não no Anexo 2 — lacuna de transcrição já registrada, e que dá
+    o mesmo grupo_2 que a resolução anterior dava.
+
+    Pública porque motor/aptidao.py (F2/F3) e motor/leitura.py (leitura ao vivo) resolvem
+    o grupo pelo mesmo caminho — uma só fonte para grupo_p/grupo_k evita a divergência que
+    o CCAE (Seção 3, "Armadilha conhecida") alerta ser um erro clássico.
+
+    Args:
+        eixo: "p" ou "k". Os dois são independentes: a mandioca é grupo 3 de P e grupo 2
+            de K, e nenhum grupo se deriva do outro.
     """
-    for grupo in grupos_exigencia:
-        if cultura_id in grupo.get("culturas", []):
-            return grupo["grupo"]
+    if eixo not in ("p", "k"):
+        raise ValueError(f"eixo deve ser 'p' ou 'k', recebido '{eixo}'")
 
-    entrada = mapa_culturas["culturas"].get(cultura_id)
-    if entrada and entrada.get("grupo") == "graos":
+    procurado = normalizar_nome_cultura(cultura_id)
+    for chave, entrada in catalogo_anexo2["culturas"].items():
+        if normalizar_nome_cultura(chave) == procurado:
+            return f"grupo_{entrada['grupo_' + eixo]}"
+
+    entrada_mapa = mapa_culturas["culturas"].get(cultura_id)
+    if entrada_mapa and entrada_mapa.get("grupo") == "graos":
         return "grupo_2"
 
     raise ErroAdubacao(
-        f"não foi possível determinar o grupo de exigência em {nome_arquivo} para '{cultura_id}'"
+        f"não foi possível determinar o grupo de exigência de {eixo.upper()} para "
+        f"'{cultura_id}' em catalogo_anexo2.json"
     )
 
 
@@ -110,7 +130,7 @@ def classificar_fosforo(
     exibiria a classe certa com a faixa errada.
 
     A resolução do GRUPO continua fora daqui, porque difere por grupo de cultura: grãos
-    resolvem por grupo_exigencia() sobre as listas de interpretacao_p.json, e os demais
+    resolvem por grupo_exigencia() sobre o catálogo do Anexo 2, e os demais
     leem o campo declarado na própria cultura.
 
     Returns:
@@ -266,7 +286,6 @@ def calcular_fosforo_potassio(
     dados_graos = dados_graos if dados_graos is not None else carregar_dados_graos()
 
     mapa_culturas = dados_comuns["mapa_culturas"]
-    interpretacao_p = dados_comuns["interpretacao_p"]
     interpretacao_k = dados_comuns["interpretacao_k"]
     adubacao_pk = dados_graos["adubacao_pk"]
 
@@ -274,8 +293,8 @@ def calcular_fosforo_potassio(
     if manutencao is None:
         raise ErroAdubacao(f"cultura '{cultura_id}' não encontrada em manutencao_por_cultura")
 
-    grupo_p = grupo_exigencia(cultura_id, mapa_culturas, interpretacao_p["grupos_exigencia"], "interpretacao_p.json")
-    grupo_k = grupo_exigencia(cultura_id, mapa_culturas, interpretacao_k["grupos_exigencia"], "interpretacao_k.json")
+    grupo_p = grupo_exigencia(cultura_id, mapa_culturas, dados_comuns["catalogo_anexo2"], "p")
+    grupo_k = grupo_exigencia(cultura_id, mapa_culturas, dados_comuns["catalogo_anexo2"], "k")
 
     leitura_p = classificar_fosforo(grupo_p, argila, p_solo, dados_comuns)
     leitura_k = classificar_potassio(grupo_k, ctc_ph7, k_solo, dados_comuns)
@@ -650,7 +669,9 @@ def calcular_adubacao_frutiferas(
     'manutencao' — Seção 6.5).
 
     Cobre pré-plantio (referência comum, Tab. 6.5.1) e crescimento (N por classe de MO,
-    com ou sem 'ano') para todas as frutíferas do escopo. Manutenção cobre: taxa por
+    com ou sem 'ano'; na videira, também por `tipo_uva` — ADU-17) para todas as frutíferas
+    do escopo. Manutenção cobre: maracujazeiro (N por classe de MO; P e K por taxa por
+    tonelada estimada, em intervalo {min, max} — ADU-16); taxa por
     tonelada estimada (abacateiro, bananeira, caquizeiro, citros, figueira, oliveira,
     pereira, quivizeiro); amoreira-preta (N por MO x ano x produtividade, colunas
     nomeadas — 'ano' identifica o ano após o plantio); mirtileiro e morangueiro
@@ -705,6 +726,23 @@ def calcular_adubacao_frutiferas(
                 raise ErroAdubacao(f"cultura '{cultura_id}': 'ano' é obrigatório na fase de crescimento")
             faixa_mo = _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]])
             n = _navegar(n_bloco["doses"], faixa_mo, str(ano))
+        elif tipo_n == "por_classe_mo_ano_e_tipo_uva":
+            # Videira (Seção 6.5.18, p. 228-229): N por tipo de uva x classe de MO x ano
+            # após o plantio. Caso ADU-17, calculado à mão pelo autor em 2026-09-13.
+            if tipo_uva not in n_bloco["doses"]:
+                raise ErroAdubacao(
+                    f"cultura '{cultura_id}' exige 'tipo_uva' em {tuple(n_bloco['doses'])} "
+                    f"na fase de crescimento, recebido {tipo_uva!r}"
+                )
+            if ano is None:
+                raise ErroAdubacao(f"cultura '{cultura_id}': 'ano' é obrigatório na fase de crescimento")
+            if ano not in n_bloco["anos"]:
+                raise ErroAdubacao(
+                    f"cultura '{cultura_id}': a fase de crescimento cobre os anos {n_bloco['anos']}, "
+                    f"recebido {ano} — a partir daí vale a manutenção"
+                )
+            faixa_mo = _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]])
+            n = _navegar(n_bloco["doses"], tipo_uva, faixa_mo, str(ano))
         else:
             raise NotImplementedError(
                 f"cultura '{cultura_id}': crescimento.n.tipo='{tipo_n}' ainda não implementado"
@@ -843,6 +881,24 @@ def calcular_adubacao_frutiferas(
                 resultado["classe_p"] = classe_p
                 resultado["classe_k"] = classe_k
             return resultado
+
+        if bloco.get("indexacao") == "classe_mo_e_produtividade_estimada":
+            # Maracujazeiro (Seção 6.5.9, p. 210-211): N por classe de MO; P e K por taxa
+            # por tonelada estimada de fruto, publicada em intervalo — o intervalo é
+            # preservado como {min, max} (ADR 0004). Caso ADU-16, calculado à mão pelo
+            # autor em 2026-09-13.
+            if produtividade_estimada is None:
+                raise ErroAdubacao(f"cultura '{cultura_id}': 'produtividade_estimada' é obrigatória na manutenção")
+            n_bloco, pk_bloco = bloco["n"], bloco["pk"]
+            if n_bloco.get("tipo") != "por_classe_mo" or pk_bloco.get("tipo") != "taxa_por_tonelada_estimada":
+                raise NotImplementedError(
+                    f"cultura '{cultura_id}': manutenção com n.tipo='{n_bloco.get('tipo')}' e "
+                    f"pk.tipo='{pk_bloco.get('tipo')}' ainda não implementada"
+                )
+            n = _navegar(n_bloco["doses"], _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]]))
+            p2o5 = _dose_taxa_por_tonelada(pk_bloco["p"], produtividade_estimada)
+            k2o = _dose_taxa_por_tonelada(pk_bloco["k"], produtividade_estimada)
+            return {"n": n, "p2o5": p2o5, "k2o": k2o}
 
         if bloco.get("tipo") == "taxa_por_tonelada_estimada":
             if produtividade_estimada is None:

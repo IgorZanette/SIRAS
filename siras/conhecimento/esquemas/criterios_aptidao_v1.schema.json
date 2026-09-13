@@ -64,9 +64,10 @@
         },
         "sem_ph_referencia": {
           "type": "object",
-          "required": ["_fonte", "v_minimo", "excecao_ca_minimo", "excecao_mg_minimo", "grau_se_deficiente"],
+          "required": ["_fonte", "tipo", "v_minimo", "excecao_ca_minimo", "excecao_mg_minimo", "grau_se_deficiente"],
           "properties": {
             "_fonte": { "type": "string" },
+            "tipo": { "type": "string", "enum": ["nc_maior_que_zero", "v_menor_que"] },
             "v_minimo": { "type": "number" },
             "excecao_ca_minimo": { "type": "number" },
             "excecao_mg_minimo": { "type": "number" },

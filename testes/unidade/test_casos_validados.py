@@ -152,3 +152,30 @@ def test_adu_15_amoreira_preta_manutencao():
     assert resultado["n"] == referencia["n"]
     assert resultado["p2o5"] == referencia["p2o5"]
     assert resultado["k2o"] == referencia["k2o"]
+
+
+@pytest.mark.parametrize("id_caso", ["ADU-16", "ADU-17"])
+def test_frutiferas_conferidas_em_2026_09_13(id_caso):
+    """ADU-16: maracujazeiro em manutenção, P e K em intervalo por tonelada estimada.
+    ADU-17: videira em crescimento, N por MO x ano x tipo de uva."""
+    caso = {c["id"]: c for c in _carregar_casos()}[id_caso]
+    assert caso["conferido_por_autor_em"] is not None
+    assert caso["referencia"] == caso["verificacao_cruzada"]
+
+    entrada, referencia = caso["entrada"], caso["referencia"]
+    resultado = calcular_adubacao_frutiferas(
+        entrada["cultura"],
+        fase=entrada["fase"],
+        ano=entrada.get("ano"),
+        produtividade_estimada=entrada.get("produtividade_estimada"),
+        tipo_uva=entrada.get("tipo_uva"),
+        mo=entrada["mo"],
+        argila=entrada["argila"],
+        p_solo=entrada["p"],
+        k_solo=entrada["k"],
+        ctc_ph7=entrada["ctc_ph7"],
+    )
+
+    assert resultado["n"] == referencia["n"]
+    assert resultado["p2o5"] == referencia["p2o5"]
+    assert resultado["k2o"] == referencia["k2o"]

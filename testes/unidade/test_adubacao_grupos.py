@@ -280,7 +280,11 @@ class TestErvaMate:
 class TestFrutiferasBespoke:
     """ADU-15 a ADU-19 (rascunho de oráculo compartilhado pelo autor em 2026-08-23):
     um caso por formato de manutenção próprio de frutífera. Cada um foi desenhado para
-    denunciar um erro específico de leitura — ver comentário em cada teste."""
+    denunciar um erro específico de leitura — ver comentário em cada teste.
+
+    A numeração ADU-16 a ADU-19 deste rascunho é anterior ao arquivo de casos e não
+    corresponde mais a ele: em testes/casos/casos_recomendacao.json, ADU-16 é o
+    maracujazeiro e ADU-17 a videira em crescimento (test_casos_validados.py)."""
 
     def test_adu_15_amoreira_preta_colunas_nao_ordinais(self):
         # Ano 4 -> coluna 'ano_3_mais_...' (nao e indice ordinal); produtividade 12>10

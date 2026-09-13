@@ -135,9 +135,7 @@ _SUBSUPERFICIE = {
 _LIMITES_DECLARADOS = {
     ("ameixeira", "fase", "manutencao"),
     ("macieira", "fase", "manutencao"),
-    ("maracujazeiro", "fase", "manutencao"),
     ("pessegueiro_nectarineira", "fase", "manutencao"),
-    ("videira", "fase", "crescimento"),
 }
 
 #: RECUSAS POR CAMPO DEPENDENTE: a fase escolhida exige um dado que só ela exige — o ano
@@ -153,6 +151,7 @@ _EXIGEM_CAMPO_DEPENDENTE = {
     ("erva-mate", "programa", "recuperacao"), ("erva-mate", "fase", "producao"),
     ("figueira", "fase", "crescimento"), ("figueira", "fase", "manutencao"),
     ("macieira", "fase", "crescimento"),
+    ("maracujazeiro", "fase", "manutencao"),
     ("oliveira", "fase", "crescimento"), ("oliveira", "fase", "manutencao"),
     ("pereira", "fase", "crescimento"), ("pereira", "fase", "manutencao"),
     ("pessegueiro_nectarineira", "fase", "crescimento"),

@@ -13,6 +13,12 @@
     <li class="etapa is-feita"><span class="etapa__n">2</span><span class="etapa__t">Análise de solo</span></li>
     <li class="etapa is-ativa"><span class="etapa__n">3</span><span class="etapa__t">Laudo</span></li>
   </ol>
+  {# Os tres passos nomeados dizem ONDE se esta; a barra diz QUANTO falta, que e a
+     pergunta que o nome do passo nao responde. #}
+  <div class="progresso nao-imprime" role="progressbar" aria-valuemin="0" aria-valuemax="3"
+       aria-valuenow="3" aria-label="Progresso da análise, passo 3 de 3">
+    <i style="width:100%"></i>
+  </div>
 
   <div class="rodape-acoes nao-imprime" style="margin:0 0 var(--e-5)">
     <a class="btn btn--contorno" href="{{ url_for('siras.dados') }}">
@@ -72,7 +78,7 @@
               <span class="linha__val">{{ teor.valor }} {{ teor.unidade|safe }}</span>
             </div>
             <div style="margin:.4rem 0 .6rem">{{ f.ficha(teor.sigla, teor.rotulo) }}</div>
-            {{ r.regua(teor.indice, teor.posicao) }}
+            {{ r.regua(teor.indice, teor.posicao, teor.faixas, teor.unidade) }}
             <p class="t-aux" style="margin-top:.5rem">{{ teor.nota }}</p>
           </div>
           {% endfor %}

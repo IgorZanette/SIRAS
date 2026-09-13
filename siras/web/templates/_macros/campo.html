@@ -9,8 +9,9 @@
    preenchido, em vez de exigir que o técnico redigite os onze campos por causa de um.
 #}
 {% macro campo(id, rotulo, unidade=None, ajuda=None, obrigatorio=False,
-               passo="0.1", placeholder="", valor=None, erro=False) %}
-  <label class="campo{% if erro %} campo--erro{% endif %}" for="{{ id }}">
+               passo="0.1", placeholder="", valor=None, erro=False, faixa=None) %}
+  <label class="campo{% if erro %} campo--erro{% endif %}{% if valor %} campo--preenchido{% endif %}"
+         for="{{ id }}">
     <span class="campo__label">
       {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% endif %}
     </span>
@@ -18,7 +19,7 @@
       {# Os espaços antes de cada {% raw %}{% if %}{% endraw %} são necessários: trim_blocks remove a quebra de
          linha que separaria os atributos, e sem eles sai value="5,4"required. #}
       <input type="number" step="{{ passo }}" id="{{ id }}" name="{{ id }}"
-             inputmode="decimal" placeholder="{{ placeholder }}"{% if valor is not none %} value="{{ valor }}"{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}{% if obrigatorio %} required{% endif %}>
+             inputmode="decimal" placeholder="{{ placeholder }}"{% if valor is not none %} value="{{ valor }}"{% endif %}{% if faixa %}{% if faixa[0] is not none %} min="{{ faixa[0] }}"{% endif %}{% if faixa[1] is not none %} max="{{ faixa[1] }}"{% endif %}{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}{% if obrigatorio %} required{% endif %}>
       {# |safe: a unidade traz marcação (cmol<sub>c</sub>/dm<sup>3</sup>) e é constante
          escrita no código, nunca texto vindo do usuário. #}
       {% if unidade %}<span class="campo__unidade">{{ unidade|safe }}</span>{% endif %}

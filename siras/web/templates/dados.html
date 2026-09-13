@@ -15,6 +15,12 @@
     <li class="etapa is-ativa"><span class="etapa__n">2</span><span class="etapa__t">Análise de solo</span></li>
     <li class="etapa"><span class="etapa__n">3</span><span class="etapa__t">Laudo</span></li>
   </ol>
+  {# Os tres passos nomeados dizem ONDE se esta; a barra diz QUANTO falta, que e a
+     pergunta que o nome do passo nao responde. #}
+  <div class="progresso nao-imprime" role="progressbar" aria-valuemin="0" aria-valuemax="3"
+       aria-valuenow="2" aria-label="Progresso da análise, passo 2 de 3">
+    <i style="width:67%"></i>
+  </div>
 
   <h1 class="t-tela">Resultados da análise de solo</h1>
   <p class="t-corpo" style="margin-top:var(--e-3);font-size:var(--fs-md)">
@@ -77,7 +83,8 @@
         {% endif %}
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_contexto %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
-                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
+                   faixas.get(campo_id)) }}
         {% endfor %}
       </div>
     </div>
@@ -106,7 +113,8 @@
                    variavel.ajuda or variavel.condicao,
                    variavel.obrigatorio, "0.1", "",
                    leitura.valores.get(variavel.campo),
-                   variavel.campo in leitura.campos_com_erro) }}
+                   variavel.campo in leitura.campos_com_erro,
+                   (0, None)) }}
         {% endif %}
         {% endfor %}
       </div>
@@ -122,7 +130,8 @@
       <div class="grade">
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_acidez %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
-                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
+                   faixas.get(campo_id)) }}
         {% endfor %}
       </div>
     </div>
@@ -136,7 +145,8 @@
       <div class="grade">
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_fertilidade %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
-                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
+                   faixas.get(campo_id)) }}
         {% endfor %}
       </div>
     </div>
@@ -154,7 +164,8 @@
       <div class="grade">
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_subsuperficie %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
-                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro) }}
+                   leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
+                   faixas.get(campo_id)) }}
         {% endfor %}
       </div>
     </details>

@@ -297,18 +297,66 @@ def test_o_tema_salvo_e_aplicado_antes_da_primeira_pintura(cliente):
     assert "siras-tema" in cabeca
 
 
-def test_o_modo_claro_redefine_a_escala_de_neutros():
-    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-900:\s*#F4F8F5', _TELAS_CSS)
+def test_o_modo_claro_nao_usa_branco_puro_de_fundo():
+    """#FFFFFF puro lê como tela de formulário. O off-white carrega a mesma matiz
+    levemente verde dos neutros escuros e lê como papel."""
+    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-900:\s*#F6F8F5', _TELAS_CSS)
     assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-100:\s*#0D1410', _TELAS_CSS)
 
 
-def test_o_verde_e_os_sinais_nao_mudam_com_o_tema():
-    """São o vocabulário do sistema: a escala divergente da §2.2 significa o mesmo nos
-    dois modos, e trocá-la por modo desfaria o que ela construiu."""
-    bloco = re.search(r':root\[data-tema="claro"\]\s*\{(.*?)\}', _TELAS_CSS, re.S).group(1)
+def test_a_malha_de_fundo_sobrevive_no_modo_claro():
+    """A malha é o que dá ao SIRAS a leitura de superfície de instrumento: sumir no modo
+    claro trocaria a identidade por conveniência."""
+    assert re.search(
+        r':root\[data-tema="claro"\] \.malha \{[^}]*rgba\(13,20,16,\.045\)', _TELAS_CSS
+    )
 
-    for token in ("--v-400", "--sig-coral", "--sig-ambar", "--sig-aqua", "--d-a"):
+
+def test_os_paineis_ganham_profundidade_por_sombra_no_modo_claro():
+    """Borda fina sobre branco desenha uma caixa; a sombra suave dá profundidade sem
+    pesar."""
+    assert re.search(
+        r':root\[data-tema="claro"\] \.painel \{[^}]*box-shadow:', _TELAS_CSS, re.S
+    )
+
+
+def test_os_sinais_sao_recalibrados_e_nao_trocados_no_modo_claro():
+    """Coral, laranja, âmbar e aqua foram desenhados para brilhar sobre preto; sobre
+    claro ficam entre 1,4:1 e 2,6:1 e viram pastel. As variantes do modo claro mantêm
+    MATIZ e SATURAÇÃO e baixam só a luminosidade — o significado de cada sinal na escala
+    divergente da §2.2 continua o mesmo."""
+    import colorsys
+
+    bloco = re.search(r':root\[data-tema="claro"\]\s*\{(.*?)\n\}', _TELAS_CSS, re.S).group(1)
+
+    def matiz(cor):
+        cor = cor.lstrip("#")
+        r, g, b = (int(cor[i:i + 2], 16) / 255 for i in (0, 2, 4))
+        return colorsys.rgb_to_hls(r, g, b)[0]
+
+    originais = {"--sig-coral": "#FF6B4A", "--sig-laranja": "#FF9F3D",
+                 "--sig-ambar": "#FFC93D", "--sig-aqua": "#2BE0C8"}
+    for token, original in originais.items():
+        claro = re.search(rf"{token}:\s*(#[0-9A-Fa-f]{{6}})", bloco).group(1)
+        assert abs(matiz(claro) - matiz(original)) < 0.04, f"{token} mudou de matiz"
+
+    # O mapeamento classe -> sinal e o verde de ação continuam intactos.
+    for token in ("--d-a", "--d-mb", "--v-400"):
         assert token not in bloco, f"{token} foi redefinido no modo claro"
+
+
+def test_os_sinais_do_modo_claro_passam_no_piso_de_componente():
+    """3:1 sobre o fundo, que é o piso do WCAG para componentes gráficos."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
+    from conferir_contraste import contraste
+
+    bloco = re.search(r':root\[data-tema="claro"\]\s*\{(.*?)\n\}', _TELAS_CSS, re.S).group(1)
+    fundo = re.search(r"--n-900:\s*(#[0-9A-Fa-f]{6})", bloco).group(1)
+
+    for token in ("--sig-coral", "--sig-laranja", "--sig-ambar", "--sig-aqua"):
+        cor = re.search(rf"{token}:\s*(#[0-9A-Fa-f]{{6}})", bloco).group(1)
+        assert contraste(cor, fundo) >= 3.0, f"{token} em {contraste(cor, fundo):.2f}:1"
 
 
 # --- como aplicar -------------------------------------------------------------
@@ -384,7 +432,7 @@ def test_o_verde_vivo_nao_e_texto_sobre_claro():
 def test_a_regua_ganha_opacidade_no_modo_claro():
     """A régua vive de opacidade: .3 sobre escuro é discreto, sobre branco é invisível."""
     assert re.search(
-        r':root\[data-tema="claro"\] \.regua__faixa \{[^}]*opacity:\s*\.42', _TELAS_CSS
+        r':root\[data-tema="claro"\] \.regua__faixa \{[^}]*opacity:\s*\.55', _TELAS_CSS
     )
 
 
@@ -397,3 +445,91 @@ def test_os_dois_cenarios_ficam_lado_a_lado_no_papel():
 
     assert re.search(r"\.cenarios \{[^}]*grid-template-columns: 1fr auto 1fr", bloco)
     assert re.search(r"\.cenarios__seta \{[^}]*transform: none", bloco)
+
+
+# --- usabilidade --------------------------------------------------------------
+
+def test_os_campos_declaram_a_faixa_que_o_dominio_valida(cliente):
+    """As faixas não são escolha da interface: são as que AnaliseSolo e Contexto já
+    recusam na construção. Declará-las no HTML adianta o erro para o momento da
+    digitação, e a validação do servidor continua sendo a que vale."""
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    esperado = {"ph_agua": ("0", "14"), "indice_smp": ("3", "8"),
+                "v_percent": ("0", "100"), "prnt": ("0", "100")}
+    for campo, (minimo, maximo) in esperado.items():
+        tag = re.search(rf'<input[^>]*id="{campo}"[^>]*>', html).group(0)
+        assert f'min="{minimo}"' in tag, f"{campo} sem min"
+        assert f'max="{maximo}"' in tag, f"{campo} sem max"
+
+
+def test_as_faixas_do_html_sao_as_do_dominio():
+    """Guarda contra a interface e o domínio divergirem: se AnaliseSolo mudar uma faixa,
+    o HTML passa a mentir sobre o que é aceito."""
+    from siras.dominio.analise import AnaliseSolo
+    from siras.web.formulario import FAIXA_DO_CAMPO
+
+    base = dict(ph_agua=6.0, indice_smp=6.0, argila=30, mo=3, p=10, k=80,
+                ctc_ph7=9, al=1, ca=2, mg=1, v_percent=50)
+    for campo, (minimo, maximo) in FAIXA_DO_CAMPO.items():
+        if campo not in base or maximo is None:
+            continue
+        for fora in (minimo - 1, maximo + 1):
+            with pytest.raises(ValueError):
+                AnaliseSolo(**{**base, campo: fora})
+
+
+def test_o_valor_digitado_nao_se_confunde_com_o_marcador(cliente):
+    """Valor e placeholder tinham a mesma cara: não dava para saber se o campo estava
+    preenchido sem clicar nele."""
+    html = cliente.get("/analise/dados?cultura_id=soja&exemplo=1").get_data(as_text=True)
+
+    assert "campo--preenchido" in html
+    assert re.search(r"\.campo__caixa input \{[^}]*font-weight: 600", _TELAS_CSS)
+    assert re.search(r"::placeholder \{[^}]*font-weight: 400", _TELAS_CSS)
+
+
+def test_a_leitura_ao_vivo_mostra_um_exemplo_antes_de_digitar(cliente):
+    """Vazio é convite, não lamento — e mostrar COMO a leitura vai aparecer convida mais
+    do que descrevê-la. O exemplo é esmaecido, sem interação e aria-hidden: ninguém o
+    confunde com uma interpretação da análise."""
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'class="vazio__exemplo"' in html
+    assert "Exemplo de como aparece" in html
+    assert re.search(r'class="vazio__exemplo" aria-hidden="true"', html)
+
+
+@pytest.mark.parametrize("rota, passo", [("/analise", 1), ("/analise/dados?cultura_id=soja", 2)])
+def test_o_fluxo_mostra_quanto_falta(cliente, rota, passo):
+    """Os três passos nomeados dizem ONDE se está; a barra diz QUANTO falta."""
+    html = cliente.get(rota).get_data(as_text=True)
+
+    assert f'aria-valuenow="{passo}"' in html
+    assert 'role="progressbar"' in html
+
+
+def test_a_regua_diz_a_faixa_numerica_de_cada_classe(cliente):
+    """A régua desenha a posição mas não escreve o número da borda: quem precisa do
+    valor exato descobre passando o mouse, sem poluir o componente."""
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+
+    titulos = re.findall(r'class="regua__faixa[^"]*"\s*title="([^"]*)"', html)
+    assert len(titulos) >= 5
+    assert any("Muito baixo: até" in titulo for titulo in titulos)
+    # Vírgula decimal, e não ponto: é número para brasileiro ler.
+    assert not any(re.search(r"\d\.\d", titulo) for titulo in titulos)
+
+
+def test_o_formulario_vira_uma_coluna_em_tela_estreita():
+    """O público usa tablet e telefone em campo: duas colunas de 170px com rótulo,
+    unidade e ajuda não cabem em 375px sem o texto quebrar em cada palavra."""
+    assert re.search(
+        r"@media \(max-width: 560px\) \{[^@]*\.grade \{ grid-template-columns: 1fr",
+        _TELAS_CSS, re.S,
+    )
+
+
+def test_o_clique_tem_resposta_propria():
+    """O hover diz 'dá para clicar'; o active diz 'clicou'."""
+    assert re.search(r"\.btn:active \{[^}]*transform:", _TELAS_CSS)

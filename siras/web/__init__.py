@@ -34,6 +34,12 @@ def criar_app(config: Optional[Dict[str, Any]] = None) -> Flask:
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
 
+    # A vírgula decimal é do domínio, não de um template: registrada como filtro, ela
+    # vale em qualquer lugar que formate número, sem cada template reinventá-la.
+    from siras.relatorio.apresentacao import formatar_enxuto
+
+    app.jinja_env.filters["numero"] = formatar_enxuto
+
     if config:
         app.config.update(config)
 

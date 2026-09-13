@@ -19,11 +19,22 @@
 {% set _ROTULOS = ["M. baixo", "Baixo", "Médio", "Alto", "M. alto"] %}
 {% set _NOMES = ["Muito baixo", "Baixo", "Médio", "Alto", "Muito alto"] %}
 
-{% macro regua(indice, posicao_pct=None) %}
+{% macro faixa_legivel(faixa, unidade) %}
+{%- if faixa.de is none -%}até {{ faixa.ate|numero }} {{ unidade }}
+{%- elif faixa.ate is none -%}acima de {{ faixa.de|numero }} {{ unidade }}
+{%- else -%}{{ faixa.de|numero }} a {{ faixa.ate|numero }} {{ unidade }}
+{%- endif -%}
+{% endmacro %}
+
+{# `faixas` é opcional: quando vem, cada estrato ganha o intervalo numérico no title.
+   É a informação que a régua desenha mas não escreve — quem quiser o número exato da
+   borda da classe descobre passando o mouse, sem poluir o componente. #}
+{% macro regua(indice, posicao_pct=None, faixas=None, unidade="") %}
   <div class="regua" role="img" aria-label="Classe {{ _NOMES[indice] }}, de cinco classes de disponibilidade">
     <div class="regua__faixas">
       {% for sigla in _SIGLAS %}
-      <span class="regua__faixa f-{{ sigla }}{% if loop.index0 == indice %} is-atual{% endif %}"></span>
+      <span class="regua__faixa f-{{ sigla }}{% if loop.index0 == indice %} is-atual{% endif %}"
+            {% if faixas and faixas|length > loop.index0 %}title="{{ _NOMES[loop.index0] }}: {{ faixa_legivel(faixas[loop.index0], unidade) }}"{% endif %}></span>
       {% endfor %}
       {% if posicao_pct is not none %}
       <span class="regua__marcador" style="--pos:{{ posicao_pct }}%"></span>

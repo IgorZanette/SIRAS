@@ -61,6 +61,30 @@ CAMPOS_CONTEXTO: Tuple[Tuple[Any, ...], ...] = (
      "Média das três últimas safras, não a meta", False, "0.1", "3,6"),
 )
 
+#: Faixa física de cada campo, para validação imediata no navegador.
+#:
+#: Os números NÃO são escolha da interface: são exatamente os que AnaliseSolo e Contexto
+#: já recusam na construção (siras/dominio/analise.py, e a decisão D2 de
+#: docs/decisoes/0002 para o índice SMP). Declará-los aqui adianta o erro para o momento
+#: da digitação, em vez de esperar o envio — e continua sendo o domínio quem decide,
+#: porque a validação do servidor segue sendo a que vale.
+FAIXA_DO_CAMPO = {
+    "ph_agua": (0, 14), "sub_ph_agua": (0, 14),
+    "indice_smp": (3, 8), "sub_indice_smp": (3, 8),
+    "v_percent": (0, 100), "sub_v_percent": (0, 100),
+    "saturacao_al": (0, 100),
+    "prnt": (0, 100),
+    # Argila SEM teto de propósito: AnaliseSolo valida só `>= 0`. Declarar 100 aqui
+    # faria o formulário recusar um valor que o motor aceita — a interface passaria a
+    # ter um limite próprio, que é exatamente o que este módulo não faz. Se o teto de
+    # 100% deve existir, o lugar dele é o domínio, e a decisão é do autor.
+    "argila": (0, None),
+    "mo": (0, None), "p": (0, None), "k": (0, None), "ctc_ph7": (0, None),
+    "al": (0, None), "ca": (0, None), "mg": (0, None),
+    "sub_al": (0, None), "sub_ca": (0, None), "sub_mg": (0, None), "sub_k": (0, None),
+    "expectativa_rendimento": (0, None),
+}
+
 _TODOS_OS_CAMPOS = CAMPOS_ACIDEZ + CAMPOS_FERTILIDADE + CAMPOS_SUBSUPERFICIE + CAMPOS_CONTEXTO
 _ROTULO_POR_CAMPO = {campo[0]: campo[1] for campo in _TODOS_OS_CAMPOS}
 
@@ -563,6 +587,7 @@ def ler(
 
 __all__ = [
     "CAMPOS_ACIDEZ",
+    "FAIXA_DO_CAMPO",
     "CAMPOS_CONTEXTO",
     "CAMPOS_FERTILIDADE",
     "CAMPOS_SUBSUPERFICIE",

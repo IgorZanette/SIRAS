@@ -66,6 +66,7 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
         "variaveis": formulario.variaveis_condicionais(
             cultura_id, grupo, dados_do_grupo(grupo)
         ),
+        "faixas": formulario.FAIXA_DO_CAMPO,
         "campos_acidez": formulario.CAMPOS_ACIDEZ,
         "campos_fertilidade": formulario.CAMPOS_FERTILIDADE,
         "campos_subsuperficie": formulario.CAMPOS_SUBSUPERFICIE,

@@ -168,7 +168,9 @@ def test_formulario_volta_preenchido_apos_erro(cliente):
 
     smp = re.escape(formulario["indice_smp"])
     assert re.search(rf'id="indice_smp"[^>]*value="{smp}"', html), "o SMP digitado se perdeu"
-    assert re.search(r'class="campo campo--erro" for="argila"', html)
+    # O rótulo do campo com erro carrega campo--erro; o atributo `for` pode cair na
+    # linha seguinte, então a asserção não depende de eles estarem juntos.
+    assert re.search(r'class="campo campo--erro[^"]*"\s+for="argila"', html)
 
 
 def test_texto_nao_numerico_e_recusado_sem_quebrar(cliente):

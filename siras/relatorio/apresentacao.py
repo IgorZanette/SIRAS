@@ -304,6 +304,7 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
             "indice": indice_da_classe(laudo.adubacao.classe_p),
             "posicao": posicao_na_regua(laudo.analise.p, laudo.adubacao.faixas_p,
                                         laudo.adubacao.classe_p),
+            "faixas": laudo.adubacao.faixas_p,
             "nota": f"Interpretado pela classe de argila {derivados.get('classe_argila', '—')} "
                     f"({formatar_numero(laudo.analise.argila, 0)}%), extrator Mehlich-1.",
         })
@@ -320,6 +321,7 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
             "indice": indice_da_classe(laudo.adubacao.classe_k),
             "posicao": posicao_na_regua(laudo.analise.k, laudo.adubacao.faixas_k,
                                         laudo.adubacao.classe_k),
+            "faixas": laudo.adubacao.faixas_k,
             "nota": f"Interpretado pela CTC a pH 7,0 de "
                     f"{formatar_numero(laudo.analise.ctc_ph7, 1)} cmolc/dm³.",
         })

@@ -23,15 +23,29 @@
     {# linha.get(), e não linha.indice: chave ausente vira Undefined, e no Jinja
        `Undefined is not none` é VERDADEIRO — a régua saía nas dez linhas. #}
     {% if linha.get("indice") is not none %}
-    {{ r.regua(linha.indice, linha.get("posicao")) }}
+    {{ r.regua(linha.indice, linha.get("posicao"), linha.get("faixas"), linha.get("unidade")) }}
     {% endif %}
     {% if linha.nota %}<p class="t-aux linha__nota">{{ linha.nota }}</p>{% endif %}
   </div>
   {% endfor %}
 {% else %}
-  {# Vazio é convite, não lamento. #}
+  {# Vazio é convite, não lamento — e mostrar COMO a leitura vai aparecer convida mais
+     do que descrevê-la. O exemplo abaixo fica esmaecido e sem interação, e diz de si
+     mesmo que é exemplo: ninguém pode confundi-lo com uma interpretação da análise. #}
   <div class="vazio">
     {{ i.ico("regua", "ico ico--xl") }}
     <p>A interpretação de cada atributo aparece aqui assim que você digitar o primeiro valor.</p>
+  </div>
+  <div class="vazio__exemplo" aria-hidden="true">
+    <div class="vazio__etiqueta">Exemplo de como aparece</div>
+    <div class="linha">
+      <div class="linha__topo">
+        <span class="linha__nome">Fósforo</span>
+        <span class="linha__val">11,0 mg/dm³</span>
+      </div>
+      <div class="linha__ficha">{{ f.ficha("b", "Baixo") }}</div>
+      {{ r.regua(1, 36) }}
+      <p class="t-aux linha__nota">Interpretado pela classe de argila.</p>
+    </div>
   </div>
 {% endif %}

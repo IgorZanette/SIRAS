@@ -11,6 +11,12 @@
     <li class="etapa"><span class="etapa__n">2</span><span class="etapa__t">Análise de solo</span></li>
     <li class="etapa"><span class="etapa__n">3</span><span class="etapa__t">Laudo</span></li>
   </ol>
+  {# Os tres passos nomeados dizem ONDE se esta; a barra diz QUANTO falta, que e a
+     pergunta que o nome do passo nao responde. #}
+  <div class="progresso nao-imprime" role="progressbar" aria-valuemin="0" aria-valuemax="3"
+       aria-valuenow="1" aria-label="Progresso da análise, passo 1 de 3">
+    <i style="width:33%"></i>
+  </div>
 
   <h1 class="t-tela">Qual cultura vai entrar na área?</h1>
   <p class="t-corpo" style="margin-top:var(--e-3);font-size:var(--fs-md)">

@@ -555,71 +555,159 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 /* =========================================================================
    Modo claro
    -------------------------------------------------------------------------
-   O sistema nasceu escuro, e o par. 14 do plano ja previa este alternador: tema
-   escuro e otimo em monitor e ruim sob sol direto, e parte do publico usa tablet
-   em campo. O laudo claro obriga a manter os dois conjuntos de cor funcionando,
-   entao o custo de oferecer o alternador e baixo.
+   O par. 14 do plano ja previa este alternador: tema escuro e otimo em monitor e
+   ruim sob sol direto, e parte do publico usa tablet em campo.
 
-   Aqui so a escala de NEUTROS inverte. O verde de acao, os quatro sinais de
-   diagnostico e a escala divergente continuam os mesmos nos dois modos: sao o
-   vocabulario do sistema, e mudar de cor por modo desfaria o que a par. 2.2
-   construiu.
+   O modo claro nao e o escuro invertido. Tres decisoes o separam de um site
+   institucional generico:
+
+   1. o fundo nao e branco puro. #F6F8F5 carrega a mesma matiz levemente verde dos
+      neutros escuros, e le como papel, nao como tela de formulario;
+   2. a malha de fundo continua, com o traco escuro em vez de claro. Ela e o que
+      da ao SIRAS a leitura de superficie de instrumento, e sumir no modo claro
+      trocaria a identidade por conveniencia;
+   3. os sinais de diagnostico sao RECALIBRADOS, nao reaproveitados. Coral, laranja,
+      ambar e aqua foram desenhados para brilhar sobre preto; sobre claro ficam
+      entre 1,4:1 e 2,6:1 e viram pastel. As variantes abaixo mantem MATIZ e
+      SATURACAO e baixam so a luminosidade, ate passar de 3:1 - medido em
+      scripts/conferir_contraste.py.
+
+   O verde de acao tambem muda de papel: --v-400 sobre claro fica em 1,5:1 e nao
+   serve para texto nem para icone. Onde ele era texto, o claro usa --v-700
+   (5,64:1, acima do piso AA de 4,5:1).
    ====================================================================== */
 :root[data-tema="claro"] {
   --n-950: #FFFFFF;
-  --n-900: #F4F8F5;   /* fundo da aplicacao    */
-  --n-880: #EAF0EC;   /* secao alternada       */
-  --n-850: #FFFFFF;   /* superficie de painel  */
-  --n-800: #FFFFFF;   /* campo                 */
-  --n-750: #F7FAF8;
-  --n-700: #CFDCD4;
-  --n-600: #A9BCB1;
+  --n-900: #F6F8F5;   /* fundo da aplicacao: off-white com a matiz da marca */
+  --n-880: #EDF2EE;   /* secao alternada                                   */
+  --n-850: #FFFFFF;   /* superficie de painel                              */
+  --n-800: #FFFFFF;   /* campo                                             */
+  --n-750: #F1F5F2;   /* campo em foco                                     */
+  --n-700: #D3DED7;
+  --n-600: #AEBFB4;
   --n-500: #7A8C82;
-  --n-400: #5C6F64;   /* texto terciario       */
-  --n-300: #405146;   /* texto secundario      */
-  --n-200: #26362D;
-  --n-100: #0D1410;   /* texto primario        */
+  --n-400: #5C6F64;   /* texto terciario  - 5,03:1 sobre o fundo           */
+  --n-300: #3B4A41;   /* texto secundario - 8,77:1                         */
+  --n-200: #1E2A23;
+  --n-100: #0D1410;   /* texto primario   - 17,48:1                        */
   --n-050: #0A0F0C;
-  /* --n-000 e a cor de MAIOR contraste com o fundo, nao "branco": no modo claro o
-     marcador da regua precisa ser escuro para continuar visivel. */
+  /* --n-000 e a cor de MAIOR contraste com o fundo, nao branco: o marcador da
+     regua precisa ser escuro aqui para continuar visivel. */
   --n-000: #0D1410;
 
-  --borda: 1px solid rgba(13, 20, 16, .12);
-  --borda-forte: 1px solid rgba(13, 20, 16, .2);
-  --luz-topo: inset 0 1px 0 rgba(255, 255, 255, .9);
-  --sombra-doc: 0 18px 48px -24px rgba(13, 20, 16, .28);
+  /* Sinais recalibrados. Mesma matiz, mesma saturacao, luminosidade menor. */
+  --sig-coral: #FF451C;
+  --sig-laranja: #D96D00;
+  --sig-ambar: #B28100;
+  --sig-aqua: #179B8A;
+
+  --borda: 1px solid rgba(13, 20, 16, .09);
+  --borda-forte: 1px solid rgba(13, 20, 16, .18);
+  --luz-topo: 0 1px 2px rgba(13, 20, 16, .04), 0 8px 24px -16px rgba(13, 20, 16, .18);
+  --sombra-doc: 0 18px 48px -24px rgba(13, 20, 16, .26);
+  --glow-v: 0 0 0 1px rgba(78, 154, 42, .4), 0 8px 26px -8px rgba(78, 154, 42, .45);
 }
 
-/* Superficies e literais que o tema escreveu em rgba clara e que precisam inverter. */
-:root[data-tema="claro"] .painel { background: var(--n-000, #fff); background: #FFFFFF;
-                                   box-shadow: 0 1px 2px rgba(13,20,16,.05); }
-:root[data-tema="claro"] .barra { background: rgba(244, 248, 245, .86); }
+/* Superficie: sombra suave no lugar da borda fina, para dar profundidade sem peso. */
+:root[data-tema="claro"] .painel {
+  background: #FFFFFF;
+  border-color: rgba(13, 20, 16, .07);
+  box-shadow: 0 1px 2px rgba(13,20,16,.04), 0 10px 28px -20px rgba(13,20,16,.22);
+}
+:root[data-tema="claro"] .barra { background: rgba(246, 248, 245, .88);
+                                  border-bottom-color: rgba(13,20,16,.08); }
+/* A malha permanece: e ela que da a leitura de superficie de instrumento. */
 :root[data-tema="claro"] .malha {
   background-image:
-    linear-gradient(rgba(13,20,16,.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(13,20,16,.035) 1px, transparent 1px);
+    linear-gradient(rgba(13,20,16,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13,20,16,.045) 1px, transparent 1px);
 }
-:root[data-tema="claro"] .btn--contorno { background: rgba(13,20,16,.03);
+:root[data-tema="claro"] .hero__halo { opacity: .55; }
+
+/* --- Verde como texto ou icone: --v-400 reprova sobre claro ---------------- */
+:root[data-tema="claro"] .hero h1 em,
+:root[data-tema="claro"] .grupo__cab .ico,
+:root[data-tema="claro"] .bloco__cab .ico,
+:root[data-tema="claro"] .leitura__cab .ico,
+:root[data-tema="claro"] .pilar__ico,
+:root[data-tema="claro"] .pilar__ir,
+:root[data-tema="claro"] .selo,
+:root[data-tema="claro"] .passo__marca,
+:root[data-tema="claro"] .campo__label b { color: var(--v-700); }
+
+/* --- Realces: 6 a 9% de verde somem sobre branco --------------------------- */
+:root[data-tema="claro"] .pilar__ico { background: rgba(78,154,42,.12);
+                                       border-color: rgba(78,154,42,.26); }
+:root[data-tema="claro"] .selo { background: rgba(78,154,42,.1);
+                                 border-color: rgba(78,154,42,.3); }
+:root[data-tema="claro"] .leitura__cab { background: rgba(78,154,42,.09); }
+:root[data-tema="claro"] .linha--destaque { background: rgba(78,154,42,.09); }
+:root[data-tema="claro"] .linha--destaque .linha__val { color: var(--v-700); }
+
+/* --- Controles ------------------------------------------------------------ */
+:root[data-tema="claro"] .btn--contorno { background: #FFFFFF;
                                           border-color: rgba(13,20,16,.16); }
-:root[data-tema="claro"] .campo__caixa { border-color: rgba(13,20,16,.16); }
-:root[data-tema="claro"] .campo__unidade { background: rgba(13,20,16,.05);
-                                           border-left-color: rgba(13,20,16,.1); }
+:root[data-tema="claro"] .btn--fantasma { color: var(--n-300); }
+:root[data-tema="claro"] .campo__caixa { border-color: rgba(13,20,16,.16);
+                                         box-shadow: 0 1px 2px rgba(13,20,16,.03); }
+:root[data-tema="claro"] .campo__unidade { background: rgba(13,20,16,.045);
+                                           border-left-color: rgba(13,20,16,.09); }
 :root[data-tema="claro"] .campo__caixa select { color-scheme: light; }
 :root[data-tema="claro"] .campo__caixa select option { background: #FFFFFF; color: #0D1410; }
 :root[data-tema="claro"] .etapa { background: #FFFFFF; }
-:root[data-tema="claro"] .grupo { background: #FFFFFF; }
-:root[data-tema="claro"] .grupo:hover { background: #F7FAF8; }
+:root[data-tema="claro"] .grupo,
 :root[data-tema="claro"] .cultura { background: #FFFFFF; }
-:root[data-tema="claro"] .calculando { background: rgba(244, 248, 245, .95); }
+
+/* --- HOVER E FOCO ---------------------------------------------------------
+   Este bloco existe por um defeito real: :root[data-tema="claro"] .cultura tem
+   especificidade maior que .cultura:hover, entao a regra de tema ANULAVA o
+   realce verde do hover - no escuro funcionava, no claro nao acontecia nada.
+   Os estados precisam ser redeclarados com a mesma especificidade do tema. */
+:root[data-tema="claro"] .cultura:hover,
+:root[data-tema="claro"] .cultura:focus-visible,
+:root[data-tema="claro"] .cultura.is-sel {
+  background: var(--v-600); color: #FFFFFF; border-color: transparent;
+}
+:root[data-tema="claro"] .grupo:hover {
+  background: #F4F9F1; border-color: rgba(78,154,42,.4);
+}
+:root[data-tema="claro"] .grupo.is-sel { background: rgba(78,154,42,.1);
+                                         border-color: var(--v-600); }
+:root[data-tema="claro"] .etapa.is-ativa { background: rgba(78,154,42,.1);
+                                           border-color: rgba(78,154,42,.4); }
+:root[data-tema="claro"] .etapa.is-ativa .etapa__n { background: var(--v-600); color: #FFFFFF; }
+:root[data-tema="claro"] .etapa.is-feita .etapa__n { color: var(--v-700);
+                                                     border-color: rgba(78,154,42,.45); }
+:root[data-tema="claro"] .btn--primario { color: #08140B; }
+:root[data-tema="claro"] .btn--primario:hover { background: var(--v-500); }
+:root[data-tema="claro"] .btn--contorno:hover { border-color: var(--v-600);
+                                                color: var(--v-700);
+                                                background: #F4F9F1; }
+:root[data-tema="claro"] .btn--fantasma:hover { color: var(--v-700); }
+:root[data-tema="claro"] .pilar--link:hover { border-color: rgba(78,154,42,.4); }
+:root[data-tema="claro"] .tabela-dados tbody tr:hover { background: rgba(78,154,42,.08); }
+:root[data-tema="claro"] .tabela-dados thead th { background: #FFFFFF; }
+
+/* --- Regua e ficha: vivem de opacidade baixa ------------------------------ */
+:root[data-tema="claro"] .regua__faixa { opacity: .55; }
+:root[data-tema="claro"] .regua__faixa.f-a { opacity: .78; }
+:root[data-tema="claro"] .regua__faixa.is-atual { opacity: 1; box-shadow: none; }
+:root[data-tema="claro"] .ficha { background: color-mix(in srgb, var(--cor) 16%, #fff);
+                                  border-color: color-mix(in srgb, var(--cor) 55%, transparent);
+                                  color: var(--cor); }
+:root[data-tema="claro"] .aviso { background: color-mix(in srgb, var(--cor) 11%, #fff); }
+
+/* --- Tela de calculo ------------------------------------------------------ */
+:root[data-tema="claro"] .calculando { background: rgba(246, 248, 245, .96); }
 :root[data-tema="claro"] .passo { background: rgba(13,20,16,.03); }
 :root[data-tema="claro"] .passo__ico { background: rgba(13,20,16,.05); }
-:root[data-tema="claro"] .tabela-dados thead th { background: #FFFFFF; }
-:root[data-tema="claro"] .tabela-dados tbody tr:hover { background: rgba(140,226,63,.1); }
-/* Verde vivo nao e cor de texto sobre branco (par. 2.3): abaixo de 3:1 de contraste. */
-:root[data-tema="claro"] .pilar__ir,
-:root[data-tema="claro"] .logo__nome { color: var(--v-700); }
-:root[data-tema="claro"] .selo { color: var(--v-700); }
-:root[data-tema="claro"] .hero__halo { opacity: .5; }
+:root[data-tema="claro"] .passo.is-ativo { background: rgba(78,154,42,.12);
+                                           border-color: rgba(78,154,42,.35); }
+:root[data-tema="claro"] .passo.is-ativo .passo__ico { background: rgba(78,154,42,.18);
+                                                       color: var(--v-700); }
+:root[data-tema="claro"] .calculando__barra { background: rgba(13,20,16,.08); }
+:root[data-tema="claro"] .calculando__pulso { border-color: var(--v-600); }
+
 /* O documento ja e claro: no modo claro ele perde a sombra de cartao flutuante e
    ganha uma borda, senao vira uma mancha branca sobre outra. */
 :root[data-tema="claro"] .doc { box-shadow: none; border: 1px solid #D8E2DB; }
@@ -629,80 +717,6 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 .tema__claro { display: none; }
 :root[data-tema="claro"] .tema__escuro { display: none; }
 :root[data-tema="claro"] .tema__claro { display: block; }
-
-/* Como aplicar: o que fazer com a dose depois de conhece-la. */
-.sec__intro { color: #405146; max-width: 66ch; margin-bottom: var(--e-4); }
-.orientacoes { display: grid; gap: var(--e-3); }
-.orientacao { padding: var(--e-4); border-radius: var(--r-doc);
-              background: #FAFCFA; border: 1px solid #E3EAE5;
-              border-left: 3px solid #CFDCD4; }
-.orientacao--parcelamento { border-left-color: var(--v-600); }
-.orientacao--calagem { border-left-color: var(--sig-ambar); }
-.orientacao--restricao { border-left-color: var(--sig-coral); }
-.orientacao__titulo { font-size: var(--fs-2xs); font-weight: 800; color: #405146;
-                      margin-bottom: 3px; }
-.orientacao__txt { font-size: var(--fs-sm); color: #0D1410; line-height: 1.55; }
-
-/* A fonte acompanha a regra sem competir com ela. */
-.trilha__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs);
-                 color: #7A8C82; }
-.doc__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs); color: #7A8C82; }
-
-/* =========================================================================
-   Modo claro: correcoes de contraste
-   -------------------------------------------------------------------------
-   O par. 2.3 do plano e explicito: --v-400 NAO e cor de texto sobre branco
-   (cerca de 2,2:1). Onde o verde vivo era texto no modo escuro, o modo claro usa
-   --v-700. E onde uma cor vivia de opacidade baixa sobre fundo escuro, ela
-   precisa de mais opacidade sobre branco para manter a mesma leitura.
-   ====================================================================== */
-
-/* A assinatura usa degrade do branco ao verde: em fundo claro sumia. */
-:root[data-tema="claro"] .logo__nome {
-  background: linear-gradient(100deg, #0D1410 30%, var(--v-700));
-  -webkit-background-clip: text; background-clip: text;
-}
-
-/* Verde vivo como texto sobre claro falha no contraste minimo. */
-:root[data-tema="claro"] .hero h1 em,
-:root[data-tema="claro"] .grupo__cab .ico,
-:root[data-tema="claro"] .bloco__cab .ico,
-:root[data-tema="claro"] .leitura__cab .ico,
-:root[data-tema="claro"] .campo__label b { color: var(--v-700); }
-
-/* Fundos de realce com 6 a 9% de verde somem sobre branco. */
-:root[data-tema="claro"] .pilar__ico { background: rgba(78,154,42,.12);
-                                       border-color: rgba(78,154,42,.28);
-                                       color: var(--v-700); }
-:root[data-tema="claro"] .selo { background: rgba(78,154,42,.1);
-                                 border-color: rgba(78,154,42,.3); }
-:root[data-tema="claro"] .leitura__cab { background: rgba(78,154,42,.08); }
-:root[data-tema="claro"] .etapa.is-ativa { background: rgba(78,154,42,.1);
-                                           border-color: rgba(78,154,42,.4); }
-:root[data-tema="claro"] .grupo.is-sel { background: rgba(78,154,42,.1); }
-:root[data-tema="claro"] .comp .col-siras { background: rgba(78,154,42,.07); }
-:root[data-tema="claro"] .linha--destaque { background: rgba(78,154,42,.08); }
-:root[data-tema="claro"] .linha--destaque .linha__val { color: var(--v-700); }
-
-/* A regua vive de opacidade: .3 sobre escuro e discreto, sobre branco e invisivel. */
-:root[data-tema="claro"] .regua__faixa { opacity: .42; }
-:root[data-tema="claro"] .regua__faixa.f-a { opacity: .62; }
-:root[data-tema="claro"] .regua__faixa.is-atual { opacity: 1; box-shadow: none; }
-
-/* Ficha: o preenchimento a 13% desaparece sobre claro. */
-:root[data-tema="claro"] .ficha { background: color-mix(in srgb, var(--cor) 22%, #fff);
-                                  color: color-mix(in srgb, var(--cor) 72%, #0D1410); }
-:root[data-tema="claro"] .aviso { background: color-mix(in srgb, var(--cor) 14%, #fff); }
-:root[data-tema="claro"] .aviso strong { color: color-mix(in srgb, var(--cor) 70%, #0D1410); }
-
-/* Tela de calculo no modo claro. */
-:root[data-tema="claro"] .passo.is-ativo { background: rgba(78,154,42,.12);
-                                           border-color: rgba(78,154,42,.35); }
-:root[data-tema="claro"] .passo.is-ativo .passo__ico { background: rgba(78,154,42,.18);
-                                                       color: var(--v-700); }
-:root[data-tema="claro"] .passo__marca { color: var(--v-700); }
-:root[data-tema="claro"] .calculando__barra { background: rgba(13,20,16,.08); }
-:root[data-tema="claro"] .calculando__pulso { border-color: var(--v-600); }
 
 /* =========================================================================
    Impressao: correcoes vistas no PDF gerado
@@ -722,4 +736,98 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
   .trilha__fonte { font-size: 7.5pt; }
   .orientacao { break-inside: avoid; }
   .sec { margin-top: var(--e-5); }
+}
+
+/* =========================================================================
+   Como aplicar: o que fazer com a dose depois de conhece-la
+   ====================================================================== */
+.sec__intro { color: #405146; max-width: 66ch; margin-bottom: var(--e-4); }
+.orientacoes { display: grid; gap: var(--e-3); }
+.orientacao { padding: var(--e-4); border-radius: var(--r-doc);
+              background: #FAFCFA; border: 1px solid #E3EAE5;
+              border-left: 3px solid #CFDCD4; }
+.orientacao--parcelamento { border-left-color: var(--v-600); }
+.orientacao--calagem { border-left-color: #B28100; }
+.orientacao--restricao { border-left-color: #FF451C; }
+.orientacao__titulo { font-size: var(--fs-2xs); font-weight: 800; color: #405146;
+                      margin-bottom: 3px; }
+.orientacao__txt { font-size: var(--fs-sm); color: #0D1410; line-height: 1.55; }
+
+/* A fonte acompanha a regra sem competir com ela. */
+.trilha__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs);
+                 color: #7A8C82; }
+.doc__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs); color: #7A8C82; }
+
+/* =========================================================================
+   Usabilidade
+   ====================================================================== */
+
+/* Valor digitado nao pode parecer marcador de posicao. O marcador fica mais fraco
+   e sem peso; o valor real fica no texto primario e em 600. */
+.campo__caixa input::placeholder { color: var(--n-500); font-weight: 400; opacity: .8; }
+.campo__caixa input { color: var(--n-100); font-weight: 600; }
+.campo--preenchido .campo__caixa { border-color: rgba(140,226,63,.28); }
+:root[data-tema="claro"] .campo--preenchido .campo__caixa { border-color: rgba(78,154,42,.4); }
+
+/* Validacao imediata: so depois que o campo perde o foco pela primeira vez, para o
+   erro nao aparecer enquanto a pessoa ainda esta digitando o primeiro digito. */
+.campo--invalido .campo__caixa { border-color: var(--sig-coral);
+                                 background: color-mix(in srgb, var(--sig-coral) 7%, transparent); }
+.campo__erro { display: block; font-size: var(--fs-3xs); color: var(--sig-coral);
+               font-weight: 600; margin-top: 2px; }
+
+/* Micro-resposta ao clique: o hover diz "da para clicar", o active diz "clicou". */
+.btn:active { transform: translateY(1px) scale(.985); }
+.cultura:active, .grupo:active { transform: scale(.985); }
+.btn, .cultura, .grupo { transition: transform 90ms ease, background var(--tr),
+                                     color var(--tr), border-color var(--tr); }
+
+/* Progresso do fluxo: os tres passos nomeados dizem ONDE se esta; a barra diz QUANTO
+   falta, que e a pergunta que o nome do passo nao responde. */
+.progresso { height: 3px; border-radius: 999px; background: var(--n-800);
+             overflow: hidden; margin: calc(-1 * var(--e-4)) 0 var(--e-6); }
+:root[data-tema="claro"] .progresso { background: var(--n-700); }
+.progresso i { display: block; height: 100%; border-radius: inherit;
+               background: linear-gradient(90deg, var(--v-600), var(--v-400));
+               transition: width 600ms cubic-bezier(.2,0,.2,1); }
+
+/* Estado vazio da leitura ao vivo: um exemplo esmaecido mostra COMO a interpretacao
+   vai aparecer, em vez de uma caixa em branco pedindo fe. */
+.vazio__exemplo { width: 100%; opacity: .38; filter: saturate(.55);
+                  pointer-events: none; user-select: none; margin-top: var(--e-3);
+                  border-top: var(--borda); padding-top: var(--e-4); }
+.vazio__etiqueta { font-size: var(--fs-3xs); font-weight: 700; letter-spacing: .06em;
+                   text-transform: uppercase; color: var(--n-500); }
+
+/* A regua ganha alvo de mouse por faixa, com a faixa numerica no title. */
+.regua__faixa { cursor: help; }
+.regua__faixa:hover { opacity: 1; }
+
+/* Contadores da landing: comecam invisiveis e sobem quando entram na viewport. */
+.prova__n[data-contador] { font-variant-numeric: tabular-nums; }
+
+/* =========================================================================
+   Telas estreitas
+   -------------------------------------------------------------------------
+   O publico usa tablet e telefone em campo. Abaixo de 560px o formulario passa a
+   uma coluna: duas colunas de 170px com rotulo, unidade e ajuda nao cabem em
+   375px sem o texto quebrar em cada palavra.
+   ====================================================================== */
+@media (max-width: 560px) {
+  .env { padding: 0 var(--e-4); }
+  .grade { grid-template-columns: 1fr; }
+  .etapas { grid-template-columns: 1fr; gap: var(--e-1); }
+  .etapa { padding: var(--e-2) var(--e-3); }
+  .bloco { padding: var(--e-4); }
+  .bloco__cab { flex-wrap: wrap; gap: var(--e-2); }
+  .rodape-acoes { flex-direction: column; align-items: stretch; }
+  .rodape-acoes .btn { width: 100%; }
+  .veredito { grid-template-columns: 1fr; }
+  .doc__cab, .doc__corpo { padding: var(--e-4); }
+  .doc__cultura { text-align: left; }
+  .hero { padding: var(--e-7) 0 var(--e-6); }
+  .hero__prova { gap: var(--e-4); }
+  .calculando__conteudo { gap: var(--e-3); }
+  .passo { grid-template-columns: 32px minmax(0,1fr) 18px; padding: var(--e-2); }
+  .passo__ico { width: 32px; height: 32px; }
 }

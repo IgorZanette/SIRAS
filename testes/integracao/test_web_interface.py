@@ -1002,3 +1002,46 @@ def test_select_com_padrao_nao_se_chama_opcional(cliente):
             rf'<label class="campo[^"]*"\s*for="{campo}">.*?</span>', tela, re.S
         ).group(0)
         assert "campo__opcional" not in rotulo, f"{campo} tem padrão e não é opcional"
+
+
+def test_o_documento_do_responsavel_sai_pontuado_no_laudo(cliente):
+    """Onze dígitos corridos num laudo assinado não são o que um conferente espera ler."""
+    html = cliente.post(
+        "/analise/laudo",
+        data=dict(_ANALISE_COMPLETA, responsavel_nome="Igor Zanette",
+                  responsavel_documento="02288399302"),
+    ).get_data(as_text=True)
+
+    # Só dentro do documento: os dígitos corridos seguem nos campos ocultos que reabrem a
+    # análise para edição, e é assim que devem seguir — ali eles são o valor enviado, e
+    # não texto impresso.
+    documento = html[html.index('<article class="doc">'):]
+
+    assert "022.883.993-02" in documento
+    assert "02288399302" not in documento
+
+
+def test_o_cnpj_recebe_a_sua_propria_mascara(cliente):
+    html = cliente.post(
+        "/analise/laudo",
+        data=dict(_ANALISE_COMPLETA, responsavel_nome="Agro Ltda",
+                  responsavel_documento="12345678000195"),
+    ).get_data(as_text=True)
+
+    assert "12.345.678/0001-95" in html
+
+
+def test_a_pontuacao_do_documento_nao_depende_de_javascript(cliente):
+    """Quem pontua o que sai no laudo é o servidor. Fazê-lo só no navegador deixaria o
+    documento de quem estiver sem JavaScript com onze dígitos corridos."""
+    from siras.web import formulario
+
+    leitura = formulario.LeituraFormulario(valores={"responsavel_documento": "02288399302"})
+
+    assert leitura.responsavel["responsavel_documento"] == "022.883.993-02"
+
+
+def test_a_mascara_do_campo_e_carregada_na_tela_de_dados(cliente):
+    assert "js/documento.js" in cliente.get(
+        "/analise/dados?cultura_id=soja"
+    ).get_data(as_text=True)

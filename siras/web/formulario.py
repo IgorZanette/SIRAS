@@ -231,11 +231,20 @@ class LeituraFormulario:
     @property
     def responsavel(self) -> Dict[str, str]:
         """Identificação do documento, como veio do formulário. Texto livre, e nunca
-        entrada de cálculo: o motor não a recebe."""
-        return {
+        entrada de cálculo: o motor não a recebe.
+
+        O documento do responsável é a única exceção ao "como veio": ele sai pontuado, e
+        a pontuação é decidida aqui, no servidor. Fazê-la só no navegador deixaria o laudo
+        de quem estiver sem JavaScript com onze dígitos corridos.
+        """
+        identificacao = {
             chave[0]: (self.valores.get(chave[0]) or "").strip()
             for chave in CAMPOS_RESPONSAVEL + CAMPOS_DA_AREA
         }
+        identificacao["responsavel_documento"] = formatar_documento(
+            identificacao["responsavel_documento"]
+        )
+        return identificacao
 
     @property
     def tem_erro_numerico(self) -> bool:
@@ -254,6 +263,36 @@ class LeituraFormulario:
     @property
     def ok(self) -> bool:
         return self.analise is not None and self.contexto is not None
+
+
+#: Quantos dígitos cada documento tem, e como ele se escreve.
+#:
+#: São as máscaras oficiais brasileiras, e não escolha de interface: um CPF escrito
+#: 023.883.993-02 e um CNPJ escrito 12.345.678/0001-95 são o que qualquer conferente
+#: espera ver num laudo assinado. A chave é a contagem de dígitos, porque é ela que
+#: distingue um do outro sem precisar perguntar.
+_MASCARA_DO_DOCUMENTO = {
+    11: "{0}{1}{2}.{3}{4}{5}.{6}{7}{8}-{9}{10}",
+    14: "{0}{1}.{2}{3}{4}.{5}{6}{7}/{8}{9}{10}{11}-{12}{13}",
+}
+
+
+def formatar_documento(bruto: str) -> str:
+    """Pontua CPF ou CNPJ pela contagem de dígitos. Devolve o texto intacto se não for
+    nem um nem outro.
+
+    Devolver intacto é deliberado: com dez ou doze dígitos não há máscara que sirva, e
+    encaixar o número na do CPF à força produziria um documento que parece válido e não
+    é. Melhor sair como foi digitado — erro visível é erro corrigível.
+
+    Idempotente: recebe tanto os dígitos corridos quanto o texto já pontuado, porque é
+    exatamente isso que volta do formulário depois do primeiro envio.
+    """
+    digitos = [caractere for caractere in bruto if caractere.isdigit()]
+    mascara = _MASCARA_DO_DOCUMENTO.get(len(digitos))
+    if mascara is None:
+        return bruto.strip()
+    return mascara.format(*digitos)
 
 
 def para_numero(texto) -> Optional[float]:
@@ -914,6 +953,7 @@ __all__ = [
     "para_numero",
     "culturas_disponiveis",
     "exige_antecedente",
+    "formatar_documento",
     "indices_de_talhoes",
     "ler_talhoes",
     "grupo_da_cultura",

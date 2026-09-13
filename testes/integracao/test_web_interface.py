@@ -683,3 +683,58 @@ def test_cada_tela_entra_com_transicao():
         r"@media \(prefers-reduced-motion: reduce\) \{[^}]*main[^}]*animation: none",
         _TELAS_CSS, re.S,
     )
+
+
+# --- volta do laudo para o formulário ------------------------------------------
+
+def test_editar_a_analise_devolve_o_formulario_preenchido(cliente):
+    """Gerar o laudo e perceber que o fósforo foi digitado errado não pode custar a
+    redigitação dos outros vinte campos. O botão reenvia o que produziu aquele laudo, e
+    a tela volta como estava."""
+    laudo = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+    ocultos = dict(re.findall(r'<input type="hidden" name="(\w+)" value="([^"]*)">', laudo))
+
+    assert set(_ANALISE_COMPLETA) <= set(ocultos), "o laudo não leva de volta tudo o que recebeu"
+
+    volta = cliente.post("/analise/dados", data=ocultos)
+    assert volta.status_code == 200
+
+    html = volta.get_data(as_text=True)
+    for campo, valor in _ANALISE_COMPLETA.items():
+        if campo in ("cultura_id", "criterio_id", "cultivo", "profundidade_incorporacao_cm"):
+            continue  # escolhas: voltam como <option selected>, não como value=
+        assert re.search(rf'id="{campo}"[^>]*value="{valor}"', html), (
+            f"{campo} não voltou preenchido"
+        )
+
+
+def test_a_volta_traz_o_responsavel_junto(cliente):
+    """Quem assina o laudo costuma ser o mesmo em todas as análises do dia: perder o
+    nome e o registro a cada correção anula a razão de o campo existir."""
+    dados = dict(_ANALISE_COMPLETA, responsavel_nome="Igor Zanette", responsavel_registro="CREA-RS 12345")
+    laudo = cliente.post("/analise/laudo", data=dados).get_data(as_text=True)
+    ocultos = dict(re.findall(r'<input type="hidden" name="(\w+)" value="([^"]*)">', laudo))
+
+    html = cliente.post("/analise/dados", data=ocultos).get_data(as_text=True)
+
+    assert 'value="Igor Zanette"' in html
+    assert 'value="CREA-RS 12345"' in html
+
+
+def test_a_volta_e_um_envio_e_nao_um_link(cliente):
+    """Um <a href> não carrega valores. O controle precisa ser um formulário, ou o
+    caminho de volta esvazia a tela — que era o defeito."""
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+
+    assert re.search(r'<form method="post" action="/analise/dados"', html)
+    assert "Editar a análise" in html
+
+
+def test_a_volta_preserva_ate_o_valor_que_o_motor_recusou(cliente):
+    """Quem volta vem justamente corrigir: apagar o valor recusado esconderia o que
+    precisa ser corrigido."""
+    html = cliente.post(
+        "/analise/dados", data=dict(_ANALISE_COMPLETA, p="valor invalido")
+    ).get_data(as_text=True)
+
+    assert 'value="valor invalido"' in html

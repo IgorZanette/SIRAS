@@ -21,9 +21,18 @@
   </div>
 
   <div class="rodape-acoes nao-imprime" style="margin:0 0 var(--e-5)">
-    <a class="btn btn--contorno" href="{{ url_for('siras.dados') }}">
-      {{ i.ico("edita", "ico ico--sm") }} Editar a análise
-    </a>
+    {# Um formulário, e não um link: assim os valores que produziram este laudo voltam
+       com o clique, e corrigir um número não custa a redigitação dos outros vinte.
+       Funciona sem JavaScript, e não depende do botão "voltar" do navegador — que
+       depois de um POST costuma pedir confirmação de reenvio. #}
+    <form method="post" action="{{ url_for('siras.dados') }}" class="acao-voltar">
+      {% for campo, valor in valores_enviados.items() %}
+      <input type="hidden" name="{{ campo }}" value="{{ valor }}">
+      {% endfor %}
+      <button class="btn btn--contorno" type="submit">
+        {{ i.ico("edita", "ico ico--sm") }} Editar a análise
+      </button>
+    </form>
     {# window.print() em vez de gerar PDF no servidor: é a rota mais confiável, mantém o
        texto selecionável e não acrescenta dependência ao projeto. #}
     <button class="btn btn--primario" type="button" onclick="window.print()">

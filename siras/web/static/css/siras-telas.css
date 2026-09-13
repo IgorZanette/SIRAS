@@ -935,3 +935,7 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 @media (prefers-reduced-motion: reduce) {
   .guia__fundo, .guia__painel { animation: none !important; }
 }
+
+/* O "Editar a analise" e um <form>, e nao um link: sem isto ele quebraria a linha
+   de acoes, porque form e elemento de bloco. */
+.acao-voltar { display: contents; }

@@ -133,11 +133,23 @@ def cultura():
     )
 
 
-@bp.get("/analise/dados")
+@bp.route("/analise/dados", methods=["GET", "POST"])
 def dados():
     """Sem cultura escolhida não há formulário a montar: quais campos existem depende
-    dela. Volta para a etapa 1 em vez de exibir uma tela pela metade."""
-    cultura_id = (request.args.get("cultura_id") or "").strip()
+    dela. Volta para a etapa 1 em vez de exibir uma tela pela metade.
+
+    Aceita POST para o caminho de volta a partir do laudo. O "Editar a análise" reenvia
+    os valores que produziram aquele laudo, e a tela volta preenchida — corrigir um
+    número não pode custar a redigitação dos outros vinte.
+
+    Os valores viajam no próprio pedido, e não em sessão: o sistema não guarda estado
+    entre requisições (CLAUDE.md — sem banco, sem autenticação), e essa restrição
+    continua valendo aqui.
+    """
+    if request.method == "POST":
+        cultura_id = (request.form.get("cultura_id") or "").strip()
+    else:
+        cultura_id = (request.args.get("cultura_id") or "").strip()
     dados_comuns = carregar_dados_comum()
     if (
         not cultura_id
@@ -147,6 +159,15 @@ def dados():
         # Espécie florestal está mapeada para a aptidão e fora do escopo de recomendação
         # (docs/decisoes/0006): o formulário de recomendação não abre para ela.
         return redirect(url_for("siras.cultura"))
+
+    if request.method == "POST":
+        # Sem validar: os valores voltam como foram digitados, inclusive os que o motor
+        # recusou. Quem chega aqui vem corrigir, e apagar o que estava errado esconderia
+        # justamente o que precisa ser corrigido.
+        return _tela_de_dados(
+            cultura_id, formulario.LeituraFormulario(valores=dict(request.form))
+        )
+
     return _tela_de_dados(cultura_id, com_exemplo=(request.args.get("exemplo") or "").strip())
 
 
@@ -223,6 +244,8 @@ def laudo():
     return render_template(
         "laudo.html",
         laudo=apresentar_laudo(resultado, dados_comuns),
+        # O que foi enviado volta com o botão "Editar a análise", em campos ocultos.
+        valores_enviados=request.form,
         # Metadado do documento, e não entrada de cálculo: a data de emissão é lida
         # aqui, e não dentro do motor, porque gerar_laudo() é determinística — a mesma
         # análise tem de produzir o mesmo laudo hoje e daqui a um mês.

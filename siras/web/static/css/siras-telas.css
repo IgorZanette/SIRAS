@@ -942,3 +942,46 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 /* O "Editar a analise" e um <form>, e nao um link: sem isto ele quebraria a linha
    de acoes, porque form e elemento de bloco. */
 .acao-voltar { display: contents; }
+
+/* =========================================================================
+   Talhoes: varias areas numa analise so
+   ====================================================================== */
+.talhoes__nota { margin: var(--e-4) 0; max-width: 62ch; }
+
+/* O cartao e um painel DENTRO de um painel. A borda esquerda marcada e o que
+   separa "outro talhao" de "mais campos do mesmo talhao" - sem ela, quinze
+   campos a mais leem como continuacao do formulario anterior. */
+.talhao-cartao { margin-bottom: var(--e-4); border-left: 3px solid var(--v-600); }
+.talhao-cartao__cab { display: flex; align-items: center; gap: var(--e-3);
+                      margin-bottom: var(--e-4); }
+.talhao-cartao__cab h3 { font-size: var(--fs-md); margin-right: auto; }
+.talhao-cartao__remover { flex: none; }
+
+/* --- No laudo: o cabecalho que separa um talhao do seguinte --------------- */
+.talhao { display: flex; align-items: baseline; gap: var(--e-3); flex-wrap: wrap;
+          margin: var(--e-8) 0 var(--e-5); padding-bottom: var(--e-3);
+          border-bottom: 2px solid #0D1410; break-after: avoid; }
+.talhao:first-child { margin-top: 0; }
+.talhao__n { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .08em;
+             text-transform: uppercase; color: #5C6F64; }
+.talhao__nome { font-family: var(--ff-display); font-size: var(--fs-xl);
+                color: #0D1410; margin-right: auto; }
+.talhao__area { font-size: var(--fs-sm); color: #405146; }
+
+/* --- Quantidade total a comprar ------------------------------------------ */
+.totais { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--e-4); }
+@media (max-width:860px){ .totais { grid-template-columns: repeat(2, 1fr); } }
+.total { padding: var(--e-4); border-radius: var(--r-doc); background: #FAFCFA;
+         border: 1px solid #E3EAE5; }
+.total__nome { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .04em;
+               text-transform: uppercase; color: #5C6F64; margin-bottom: var(--e-2); }
+.total__val { display: flex; align-items: baseline; gap: .35rem; }
+
+@media print {
+  /* Cada talhao comeca em pagina propria: no papel, duas recomendacoes coladas
+     na mesma folha sao lidas como uma so. A primeira nao quebra, ou o documento
+     abriria com uma folha em branco. */
+  .talhao { break-before: page; }
+  .talhao:first-child { break-before: avoid; }
+  .totais { grid-template-columns: repeat(4, 1fr); }
+}

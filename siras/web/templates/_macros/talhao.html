@@ -1,0 +1,45 @@
+{# Cartão de um talhão adicional.
+
+   O PRIMEIRO talhão não usa este cartão: ele são os próprios blocos do formulário, com
+   os nomes de campo originais. Só do segundo em diante os campos ganham o sufixo
+   "__N" — é o que faz a análise de uma área só continuar exatamente o que sempre foi,
+   sem saber que talhões múltiplos existem.
+
+   O mesmo macro serve ao que o servidor devolve preenchido e ao molde que o JavaScript
+   clona: são a mesma marcação, então não há como uma versão ganhar um campo e a outra
+   não. No molde, o índice é a marca __IDX__, trocada no clone.
+#}
+{% import "_macros/campo.html" as c %}
+{% import "_macros/ico.html" as i %}
+
+{% macro cartao(indice, campos, faixas, valores, com_erro) %}
+{% set n = indice|string %}
+<div class="talhao-cartao painel" data-talhao="{{ n }}">
+  <div class="talhao-cartao__cab">
+    {{ i.ico("analise") }}
+    <h3>Outro talhão</h3>
+    <button class="btn btn--fantasma talhao-cartao__remover" type="button"
+            data-remover-talhao>Remover</button>
+  </div>
+
+  <div class="grade">
+    {# Com mais de um talhão o nome deixa de ser opcional: um laudo que traz várias
+       recomendações e não diz a qual área cada uma pertence é pior que não trazê-las. #}
+    {{ c.campo_texto("talhao__" ~ n, "Nome do talhão",
+                     "Como esta área aparece no laudo",
+                     valores.get("talhao__" ~ n),
+                     placeholder="Ex.: B2") }}
+    {{ c.campo("area_ha__" ~ n, "Área do talhão", "ha",
+               "Opcional. Preenchida em todos os talhões, o laudo soma as quantidades",
+               false, "0.1", "12,5",
+               valores.get("area_ha__" ~ n), ("area_ha__" ~ n) in com_erro,
+               faixas.get("area_ha")) }}
+
+    {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos %}
+    {{ c.campo(campo_id ~ "__" ~ n, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
+               valores.get(campo_id ~ "__" ~ n), (campo_id ~ "__" ~ n) in com_erro,
+               faixas.get(campo_id)) }}
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}

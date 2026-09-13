@@ -657,6 +657,79 @@ def _orientacoes(laudo: Laudo) -> List[Dict[str, Any]]:
     return [item for item in itens if item["texto"]]
 
 
+#: As quatro grandezas do veredito, na mesma ordem e com os mesmos nomes com que o laudo
+#: as apresenta. A unidade aqui e a do TOTAL: a dose e por hectare, a compra nao e.
+_GRANDEZAS_CONSOLIDAVEIS = (
+    ("Calcário", "calagem", "t"),
+    ("Nitrogênio (N)", "n", "kg"),
+    ("Fósforo (P<sub>2</sub>O<sub>5</sub>)", "p2o5", "kg"),
+    ("Potássio (K<sub>2</sub>O)", "k2o", "kg"),
+)
+
+
+def _dose_somavel(dose: Any) -> Optional[float]:
+    """O valor da dose quando ela É um número, e None quando não é.
+
+    O Manual nem sempre publica um número: há teto ("<= manutenção"), intervalo e lacuna
+    declarada. Multiplicar qualquer um deles por uma área produziria uma quantidade com
+    precisão que a fonte não dá — então a grandeza fica de fora do total e o laudo diz
+    que ficou, em vez de somar por cima.
+    """
+    if isinstance(dose, bool) or not isinstance(dose, (int, float)):
+        return None
+    return float(dose)
+
+
+def consolidar_por_area(blocos: Sequence[Any]) -> Optional[Dict[str, Any]]:
+    """Quantidade total a comprar, a partir das doses por hectare e da área de cada talhão.
+
+    Devolve None quando QUALQUER talhão está sem área: somar sobre um conjunto incompleto
+    daria um número que parece o total da propriedade e não é. É a regra combinada — área
+    é campo opcional, e o total é a recompensa por preenchê-la em todos.
+
+    Não há critério agronômico aqui. É aritmética sobre a saída do motor: dose por hectare
+    vezes hectares, somada. Nenhuma dose é criada, arredondada para outra classe nem
+    convertida entre nutrientes.
+
+    `blocos` é uma sequência de objetos com `rotulo`, `area_ha` e `laudo`.
+    """
+    if not blocos or any(getattr(b, "area_ha", None) is None for b in blocos):
+        return None
+
+    area_total = sum(float(b.area_ha) for b in blocos)
+
+    itens: List[Dict[str, Any]] = []
+    sem_total: List[str] = []
+    for nome, chave, unidade in _GRANDEZAS_CONSOLIDAVEIS:
+        quantidades = []
+        for bloco in blocos:
+            laudo = bloco.laudo
+            bruta = (
+                laudo.calagem.nc_t_ha if chave == "calagem"
+                else getattr(laudo.adubacao, chave)
+            )
+            valor = _dose_somavel(bruta)
+            if valor is None:
+                quantidades = None
+                break
+            quantidades.append(valor * float(bloco.area_ha))
+
+        if quantidades is None:
+            sem_total.append(nome)
+            continue
+        itens.append({
+            "nome": nome,
+            "quantidade": formatar_numero(sum(quantidades), 1),
+            "unidade": unidade,
+        })
+
+    return {
+        "area_total": formatar_numero(area_total, 1),
+        "itens": itens,
+        "sem_total": sem_total,
+    }
+
+
 def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
     """Monta o modelo de exibição do laudo. O template só itera sobre o que sai daqui."""
     return {
@@ -680,6 +753,7 @@ def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
 __all__ = [
     "CLASSES_TEOR",
     "apresentar_laudo",
+    "consolidar_por_area",
     "formatar_dose",
     "formatar_enxuto",
     "formatar_numero",

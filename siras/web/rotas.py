@@ -17,6 +17,7 @@ Python (PLANO-FRONTEND §9.4, opção B).
 from __future__ import annotations
 
 from datetime import datetime
+from types import SimpleNamespace
 from typing import Any, Dict
 
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
@@ -36,6 +37,8 @@ from siras.relatorio import tabelas as tabelas_do_manual
 from siras.relatorio.apresentacao import (
     apresentar_laudo,
     apresentar_leitura,
+    consolidar_por_area,
+    formatar_numero,
     nome_de_exibicao,
 )
 from siras.web import exemplo as exemplo_de_formulario
@@ -77,6 +80,8 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
         "campos_subsuperficie": formulario.CAMPOS_SUBSUPERFICIE,
         "campos_contexto": formulario.CAMPOS_CONTEXTO,
         "campos_responsavel": formulario.CAMPOS_RESPONSAVEL,
+        "campos_do_talhao": formulario.CAMPOS_DO_TALHAO,
+        "campo_area": formulario.CAMPO_AREA,
     }
 
 
@@ -86,6 +91,10 @@ def _tela_de_dados(cultura_id: str, leitura=None, erro_do_motor: str = None,
     opcoes["cenarios"] = exemplo_de_formulario.CENARIOS
     opcoes["cenario_ativo"] = com_exemplo
     leitura = leitura or formulario.LeituraFormulario()
+    # Os talhões adicionais que vieram no envio voltam desenhados pelo servidor: a tela
+    # tem de se reconstruir sozinha depois de um erro de validação, sem depender do
+    # JavaScript que os criou.
+    opcoes["talhoes_extras"] = formulario.indices_de_talhoes(leitura.valores)
     if com_exemplo and not leitura.valores:
         leitura.valores = exemplo_de_formulario.montar(
             cultura_id, opcoes["grupo"], opcoes["dados"],
@@ -233,21 +242,49 @@ def laudo():
     dados_comuns = carregar_dados_comum()
     cultura_id = (request.form.get("cultura_id") or "").strip()
     grupo = formulario.grupo_da_cultura(cultura_id, dados_comuns)
-    leitura = formulario.ler(request.form, dados_comuns, dados_do_grupo(grupo))
+    leitura, talhoes = formulario.ler_talhoes(
+        request.form, dados_comuns, dados_do_grupo(grupo)
+    )
 
     if not leitura.ok:
         return _tela_de_dados(cultura_id, leitura), 422
 
+    # Um talhão, uma chamada ao motor. gerar_laudo() continua sendo função pura de uma
+    # análise, uma cultura e um contexto: a análise de várias áreas não muda o motor, ela
+    # o chama mais vezes e reúne as saídas num documento só.
     try:
-        resultado = gerar_laudo(leitura.analise, leitura.contexto.cultura_id, leitura.contexto)
+        resolvidos = [
+            SimpleNamespace(
+                rotulo=bloco.rotulo,
+                area_ha=bloco.area_ha,
+                laudo=gerar_laudo(
+                    bloco.analise, leitura.contexto.cultura_id, leitura.contexto
+                ),
+            )
+            for bloco in talhoes
+        ]
     except (ErroLaudo, ErroCalagem, ErroAdubacao, ErroAptidao) as erro:
         # Erro de escopo ou de base incompleta, não de digitação: o formulário volta
         # preenchido e a mensagem do motor aparece inteira, sem tradução que a apague.
         return _tela_de_dados(cultura_id, leitura, erro_do_motor=str(erro)), 422
 
+    blocos = [
+        {
+            "rotulo": item.rotulo,
+            "area": formatar_numero(item.area_ha, 1) if item.area_ha is not None else None,
+            "laudo": apresentar_laudo(item.laudo, dados_comuns),
+        }
+        for item in resolvidos
+    ]
+
     return render_template(
         "laudo.html",
-        laudo=apresentar_laudo(resultado, dados_comuns),
+        blocos=blocos,
+        # O total só faz sentido a partir de duas áreas, e só quando todas as informaram.
+        total=consolidar_por_area(resolvidos) if len(resolvidos) > 1 else None,
+        # O cabeçalho é único e fala do que os talhões compartilham: cultura, manejo,
+        # PRNT e critério de calagem saem do primeiro, porque são os mesmos em todos.
+        laudo=blocos[0]["laudo"],
         # Mesma peça de informação, outra folha de estilo: a versão impressa é A4 em
         # preto e branco, e o "Salvar em PDF" continua entregando o documento em cores.
         impressa=(request.form.get("formato") == "impressa"),

@@ -1,0 +1,195 @@
+{# Corpo do laudo de UM talhão: veredito, interpretação, como aplicar, aptidão e trilha.
+
+   Está em parcial porque a análise de várias áreas repete exatamente isto, uma vez por
+   talhão, dentro do mesmo documento. Manter duas cópias — uma para o laudo de uma área e
+   outra para o de várias — faria as duas divergirem no primeiro ajuste que alguém
+   esquecesse de repetir do outro lado.
+
+   Recebe `laudo` pelo contexto do include. #}
+{% import "_macros/ico.html" as i %}
+{% import "_macros/ficha.html" as f %}
+{% import "_macros/regua.html" as r %}
+
+      {# ——— 1. Veredito: os quatro números que o usuário veio buscar ——— #}
+      <section class="veredito">
+        {% for dose in laudo.veredito %}
+        <div class="dose{% if not dose.sigla %} dose--neutra{% endif %}"
+             {% if dose.sigla %}style="--cor:var(--d-{{ dose.sigla }})"{% endif %}>
+          <div class="dose__nome">{{ dose.nome|safe }}</div>
+          <div class="dose__val">
+            <span class="numero{% if not dose.destaque %} numero--sec{% endif %}">{{ dose.valor }}</span>
+            <span class="numero__un">{{ dose.unidade }}</span>
+          </div>
+          <p class="dose__obs">{{ dose.observacao }}</p>
+        </div>
+        {% endfor %}
+      </section>
+
+      {# ——— 2. Interpretação dos atributos ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("regua") }}<h3>Interpretação dos atributos</h3></div>
+        <div class="atributos">
+          {% for teor in laudo.teores %}
+          <div class="atributo">
+            <div class="linha__topo">
+              <span class="linha__nome">{{ teor.nome }}</span>
+              <span class="linha__val">{{ teor.valor }} {{ teor.unidade|safe }}</span>
+            </div>
+            <div style="margin:.4rem 0 .6rem">{{ f.ficha(teor.sigla, teor.rotulo) }}</div>
+            {{ r.regua(teor.indice, teor.posicao, teor.faixas, teor.unidade) }}
+            <p class="t-aux" style="margin-top:.5rem">{{ teor.nota }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      {# ——— 3. Como aplicar ——— #}
+      {% if laudo.orientacoes %}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("broto") }}<h3>Como aplicar</h3></div>
+        <p class="sec__intro">
+          Depois de saber quanto, a pergunta seguinte é como. O que segue é o que o
+          Manual publica junto das doses para esta cultura.
+        </p>
+        <div class="orientacoes">
+          {% for item in laudo.orientacoes %}
+          <div class="orientacao orientacao--{{ item.tipo }}">
+            <div class="orientacao__titulo">{{ item.titulo }}</div>
+            <p class="orientacao__txt">{{ item.texto }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      {# ——— 4. Aptidão edáfica ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("aptidao") }}<h3>Aptidão edáfica</h3></div>
+        {# Os dois cenários lado a lado, e não um deles em prosa: pelo CCAE §7, a
+           diferença entre eles é o que quantifica o ganho atribuível à recomendação
+           emitida acima. É o que integra os dois módulos do sistema. #}
+        <div class="cenarios">
+          <div class="cenario">
+            <div class="aptidao__selo" style="--cor:{{ laudo.aptidao.atual.cor }}">
+              {{ i.ico(laudo.aptidao.atual.icone, "ico ico--lg") }}
+              <div class="aptidao__grau">{{ laudo.aptidao.atual.rotulo }}</div>
+            </div>
+            <div class="cenario__rotulo">Hoje</div>
+            <p class="cenario__nota">
+              Sobre os valores do laudo, sem intervenção.
+              {%- if laudo.aptidao.atual.fator_determinante %}
+              Fator determinante: <b>{{ laudo.aptidao.atual.fator_determinante }}</b>.
+              {%- endif %}
+            </p>
+          </div>
+
+          <div class="cenarios__seta" aria-hidden="true">
+            {{ i.ico("avanca", "ico ico--lg") }}
+            <span>aplicando este laudo</span>
+          </div>
+
+          <div class="cenario">
+            <div class="aptidao__selo" style="--cor:{{ laudo.aptidao.potencial.cor }}">
+              {{ i.ico(laudo.aptidao.potencial.icone, "ico ico--lg") }}
+              <div class="aptidao__grau">{{ laudo.aptidao.potencial.rotulo }}</div>
+            </div>
+            <div class="cenario__rotulo">Após a correção</div>
+            <p class="cenario__nota">
+              Com a calagem e a adubação acima aplicadas integralmente.
+              {%- if laudo.aptidao.potencial.fator_determinante %}
+              Fator determinante: <b>{{ laudo.aptidao.potencial.fator_determinante }}</b>.
+              {%- endif %}
+            </p>
+          </div>
+        </div>
+
+        <p class="aptidao__leitura">
+          {% if laudo.aptidao.houve_ganho %}
+          A recomendação deste laudo leva a área de
+          <b>{{ laudo.aptidao.atual.rotulo }}</b> para
+          <b>{{ laudo.aptidao.potencial.rotulo }}</b> — essa diferença é o ganho
+          atribuível a ela.
+          {% else %}
+          A aptidão permanece <b>{{ laudo.aptidao.potencial.rotulo }}</b> mesmo com as
+          recomendações aplicadas: o que limita esta área não é corrigível por calagem
+          nem por adubação.
+          {% endif %}
+          A avaliação considera exclusivamente os atributos químicos e físicos informados.
+          Relevo, clima, deficiência hídrica e suscetibilidade à erosão estão fora do escopo.
+        </p>
+
+        <h4 class="t-rotulo aptidao__titulo">Fatores de limitação, na situação atual</h4>
+        <div class="limitantes">
+          {% for fator in laudo.aptidao.atual.fatores %}
+          {% if fator.grau > 0 %}
+          <div class="limitante">
+            <span class="limitante__barra"><i style="width:{{ fator.peso }}%"></i></span>
+            <span><b>{{ fator.nome }}:</b> limitação {{ fator.rotulo|lower }}. {{ fator.evidencia }}</span>
+          </div>
+          {% endif %}
+          {% else %}
+          <div class="limitante"><span>Nenhum atributo limitante identificado nesta amostra.</span></div>
+          {% endfor %}
+        </div>
+
+        {% set remanescentes = laudo.aptidao.potencial.fatores|selectattr("grau", "gt", 0)|list %}
+        {% if remanescentes %}
+        <h4 class="t-rotulo aptidao__titulo">O que permanece depois da correção</h4>
+        <div class="limitantes">
+          {% for fator in remanescentes %}
+          <div class="limitante">
+            <span class="limitante__barra"><i style="width:{{ fator.peso }}%"></i></span>
+            <span><b>{{ fator.nome }}:</b> limitação {{ fator.rotulo|lower }}. {{ fator.evidencia }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if laudo.aptidao.atual.rebaixamento_aplicado %}
+        <p class="t-aux aptidao__ressalva">
+          Classe rebaixada por acúmulo de fatores com limitação moderada ou maior.
+        </p>
+        {% endif %}
+        {% for alerta in laudo.aptidao.atual.alertas %}
+        <p class="t-aux aptidao__ressalva">{{ alerta }}</p>
+        {% endfor %}
+      </section>
+
+      {# ——— 4. Trilha: o diferencial declarado do SIRAS, em seção própria ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("rastro") }}<h3>De onde vem cada número</h3></div>
+        <p style="color:#405146;max-width:66ch;margin-bottom:var(--e-4)">
+          Toda saída do SIRAS é rastreável até a regra e a tabela do Manual que a
+          produziram. Esta seção existe para que o técnico possa conferir e para que o
+          laudo tenha valor em análise de crédito rural.
+          <a href="{{ url_for('siras.tabelas') }}" class="nao-imprime"
+             style="color:var(--v-700);font-weight:700">Ver as tabelas transcritas</a>.
+        </p>
+
+        {# Agrupado por módulo e na ordem em que o laudo os apresenta. Nenhum passo é
+           filtrado: a calagem aparece duas vezes porque a aptidão potencial recalcula a
+           dose para testar a exequibilidade (CCAE §7.2), e essa é uma decisão que o
+           sistema realmente tomou. #}
+        {% for modulo in ["Calagem", "Adubação", "Aptidão edáfica"] %}
+        {% set passos = laudo.trilha|selectattr("modulo", "equalto", modulo)|list %}
+        {% if passos %}
+        <h4 class="t-rotulo" style="margin-top:var(--e-5);color:#5C6F64">{{ modulo }}</h4>
+        {% for passo in passos %}
+        <div class="trilha__item">
+          <span class="trilha__ref">
+            {{ i.ico("rastro", "ico ico--sm") }}
+            <span>{{ passo.rotulo }}{% if passo.vezes > 1 %}<span class="trilha__vezes"
+              title="regra aplicada nos dois cenários de aptidão">{{ passo.vezes }}×</span>{% endif %}</span>
+          </span>
+          <span class="trilha__txt">
+            {{ passo.regra }}
+            {# A fonte fica discreta de proposito: ela precisa estar disponivel para
+               conferencia, e nao competir com a regra pela atencao de quem le. #}
+            <span class="trilha__fonte">{{ passo.fonte }}</span>
+          </span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+      </section>
+

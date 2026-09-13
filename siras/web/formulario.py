@@ -14,6 +14,7 @@ criaria um segundo conjunto de limites, divergente do do domínio e sem fonte.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
@@ -79,6 +80,7 @@ FAIXA_DO_CAMPO = {
     "al": (0, None), "ca": (0, None), "mg": (0, None),
     "sub_al": (0, None), "sub_ca": (0, None), "sub_mg": (0, None), "sub_k": (0, None),
     "expectativa_rendimento": (0, None),
+    "area_ha": (0, None),
 }
 
 #: Identificação do responsável técnico. NÃO entra em AnaliseSolo nem em Contexto: não
@@ -106,6 +108,33 @@ CAMPOS_RESPONSAVEL: Tuple[Tuple[Any, ...], ...] = (
 
 _TODOS_OS_CAMPOS = CAMPOS_ACIDEZ + CAMPOS_FERTILIDADE + CAMPOS_SUBSUPERFICIE + CAMPOS_CONTEXTO
 _ROTULO_POR_CAMPO = {campo[0]: campo[1] for campo in _TODOS_OS_CAMPOS}
+
+#: O que se repete a cada talhão: só a análise de solo.
+#:
+#: Cultura, sistema de manejo, PRNT, cultivo, antecedente e expectativa de rendimento
+#: são preenchidos uma vez e valem para todos — é o caso real de uma lavoura amostrada em
+#: várias áreas, e é o que evita transformar o formulário em vinte campos vezes N.
+CAMPOS_DO_TALHAO: Tuple[Tuple[Any, ...], ...] = (
+    CAMPOS_ACIDEZ + CAMPOS_FERTILIDADE + CAMPOS_SUBSUPERFICIE
+)
+
+#: Área do talhão, em hectares. Opcional, e com uma consequência declarada: o laudo só
+#: consolida quantidades a comprar quando TODOS os talhões a informam. Com uma área
+#: faltando, a soma seria sobre um conjunto incompleto e diria menos do que aparenta.
+CAMPO_AREA: Tuple[Any, ...] = (
+    "area_ha", "Área do talhão", "ha",
+    "Opcional. Preenchida em todos os talhões, o laudo soma as quantidades a comprar",
+    False, "0.1", "12,5",
+)
+
+
+@dataclass
+class BlocoDeTalhao:
+    """Uma área amostrada: seu nome, sua extensão e a análise que a descreve."""
+
+    rotulo: str
+    area_ha: Optional[float]
+    analise: AnaliseSolo
 
 
 @dataclass
@@ -502,6 +531,142 @@ def exige_antecedente(dados_graos: Dict[str, Any], cultura_id: str) -> bool:
     return entrada.get("modelo") == "mo_x_antecedente"
 
 
+#: Sufixo dos campos de um talhão adicional: "ph_agua__2", "talhao__3".
+#:
+#: O PRIMEIRO talhão mantém os nomes de campo originais, sem sufixo. Não é detalhe de
+#: implementação: é o que faz a análise de uma área só continuar exatamente o que já era
+#: — a leitura ao vivo, o preenchimento por exemplo e a volta do laudo para a edição
+#: seguem funcionando sem saber que talhões múltiplos existem.
+_SUFIXO_DE_TALHAO = re.compile(r"__(\d+)$")
+
+
+def indices_de_talhoes(form: Mapping[str, str]) -> List[int]:
+    """Quais talhões adicionais vieram neste envio, em ordem crescente."""
+    achados = set()
+    for chave in form:
+        casou = _SUFIXO_DE_TALHAO.search(chave)
+        if casou:
+            achados.add(int(casou.group(1)))
+    return sorted(achados)
+
+
+def _analise_de(numeros: Dict[str, Optional[float]]) -> AnaliseSolo:
+    return AnaliseSolo(
+        ph_agua=numeros["ph_agua"],
+        indice_smp=numeros["indice_smp"],
+        argila=numeros["argila"],
+        mo=numeros["mo"],
+        p=numeros["p"],
+        k=numeros["k"],
+        ctc_ph7=numeros["ctc_ph7"],
+        al=numeros["al"],
+        ca=numeros["ca"],
+        mg=numeros["mg"],
+        v_percent=numeros["v_percent"],
+        saturacao_al=numeros["saturacao_al"],
+        subsuperficie=_montar_subsuperficie(numeros),
+    )
+
+
+def _ler_talhao_adicional(
+    form: Mapping[str, str], indice: int, leitura: LeituraFormulario
+) -> Optional[BlocoDeTalhao]:
+    """Lê um talhão adicional. Devolve None quando algo o impede, registrando o motivo
+    em `leitura` com o número do talhão no rótulo — num formulário com quatro áreas,
+    "falta o pH" sem dizer de qual delas não ajuda ninguém."""
+    rotulo_bruto = (form.get(f"talhao__{indice}") or "").strip()
+    identificacao = rotulo_bruto or f"#{indice}"
+
+    numeros: Dict[str, Optional[float]] = {}
+    for campo_id, rotulo, _un, _ajuda, obrigatorio, _passo, _ex in CAMPOS_DO_TALHAO:
+        bruto = (form.get(f"{campo_id}__{indice}") or "").strip()
+        if not bruto:
+            if obrigatorio:
+                leitura.faltando.append(f"{rotulo} (talhão {identificacao})")
+                leitura.campos_com_erro.append(f"{campo_id}__{indice}")
+            numeros[campo_id] = None
+            continue
+        valor = para_numero(bruto)
+        if valor is None:
+            leitura.invalidos.append(
+                f"{rotulo} (talhão {identificacao}): “{bruto}” não é um número"
+            )
+            leitura.campos_com_erro.append(f"{campo_id}__{indice}")
+        numeros[campo_id] = valor
+
+    area_bruta = (form.get(f"area_ha__{indice}") or "").strip()
+    area = para_numero(area_bruta) if area_bruta else None
+    if area_bruta and area is None:
+        leitura.invalidos.append(
+            f"Área do talhão {identificacao}: “{area_bruta}” não é um número"
+        )
+        leitura.campos_com_erro.append(f"area_ha__{indice}")
+
+    if any(valor is None for campo, valor in numeros.items()
+           if campo in {c[0] for c in CAMPOS_DO_TALHAO if c[4]}):
+        return None
+
+    try:
+        analise = _analise_de(numeros)
+    except ValueError as erro:
+        leitura.invalidos.append(f"Talhão {identificacao} — {erro}")
+        return None
+
+    return BlocoDeTalhao(rotulo=rotulo_bruto, area_ha=area, analise=analise)
+
+
+def ler_talhoes(
+    form: Mapping[str, str],
+    dados: Dict[str, Any],
+    entradas_do_grupo: Optional[Dict[str, Any]] = None,
+) -> Tuple[LeituraFormulario, List[BlocoDeTalhao]]:
+    """Lê o formulário inteiro: o contexto compartilhado e um bloco por talhão.
+
+    Com um talhão só, devolve exatamente o que `ler()` sempre devolveu mais um bloco —
+    nada no caminho de uma área muda.
+
+    Com mais de um, o nome de cada talhão passa a ser obrigatório: um laudo que traz
+    quatro recomendações diferentes e não diz a qual área cada uma pertence é pior que
+    não trazê-las.
+    """
+    leitura = ler(form, dados, entradas_do_grupo)
+    indices = indices_de_talhoes(form)
+
+    blocos: List[BlocoDeTalhao] = []
+    if leitura.analise is not None:
+        area_bruta = (form.get("area_ha") or "").strip()
+        area = para_numero(area_bruta) if area_bruta else None
+        if area_bruta and area is None:
+            leitura.invalidos.append(f"Área do talhão: “{area_bruta}” não é um número")
+            leitura.campos_com_erro.append("area_ha")
+        blocos.append(
+            BlocoDeTalhao(
+                rotulo=(form.get("talhao") or "").strip(),
+                area_ha=area,
+                analise=leitura.analise,
+            )
+        )
+
+    for indice in indices:
+        bloco = _ler_talhao_adicional(form, indice, leitura)
+        if bloco is not None:
+            blocos.append(bloco)
+
+    if indices:
+        for posicao, bloco in enumerate(blocos, start=1):
+            if not bloco.rotulo:
+                leitura.faltando.append(f"Nome do talhão {posicao}")
+                leitura.campos_com_erro.append(
+                    "talhao" if posicao == 1 else f"talhao__{indices[posicao - 2]}"
+                )
+
+    if leitura.faltando or leitura.invalidos:
+        leitura.analise = None
+        leitura.contexto = None
+
+    return leitura, blocos
+
+
 def _montar_subsuperficie(numeros: Dict[str, Optional[float]]) -> Optional[Camada]:
     informados = {
         chave[4:]: valor for chave, valor in numeros.items()
@@ -627,21 +792,7 @@ def ler(
     criterio = next(c for c in dados["criterios_calagem"]["criterios"] if c["id"] == criterio_id)
 
     try:
-        leitura.analise = AnaliseSolo(
-            ph_agua=numeros["ph_agua"],
-            indice_smp=numeros["indice_smp"],
-            argila=numeros["argila"],
-            mo=numeros["mo"],
-            p=numeros["p"],
-            k=numeros["k"],
-            ctc_ph7=numeros["ctc_ph7"],
-            al=numeros["al"],
-            ca=numeros["ca"],
-            mg=numeros["mg"],
-            v_percent=numeros["v_percent"],
-            saturacao_al=numeros["saturacao_al"],
-            subsuperficie=_montar_subsuperficie(numeros),
-        )
+        leitura.analise = _analise_de(numeros)
     except ValueError as erro:
         # A mensagem vem do próprio domínio e já nomeia o campo e a faixa física.
         leitura.invalidos.append(str(erro))
@@ -674,10 +825,15 @@ __all__ = [
     "CAMPOS_FERTILIDADE",
     "CAMPOS_SUBSUPERFICIE",
     "LeituraFormulario",
+    "BlocoDeTalhao",
+    "CAMPOS_DO_TALHAO",
+    "CAMPO_AREA",
     "antecedentes_da_cultura",
     "para_numero",
     "culturas_disponiveis",
     "exige_antecedente",
+    "indices_de_talhoes",
+    "ler_talhoes",
     "grupo_da_cultura",
     "variaveis_condicionais",
     "ler",

@@ -137,6 +137,13 @@ body.impressa .assinatura__dados { color: #1F1F1F; }
 body.impressa .assinatura__carimbo { color: #555555; }
 
 body.impressa .doc__rodape { border-top-color: #8A8A8A; color: #3A3A3A; }
+
+body.impressa .talhao { border-bottom-color: #000000; }
+body.impressa .talhao__n { color: #3A3A3A; }
+body.impressa .talhao__nome { color: #000000; }
+body.impressa .talhao__area { color: #1F1F1F; }
+body.impressa .total { background: #FFFFFF; border: 1px solid #8A8A8A; }
+body.impressa .total__nome { color: #1F1F1F; }
 body.impressa .trilha__fonte { color: #555555; }
 
 /* --- Barra de acoes desta tela ------------------------------------------ */

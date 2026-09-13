@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros/ico.html" as i %}
 {% import "_macros/campo.html" as c %}
+{% import "_macros/talhao.html" as tl %}
 {% import "_macros/aviso.html" as av %}
 
 {% block titulo %}Análise de solo — SIRAS{% endblock %}
@@ -199,8 +200,47 @@
         {{ c.campo_texto(campo_id, rotulo, ajuda, leitura.valores.get(campo_id),
                          placeholder=exemplo) }}
         {% endfor %}
+        {# A área acompanha o talhão a que pertence, e não o bloco de cálculo: ela não
+           entra em dose nenhuma. Serve para o laudo somar quanto comprar. #}
+        {{ c.campo(campo_area[0], campo_area[1], campo_area[2], campo_area[3],
+                   false, campo_area[5], campo_area[6],
+                   leitura.valores.get(campo_area[0]),
+                   campo_area[0] in leitura.campos_com_erro, faixas.get(campo_area[0])) }}
       </div>
     </details>
+
+    {# ——— Outros talhões ———
+       Uma propriedade raramente é uma amostra só. Repetir a análise inteira para cada
+       área e grampear quatro laudos separados é o que este bloco evita: mesma cultura,
+       mesmo manejo, mesmo corretivo, e um documento só com uma recomendação por área. #}
+    <div class="painel bloco talhoes" data-talhoes>
+      <div class="bloco__cab">
+        {{ i.ico("perfil") }}
+        <h3>Outros talhões</h3>
+        <span class="t-aux">Mesma cultura e mesmo manejo, outra amostra</span>
+      </div>
+
+      <div data-talhoes-lista>
+        {% for indice in talhoes_extras %}
+        {{ tl.cartao(indice, campos_do_talhao, faixas, leitura.valores,
+                     leitura.campos_com_erro) }}
+        {% endfor %}
+      </div>
+
+      <p class="t-aux talhoes__nota">
+        Cada talhão recebe a sua própria recomendação, no mesmo laudo. Com mais de um, o
+        nome de cada área passa a ser obrigatório.
+      </p>
+      <button class="btn btn--contorno" type="button" data-adicionar-talhao>
+        {{ i.ico("edita", "ico ico--sm") }} Adicionar novo talhão
+      </button>
+    </div>
+
+    {# Molde do cartão, com __IDX__ no lugar do índice. Fica num <template> para que o
+       navegador não o envie junto do formulário nem o conte na navegação por teclado. #}
+    <template id="molde-talhao">
+      {{ tl.cartao("__IDX__", campos_do_talhao, faixas, {}, []) }}
+    </template>
 
     <div class="rodape-acoes">
       <span class="t-aux">Os campos marcados com <b style="color:var(--v-400)">*</b> são obrigatórios.</span>
@@ -235,4 +275,5 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/leitura-ao-vivo.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/gerando.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/talhoes.js') }}" defer></script>
 {% endblock %}

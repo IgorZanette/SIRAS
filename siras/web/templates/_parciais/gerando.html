@@ -70,5 +70,12 @@
     </ol>
 
     <div class="calculando__barra" aria-hidden="true"><i></i></div>
+
+    {# Confirmação antes de navegar: o laudo aparece de repente, e um instante de
+       "pronto" separa a espera do resultado. #}
+    <div class="calculando__pronto" hidden>
+      {{ i.ico("confere", "ico ico--lg") }}
+      <span>Laudo pronto</span>
+    </div>
   </div>
 </div>

@@ -441,10 +441,9 @@ def test_a_regua_ganha_opacidade_no_modo_claro():
 def test_os_dois_cenarios_ficam_lado_a_lado_no_papel():
     """A largura útil de uma A4 retrato cai dentro da consulta de 720px, então a regra de
     tela estreita entrava no papel e virava a seta de lado, com o texto na vertical."""
-    bloco = _TELAS_CSS[_TELAS_CSS.rindex("@media print"):]
-
-    assert re.search(r"\.cenarios \{[^}]*grid-template-columns: 1fr auto 1fr", bloco)
-    assert re.search(r"\.cenarios__seta \{[^}]*transform: none", bloco)
+    # O arquivo tem mais de um bloco @media print; a busca é no arquivo inteiro.
+    assert re.search(r"\.cenarios \{[^}]*grid-template-columns: 1fr auto 1fr", _TELAS_CSS)
+    assert re.search(r"\.cenarios__seta \{[^}]*transform: none", _TELAS_CSS)
 
 
 # --- usabilidade --------------------------------------------------------------
@@ -533,3 +532,133 @@ def test_o_formulario_vira_uma_coluna_em_tela_estreita():
 def test_o_clique_tem_resposta_propria():
     """O hover diz 'dá para clicar'; o active diz 'clicou'."""
     assert re.search(r"\.btn:active \{[^}]*transform:", _TELAS_CSS)
+
+
+# --- exemplos por cenario -----------------------------------------------------
+
+def test_ha_tres_cenarios_de_exemplo(cliente):
+    """Um exemplo só nunca exercita o laudo SEM calagem, que é metade do que o sistema
+    faz. Os três percorrem caminhos diferentes do motor."""
+    from siras.web.exemplo import CENARIOS
+
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert len(CENARIOS) == 3
+    for cenario in CENARIOS:
+        assert cenario["nome"] in html
+        assert f"exemplo={cenario['id']}" in html
+
+
+@pytest.mark.parametrize("cenario", ["argiloso", "arenoso", "corrigido"])
+def test_cada_cenario_preenche_valores_proprios(cliente, cenario):
+    html = cliente.get(f"/analise/dados?cultura_id=soja&exemplo={cenario}").get_data(as_text=True)
+
+    argila = re.search(r'id="argila"[^>]*value="([^"]*)"', html).group(1)
+    assert argila, f"{cenario} não preencheu a argila"
+
+
+def test_os_cenarios_percorrem_caminhos_diferentes(cliente):
+    """O solo corrigido tem pH acima do gatilho: o laudo dele sai SEM calagem indicada,
+    e o argiloso ácido sai com dose."""
+    def nc(cenario):
+        campos = dict(re.findall(
+            r'<input[^>]*id="(\w+)"[^>]*value="([^"]*)"',
+            cliente.get(f"/analise/dados?cultura_id=soja&exemplo={cenario}").get_data(as_text=True),
+        ))
+        campos.update({"cultura_id": "soja", "criterio_id": "graos_convencional"})
+        html = cliente.post("/analise/laudo", data=campos).get_data(as_text=True)
+        return "Calagem não indicada" in html
+
+    assert nc("corrigido") is True, "o cenário corrigido deveria dispensar a calagem"
+    assert nc("argiloso") is False, "o cenário argiloso ácido deveria pedir calcário"
+
+
+# --- identificação do documento -----------------------------------------------
+
+def test_o_laudo_traz_data_e_espaco_de_assinatura(cliente):
+    """O SIRAS é apoio à decisão: a recomendação oficial é do profissional habilitado, e
+    o documento precisa carregar de quem ela é."""
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+
+    assert "Emitido em" in html
+    assert 'class="assinatura__linha"' in html
+    assert "Assinatura e carimbo" in html
+
+
+def test_o_responsavel_informado_sai_impresso(cliente):
+    """Quem se identifica recebe o laudo pronto para assinar e carimbar."""
+    dados = dict(_ANALISE_COMPLETA,
+                 responsavel_nome="Igor Zanette",
+                 responsavel_registro="CREA-RS 123456",
+                 responsavel_documento="000.000.000-00",
+                 propriedade="Fazenda Santa Rita")
+
+    html = cliente.post("/analise/laudo", data=dados).get_data(as_text=True)
+
+    assert "Igor Zanette" in html
+    assert "CREA-RS 123456" in html
+    assert "Fazenda Santa Rita" in html
+
+
+def test_sem_responsavel_a_linha_de_assinatura_continua(cliente):
+    """Quem só quer ver a recomendação na tela não precisa se identificar — e o laudo
+    continua assinável à mão."""
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+
+    assert "Responsável técnico" in html
+    assert 'class="assinatura__linha"' in html
+
+
+def test_a_identificacao_nao_entra_no_motor():
+    """Nome e CPF são metadado do documento, não entrada de cálculo: gerar_laudo()
+    continua sendo função pura de análise, cultura e contexto."""
+    import inspect
+
+    from siras.motor.laudo import gerar_laudo
+
+    parametros = set(inspect.signature(gerar_laudo).parameters)
+    assert not parametros & {"responsavel", "responsavel_nome", "emitido_em"}
+
+
+# --- apresentação de primeira visita -------------------------------------------
+
+def test_a_apresentacao_nasce_oculta(cliente):
+    """Sem JavaScript a página simplesmente não a mostra — em vez de mostrá-la sem meio
+    de fechar, que seria pior que não ter guia nenhum."""
+    html = cliente.get("/").get_data(as_text=True)
+
+    assert re.search(r'id="guia"[^>]*hidden', html)
+    assert html.count("data-guia-passo") == 3
+    assert "data-guia-fechar" in html
+
+
+def test_a_apresentacao_marca_que_ja_foi_vista():
+    caminho = _ESTATICOS / "js" / "guia.js"
+    codigo = caminho.read_text(encoding="utf-8")
+
+    assert "siras-guia-visto" in codigo
+    assert "Escape" in codigo, "deveria fechar com Esc"
+
+
+# --- microinterações -----------------------------------------------------------
+
+def test_o_alternador_de_tema_usa_sol_e_lua(cliente):
+    html = cliente.get("/").get_data(as_text=True)
+
+    assert "#i-sol" in html and "#i-lua" in html
+    assert re.search(r"\.tema__claro \{[^}]*transform: rotate", _TELAS_CSS)
+
+
+def test_a_tela_de_calculo_confirma_antes_de_navegar(cliente):
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'class="calculando__pronto"' in html
+    assert "Laudo pronto" in html
+
+
+def test_cada_tela_entra_com_transicao():
+    assert re.search(r"main \{ animation: entrar-tela", _TELAS_CSS)
+    assert re.search(
+        r"@media \(prefers-reduced-motion: reduce\) \{[^}]*main[^}]*animation: none",
+        _TELAS_CSS, re.S,
+    )

@@ -47,6 +47,10 @@
       <div class="doc__cultura">
         <div class="t-rotulo">Cultura</div>
         <strong>{{ laudo.cultura }}</strong>
+        <div class="doc__data">Emitido em {{ emitido_em }}</div>
+        {% if responsavel and responsavel.propriedade %}
+        <div class="doc__data">{{ responsavel.propriedade }}</div>
+        {% endif %}
       </div>
     </header>
 
@@ -233,6 +237,24 @@
         {% endfor %}
         {% endif %}
         {% endfor %}
+      </section>
+
+      {# Espaço de assinatura. O SIRAS é ferramenta de apoio à decisão: a recomendação
+         oficial é do profissional habilitado, e o documento precisa carregar de quem
+         ela é. Se o responsável se identificou, o nome já sai impresso e resta assinar
+         e carimbar. #}
+      <section class="assinatura">
+        <div class="assinatura__linha"></div>
+        <div class="assinatura__nome">
+          {{ responsavel.responsavel_nome if responsavel and responsavel.responsavel_nome
+             else "Responsável técnico" }}
+        </div>
+        {% if responsavel and (responsavel.responsavel_registro or responsavel.responsavel_documento) %}
+        <div class="assinatura__dados">
+          {{ responsavel.responsavel_registro }}{% if responsavel.responsavel_registro and responsavel.responsavel_documento %} · {% endif %}{{ responsavel.responsavel_documento }}
+        </div>
+        {% endif %}
+        <div class="assinatura__carimbo">Assinatura e carimbo</div>
       </section>
 
       <footer class="doc__rodape">

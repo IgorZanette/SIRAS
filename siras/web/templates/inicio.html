@@ -167,4 +167,10 @@
     </div>
   </section>
 </main>
+
+{% include "_parciais/apresentacao.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/guia.js') }}" defer></script>
 {% endblock %}

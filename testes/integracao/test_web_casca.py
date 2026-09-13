@@ -22,11 +22,14 @@ from siras.web import criar_app
 _ESTATICOS = Path(__file__).parent.parent.parent / "siras" / "web" / "static"
 _TEMPLATES = Path(__file__).parent.parent.parent / "siras" / "web" / "templates"
 
-#: Os 24 símbolos do conjunto (PLANO-FRONTEND §6.3) mais a marca.
+#: Os 24 símbolos do conjunto (PLANO-FRONTEND §6.3), mais a marca e os três que a
+#: interface pediu depois: sol e lua para o alternador de tema, e a lupa. Todos seguem
+#: as regras da família, inclusive a onda de horizonte que assina o conjunto.
 _ICONES_ESPERADOS = {
     "perfil", "broto", "calagem", "analise", "regua", "alvo", "aptidao", "laudo", "rastro",
     "graos", "hortalicas", "tuberculos", "frutiferas", "erva", "comerciais",
     "alerta", "confere", "avanca", "volta", "imprime", "edita", "baixa", "info",
+    "sol", "lua", "lupa",
     "marca",
 }
 

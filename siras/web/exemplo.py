@@ -27,27 +27,59 @@ from typing import Any, Dict, List, Optional
 
 from siras.dominio.nomes import buscar_por_nome
 
-#: Laudo de laboratório de demonstração. Valores de entrada, plausíveis para um solo do
-#: planalto do RS sob cultivo. Não são do Manual e não valem como referência agronômica.
+#: Três laudos de laboratório de DEMONSTRAÇÃO. São entradas plausíveis de um laboratório
+#: do RS, e nenhum número aqui sai de tabela do Manual nem vale como referência
+#: agronômica — são valores de entrada, do tipo que o técnico transcreve.
+#:
+#: Os três existem porque exercitam caminhos diferentes do motor, e é isso que faz um
+#: exemplo valer mais que um formulário preenchido ao acaso:
+#:
+#: - ARGILOSO ácido dispara a calagem e cai nas classes baixas de P;
+#: - ARENOSO tem CTC baixa, o que muda a faixa de interpretação do potássio e a leitura
+#:   da aptidão, sem disparar a mesma dose de calcário;
+#: - CORRIGIDO tem pH acima do gatilho: mostra o laudo em que a calagem NÃO é indicada,
+#:   que é o caminho que um exemplo só nunca exercita.
 #:
 #: A camada de subsuperfície fica de fora de propósito: só um critério de calagem a lê
 #: (plantio direto consolidado com restrições), e preenchê-la sempre sugeriria que toda
 #: análise precisa de duas amostragens.
-ANALISE_DE_DEMONSTRACAO: Dict[str, str] = {
-    "ph_agua": "5,2",
-    "indice_smp": "5,6",
-    "al": "0,9",
-    "ca": "2,8",
-    "mg": "1,2",
-    "v_percent": "46",
-    "saturacao_al": "14",
-    "argila": "38",
-    "mo": "3,1",
-    "p": "9,4",
-    "k": "112",
-    "ctc_ph7": "9,8",
-    "prnt": "75",
-}
+CENARIOS = (
+    {
+        "id": "argiloso",
+        "nome": "Solo argiloso ácido",
+        "resumo": "Dispara a calagem e cai nas classes baixas de fósforo.",
+        "valores": {
+            "ph_agua": "5,0", "indice_smp": "5,3", "al": "1,4", "ca": "2,6", "mg": "1,1",
+            "v_percent": "42", "saturacao_al": "", "argila": "58", "mo": "3,4",
+            "p": "6,2", "k": "88", "ctc_ph7": "11,2", "prnt": "75",
+        },
+    },
+    {
+        "id": "arenoso",
+        "nome": "Solo arenoso",
+        "resumo": "CTC baixa muda a faixa de interpretação do potássio.",
+        "valores": {
+            "ph_agua": "5,4", "indice_smp": "5,9", "al": "0,5", "ca": "1,6", "mg": "0,7",
+            "v_percent": "52", "saturacao_al": "", "argila": "14", "mo": "1,8",
+            "p": "12,5", "k": "44", "ctc_ph7": "5,6", "prnt": "75",
+        },
+    },
+    {
+        "id": "corrigido",
+        "nome": "Solo já corrigido",
+        "resumo": "pH acima do gatilho: mostra o laudo sem indicação de calagem.",
+        "valores": {
+            "ph_agua": "6,2", "indice_smp": "6,4", "al": "0,1", "ca": "4,2", "mg": "1,8",
+            "v_percent": "72", "saturacao_al": "", "argila": "38", "mo": "3,1",
+            "p": "24,0", "k": "140", "ctc_ph7": "9,8", "prnt": "100",
+        },
+    },
+)
+
+_POR_ID = {cenario["id"]: cenario for cenario in CENARIOS}
+
+#: Mantido para quem chama sem escolher: o primeiro cenário.
+ANALISE_DE_DEMONSTRACAO: Dict[str, str] = CENARIOS[0]["valores"]
 
 
 def _numero_para_campo(valor: Any) -> str:
@@ -111,9 +143,11 @@ def montar(
     manejos: List[Any],
     variaveis: List[Dict[str, Any]],
     entradas_do_grupo: Optional[Dict[str, Any]] = None,
+    cenario: Optional[str] = None,
 ) -> Dict[str, str]:
-    """Valores de exemplo para o formulário desta cultura."""
-    valores: Dict[str, str] = dict(ANALISE_DE_DEMONSTRACAO)
+    """Valores de exemplo para o formulário desta cultura, no cenário pedido."""
+    escolhido = _POR_ID.get(cenario or "", CENARIOS[0])
+    valores: Dict[str, str] = dict(escolhido["valores"])
     valores["cultura_id"] = cultura_id
     valores["profundidade_incorporacao_cm"] = "20"
     if grupo == "graos":
@@ -148,4 +182,4 @@ def montar(
     return valores
 
 
-__all__ = ["ANALISE_DE_DEMONSTRACAO", "montar"]
+__all__ = ["ANALISE_DE_DEMONSTRACAO", "CENARIOS", "montar"]

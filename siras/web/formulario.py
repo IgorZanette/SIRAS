@@ -81,6 +81,21 @@ FAIXA_DO_CAMPO = {
     "expectativa_rendimento": (0, None),
 }
 
+#: Identificação do responsável técnico. NÃO entra em AnaliseSolo nem em Contexto: não
+#: é dado da análise nem do cálculo, é metadado do documento. O motor não a conhece, e
+#: gerar_laudo() continua sendo função pura de análise, cultura e contexto.
+#:
+#: Tudo opcional: quem só quer ver a recomendação na tela não precisa se identificar.
+CAMPOS_RESPONSAVEL: Tuple[Tuple[Any, ...], ...] = (
+    ("responsavel_nome", "Nome do responsável técnico", None,
+     "Sai impresso no laudo, acima da linha de assinatura", False, "", ""),
+    ("responsavel_registro", "Registro profissional", None,
+     "CREA, CRT ou outro conselho, com a UF", False, "", ""),
+    ("responsavel_documento", "CPF ou CNPJ", None, None, False, "", ""),
+    ("propriedade", "Propriedade ou talhão", None,
+     "Identifica a área a que este laudo se refere", False, "", ""),
+)
+
 _TODOS_OS_CAMPOS = CAMPOS_ACIDEZ + CAMPOS_FERTILIDADE + CAMPOS_SUBSUPERFICIE + CAMPOS_CONTEXTO
 _ROTULO_POR_CAMPO = {campo[0]: campo[1] for campo in _TODOS_OS_CAMPOS}
 
@@ -99,6 +114,15 @@ class LeituraFormulario:
     campos_com_erro: List[str] = field(default_factory=list)
     #: o que veio do formulário, para devolver a tela preenchida
     valores: Dict[str, str] = field(default_factory=dict)
+
+    @property
+    def responsavel(self) -> Dict[str, str]:
+        """Identificação do documento, como veio do formulário. Texto livre, e nunca
+        entrada de cálculo: o motor não a recebe."""
+        return {
+            chave[0]: (self.valores.get(chave[0]) or "").strip()
+            for chave in CAMPOS_RESPONSAVEL
+        }
 
     @property
     def ok(self) -> bool:
@@ -583,6 +607,7 @@ def ler(
 
 __all__ = [
     "CAMPOS_ACIDEZ",
+    "CAMPOS_RESPONSAVEL",
     "FAIXA_DO_CAMPO",
     "CAMPOS_CONTEXTO",
     "CAMPOS_FERTILIDADE",

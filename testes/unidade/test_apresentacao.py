@@ -94,14 +94,36 @@ def test_evidencia_sai_com_separador_decimal_unico():
     """O motor interpola floats de Python, então a mesma frase mistura o ponto do repr
     com a vírgula do limiar transcrito. Num documento isso lê como erro."""
     bruto = "pH 5.1 < 5,5; m% = 24.3 -> MODERADO"
-    assert humanizar_evidencia(bruto) == "pH 5,1 < 5,5; m% = 24,3 → MODERADO"
+
+    humanizada = humanizar_evidencia(bruto)
+
+    assert "5,1" in humanizada and "24,3" in humanizada
+    assert "5.1" not in humanizada and "24.3" not in humanizada
+    assert "→" in humanizada and "->" not in humanizada
 
 
-def test_humanizar_evidencia_nao_mexe_em_identificador():
-    """'grupo_2' e 'Tab. 5.3' não podem virar outra coisa: só separador decimal muda."""
-    assert humanizar_evidencia("argila classe 3, grupo_2 -> baixo") == (
-        "argila classe 3, grupo_2 → baixo"
+def test_a_evidencia_troca_o_vocabulario_de_maquina():
+    """'grupo_2', 'cmolc/dm3' e 'MODERADO' servem para depurar, não para um documento
+    que o técnico assina e anexa a projeto de crédito rural."""
+    humanizada = humanizar_evidencia(
+        "P 9.4 mg/dm3, argila classe 3, grupo_2 -> baixo"
     )
+
+    assert "grupo 2 de exigência" in humanizada
+    assert "classe de argila 3" in humanizada
+    assert "mg/dm³" in humanizada
+    assert "_" not in humanizada, "sobrou identificador de base na evidência"
+
+
+def test_a_traducao_nao_recalcula_nada():
+    """Só pontuação e vocabulário mudam: os números que o fator decidiu são os mesmos."""
+    bruto = "CTC pH7 9.8 cmolc/dm3 -> classe media"
+
+    humanizada = humanizar_evidencia(bruto)
+
+    assert "9,8" in humanizada
+    assert "CTC a pH 7,0" in humanizada
+    assert "classe média" in humanizada
 
 
 def test_classe_tem_sigla_e_rotulo_legivel():

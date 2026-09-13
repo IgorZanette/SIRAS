@@ -831,3 +831,107 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
   .passo { grid-template-columns: 32px minmax(0,1fr) 18px; padding: var(--e-2); }
   .passo__ico { width: 32px; height: 32px; }
 }
+
+/* =========================================================================
+   Identificacao do documento
+   ====================================================================== */
+.doc__data { font-size: var(--fs-2xs); color: #5C6F64; margin-top: 4px; }
+.assinatura { margin-top: var(--e-8); display: grid; justify-items: center;
+              gap: 2px; break-inside: avoid; }
+/* A linha vem ANTES do nome: e sobre ela que se assina, e o nome impresso abaixo
+   identifica quem assinou - a ordem de um documento tecnico, nao a de um formulario. */
+.assinatura__linha { width: min(320px, 80%); border-top: 1px solid #0D1410;
+                     margin-bottom: var(--e-2); }
+.assinatura__nome { font-family: var(--ff-display); font-weight: 700;
+                    font-size: var(--fs-md); color: #0D1410; }
+.assinatura__dados { font-size: var(--fs-xs); color: #405146; }
+.assinatura__carimbo { margin-top: var(--e-4); font-size: var(--fs-3xs);
+                       letter-spacing: .08em; text-transform: uppercase;
+                       color: #7A8C82; }
+@media print { .assinatura { margin-top: 22mm; } }
+
+/* Escolha do cenario de exemplo. */
+.cenarios-exemplo { display: flex; flex-wrap: wrap; align-items: center;
+                    gap: var(--e-2); margin-top: var(--e-4); }
+.btn--pequeno { min-height: 38px; padding: 0 .8rem; font-size: var(--fs-xs); }
+.btn--contorno.is-ativo { border-color: var(--v-400); color: var(--v-300);
+                          background: rgba(140,226,63,.1); }
+:root[data-tema="claro"] .btn--contorno.is-ativo { border-color: var(--v-600);
+                                                   color: var(--v-700);
+                                                   background: rgba(78,154,42,.1); }
+
+/* Confirmacao no fim da sequencia: um instante de "pronto" separa a espera do
+   resultado, que sem isso aparece de repente. */
+.calculando__pronto { display: flex; align-items: center; gap: var(--e-2);
+                      color: var(--v-400); font-weight: 700;
+                      font-size: var(--fs-sm);
+                      animation: surgir 320ms cubic-bezier(.2,0,.2,1) both; }
+.calculando__pronto[hidden] { display: none; }
+:root[data-tema="claro"] .calculando__pronto { color: var(--v-700); }
+@keyframes surgir {
+  from { opacity: 0; transform: translateY(6px) scale(.94) }
+  to   { opacity: 1; transform: none }
+}
+
+/* Alternador de tema: os dois icones ocupam a mesma celula e fazem crossfade com
+   um quarto de giro, em vez de trocar de uma vez. */
+.tema { position: relative; overflow: hidden; }
+.tema__escuro, .tema__claro { display: grid; place-items: center;
+                              transition: opacity 260ms ease, transform 260ms ease; }
+.tema__claro { position: absolute; inset: 0; }
+:root[data-tema="claro"] .tema__escuro,
+:root[data-tema="claro"] .tema__claro { display: grid; }
+.tema__claro { opacity: 0; transform: rotate(-90deg) scale(.6); }
+.tema__escuro { opacity: 1; transform: none; }
+:root[data-tema="claro"] .tema__claro { opacity: 1; transform: none; }
+:root[data-tema="claro"] .tema__escuro { opacity: 0; transform: rotate(90deg) scale(.6); }
+/* A troca de cores da pagina inteira acompanha, em vez de piscar. */
+body, .painel, .barra, .campo__caixa, .etapa, .grupo, .cultura, .doc {
+  transition: background-color 240ms ease, border-color 240ms ease, color 240ms ease;
+}
+
+/* Entrada de tela: cada passo do fluxo aparece com um deslocamento curto, o que
+   liga uma tela a outra em vez de trocar o conteudo de supetao. */
+@keyframes entrar-tela {
+  from { opacity: 0; transform: translateY(10px) }
+  to   { opacity: 1; transform: none }
+}
+main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  main, .calculando__pronto { animation: none !important; }
+  body, .painel, .barra, .campo__caixa, .etapa, .grupo, .cultura, .doc,
+  .tema__escuro, .tema__claro { transition: none !important; }
+}
+
+/* =========================================================================
+   Apresentacao de primeira visita
+   ====================================================================== */
+.guia { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center;
+        padding: var(--e-5); }
+.guia[hidden] { display: none; }
+.guia__fundo { position: absolute; inset: 0; background: rgba(5,8,7,.72);
+               backdrop-filter: blur(6px); animation: entrar-veu 200ms ease both; }
+:root[data-tema="claro"] .guia__fundo { background: rgba(13,20,16,.45); }
+.guia__painel { position: relative; width: min(480px, 100%); padding: var(--e-6);
+                display: grid; gap: var(--e-4); justify-items: start;
+                animation: surgir 280ms cubic-bezier(.2,0,.2,1) both; }
+.guia__pontos { display: flex; gap: 6px; }
+.guia__pontos span { width: 22px; height: 3px; border-radius: 999px;
+                     background: var(--n-700); transition: background var(--tr); }
+.guia__pontos span.is-ativo { background: var(--v-400); }
+:root[data-tema="claro"] .guia__pontos span.is-ativo { background: var(--v-600); }
+.guia__passo { display: grid; gap: var(--e-3); justify-items: start; }
+.guia__passo[hidden] { display: none; }
+.guia__ico { width: 46px; height: 46px; display: grid; place-content: center;
+             border-radius: 13px; color: var(--v-400);
+             background: rgba(140,226,63,.09); border: 1px solid rgba(140,226,63,.22); }
+:root[data-tema="claro"] .guia__ico { color: var(--v-700);
+                                      background: rgba(78,154,42,.12);
+                                      border-color: rgba(78,154,42,.26); }
+.guia__titulo { font-size: var(--fs-lg); letter-spacing: -.02em; }
+.guia__txt { font-size: var(--fs-sm); color: var(--n-300); line-height: 1.6; }
+.guia__acoes { display: flex; gap: var(--e-2); align-items: center;
+               justify-content: space-between; width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .guia__fundo, .guia__painel { animation: none !important; }
+}

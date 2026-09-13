@@ -112,19 +112,57 @@ def formatar_enxuto(valor: Optional[float]) -> str:
     return formatar_numero(valor, 0 if float(valor).is_integer() else 1)
 
 
+#: Vocabulário de máquina -> português de laudo. As evidências são montadas pelo motor
+#: com os identificadores da base ('grupo_2', 'classe media', 'cmolc/dm3'), que servem
+#: para depurar e não para um documento que vai anexado a projeto de crédito rural.
+#:
+#: A troca acontece SÓ aqui. Reescrever as strings no motor mexeria no que a verificação
+#: de conformidade do CCAE inspeciona, e essa é decisão do autor, não da apresentação.
+#: A ordem importa: as entradas mais longas vêm antes, senão 'CTC pH7' viraria
+#: 'CTC a pH 7,0 pH7'.
+_VOCABULARIO_DA_EVIDENCIA = (
+    ("CTC pH7", "CTC a pH 7,0"),
+    ("cmolc/dm3", "cmolc/dm³"),
+    ("mg/dm3", "mg/dm³"),
+    ("m%", "saturação por Al"),
+    ("(faixa b)", "(faixa b de CTC)"),
+    ("(faixa a)", "(faixa a de CTC)"),
+    ("(faixa c)", "(faixa c de CTC)"),
+    ("(faixa d)", "(faixa d de CTC)"),
+    ("grupo_1", "grupo 1 de exigência"),
+    ("grupo_2", "grupo 2 de exigência"),
+    ("grupo_3", "grupo 3 de exigência"),
+    ("grupo_4", "grupo 4 de exigência"),
+    ("argila classe", "classe de argila"),
+    ("classe media", "classe média"),
+    ("classe medio", "classe média"),
+    ("classe baixa", "classe baixa"),
+    ("muito_baixo", "muito baixo"),
+    ("muito_alto", "muito alto"),
+    ("(medio)", "(médio)"),
+    ("(media)", "(média)"),
+    ("MUITO_FORTE", "limitação muito forte"),
+    ("MODERADO", "limitação moderada"),
+    ("LIGEIRO", "limitação ligeira"),
+    ("FORTE", "limitação forte"),
+    ("NULO", "sem limitação"),
+)
+
+
 def humanizar_evidencia(texto: str) -> str:
-    """Ajusta a pontuação das evidências que o motor monta para leitura em documento.
+    """Traduz a evidência que o motor montou para a língua do laudo.
 
-    O motor interpola floats de Python, então a mesma frase sai com "pH 5.1 < 5,5": ponto
-    do repr e vírgula do limiar transcrito. Num laudo que vai anexado a projeto de crédito
-    isso lê como erro. A troca é só de separador decimal e de seta — nenhuma evidência é
-    reescrita, nenhum número muda.
+    O motor interpola floats de Python e identificadores da base, então a mesma frase sai
+    com "pH 5.2 < 5,5" (ponto do repr e vírgula do limiar transcrito) e com "grupo_2".
+    Num documento que o técnico assina, isso lê como erro e como jargão de sistema.
 
-    A correção de raiz seria o motor formatar os números ao montar a evidência; isso
-    mexeria em strings que a verificação de conformidade do CCAE inspeciona, e é decisão
-    do autor, não da camada de apresentação.
+    Só pontuação e vocabulário mudam: nenhum número é recalculado, nenhuma classe é
+    reclassificada, e a evidência continua dizendo exatamente o que o fator decidiu.
     """
-    return re.sub(r"(\d)\.(\d)", r"\1,\2", texto).replace("->", "→")
+    humanizado = re.sub(r"(\d)\.(\d)", r"\1,\2", texto).replace("->", "→")
+    for cru, legivel in _VOCABULARIO_DA_EVIDENCIA:
+        humanizado = humanizado.replace(cru, legivel)
+    return humanizado
 
 
 def indice_da_classe(classe: str) -> int:

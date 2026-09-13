@@ -16,6 +16,7 @@ Python (PLANO-FRONTEND §9.4, opção B).
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, Dict
 
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
@@ -71,18 +72,22 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
         "campos_fertilidade": formulario.CAMPOS_FERTILIDADE,
         "campos_subsuperficie": formulario.CAMPOS_SUBSUPERFICIE,
         "campos_contexto": formulario.CAMPOS_CONTEXTO,
+        "campos_responsavel": formulario.CAMPOS_RESPONSAVEL,
     }
 
 
 def _tela_de_dados(cultura_id: str, leitura=None, erro_do_motor: str = None,
-                   com_exemplo: bool = False):
+                   com_exemplo: str = ""):
     opcoes = _opcoes_do_formulario(cultura_id)
+    opcoes["cenarios"] = exemplo_de_formulario.CENARIOS
+    opcoes["cenario_ativo"] = com_exemplo
     leitura = leitura or formulario.LeituraFormulario()
     if com_exemplo and not leitura.valores:
         leitura.valores = exemplo_de_formulario.montar(
             cultura_id, opcoes["grupo"], opcoes["dados"],
             opcoes["manejos"], opcoes["variaveis"],
             dados_do_grupo(opcoes["grupo"]),
+            cenario=com_exemplo,
         )
     return render_template(
         "dados.html",
@@ -142,7 +147,7 @@ def dados():
         # Espécie florestal está mapeada para a aptidão e fora do escopo de recomendação
         # (docs/decisoes/0006): o formulário de recomendação não abre para ela.
         return redirect(url_for("siras.cultura"))
-    return _tela_de_dados(cultura_id, com_exemplo=bool(request.args.get("exemplo")))
+    return _tela_de_dados(cultura_id, com_exemplo=(request.args.get("exemplo") or "").strip())
 
 
 @bp.get("/analise/laudo")
@@ -215,4 +220,12 @@ def laudo():
         # preenchido e a mensagem do motor aparece inteira, sem tradução que a apague.
         return _tela_de_dados(cultura_id, leitura, erro_do_motor=str(erro)), 422
 
-    return render_template("laudo.html", laudo=apresentar_laudo(resultado, dados_comuns))
+    return render_template(
+        "laudo.html",
+        laudo=apresentar_laudo(resultado, dados_comuns),
+        # Metadado do documento, e não entrada de cálculo: a data de emissão é lida
+        # aqui, e não dentro do motor, porque gerar_laudo() é determinística — a mesma
+        # análise tem de produzir o mesmo laudo hoje e daqui a um mês.
+        emitido_em=datetime.now().strftime("%d/%m/%Y"),
+        responsavel=leitura.responsavel,
+    )

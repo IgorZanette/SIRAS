@@ -48,7 +48,11 @@
         passo.classList.remove("is-ativo");
         passo.classList.add("is-feito");
       });
-    }, ESPERA_MINIMA_MS);
+      var pronto = veu.querySelector(".calculando__pronto");
+      if (pronto) {
+        pronto.hidden = false;
+      }
+    }, ESPERA_MINIMA_MS - 450);
   }
 
   formulario.addEventListener("submit", function (evento) {

@@ -32,10 +32,18 @@
   {# Um laudo de demonstracao ja preenchido. Serve a quem quer conhecer o sistema sem
      transcrever dezessete campos, e ao roteiro do teste de usabilidade, onde essa
      transcricao consome o tempo da tarefa sem medir nada. #}
-  <a class="btn btn--contorno" style="margin-top:var(--e-4)"
-     href="{{ url_for('siras.dados', cultura_id=cultura_id, exemplo=1) }}">
-    {{ i.ico("edita", "ico ico--sm") }} Preencher com um exemplo
-  </a>
+  {# Três laudos de demonstração, e não um: cada um exercita um caminho diferente do
+     motor, e é isso que faz o exemplo valer mais que um formulário preenchido ao acaso. #}
+  <div class="cenarios-exemplo nao-imprime">
+    <span class="t-aux">Preencher com um exemplo:</span>
+    {% for cenario in cenarios %}
+    <a class="btn btn--contorno btn--pequeno{% if cenario_ativo == cenario.id %} is-ativo{% endif %}"
+       href="{{ url_for('siras.dados', cultura_id=cultura_id, exemplo=cenario.id) }}"
+       title="{{ cenario.resumo }}">
+      {{ i.ico("edita", "ico ico--sm") }} {{ cenario.nome }}
+    </a>
+    {% endfor %}
+  </div>
 
   {% if leitura.faltando or leitura.invalidos %}
   <div style="margin-top:var(--e-5)">
@@ -166,6 +174,22 @@
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
                    leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
                    faixas.get(campo_id)) }}
+        {% endfor %}
+      </div>
+    </details>
+
+    {# Identificação do documento. Fica recolhida porque nada aqui entra no cálculo:
+       quem só quer ver a recomendação na tela não precisa se identificar. Quem vai
+       anexar o laudo a um projeto precisa, e aí ele já sai impresso para assinar. #}
+    <details class="painel bloco">
+      <summary class="bloco__cab" style="cursor:pointer">
+        {{ i.ico("laudo") }}
+        <h3>Responsável técnico e propriedade</h3>
+        <span class="t-aux">Opcional — sai impresso no laudo</span>
+      </summary>
+      <div class="grade">
+        {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_responsavel %}
+        {{ c.campo_texto(campo_id, rotulo, ajuda, leitura.valores.get(campo_id)) }}
         {% endfor %}
       </div>
     </details>

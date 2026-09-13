@@ -1,0 +1,64 @@
+{# Apresentação de primeira visita: três passos, dispensável, e que não volta.
+
+   Existe porque o SIRAS parte de uma premissa que o visitante não tem: que a cultura vem
+   antes da análise, e que o laudo carrega a tabela que gerou cada número. Sem isso, a
+   primeira tela parece só mais um formulário.
+
+   Três regras que a fazem ser ajuda e não obstáculo:
+   - some com Esc, com clique fora e com "Pular", além do botão de concluir;
+   - não bloqueia nada: quem ignorar e clicar em "Iniciar análise" segue o fluxo;
+   - guarda no navegador que já foi vista, e não reaparece.
+
+   Nasce escondida e só é revelada pelo JavaScript: sem ele, a página nunca a mostra,
+   em vez de mostrá-la sem meio de fechar. #}
+{% import "_macros/ico.html" as i %}
+
+<div class="guia" id="guia" hidden aria-hidden="true">
+  <div class="guia__fundo" data-guia-fechar></div>
+
+  <div class="guia__painel painel" role="dialog" aria-modal="true"
+       aria-labelledby="guia-titulo">
+    <div class="guia__pontos" aria-hidden="true">
+      <span data-guia-ponto class="is-ativo"></span>
+      <span data-guia-ponto></span>
+      <span data-guia-ponto></span>
+    </div>
+
+    <section class="guia__passo" data-guia-passo hidden>
+      <span class="guia__ico">{{ i.ico("broto", "ico ico--lg") }}</span>
+      <h2 class="guia__titulo" id="guia-titulo">A cultura vem antes da análise</h2>
+      <p class="guia__txt">
+        Ela define o critério de calagem, o grupo de exigência em fósforo e potássio e
+        quais informações de manejo o Manual pede. Por isso o SIRAS pergunta a cultura
+        primeiro, e não no fim.
+      </p>
+    </section>
+
+    <section class="guia__passo" data-guia-passo hidden>
+      <span class="guia__ico">{{ i.ico("regua", "ico ico--lg") }}</span>
+      <h2 class="guia__titulo">A interpretação aparece enquanto você digita</h2>
+      <p class="guia__txt">
+        O painel ao lado do formulário classifica cada atributo na hora. Digitar 110 em
+        vez de 11,0 no fósforo salta a classe imediatamente — o erro é percebido no campo
+        em que aconteceu, e não três telas adiante.
+      </p>
+    </section>
+
+    <section class="guia__passo" data-guia-passo hidden>
+      <span class="guia__ico">{{ i.ico("rastro", "ico ico--lg") }}</span>
+      <h2 class="guia__titulo">Cada número diz de onde veio</h2>
+      <p class="guia__txt">
+        O laudo traz a tabela do Manual que produziu cada dose, em seção própria. É o que
+        permite conferir o cálculo e o que dá ao documento utilidade em análise de
+        crédito rural.
+      </p>
+    </section>
+
+    <div class="guia__acoes">
+      <button class="btn btn--fantasma" type="button" data-guia-fechar>Pular</button>
+      <button class="btn btn--primario" type="button" data-guia-avancar>
+        Entendi {{ i.ico("avanca", "ico ico--sm") }}
+      </button>
+    </div>
+  </div>
+</div>

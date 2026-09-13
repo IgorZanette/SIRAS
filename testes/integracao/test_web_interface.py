@@ -632,12 +632,33 @@ def test_a_apresentacao_nasce_oculta(cliente):
     assert "data-guia-fechar" in html
 
 
-def test_a_apresentacao_marca_que_ja_foi_vista():
-    caminho = _ESTATICOS / "js" / "guia.js"
-    codigo = caminho.read_text(encoding="utf-8")
+def test_a_apresentacao_reaparece_a_cada_ciclo_de_visitas():
+    """O público do SIRAS não é de uso diário: quem abre o sistema em duas safras
+    diferentes volta sem lembrar que a cultura precede a análise, e uma guia que nunca
+    mais aparece deixa de ajudar exatamente quem mais precisa."""
+    codigo = (_ESTATICOS / "js" / "guia.js").read_text(encoding="utf-8")
 
-    assert "siras-guia-visto" in codigo
+    assert re.search(r"var CICLO = \d+", codigo)
+    assert "(entrada - 1) % CICLO === 0" in codigo
     assert "Escape" in codigo, "deveria fechar com Esc"
+
+
+def test_uma_entrada_e_uma_sessao_e_nao_um_carregamento():
+    """Recarregar a página cinco vezes seguidas não pode fazer a guia voltar: isso seria
+    contar impaciência como visita."""
+    codigo = (_ESTATICOS / "js" / "guia.js").read_text(encoding="utf-8")
+
+    assert "sessionStorage" in codigo
+    assert "siras-guia-visitas" in codigo
+
+
+def test_pular_significa_agora_nao_e_nao_nunca_mais():
+    """Numa guia periódica, fechar não pode marcar 'visto para sempre' — quem decide a
+    próxima aparição é o contador, que já avançou ao abrir a página."""
+    codigo = (_ESTATICOS / "js" / "guia.js").read_text(encoding="utf-8")
+
+    corpo_do_fechar = re.search(r"function fechar\(\) \{(.*?)\n  \}", codigo, re.S).group(1)
+    assert "setItem" not in corpo_do_fechar
 
 
 # --- microinterações -----------------------------------------------------------

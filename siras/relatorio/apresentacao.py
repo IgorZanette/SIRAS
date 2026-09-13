@@ -192,8 +192,13 @@ def _observacao_da_calagem(laudo: Laudo) -> str:
     dose_cfg = criterio.get("dose", {})
     camada = criterio.get("amostragem_cm")
     partes = []
+    # O PRNT informado precisa aparecer junto da dose: motor/calagem.py ja converteu
+    # (NC x 100 / PRNT), entao o numero exibido e do CORRETIVO REAL, nao de PRNT 100%.
+    # Rotular o cartao como "Calcario PRNT 100%" dizia o contrario e induzia o tecnico a
+    # converter de novo.
+    partes.append(f"Dose do corretivo com PRNT {formatar_enxuto(laudo.contexto.prnt)}%")
     if dose_cfg.get("ph_alvo"):
-        partes.append(f"Dose para elevar o pH a {formatar_numero(dose_cfg['ph_alvo'])}")
+        partes.append(f"para elevar o pH a {formatar_numero(dose_cfg['ph_alvo'])}")
     if camada:
         partes.append(f"camada de {camada[0]}–{camada[1]} cm")
     if criterio.get("modo_aplicacao") == "superficial":
@@ -238,7 +243,7 @@ def _veredito(laudo: Laudo) -> List[Dict[str, Any]]:
     """
     return [
         {
-            "nome": "Calcário PRNT 100%",
+            "nome": "Calcário",
             "valor": formatar_numero(laudo.calagem.nc_t_ha, 1),
             "unidade": "t/ha",
             "observacao": _observacao_da_calagem(laudo),
@@ -534,6 +539,54 @@ def apresentar_leitura(leitura: Dict[str, Any]) -> List[Dict[str, Any]]:
     return linhas
 
 
+_ROTULO_DE_PARCELAMENTO = {
+    "n": "Nitrogênio (N)",
+    "p": "Fósforo (P₂O₅)",
+    "k": "Potássio (K₂O)",
+}
+
+
+def _orientacoes(laudo: Laudo) -> List[Dict[str, Any]]:
+    """Como aplicar: parcelamento, observações e restrições, tudo transcrito.
+
+    Depois de "quanto", a pergunta seguinte do técnico é sempre "como" — e o Manual
+    responde, com parcelamento por nutriente e restrições por cultura. Essa informação já
+    estava na base e o laudo não a mostrava.
+    """
+    itens: List[Dict[str, Any]] = []
+    orientacoes = laudo.adubacao.orientacoes or {}
+
+    parcelamento = orientacoes.get("parcelamento") or {}
+    for nutriente in ("n", "p", "k"):
+        texto = parcelamento.get(nutriente)
+        if texto:
+            itens.append({
+                "titulo": f"Parcelamento — {_ROTULO_DE_PARCELAMENTO[nutriente]}",
+                "texto": texto,
+                "tipo": "parcelamento",
+            })
+
+    criterio = laudo.calagem.criterio or {}
+    for nota in criterio.get("notas", ()):
+        itens.append({"titulo": "Calagem", "texto": nota, "tipo": "calagem"})
+
+    if orientacoes.get("nota"):
+        itens.append({"titulo": "Nota da cultura", "texto": orientacoes["nota"], "tipo": "nota"})
+
+    for observacao in orientacoes.get("observacoes", ()):
+        itens.append({"titulo": "Observação", "texto": observacao, "tipo": "nota"})
+
+    for restricao in orientacoes.get("restricoes", ()):
+        if isinstance(restricao, dict):
+            nutriente = str(restricao.get("nutriente", "")).capitalize()
+            itens.append({
+                "titulo": f"Restrição — {nutriente}" if nutriente else "Restrição",
+                "texto": restricao.get("observacao") or "",
+                "tipo": "restricao",
+            })
+    return [item for item in itens if item["texto"]]
+
+
 def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
     """Monta o modelo de exibição do laudo. O template só itera sobre o que sai daqui."""
     return {
@@ -549,6 +602,7 @@ def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
         "teores": _teores(laudo),
         "aptidao": _aptidao(laudo),
         "trilha": _trilha(laudo),
+        "orientacoes": _orientacoes(laudo),
         "criterio_calagem": laudo.calagem.criterio,
     }
 

@@ -436,6 +436,11 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
    a acao. Esta responde: existe porque o usuario clicou em gerar, some quando o
    laudo chega, e o que ela anima e a sequencia real de modulos do motor.
    ====================================================================== */
+/* O atributo hidden vale por uma regra de baixa especificidade; qualquer display numa
+   classe a vence. Sem esta linha o veu nasce visivel e nunca some - foi o que fez a
+   tela de calculo aparecer ao entrar no formulario e ficar carregando para sempre. */
+.calculando[hidden] { display: none; }
+
 .calculando {
   position: fixed; inset: 0; z-index: 100;
   display: grid; place-items: center; padding: var(--e-5);
@@ -536,3 +541,99 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
   .calculando__pulso, .passo.is-ativo .passo__ico { animation: none !important; }
   .calculando__pulso { opacity: .3; }
 }
+
+/* =========================================================================
+   Modo claro
+   -------------------------------------------------------------------------
+   O sistema nasceu escuro, e o par. 14 do plano ja previa este alternador: tema
+   escuro e otimo em monitor e ruim sob sol direto, e parte do publico usa tablet
+   em campo. O laudo claro obriga a manter os dois conjuntos de cor funcionando,
+   entao o custo de oferecer o alternador e baixo.
+
+   Aqui so a escala de NEUTROS inverte. O verde de acao, os quatro sinais de
+   diagnostico e a escala divergente continuam os mesmos nos dois modos: sao o
+   vocabulario do sistema, e mudar de cor por modo desfaria o que a par. 2.2
+   construiu.
+   ====================================================================== */
+:root[data-tema="claro"] {
+  --n-950: #FFFFFF;
+  --n-900: #F4F8F5;   /* fundo da aplicacao    */
+  --n-880: #EAF0EC;   /* secao alternada       */
+  --n-850: #FFFFFF;   /* superficie de painel  */
+  --n-800: #FFFFFF;   /* campo                 */
+  --n-750: #F7FAF8;
+  --n-700: #CFDCD4;
+  --n-600: #A9BCB1;
+  --n-500: #7A8C82;
+  --n-400: #5C6F64;   /* texto terciario       */
+  --n-300: #405146;   /* texto secundario      */
+  --n-200: #26362D;
+  --n-100: #0D1410;   /* texto primario        */
+  --n-050: #0A0F0C;
+  /* --n-000 e a cor de MAIOR contraste com o fundo, nao "branco": no modo claro o
+     marcador da regua precisa ser escuro para continuar visivel. */
+  --n-000: #0D1410;
+
+  --borda: 1px solid rgba(13, 20, 16, .12);
+  --borda-forte: 1px solid rgba(13, 20, 16, .2);
+  --luz-topo: inset 0 1px 0 rgba(255, 255, 255, .9);
+  --sombra-doc: 0 18px 48px -24px rgba(13, 20, 16, .28);
+}
+
+/* Superficies e literais que o tema escreveu em rgba clara e que precisam inverter. */
+:root[data-tema="claro"] .painel { background: var(--n-000, #fff); background: #FFFFFF;
+                                   box-shadow: 0 1px 2px rgba(13,20,16,.05); }
+:root[data-tema="claro"] .barra { background: rgba(244, 248, 245, .86); }
+:root[data-tema="claro"] .malha {
+  background-image:
+    linear-gradient(rgba(13,20,16,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13,20,16,.035) 1px, transparent 1px);
+}
+:root[data-tema="claro"] .btn--contorno { background: rgba(13,20,16,.03);
+                                          border-color: rgba(13,20,16,.16); }
+:root[data-tema="claro"] .campo__caixa { border-color: rgba(13,20,16,.16); }
+:root[data-tema="claro"] .campo__unidade { background: rgba(13,20,16,.05);
+                                           border-left-color: rgba(13,20,16,.1); }
+:root[data-tema="claro"] .campo__caixa select { color-scheme: light; }
+:root[data-tema="claro"] .campo__caixa select option { background: #FFFFFF; color: #0D1410; }
+:root[data-tema="claro"] .etapa { background: #FFFFFF; }
+:root[data-tema="claro"] .grupo { background: #FFFFFF; }
+:root[data-tema="claro"] .grupo:hover { background: #F7FAF8; }
+:root[data-tema="claro"] .cultura { background: #FFFFFF; }
+:root[data-tema="claro"] .calculando { background: rgba(244, 248, 245, .95); }
+:root[data-tema="claro"] .passo { background: rgba(13,20,16,.03); }
+:root[data-tema="claro"] .passo__ico { background: rgba(13,20,16,.05); }
+:root[data-tema="claro"] .tabela-dados thead th { background: #FFFFFF; }
+:root[data-tema="claro"] .tabela-dados tbody tr:hover { background: rgba(140,226,63,.1); }
+/* Verde vivo nao e cor de texto sobre branco (par. 2.3): abaixo de 3:1 de contraste. */
+:root[data-tema="claro"] .pilar__ir,
+:root[data-tema="claro"] .logo__nome { color: var(--v-700); }
+:root[data-tema="claro"] .selo { color: var(--v-700); }
+:root[data-tema="claro"] .hero__halo { opacity: .5; }
+/* O documento ja e claro: no modo claro ele perde a sombra de cartao flutuante e
+   ganha uma borda, senao vira uma mancha branca sobre outra. */
+:root[data-tema="claro"] .doc { box-shadow: none; border: 1px solid #D8E2DB; }
+
+/* Botao alternador */
+.tema { width: 40px; height: 40px; padding: 0; flex: none; }
+.tema__claro { display: none; }
+:root[data-tema="claro"] .tema__escuro { display: none; }
+:root[data-tema="claro"] .tema__claro { display: block; }
+
+/* Como aplicar: o que fazer com a dose depois de conhece-la. */
+.sec__intro { color: #405146; max-width: 66ch; margin-bottom: var(--e-4); }
+.orientacoes { display: grid; gap: var(--e-3); }
+.orientacao { padding: var(--e-4); border-radius: var(--r-doc);
+              background: #FAFCFA; border: 1px solid #E3EAE5;
+              border-left: 3px solid #CFDCD4; }
+.orientacao--parcelamento { border-left-color: var(--v-600); }
+.orientacao--calagem { border-left-color: var(--sig-ambar); }
+.orientacao--restricao { border-left-color: var(--sig-coral); }
+.orientacao__titulo { font-size: var(--fs-2xs); font-weight: 800; color: #405146;
+                      margin-bottom: 3px; }
+.orientacao__txt { font-size: var(--fs-sm); color: #0D1410; line-height: 1.55; }
+
+/* A fonte acompanha a regra sem competir com ela. */
+.trilha__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs);
+                 color: #7A8C82; }
+.doc__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs); color: #7A8C82; }

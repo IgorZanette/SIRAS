@@ -226,3 +226,91 @@ def test_a_animacao_para_com_prefers_reduced_motion():
         r"@media \(prefers-reduced-motion: reduce\) \{[^}]*\.calculando[^}]*animation: none",
         _TELAS_CSS, re.S,
     )
+
+
+# --- exemplo por cultura ------------------------------------------------------
+
+def test_o_exemplo_preenche_a_analise_inteira(cliente):
+    """Transcrever dezessete campos antes de ver qualquer resultado é barreira alta para
+    quem só quer conhecer o sistema, e no roteiro do SUS consome o tempo da tarefa sem
+    medir nada."""
+    html = cliente.get("/analise/dados?cultura_id=soja&exemplo=1").get_data(as_text=True)
+
+    for campo in ("ph_agua", "indice_smp", "argila", "mo", "p", "k", "ctc_ph7",
+                  "al", "ca", "mg", "v_percent", "prnt"):
+        assert re.search(rf'id="{campo}"[^>]*value="[^"]+"', html), f"{campo} vazio no exemplo"
+
+
+def test_a_produtividade_do_exemplo_vem_da_base(cliente):
+    """Inventar uma produtividade típica por cultura seria afirmação agronômica. A soja
+    usa o rendimento de referência que graos_adubacao_pk.json transcreve."""
+    from siras.conhecimento.carregador import carregar_dados_graos
+
+    esperado = (carregar_dados_graos()["adubacao_pk"]["manutencao_por_cultura"]
+                ["culturas"]["soja"]["rendimento_referencia_t_ha"])
+    html = cliente.get("/analise/dados?cultura_id=soja&exemplo=1").get_data(as_text=True)
+
+    valor = re.search(r'id="expectativa_rendimento"[^>]*value="([^"]*)"', html).group(1)
+    assert valor.replace(",", ".") == f"{float(esperado):g}"
+
+
+def test_sem_exemplo_o_formulario_abre_vazio(cliente):
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert not re.search(r'id="ph_agua"[^>]*value="[^"]+"', html)
+
+
+# --- modo claro ---------------------------------------------------------------
+
+def test_existe_alternador_de_tema(cliente):
+    """§14 do plano: tema escuro é ruim sob sol direto, e parte do público usa tablet em
+    campo."""
+    html = cliente.get("/").get_data(as_text=True)
+
+    assert 'id="alternar-tema"' in html
+    assert 'aria-pressed' in html
+
+
+def test_o_tema_salvo_e_aplicado_antes_da_primeira_pintura(cliente):
+    """Num script no fim da página, quem escolheu o modo claro veria a tela escura piscar
+    antes de clarear."""
+    html = cliente.get("/").get_data(as_text=True)
+    cabeca = html[: html.index("</head>")]
+
+    assert "siras-tema" in cabeca
+
+
+def test_o_modo_claro_redefine_a_escala_de_neutros():
+    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-900:\s*#F4F8F5', _TELAS_CSS)
+    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-100:\s*#0D1410', _TELAS_CSS)
+
+
+def test_o_verde_e_os_sinais_nao_mudam_com_o_tema():
+    """São o vocabulário do sistema: a escala divergente da §2.2 significa o mesmo nos
+    dois modos, e trocá-la por modo desfaria o que ela construiu."""
+    bloco = re.search(r':root\[data-tema="claro"\]\s*\{(.*?)\}', _TELAS_CSS, re.S).group(1)
+
+    for token in ("--v-400", "--sig-coral", "--sig-ambar", "--sig-aqua", "--d-a"):
+        assert token not in bloco, f"{token} foi redefinido no modo claro"
+
+
+# --- como aplicar -------------------------------------------------------------
+
+def test_o_laudo_diz_como_aplicar(cliente):
+    """Depois de "quanto", a pergunta seguinte do técnico é "como" — e o parcelamento já
+    estava transcrito na base sem aparecer no laudo."""
+    dados_do_formulario = dict(_ANALISE_COMPLETA,
+                               cultura_id="tomate", criterio_id="olericolas_convencional")
+
+    html = cliente.post("/analise/laudo", data=dados_do_formulario).get_data(as_text=True)
+
+    assert "Como aplicar" in html
+    assert "Parcelamento" in html
+    assert "Integralmente no plantio" in html
+
+
+def test_a_fonte_acompanha_a_regra_sem_competir_com_ela(cliente):
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+
+    assert 'class="trilha__fonte"' in html
+    assert re.search(r"\.trilha__fonte\s*\{[^}]*font-size:\s*var\(--fs-3xs\)", _TELAS_CSS)

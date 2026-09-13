@@ -37,6 +37,7 @@ from siras.relatorio.apresentacao import (
     apresentar_leitura,
     nome_de_exibicao,
 )
+from siras.web import exemplo as exemplo_de_formulario
 from siras.web import formulario
 
 bp = Blueprint("siras", __name__)
@@ -72,12 +73,21 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
     }
 
 
-def _tela_de_dados(cultura_id: str, leitura=None, erro_do_motor: str = None):
+def _tela_de_dados(cultura_id: str, leitura=None, erro_do_motor: str = None,
+                   com_exemplo: bool = False):
+    opcoes = _opcoes_do_formulario(cultura_id)
+    leitura = leitura or formulario.LeituraFormulario()
+    if com_exemplo and not leitura.valores:
+        leitura.valores = exemplo_de_formulario.montar(
+            cultura_id, opcoes["grupo"], opcoes["dados"],
+            opcoes["manejos"], opcoes["variaveis"],
+            dados_do_grupo(opcoes["grupo"]),
+        )
     return render_template(
         "dados.html",
-        leitura=leitura or formulario.LeituraFormulario(),
+        leitura=leitura,
         erro_do_motor=erro_do_motor,
-        **_opcoes_do_formulario(cultura_id),
+        **opcoes,
     )
 
 
@@ -131,7 +141,7 @@ def dados():
         # Espécie florestal está mapeada para a aptidão e fora do escopo de recomendação
         # (docs/decisoes/0006): o formulário de recomendação não abre para ela.
         return redirect(url_for("siras.cultura"))
-    return _tela_de_dados(cultura_id)
+    return _tela_de_dados(cultura_id, com_exemplo=bool(request.args.get("exemplo")))
 
 
 @bp.get("/analise/laudo")

@@ -1,35 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SIRAS">
-  <!-- ==========================================================================
-       FAVICON DO SIRAS
-       --------------------------------------------------------------------------
-       O símbolo completo — bloco, três horizontes e broto — tem detalhe demais para
-       16 px: a essa escala as ondas viram uma mancha. Aqui o desenho é reduzido ao
-       gesto que identifica a marca.
+<title>SIRAS</title>
+<desc>
+  FAVICON DO SIRAS
+  =================================================================
+  Mesma ideia do símbolo, reduzida ao que sobrevive a 16 px: o broto some e ficam duas
+  barras, grossas e com forte contraste entre si. A 16 px o olho lê "nível" ou "camada",
+  que é exatamente a leitura certa, e o par verde vivo sobre fundo escuro se destaca
+  entre favicons majoritariamente claros.
+</desc>
+<defs>
+  <linearGradient id="fav-fundo" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#18231D"/>
+    <stop offset="1" stop-color="#050807"/>
+  </linearGradient>
+</defs>
 
-       A ideia: a onda de horizonte do SIRAS é uma curva em S dupla. Desenhada
-       sozinha, grossa e centrada, ela lê ao mesmo tempo como o ESTRATO DE SOLO da
-       marca e como o S de SIRAS. Duas leituras, uma forma — e três elementos no
-       total, que é o que sobrevive a 16 px: fundo, S e folha.
+<rect width="64" height="64" rx="15" fill="url(#fav-fundo)"/>
 
-       Fundo escuro (--n-900) em vez de verde: na aba do navegador o ícone disputa
-       com favicons majoritariamente claros, e o bloco escuro com o traço verde vivo
-       se destaca em vez de sumir.
-       ====================================================================== */ -->
-  <defs>
-    <linearGradient id="f-s" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0" stop-color="#6CC72A"/>
-      <stop offset="1" stop-color="#B6F56A"/>
-    </linearGradient>
-  </defs>
-
-  <rect width="64" height="64" rx="16" fill="#0A0F0C"/>
-
-  <!-- A curva em S: horizonte do perfil e inicial da marca. -->
-  <path d="M14 40c7.5-8 14.5 4 22-4s7.5-14 0-14"
-        fill="none" stroke="url(#f-s)" stroke-width="7" stroke-linecap="round"/>
-  <!-- Segundo estrato, mais fraco: dá profundidade sem competir com o S. -->
-  <path d="M14 51c7.5-6 14.5 3 22-3"
-        fill="none" stroke="#8CE23F" stroke-width="4" stroke-linecap="round" opacity=".38"/>
-  <!-- A folha fecha o traço superior e é o que diz "isto é solo, não tipografia". -->
-  <path d="M40.5 15c3.6-4.4 8.8-5 12-4.2-1 4.8-5.2 7.6-10.6 7.4z" fill="#D9FBAE"/>
+<g stroke-linecap="round" fill="none">
+  <path d="M26 26h20" stroke="#D9FBAE" stroke-width="9"/>
+  <path d="M18 43h28" stroke="#8CE23F" stroke-width="9"/>
+</g>
+<path d="M18 57h12" stroke="#4E9A2A" stroke-width="7" stroke-linecap="round" opacity=".55" fill="none"/>
 </svg>

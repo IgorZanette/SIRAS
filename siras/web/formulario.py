@@ -224,6 +224,12 @@ _ROTULO_DE_VALOR = {
     "leguminosa": "Leguminosa",
     "graminea": "Gramínea",
     "consorciacao_ou_pousio": "Consorciação ou pousio",
+    "instalacao": "Instalação",
+    "formacao": "Formação",
+    "plantio": "No plantio",
+    "6_meses": "6 meses após o plantio",
+    "14_meses": "14 meses após o plantio",
+    "18_meses": "18 meses após o plantio",
 }
 
 _UNIDADE_DE_VARIAVEL = {
@@ -259,6 +265,68 @@ def _rotular(identificador: str) -> str:
     return identificador.replace("_", " ").capitalize()
 
 
+def _coletar(no: Any, chave: str, achados: List[str]) -> List[str]:
+    """Todos os valores de uma lista `chave`, em qualquer profundidade da cultura."""
+    if isinstance(no, dict):
+        valores = no.get(chave)
+        if isinstance(valores, list):
+            for valor in valores:
+                if isinstance(valor, str) and valor not in achados:
+                    achados.append(valor)
+        for filho in no.values():
+            _coletar(filho, chave, achados)
+    elif isinstance(no, list):
+        for item in no:
+            _coletar(item, chave, achados)
+    return achados
+
+
+def _fases_declaradas(entrada: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Fases que a cultura publica em `n.fases` / `pk.fases` (caso do aspargo).
+
+    O Manual nomeia as fases de N e as de P/K de formas diferentes para a mesma cultura —
+    'instalacao' num eixo e 'pre_plantio' no outro —, e não é o mesmo eixo de três fases.
+    Por isso saem dois campos, exatamente como calcular_adubacao_hortalicas() os recebe:
+    unir as duas listas num campo só ofereceria combinações que a tabela não tem.
+    """
+    campos = []
+    for bloco, campo, rotulo in (
+        ("n", "fase_n", "Fase — nitrogênio"),
+        ("pk", "fase_pk", "Fase — fósforo e potássio"),
+    ):
+        fases = (entrada.get(bloco) or {}).get("fases")
+        if isinstance(fases, list) and fases:
+            campos.append({
+                "campo": campo,
+                "rotulo": rotulo,
+                "tipo": "escolha",
+                "obrigatorio": True,
+                "valores": [(fase, _rotular(fase)) for fase in fases],
+                "ajuda": "O Manual publica tabela própria para cada fase desta cultura",
+            })
+    return campos
+
+
+def _momentos_declarados(entrada: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Momentos de aplicação dentro da fase (caso da erva-mate, campo `momentos`).
+
+    Os momentos vivem dentro de cada fase, então a lista oferecida é a união das fases.
+    Quem recusa uma combinação inválida é a função de adubação, que já nomeia o que
+    falta — a tela não repete essa regra.
+    """
+    momentos = _coletar(entrada, "momentos", [])
+    if not momentos:
+        return []
+    return [{
+        "campo": "momento",
+        "rotulo": _rotular("momento"),
+        "tipo": "escolha",
+        "obrigatorio": False,
+        "valores": [(momento, _rotular(momento)) for momento in momentos],
+        "ajuda": _AJUDA_DE_VARIAVEL.get("momento"),
+    }]
+
+
 def variaveis_condicionais(
     cultura_id: str, grupo: str, entradas: Optional[Dict[str, Any]]
 ) -> List[Dict[str, Any]]:
@@ -290,6 +358,9 @@ def variaveis_condicionais(
                 "valores": [(fase, _rotular(fase)) for fase in fases],
                 "ajuda": _AJUDA_DE_VARIAVEL.get("fase"),
             })
+
+    variaveis.extend(_fases_declaradas(entrada))
+    variaveis.extend(_momentos_declarados(entrada))
 
     declaradas = entrada.get("variavel_adicional") or []
     if isinstance(declaradas, dict):

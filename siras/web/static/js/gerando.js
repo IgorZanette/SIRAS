@@ -16,7 +16,7 @@
 (function () {
   "use strict";
 
-  var ESPERA_MINIMA_MS = 2400;
+  var ESPERA_MINIMA_MS = 3500;
 
   var formulario = document.querySelector("[data-formulario-analise]");
   var veu = document.getElementById("calculando");

@@ -63,6 +63,10 @@ class RecomendacaoAdubacao:
     #: classe o teor está, sem reclassificar nada na camada de apresentação.
     faixas_p: List[Dict[str, Any]] = field(default_factory=list)
     faixas_k: List[Dict[str, Any]] = field(default_factory=list)
+    #: Orientações práticas que o Manual publica junto da dose: parcelamento de N, P e K,
+    #: observações e restrições da cultura. São transcrição, e são o que o técnico procura
+    #: depois de saber quanto aplicar — a pergunta seguinte a "quanto" é sempre "como".
+    orientacoes: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

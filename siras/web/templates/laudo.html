@@ -32,10 +32,10 @@
       <div>
         <h2>Laudo de recomendação</h2>
         <div class="doc__meta">
-          Critério de calagem: {{ laudo.criterio_calagem.id }} ·
-          {{ laudo.criterio_calagem.fonte }} ·
-          PRNT {{ laudo.prnt }}% ·
-          incorporação a {{ laudo.profundidade }} cm
+          {{ laudo.contexto.sistema_manejo|replace("_", " ")|capitalize }} ·
+          PRNT {{ laudo.prnt }}% · incorporação a {{ laudo.profundidade }} cm
+          <span class="doc__fonte">critério {{ laudo.criterio_calagem.id }},
+            {{ laudo.criterio_calagem.fonte }}</span>
         </div>
       </div>
       <div class="doc__cultura">
@@ -79,7 +79,26 @@
         </div>
       </section>
 
-      {# ——— 3. Aptidão edáfica ——— #}
+      {# ——— 3. Como aplicar ——— #}
+      {% if laudo.orientacoes %}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("broto") }}<h3>Como aplicar</h3></div>
+        <p class="sec__intro">
+          Depois de saber quanto, a pergunta seguinte é como. O que segue é o que o
+          Manual publica junto das doses para esta cultura.
+        </p>
+        <div class="orientacoes">
+          {% for item in laudo.orientacoes %}
+          <div class="orientacao orientacao--{{ item.tipo }}">
+            <div class="orientacao__titulo">{{ item.titulo }}</div>
+            <p class="orientacao__txt">{{ item.texto }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      {# ——— 4. Aptidão edáfica ——— #}
       <section class="sec">
         <div class="sec__cab">{{ i.ico("aptidao") }}<h3>Aptidão edáfica</h3></div>
         {# Os dois cenários lado a lado, e não um deles em prosa: pelo CCAE §7, a
@@ -195,8 +214,10 @@
         <div class="trilha__item">
           <span class="trilha__ref">{{ i.ico("rastro", "ico ico--sm") }}{{ passo.rotulo }}</span>
           <span class="trilha__txt">
-            {{ passo.regra }}<br>
-            <span style="color:#5C6F64">{{ passo.fonte }}</span>
+            {{ passo.regra }}
+            {# A fonte fica discreta de proposito: ela precisa estar disponivel para
+               conferencia, e nao competir com a regra pela atencao de quem le. #}
+            <span class="trilha__fonte">{{ passo.fonte }}</span>
           </span>
         </div>
         {% endfor %}

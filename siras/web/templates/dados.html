@@ -23,6 +23,14 @@
     <a href="{{ url_for('siras.cultura') }}" style="color:var(--v-400)">Trocar de cultura</a>.
   </p>
 
+  {# Um laudo de demonstracao ja preenchido. Serve a quem quer conhecer o sistema sem
+     transcrever dezessete campos, e ao roteiro do teste de usabilidade, onde essa
+     transcricao consome o tempo da tarefa sem medir nada. #}
+  <a class="btn btn--contorno" style="margin-top:var(--e-4)"
+     href="{{ url_for('siras.dados', cultura_id=cultura_id, exemplo=1) }}">
+    {{ i.ico("edita", "ico ico--sm") }} Preencher com um exemplo
+  </a>
+
   {% if leitura.faltando or leitura.invalidos %}
   <div style="margin-top:var(--e-5)">
     {% set _corpo %}

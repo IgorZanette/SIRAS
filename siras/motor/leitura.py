@@ -22,6 +22,7 @@ from typing import Any, Dict, Optional
 
 from siras.conhecimento.carregador import carregar_dados_comum
 from siras.dominio.analise import AnaliseSolo, Contexto, derivar_saturacao_al
+from siras.dominio.nomes import buscar_por_nome
 from siras.motor.adubacao import (
     classificar_faixa,
     classificar_fosforo,
@@ -72,7 +73,10 @@ def _grupos_de_exigencia(
     entradas = dados_do_grupo(grupo)
     if entradas is None:
         return None
-    declarado = entradas.get(cultura_id, {}).get("grupo_exigencia")
+    # buscar_por_nome, e não entradas.get(): mapa_culturas.json escreve 'erva-mate' com
+    # hífen e erva_mate_adubacao.json escreve 'erva_mate' com underscore, e a busca
+    # literal fazia o painel não classificar P e K justamente na erva-mate.
+    declarado = (buscar_por_nome(entradas, cultura_id) or {}).get("grupo_exigencia")
     if not declarado:
         return None
     return {"p": f"grupo_{declarado['p']}", "k": f"grupo_{declarado['k']}"}

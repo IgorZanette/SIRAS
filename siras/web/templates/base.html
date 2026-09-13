@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0A0F0C">
+
+{# Aplica o tema salvo ANTES da primeira pintura. Num <script defer> no fim da pagina, o
+   usuario de modo claro veria a tela escura piscar antes de clarear. #}
+<script>
+  (function () {
+    try {
+      var salvo = window.localStorage.getItem("siras-tema");
+      if (salvo) { document.documentElement.dataset.tema = salvo; }
+    } catch (erro) {}
+  })();
+</script>
 <title>{% block titulo %}SIRAS — interpretação e recomendação agronômica de solo{% endblock %}</title>
 
 {# Fontes auto-hospedadas. O sistema roda offline em localhost: nenhuma requisição a
@@ -52,6 +63,11 @@
       <a class="btn btn--fantasma barra__secundario" href="{{ url_for('siras.tabelas') }}">
         Tabelas do Manual
       </a>
+      <button class="btn btn--contorno tema" type="button" id="alternar-tema"
+              aria-pressed="false" aria-label="Mudar para o modo claro">
+        <span class="tema__escuro">{{ i.ico("broto", "ico ico--sm") }}</span>
+        <span class="tema__claro">{{ i.ico("perfil", "ico ico--sm") }}</span>
+      </button>
       {% block barra_nav %}{% endblock %}
     </nav>
   </div>
@@ -59,6 +75,7 @@
 
 {% block conteudo %}{% endblock %}
 
+<script src="{{ url_for('static', filename='js/tema.js') }}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

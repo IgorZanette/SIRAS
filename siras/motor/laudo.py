@@ -231,6 +231,9 @@ def _adubacao_graos(
         motivo_n=resultado_n["motivo"],
         faixas_p=resultado_pk["faixas_p"],
         faixas_k=resultado_pk["faixas_k"],
+        orientacoes=_orientacoes(
+            dados_graos["adubacao_n"]["culturas"].get(cultura_id, {})
+        ),
     )
 
 
@@ -326,6 +329,18 @@ def _faixas_da_classe(
     return faixas["classe_p"], faixas["classe_k"]
 
 
+def _orientacoes(entrada: Dict[str, Any]) -> Dict[str, Any]:
+    """Parcelamento, observações e restrições que a cultura publica, sem reescrever nada."""
+    if not entrada:
+        return {}
+    colhidas = {
+        chave: entrada[chave]
+        for chave in ("parcelamento", "observacoes", "restricoes", "nota", "motivo")
+        if entrada.get(chave)
+    }
+    return colhidas
+
+
 def _montar_adubacao(
     analise: AnaliseSolo,
     cultura_id: str,
@@ -335,6 +350,7 @@ def _montar_adubacao(
     dados_grupo: Dict[str, Any],
     resultado: Dict[str, Any],
 ) -> RecomendacaoAdubacao:
+    entrada = buscar_por_nome(dados_grupo["adubacao"].get("culturas", {}), cultura_id) or {}
     faixas_p, faixas_k = _faixas_da_classe(analise, cultura_id, dados_grupo, dados, resultado)
 
     trace.registrar(
@@ -370,6 +386,7 @@ def _montar_adubacao(
         motivo_n=resultado.get("motivo_n"),
         faixas_p=faixas_p,
         faixas_k=faixas_k,
+        orientacoes=_orientacoes(entrada),
     )
 
 

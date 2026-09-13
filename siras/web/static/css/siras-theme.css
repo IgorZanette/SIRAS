@@ -191,11 +191,23 @@ svg { display: block; }
 .painel--marca { border-radius: var(--r-marca); }
 
 /* Documento claro dentro do app escuro. */
+/* O laudo e um DOCUMENTO, e nao uma tela: e branco e limpo nos dois temas.
+   O tema veste a aplicacao em volta dele -- cabecalho, botoes, fundo -- mas o
+   papel nao muda de cor porque alguem preferiu a interface escura.
+
+   Por isso nenhuma cor daqui para dentro sai de token de tema. A versao anterior
+   usava background:var(--n-000), e no tema claro --n-000 vale #0D1410: ali ele
+   significa "maior contraste com o fundo", que e o que o marcador da regua
+   precisa. O documento herdava esse quase-preto e saia preto sobre preto.
+
+   --n-000 e redeclarado localmente pelo mesmo motivo: dentro de um papel branco,
+   maior contraste e escuro -- nos dois temas. */
 .doc {
-  background: var(--n-000);
+  background: #FFFFFF;
   color: #0D1410;
   border-radius: var(--r-doc);
   box-shadow: var(--sombra-doc);
+  --n-000: #0D1410;
   --n-100: #0D1410; --n-300: #405146; --n-400: #5C6F64; --n-500: #7A8C82;
 }
 

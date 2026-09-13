@@ -821,3 +821,33 @@ def test_a_dica_de_unidade_so_aparece_para_erro_de_medida(cliente):
 
     assert "Confira a unidade" not in escolha
     assert "Confira a unidade" in medida
+
+
+# --- o laudo é documento, e não tela -------------------------------------------
+
+_TEMA_CSS = (_ESTATICOS / "css" / "siras-theme.css").read_text(encoding="utf-8")
+
+
+def test_o_documento_do_laudo_e_branco_em_qualquer_tema():
+    """O defeito: .doc usava background var(--n-000), e no tema claro esse token vale
+    #0D1410 — ali ele significa 'maior contraste com o fundo', que é o que o marcador da
+    régua precisa. O laudo herdava o quase-preto e saía preto sobre preto."""
+    regra = re.search(r"\n\.doc \{(.*?)\}", _TEMA_CSS, re.S).group(1)
+
+    assert re.search(r"background:\s*#FFFFFF", regra, re.I)
+    assert "var(--n-000)" not in regra, "o papel voltou a depender de token de tema"
+
+
+def test_o_documento_redeclara_o_contraste_maximo_como_escuro():
+    """Dentro de um papel branco, 'maior contraste' é escuro — nos dois temas. Sem isto
+    o marcador da régua sai branco sobre branco no tema escuro."""
+    regra = re.search(r"\n\.doc \{(.*?)\}", _TEMA_CSS, re.S).group(1)
+
+    assert re.search(r"--n-000:\s*#0D1410", regra, re.I)
+
+
+def test_nenhum_tema_repinta_o_fundo_do_documento():
+    for folha in (_TEMA_CSS, _TELAS_CSS):
+        for regra in re.findall(r':root\[data-tema="claro"\][^{]*\{[^}]*\}', folha):
+            if ".doc" in regra.split("{")[0]:
+                assert "background" not in regra, f"tema claro repinta o documento: {regra[:80]}"

@@ -40,7 +40,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/siras-telas.css') }}">
 {% block estilos %}{% endblock %}
 </head>
-<body class="malha">
+<body class="malha {% block corpo_classe %}{% endblock %}">
 
 {% import "_macros/ico.html" as i %}
 

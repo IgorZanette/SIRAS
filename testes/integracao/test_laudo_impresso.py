@@ -137,3 +137,108 @@ def test_a_cromia_do_diagnostico_sobrevive_a_impressao():
 
 def test_a_malha_de_fundo_nao_vai_para_o_papel():
     assert re.search(r"body\.malha\s*\{[^}]*background-image:\s*none", _bloco_de_impressao())
+
+
+# --- versão impressa: A4 em preto e branco -------------------------------------
+
+_IMPRESSA_CSS = (
+    Path(__file__).parent.parent.parent / "siras" / "web" / "static" / "css"
+    / "siras-impressa.css"
+).read_text(encoding="utf-8")
+
+_ANALISE = {
+    "cultura_id": "soja", "criterio_id": "graos_convencional", "cultivo": "1",
+    "profundidade_incorporacao_cm": "20", "prnt": "100", "expectativa_rendimento": "3",
+    "ph_agua": "5.1", "indice_smp": "5.4", "argila": "38", "mo": "2.8",
+    "p": "11", "k": "96", "ctc_ph7": "9.4",
+    "al": "1.2", "ca": "2.4", "mg": "1.1", "v_percent": "42",
+}
+
+
+@pytest.fixture
+def cliente():
+    return criar_app({"TESTING": True}).test_client()
+
+
+def test_o_laudo_em_cores_oferece_a_versao_impressa(cliente):
+    html = cliente.post("/analise/laudo", data=_ANALISE).get_data(as_text=True)
+
+    assert "Versão impressa" in html
+    assert "Salvar em PDF" in html, "a versão trabalhada continua sendo oferecida"
+
+
+def test_a_versao_impressa_troca_a_folha_de_estilo(cliente):
+    resposta = cliente.post("/analise/laudo", data=dict(_ANALISE, formato="impressa"))
+    html = resposta.get_data(as_text=True)
+
+    assert resposta.status_code == 200
+    assert "siras-impressa.css" in html
+    assert re.search(r'<body class="[^"]*\bimpressa\b', html)
+
+
+def test_a_versao_em_cores_nao_carrega_a_folha_de_impressao(cliente):
+    html = cliente.post("/analise/laudo", data=_ANALISE).get_data(as_text=True)
+
+    assert "siras-impressa.css" not in html
+    assert not re.search(r'<body class="[^"]*\bimpressa\b', html)
+
+
+def test_o_formato_nao_gruda_na_analise(cliente):
+    """'formato' diz como ESTA tela foi pedida. Se viajasse nos campos ocultos, voltar à
+    edição a partir da versão impressa devolveria sempre a versão impressa."""
+    html = cliente.post(
+        "/analise/laudo", data=dict(_ANALISE, formato="impressa")
+    ).get_data(as_text=True)
+
+    assert 'name="formato" value="impressa"' not in html
+
+
+def test_a_versao_impressa_mantem_o_conteudo_do_laudo(cliente):
+    """Outra folha de estilo, e não outro documento: o que muda é a cor, não o que o
+    laudo diz."""
+    cores = cliente.post("/analise/laudo", data=_ANALISE).get_data(as_text=True)
+    papel = cliente.post(
+        "/analise/laudo", data=dict(_ANALISE, formato="impressa")
+    ).get_data(as_text=True)
+
+    for marca in ("Laudo de recomendação", "Responsável Técnico", "Assinatura e carimbo"):
+        assert marca in cores and marca in papel
+
+
+def test_a_rampa_de_classes_vira_cinza_monotono():
+    """Num documento sem cor a única coisa que distingue cinco faixas é a luminosidade, e
+    ela precisa crescer na mesma direção que a grandeza — senão a régua mente."""
+    tons = []
+    for classe in ("f-mb", "f-b", "f-m", "f-a", "f-ma"):
+        achado = re.search(rf"\.{classe}\s*\{{\s*--cor:\s*#([0-9A-F]{{6}})", _IMPRESSA_CSS)
+        assert achado, f"a folha impressa não redefine .{classe}"
+        valor = achado.group(1)
+        assert valor[0:2] == valor[2:4] == valor[4:6], f".{classe} não é cinza: #{valor}"
+        tons.append(int(valor[0:2], 16))
+
+    assert tons == sorted(tons, reverse=True), f"a rampa não é monótona: {tons}"
+
+
+def test_a_faixa_vigente_e_marcada_por_forma_e_nao_por_tom():
+    """Tom sobrevive mal a uma fotocópia; contorno sobrevive."""
+    assert re.search(r"\.regua__faixa\.is-atual[^}]*outline:\s*[\d.]+px solid #000000",
+                     _IMPRESSA_CSS, re.S)
+
+
+def test_a_folha_impressa_declara_a4():
+    assert re.search(r"@page \{ size: A4 portrait", _IMPRESSA_CSS)
+
+
+def test_os_cinzas_sobrevivem_a_caixa_de_impressao():
+    """Sem print-color-adjust o navegador descarta os fundos e as cinco faixas viram
+    cinco retângulos brancos."""
+    bloco = re.search(r"@media print \{(.*)\}", _IMPRESSA_CSS, re.S).group(1)
+
+    assert "print-color-adjust: exact" in bloco
+    assert ".regua__faixa" in bloco
+
+
+def test_a_aplicacao_nao_acompanha_o_documento_impresso(cliente):
+    """Na versão impressa o laudo não está dentro de uma ferramenta: ele é a entrega."""
+    assert re.search(r"body\.impressa \.barra,", _IMPRESSA_CSS)
+    assert re.search(r"body\.impressa \.etapas,", _IMPRESSA_CSS)

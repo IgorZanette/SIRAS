@@ -5,6 +5,15 @@
 
 {% block titulo %}Laudo de recomendação — {{ laudo.cultura }} — SIRAS{% endblock %}
 
+{# A versão impressa é a MESMA peça de informação numa folha preto e branco: mesmo
+   template, mesma view model, outra folha de estilo. Duplicar o documento em dois
+   templates faria as duas versões divergirem no primeiro ajuste que alguém esquecesse
+   de repetir do outro lado. #}
+{% block corpo_classe %}{% if impressa %}impressa{% endif %}{% endblock %}
+{% block estilos %}{% if impressa %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/siras-impressa.css') }}">
+{% endif %}{% endblock %}
+
 {% block conteudo %}
 <main class="env" style="padding-bottom:var(--e-10)">
 
@@ -20,6 +29,27 @@
     <i style="width:100%"></i>
   </div>
 
+  {% if impressa %}
+  {# Nesta tela só existem duas ações: imprimir, e voltar ao documento em cores. A
+     conferência da paginação acontece antes de gastar papel, e é para isso que a versão
+     impressa é uma TELA e não um atalho direto para a caixa de impressão. #}
+  <div class="acoes-impressa nao-imprime">
+    <form method="post" action="{{ url_for('siras.laudo') }}" class="acao-voltar">
+      {% for campo, valor in valores_enviados.items() %}
+      <input type="hidden" name="{{ campo }}" value="{{ valor }}">
+      {% endfor %}
+      <button class="btn btn--contorno" type="submit">
+        {{ i.ico("volta", "ico ico--sm") }} Voltar ao laudo
+      </button>
+    </form>
+    <button class="btn btn--primario" type="button" onclick="window.print()">
+      {{ i.ico("imprime", "ico ico--sm") }} Imprimir
+    </button>
+    <span class="acoes-impressa__nota">
+      Folha A4, preto e branco — legível em impressora monocromática e em fotocópia
+    </span>
+  </div>
+  {% else %}
   <div class="rodape-acoes nao-imprime" style="margin:0 0 var(--e-5)">
     {# Um formulário, e não um link: assim os valores que produziram este laudo voltam
        com o clique, e corrigir um número não custa a redigitação dos outros vinte.
@@ -33,12 +63,24 @@
         {{ i.ico("edita", "ico ico--sm") }} Editar a análise
       </button>
     </form>
+    {# Mesma travessia do "Editar": os valores que produziram este laudo seguem no
+       próprio pedido, agora marcados com o formato. #}
+    <form method="post" action="{{ url_for('siras.laudo') }}" class="acao-voltar">
+      {% for campo, valor in valores_enviados.items() %}
+      <input type="hidden" name="{{ campo }}" value="{{ valor }}">
+      {% endfor %}
+      <input type="hidden" name="formato" value="impressa">
+      <button class="btn btn--contorno" type="submit">
+        {{ i.ico("laudo", "ico ico--sm") }} Versão impressa
+      </button>
+    </form>
     {# window.print() em vez de gerar PDF no servidor: é a rota mais confiável, mantém o
        texto selecionável e não acrescenta dependência ao projeto. #}
     <button class="btn btn--primario" type="button" onclick="window.print()">
       {{ i.ico("imprime", "ico ico--sm") }} Salvar em PDF
     </button>
   </div>
+  {% endif %}
 
   {# A troca de tema marca a fronteira entre operar e entregar: daqui para baixo é
      documento, não ferramenta. #}

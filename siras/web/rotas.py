@@ -248,8 +248,15 @@ def laudo():
     return render_template(
         "laudo.html",
         laudo=apresentar_laudo(resultado, dados_comuns),
-        # O que foi enviado volta com o botão "Editar a análise", em campos ocultos.
-        valores_enviados=request.form,
+        # Mesma peça de informação, outra folha de estilo: a versão impressa é A4 em
+        # preto e branco, e o "Salvar em PDF" continua entregando o documento em cores.
+        impressa=(request.form.get("formato") == "impressa"),
+        # O que foi enviado volta com os botões que reabrem esta análise, em campos
+        # ocultos. 'formato' fica de fora: ele diz como ESTA tela foi pedida, e viajar
+        # junto faria a versão impressa grudar no laudo em cores e na volta à edição.
+        valores_enviados={
+            campo: valor for campo, valor in request.form.items() if campo != "formato"
+        },
         # Metadado do documento, e não entrada de cálculo: a data de emissão é lida
         # aqui, e não dentro do motor, porque gerar_laudo() é determinística — a mesma
         # análise tem de produzir o mesmo laudo hoje e daqui a um mês.

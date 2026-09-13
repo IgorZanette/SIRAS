@@ -46,6 +46,11 @@ from siras.conhecimento.carregador import carregar_dados_comum
 from siras.dominio.escopo import TOTAL_DE_CULTURAS_NO_ESCOPO, no_escopo_de_recomendacao
 from siras.web import criar_app
 
+#: Bancada ampla: roda antes de entregar, e não a cada alteração. Concentra a maior
+#: parte do tempo da suíte e repete em volume o que os testes por grupo cobrem por
+#: amostra — ver conftest.py na raiz. Para rodá-la: python -m pytest --completa
+pytestmark = pytest.mark.lenta
+
 _DADOS = carregar_dados_comum()
 _CULTURAS = sorted(
     cultura for cultura in _DADOS["mapa_culturas"]["culturas"]

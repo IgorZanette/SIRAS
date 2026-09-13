@@ -57,8 +57,10 @@
         <div class="t-rotulo">Cultura</div>
         <strong>{{ laudo.cultura }}</strong>
         <div class="doc__data">Emitido em {{ emitido_em }}</div>
-        {% if responsavel and responsavel.propriedade %}
-        <div class="doc__data">{{ responsavel.propriedade }}</div>
+        {% if responsavel and (responsavel.propriedade or responsavel.talhao) %}
+        <div class="doc__data">
+          {{ responsavel.propriedade }}{% if responsavel.propriedade and responsavel.talhao %} · {% endif %}{% if responsavel.talhao %}Talhão {{ responsavel.talhao }}{% endif %}
+        </div>
         {% endif %}
       </div>
     </header>
@@ -252,12 +254,17 @@
          oficial é do profissional habilitado, e o documento precisa carregar de quem
          ela é. Se o responsável se identificou, o nome já sai impresso e resta assinar
          e carimbar. #}
+      {# "Responsável Técnico" é o PAPEL, e está sempre impresso: é ele que diz de quem o
+         documento exige assinatura, e some-lo quando o nome foi preenchido trocava a
+         função pela pessoa. O nome, o registro e o documento são a identificação, e
+         entram só quando informados — quem não os preencheu recebe a linha em branco
+         para preencher à mão. #}
       <section class="assinatura">
         <div class="assinatura__linha"></div>
-        <div class="assinatura__nome">
-          {{ responsavel.responsavel_nome if responsavel and responsavel.responsavel_nome
-             else "Responsável técnico" }}
-        </div>
+        {% if responsavel and responsavel.responsavel_nome %}
+        <div class="assinatura__nome">{{ responsavel.responsavel_nome }}</div>
+        {% endif %}
+        <div class="assinatura__papel">Responsável Técnico</div>
         {% if responsavel and (responsavel.responsavel_registro or responsavel.responsavel_documento) %}
         <div class="assinatura__dados">
           {{ responsavel.responsavel_registro }}{% if responsavel.responsavel_registro and responsavel.responsavel_documento %} · {% endif %}{{ responsavel.responsavel_documento }}

@@ -605,7 +605,7 @@ def test_sem_responsavel_a_linha_de_assinatura_continua(cliente):
     continua assinável à mão."""
     html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
 
-    assert "Responsável técnico" in html
+    assert "Responsável Técnico" in html
     assert 'class="assinatura__linha"' in html
 
 
@@ -851,3 +851,65 @@ def test_nenhum_tema_repinta_o_fundo_do_documento():
         for regra in re.findall(r':root\[data-tema="claro"\][^{]*\{[^}]*\}', folha):
             if ".doc" in regra.split("{")[0]:
                 assert "background" not in regra, f"tema claro repinta o documento: {regra[:80]}"
+
+
+# --- responsável técnico e identificação da área -------------------------------
+
+def _laudo(cliente, **extra):
+    return cliente.post(
+        "/analise/laudo", data=dict(_ANALISE_COMPLETA, **extra)
+    ).get_data(as_text=True)
+
+
+def test_o_papel_do_responsavel_e_sempre_impresso(cliente):
+    """'Responsável Técnico' é o papel que o documento exige, e não um substituto do nome
+    quando ele falta: some-lo assim que alguém se identifica trocava a função pela
+    pessoa."""
+    sem_nome = _laudo(cliente)
+    com_nome = _laudo(cliente, responsavel_nome="Igor Zanette")
+
+    assert "Responsável Técnico" in sem_nome
+    assert "Responsável Técnico" in com_nome
+    assert "Igor Zanette" in com_nome
+
+
+def test_os_dados_do_responsavel_so_saem_quando_informados(cliente):
+    html = _laudo(cliente)
+
+    assert "assinatura__nome" not in html
+    assert "assinatura__dados" not in html
+    assert "Assinatura e carimbo" in html
+
+
+def test_registro_e_documento_saem_juntos_quando_preenchidos(cliente):
+    html = _laudo(cliente, responsavel_nome="Igor Zanette",
+                  responsavel_registro="CREA-RS 123456", responsavel_documento="000.000.000-00")
+
+    assert "CREA-RS 123456" in html and "000.000.000-00" in html
+
+
+def test_propriedade_e_talhao_sao_campos_separados(cliente):
+    """Eram um campo só, 'Propriedade ou talhão'. São dois níveis da mesma identificação,
+    e é o talhão que passa a repetir quando a análise cobre mais de uma área."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'id="propriedade"' in tela
+    assert 'id="talhao"' in tela
+    assert "Propriedade ou talhão" not in tela
+
+
+def test_a_area_identificada_sai_no_cabecalho_do_laudo(cliente):
+    html = _laudo(cliente, propriedade="Fazenda Santa Rita", talhao="3B")
+
+    assert "Fazenda Santa Rita" in html
+    assert "Talhão 3B" in html
+
+
+def test_os_campos_dispensaveis_dizem_que_sao_opcionais(cliente):
+    """Num bloco em que todo campo é dispensável, o rótulo sozinho não informa isso — o
+    asterisco marca o obrigatório, não o contrário."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    for campo in ("responsavel_nome", "responsavel_documento", "propriedade", "talhao"):
+        bloco = re.search(rf'<input type="text" id="{campo}"[^>]*>', tela).group(0)
+        assert "placeholder=" in bloco and "Opcional" in bloco, f"{campo} não diz ser opcional"

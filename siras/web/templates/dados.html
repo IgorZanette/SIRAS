@@ -196,7 +196,8 @@
       </summary>
       <div class="grade">
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_responsavel %}
-        {{ c.campo_texto(campo_id, rotulo, ajuda, leitura.valores.get(campo_id)) }}
+        {{ c.campo_texto(campo_id, rotulo, ajuda, leitura.valores.get(campo_id),
+                         placeholder=exemplo) }}
         {% endfor %}
       </div>
     </details>

@@ -86,14 +86,22 @@ FAIXA_DO_CAMPO = {
 #: gerar_laudo() continua sendo função pura de análise, cultura e contexto.
 #:
 #: Tudo opcional: quem só quer ver a recomendação na tela não precisa se identificar.
+#: O último elemento da tupla é o PLACEHOLDER do campo, e não um exemplo a copiar: aqui
+#: ele diz que preencher é opcional. Num bloco em que todo campo é dispensável, o rótulo
+#: sozinho não informa isso, e o asterisco marca o obrigatório — não o contrário.
 CAMPOS_RESPONSAVEL: Tuple[Tuple[Any, ...], ...] = (
     ("responsavel_nome", "Nome do responsável técnico", None,
-     "Sai impresso no laudo, acima da linha de assinatura", False, "", ""),
+     "Sai impresso no laudo, acima da linha de assinatura", False, "", "Opcional"),
     ("responsavel_registro", "Registro profissional", None,
-     "CREA, CRT ou outro conselho, com a UF", False, "", ""),
-    ("responsavel_documento", "CPF ou CNPJ", None, None, False, "", ""),
-    ("propriedade", "Propriedade ou talhão", None,
-     "Identifica a área a que este laudo se refere", False, "", ""),
+     "CREA, CRT ou outro conselho, com a UF", False, "", "Opcional — ex.: CREA-RS 123456"),
+    ("responsavel_documento", "CPF ou CNPJ", None, None, False, "", "Opcional"),
+    ("propriedade", "Propriedade", None,
+     "Nome da fazenda ou do estabelecimento", False, "", "Opcional"),
+    # Talhão tem campo próprio, e não dividindo um com a propriedade: são dois níveis
+    # diferentes da mesma identificação, e é o talhão que passa a repetir quando a
+    # análise cobre mais de uma área.
+    ("talhao", "Talhão", None,
+     "A área amostrada dentro da propriedade", False, "", "Opcional"),
 )
 
 _TODOS_OS_CAMPOS = CAMPOS_ACIDEZ + CAMPOS_FERTILIDADE + CAMPOS_SUBSUPERFICIE + CAMPOS_CONTEXTO

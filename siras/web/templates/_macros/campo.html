@@ -53,11 +53,11 @@
 
 {# Campo de texto livre. Existe separado do numérico porque não tem unidade, não tem
    passo e não tem faixa: é identificação, não medida. #}
-{% macro campo_texto(id, rotulo, ajuda=None, valor=None) %}
+{% macro campo_texto(id, rotulo, ajuda=None, valor=None, placeholder=None) %}
   <label class="campo{% if valor %} campo--preenchido{% endif %}" for="{{ id }}">
     <span class="campo__label">{{ rotulo }}</span>
     <span class="campo__caixa">
-      <input type="text" id="{{ id }}" name="{{ id }}" autocomplete="off"{% if valor %} value="{{ valor }}"{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}>
+      <input type="text" id="{{ id }}" name="{{ id }}" autocomplete="off"{% if valor %} value="{{ valor }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}>
     </span>
     {% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}
   </label>

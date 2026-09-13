@@ -30,7 +30,7 @@ tolerância de arredondamento.
 - Cobrir todas as classes de interpretação (muito baixo a muito alto), diferentes CTCs e texturas, e
   os casos especiais: plantio direto consolidado, baixo poder tampão (SMP > 6,3), frutíferas por
   fase, erva-mate e tabaco por tipo.
-- Formato em `testes/casos/casos_recomendacao.json` e `casos_aptidao.json`.
+- Formato em `testes/casos/casos_recomendacao.json` e, para a aptidão, `entradas_aptidao.json` + `gabarito_aptidao.csv`.
 
 Cada caso registra `origem_referencia` — quem calculou, quando, e se foi conferido com o orientador.
 É esse campo que separa "eu testei" de "eu validei".

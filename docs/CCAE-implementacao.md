@@ -154,7 +154,8 @@ Converter **todas** as tabelas das Seções 6 (F2, F3) para esse formato ao mont
         [[30.0,"MODERADO"],[50.0,"FORTE"],[null,"MUITO_FORTE"]]
     },
     "sem_ph_referencia": {
-      "_fonte": "Manual RS/SC 2016, Tab. 5.6 e 5.7",
+      "_fonte": "Manual RS/SC 2016, Tab. 5.4 (p. 78), 5.6 (p. 83) e 5.7; excecao Ca/Mg com limites minimos: Tab. 5.6, nota (2) (a Tab. 5.4, nota (6), a redige com igualdade)",
+      "tipo": "nc_maior_que_zero",
       "v_minimo": 40.0,
       "excecao_ca_minimo": 4.0,
       "excecao_mg_minimo": 1.0,
@@ -359,7 +360,7 @@ Testes obrigatórios adicionais:
 - **Integridade do catálogo:** todo `grupo_p` e `grupo_k` confere com as Tabelas 6.2 e 6.7.
 - **Cobertura:** `coverage.py` sobre `motor/aptidao.py`, meta 100% de ramos.
 
-> **Nota de adaptação:** a implementação real usa `testes/casos/casos_aptidao.json` (mesmo formato dos demais conjuntos de casos do SIRAS, ver `testes/casos/casos_recomendacao.json`) em vez de um CSV próprio, lido por `testes/unidade/test_casos_aptidao.py`. O `referencia` de cada caso continua sendo preenchido exclusivamente pelo autor, sem consultar o código (CLAUDE.md, regra absoluta de dados agronômicos) — o arquivo já existe como esqueleto (`testes/casos/casos_aptidao.json`) com um caso de exemplo a remover.
+> **Nota de adaptação:** a implementação real usa `testes/casos/entradas_aptidao.json` (só entradas) e `testes/casos/gabarito_aptidao.csv` (só respostas), lidos por `testes/unidade/test_conformidade_aptidao.py`. As respostas são geradas exclusivamente pelo autor, sem consultar o código (CLAUDE.md, regra absoluta de dados agronômicos). O esqueleto anterior, `testes/casos/casos_aptidao.json`, e seu runner foram removidos em 13/09/2026.
 
 ---
 
@@ -379,4 +380,4 @@ Testes obrigatórios adicionais:
 
 As etapas 1 a 3 acontecem **antes** de qualquer linha de código. É a ordem que sustenta a alegação de não-circularidade.
 
-> **Nota de adaptação:** etapa 1 (A-10) foi resolvida sem necessidade de conferência do impresso — ver a nota na Seção 3 acima e o Apêndice A do CCAE-v1.0.md. Etapas 4-6 foram adaptadas à arquitetura existente conforme as notas desta seção e `docs/decisoes/0005`. Etapa 5 (`gabarito_conformidade.csv`) permanece pendente e é do autor, não do Claude Code — `testes/casos/casos_aptidao.json` está pronto para recebê-la.
+> **Nota de adaptação:** etapa 1 (A-10) foi resolvida sem necessidade de conferência do impresso — ver a nota na Seção 3 acima e o Apêndice A do CCAE-v1.0.md. Etapas 4-6 foram adaptadas à arquitetura existente conforme as notas desta seção e `docs/decisoes/0005`. Etapa 5 foi cumprida pelo autor em `testes/casos/gabarito_aptidao.csv`.

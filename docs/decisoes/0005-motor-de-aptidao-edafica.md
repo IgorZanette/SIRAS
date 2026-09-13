@@ -191,3 +191,48 @@ meio de uma tarefa já em andamento. Registrado aqui para o autor decidir a conv
   `cultura_id` entre arquivos (pendente de decisão do autor) mais culturas genuinamente
   sem adubação transcrita. Até essa decisão, `INDETERMINADA` nesses casos é o
   comportamento correto (falha fechada, CCAE P5), não um defeito do motor de aptidão.
+
+## Adendo — 13/09/2026: operador do F1 na base e grupo de exigência pelo Anexo 2
+
+Dois débitos técnicos do `docs/ROADMAP.md` alcançam decisões desta ADR. O texto acima é o
+registro da época e não foi reescrito; o que mudou está aqui.
+
+**Operador de F1, ramo (b), em `criterios_aptidao.json` (débito 1, alcança D5.1).** O limiar
+`40.0` já estava na base, mas a comparação `>=` estava em `motor/aptidao.py` — a assimetria que
+deixou a divergência B-6 passar sem que nenhum teste a visse (CCAE v1.2, Apêndice B). Agora
+`F1_acidez.sem_ph_referencia.tipo` declara a derivação: `nc_maior_que_zero`, a da v1.2, em que há
+limitação se e somente se a necessidade de calcário é maior que zero. A derivação da v1.1
+(`v_menor_que`) continua aceita pelo motor apenas para que a equivalência entre as versões seja
+medida: `testes/unidade/test_equivalencia_ccae_v11_v12.py` roda os 84 casos nos dois cenários sob
+as duas e obtém saídas idênticas. A fórmula de NC duplicada entre `motor/aptidao.py` e
+`motor/calagem.py` é comparada em `testes/unidade/test_nc_ramo_b.py`, como o §7.1(b) exige.
+
+**Grupo de exigência pelo catálogo do Anexo 2 (débito 3, alcança D5.2 e D5.7).** A camada 2 de
+D5.7 mudou de fonte: `grupo_exigencia()` deixou de ler as listas `culturas` de
+`interpretacao_p.json` e `interpretacao_k.json`, que eram parciais, e passou a ler
+`dados/comum/catalogo_anexo2.json`, as 141 culturas do Anexo 2. A comparação deixou de ser por
+string exata e passou a ser pela forma normalizada do nome (`siras/dominio/nomes.py`), o que
+tornou desnecessária a tradução de grafias feita por `_grafias_do_catalogo()`, removida. A
+camada 1 — grupo transcrito nos arquivos de adubação por grupo — não mudou.
+
+Medido sobre os dados de hoje:
+
+- nenhuma cultura que as listas resolviam mudou de grupo;
+  `testes/unidade/test_grupo_exigencia_catalogo.py` reconstrói a regra anterior a partir das
+  listas, que continuam em `dados/`, e compara;
+- das 114 culturas de `ph_referencia.json`, as que têm grupo de P e K resolvido passaram de 77
+  para 102. As 12 restantes são agregados sem entrada própria no Anexo 2 (gramíneas, leguminosas
+  e consorciações forrageiras de estação fria e quente), as duas variantes de arroz irrigado, e
+  quatro culturas cujo nome não encontra correspondência no catálogo nem em
+  `aliases_culturas.json` (aveia, crisântemo, ervilha forrageira e hortelã);
+- das 21 culturas de grãos do mapa, só o arroz de sequeiro depende do fallback de grãos, por não
+  constar do Anexo 2, e continua no grupo 2.
+
+A contagem de 62/115 citada em Consequências é a da época desta ADR; a reconstrução da regra
+anterior sobre os dados de hoje dá 77, porque culturas foram transcritas desde então.
+
+A pendência de grafia canônica de `cultura_id` descrita em D5.7 continua aberta. A comparação
+normalizada contorna acento, hífen e sublinhado, mas não resolve sinônimos, que seguem em
+`aliases_culturas.json`.
+
+**Atualização de 13/09/2026, depois do adendo.** `testes/casos/casos_aptidao.json` e seu runner foram removidos a pedido do autor: o conjunto oficial de aptidão é `entradas_aptidao.json` + `gabarito_aptidao.csv`, agora com 92 casos (8 conferidos à mão pelo autor nesta data), e é sobre eles que a equivalência v1.1/v1.2 roda. A exequibilidade de D5.4 passou a ler a NC antes do arredondamento (CCAE v1.3, §7.2, decisão A do autor): `motor/calagem.py` devolve `nc_bruta_t_ha` junto do resultado, fora da saída do Trace, porque a trilha exibe a saída e a NC de decisão não é exibida.

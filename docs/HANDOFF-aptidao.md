@@ -26,11 +26,12 @@ A consequência prática: o CCAE foi **escrito e aprovado pelo orientador antes*
 
 | Arquivo | Papel |
 |---|---|
+| `docs/CCAE-v1.3.md` | Rascunho da v1.3, aguardando aprovação: exequibilidade pela `NC` antes do arredondamento, procedência da exceção Ca/Mg, estratos da §9.2 |
 | `docs/CCAE-v1.2.md` | **Especificação normativa vigente** (tag `criterios-v1.2`). Fatores F1–F7, graus, composição, cenários |
 | `docs/CCAE-v1.1.md` | Versão sob a qual o conjunto de conformidade foi executado. A v1.2 não altera a função de mapeamento — só a derivação da regra de F1 no ramo (b) |
 | `docs/CCAE-implementacao.md` | Estruturas JSON, contrato do motor, convenções de intervalo |
-| `testes/casos/entradas_aptidao.json` | 84 casos, **só entradas** |
-| `testes/casos/gabarito_aptidao.csv` | 84 linhas, **só respostas** |
+| `testes/casos/entradas_aptidao.json` | 92 casos, **só entradas** |
+| `testes/casos/gabarito_aptidao.csv` | 92 linhas, **só respostas** |
 | `testes/unidade/test_conformidade_aptidao.py` | Runner |
 | `validar_anexo1.py` | Validação contra o Anexo 1 do Manual (oráculo externo) |
 
@@ -168,13 +169,13 @@ O gabarito foi construído com **essa configuração exata**. `REBAIXAMENTO_POR_
 
 ## 9. Conjunto de casos
 
-84 casos, 100% gabaritados. 80 entram na métrica de conformidade; 4 são de rejeição de entrada e ficam fora por definição.
+92 casos, 100% gabaritados. 88 entram na métrica de conformidade; 4 são de rejeição de entrada e ficam fora por definição.
 
 | Bloco | N | Cobre |
 |---|---|---|
 | `anexo1_manual` | 12 | Glebas do Anexo 1; classes de P e K publicadas pelo Manual |
-| `fator_determinante` | 21 | 3 por fator, F1 a F7 |
-| `fronteira` | 17 | Limiares exatos e ±0,1 |
+| `fator_determinante` | 26 | 3 por fator, F1 a F7 |
+| `fronteira` | 20 | Limiares exatos e ±0,1 |
 | `calibracao` | 14 | 20 culturas distintas |
 | `cenario_potencial` | 10 | 5 pares ATUAL/POTENCIAL |
 | `ramo_b_sem_ph_referencia` | 6 | Culturas sem pH de referência |

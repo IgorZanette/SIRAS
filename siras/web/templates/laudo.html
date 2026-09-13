@@ -212,7 +212,11 @@
         <h4 class="t-rotulo" style="margin-top:var(--e-5);color:#5C6F64">{{ modulo }}</h4>
         {% for passo in passos %}
         <div class="trilha__item">
-          <span class="trilha__ref">{{ i.ico("rastro", "ico ico--sm") }}{{ passo.rotulo }}</span>
+          <span class="trilha__ref">
+            {{ i.ico("rastro", "ico ico--sm") }}
+            <span>{{ passo.rotulo }}{% if passo.vezes > 1 %}<span class="trilha__vezes"
+              title="regra aplicada nos dois cenários de aptidão">{{ passo.vezes }}×</span>{% endif %}</span>
+          </span>
           <span class="trilha__txt">
             {{ passo.regra }}
             {# A fonte fica discreta de proposito: ela precisa estar disponivel para

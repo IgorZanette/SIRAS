@@ -29,6 +29,10 @@ from siras.dominio.nomes import buscar_por_nome
 
 #: Laudo de laboratório de demonstração. Valores de entrada, plausíveis para um solo do
 #: planalto do RS sob cultivo. Não são do Manual e não valem como referência agronômica.
+#:
+#: A camada de subsuperfície fica de fora de propósito: só um critério de calagem a lê
+#: (plantio direto consolidado com restrições), e preenchê-la sempre sugeriria que toda
+#: análise precisa de duas amostragens.
 ANALISE_DE_DEMONSTRACAO: Dict[str, str] = {
     "ph_agua": "5,2",
     "indice_smp": "5,6",
@@ -36,7 +40,7 @@ ANALISE_DE_DEMONSTRACAO: Dict[str, str] = {
     "ca": "2,8",
     "mg": "1,2",
     "v_percent": "46",
-    "saturacao_al": "",
+    "saturacao_al": "14",
     "argila": "38",
     "mo": "3,1",
     "p": "9,4",

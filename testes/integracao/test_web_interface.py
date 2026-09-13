@@ -314,3 +314,73 @@ def test_a_fonte_acompanha_a_regra_sem_competir_com_ela(cliente):
 
     assert 'class="trilha__fonte"' in html
     assert re.search(r"\.trilha__fonte\s*\{[^}]*font-size:\s*var\(--fs-3xs\)", _TELAS_CSS)
+
+
+# --- trilha enxuta ------------------------------------------------------------
+
+def test_a_trilha_nao_repete_a_mesma_fonte(cliente):
+    """A aptidão roda duas vezes, uma por cenário, e a calagem é recalculada dentro do
+    POTENCIAL para testar a exequibilidade. Os passos repetidos citam a MESMA fonte:
+    listá-los duas vezes não acrescenta rastreabilidade e consumia duas páginas do laudo
+    impresso."""
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+
+    trilha = html[html.index("De onde vem cada número"):]
+    assert trilha.count("F1_acidez") == 0, "identificador cru na tela"
+    assert trilha.count("composicao_aptidao") == 0, "identificador cru na tela"
+    assert "Composição da classe" in trilha
+    # Os sete fatores aparecem uma vez cada, e não duas.
+    assert trilha.count('class="trilha__item"') == 12
+
+
+def test_a_repeticao_continua_registrada(cliente):
+    """Deduplicar não pode virar apagar: a regra foi mesmo aplicada duas vezes."""
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+
+    assert 'class="trilha__vezes"' in html
+    assert "2×" in html
+
+
+def test_a_etiqueta_da_trilha_nao_invade_a_coluna_do_texto():
+    """128px não cabiam 'graos_convencional', e inline-flex sem min-width não encolhe: a
+    etiqueta se sobrepunha ao texto no PDF."""
+    regra = re.search(r"\.trilha__ref \{(.*?)\}", _TELAS_CSS, re.S).group(1)
+
+    assert "min-width: 0" in regra
+    assert "overflow-wrap: anywhere" in regra
+
+
+# --- contraste no modo claro --------------------------------------------------
+
+def test_a_assinatura_nao_some_no_modo_claro():
+    """O nome usa degradê do branco ao verde: sobre fundo claro ficava invisível."""
+    assert re.search(
+        r':root\[data-tema="claro"\] \.logo__nome \{[^}]*#0D1410', _TELAS_CSS
+    )
+
+
+def test_o_verde_vivo_nao_e_texto_sobre_claro():
+    """§2.3 do plano: --v-400 sobre branco fica em torno de 2,2:1 e reprova no contraste
+    mínimo. Onde era texto no modo escuro, o modo claro usa --v-700."""
+    assert re.search(
+        r':root\[data-tema="claro"\][^{]*\.hero h1 em[^{]*\{[^}]*var\(--v-700\)',
+        _TELAS_CSS, re.S,
+    )
+
+
+def test_a_regua_ganha_opacidade_no_modo_claro():
+    """A régua vive de opacidade: .3 sobre escuro é discreto, sobre branco é invisível."""
+    assert re.search(
+        r':root\[data-tema="claro"\] \.regua__faixa \{[^}]*opacity:\s*\.42', _TELAS_CSS
+    )
+
+
+# --- impressão ----------------------------------------------------------------
+
+def test_os_dois_cenarios_ficam_lado_a_lado_no_papel():
+    """A largura útil de uma A4 retrato cai dentro da consulta de 720px, então a regra de
+    tela estreita entrava no papel e virava a seta de lado, com o texto na vertical."""
+    bloco = _TELAS_CSS[_TELAS_CSS.rindex("@media print"):]
+
+    assert re.search(r"\.cenarios \{[^}]*grid-template-columns: 1fr auto 1fr", bloco)
+    assert re.search(r"\.cenarios__seta \{[^}]*transform: none", bloco)

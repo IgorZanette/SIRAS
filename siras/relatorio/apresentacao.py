@@ -52,6 +52,8 @@ _SELO_POR_CLASSE_APTIDAO = {
     "INDETERMINADA": ("var(--n-500)", "info"),
 }
 _NOME_POR_FATOR = {
+    "composicao_aptidao": "Composição da classe",
+    "aptidao_indeterminada": "Aptidão indeterminada",
     "F1_acidez": "Acidez", "F2_fosforo": "Fósforo", "F3_potassio": "Potássio",
     "F4_ca_mg": "Cálcio e magnésio", "F5_ctc": "CTC a pH 7,0",
     "F6_mo": "Matéria orgânica", "F7_textura": "Textura",
@@ -384,17 +386,45 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
             return _NOME_POR_FATOR[regra]
         return regra.split(":")[0]
 
-    return [
-        {
+    # A aptidão roda duas vezes, uma por cenário, e a calagem é recalculada dentro do
+    # cenário POTENCIAL para testar a exequibilidade (CCAE §7.2). Os passos repetidos
+    # citam a MESMA fonte, então listá-los duas vezes não acrescenta rastreabilidade e
+    # dobrava o tamanho desta seção — eram duas páginas do laudo impresso.
+    #
+    # A repetição não some: a coluna 'vezes' registra quantas vezes a regra foi aplicada,
+    # e os dois cenários continuam visíveis na seção de aptidão.
+    itens: List[Dict[str, Any]] = []
+    vistos: Dict[tuple, Dict[str, Any]] = {}
+    for passo in laudo.trace:
+        chave = (passo.regra, passo.fonte)
+        if chave in vistos:
+            vistos[chave]["vezes"] += 1
+            continue
+        # Nos fatores de aptidão a regra É o identificador ('F1_acidez'), e repeti-lo ao
+        # lado do rótulo não diz nada a quem confere. A evidência que o fator registrou
+        # diz: o valor lido, o limiar e a classe que saiu.
+        evidencia = passo.saida.get("evidencia")
+        if passo.regra == "composicao_aptidao":
+            # Este passo não registra evidência: o que ele decidiu está na saída.
+            determinante = _NOME_POR_FATOR.get(
+                passo.saida.get("fator_determinante"), passo.saida.get("fator_determinante")
+            )
+            evidencia = (
+                f"classe {_ROTULO_POR_CLASSE_APTIDAO.get(passo.saida.get('classe'), '—')}"
+                f", determinada por {determinante}"
+            )
+        item = {
             "modulo": modulo(passo.regra),
             "rotulo": rotulo(passo.regra),
-            "regra": passo.regra,
+            "regra": humanizar_evidencia(evidencia) if evidencia else passo.regra,
             "fonte": passo.fonte,
             "entradas": passo.entradas,
             "saida": passo.saida,
+            "vezes": 1,
         }
-        for passo in laudo.trace
-    ]
+        vistos[chave] = item
+        itens.append(item)
+    return itens
 
 
 #: Classes das escalas de três e quatro faixas de interpretacao_geral.json (MO, CTC, Ca,

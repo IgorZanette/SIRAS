@@ -47,14 +47,24 @@
 .logo__simbolo { width: 40px; height: 40px; display: block; flex: none;
                  transition: transform var(--tr); }
 .logo:hover .logo__simbolo { transform: translateY(-2px); }
-.logo__assinatura { display: grid; gap: 1px; }
-/* O nome na tipografia do sistema: Sora 800, tracking fechado, caixa alta. A regua
-   colorida abaixo repete a escala diagnostica e amarra a marca ao componente que a
-   plataforma usa para interpretar. */
-.logo__nome { font-family: var(--ff-display); font-size: 1.3rem; font-weight: 800;
-              letter-spacing: .06em; line-height: 1; color: var(--n-000); }
+.logo__assinatura { display: grid; gap: 3px; }
+/* O nome em Sora 800 com tracking ABERTO e um degrade sutil do branco ao verde claro.
+   Caixa alta com letra fechada vira bloco; aberta, cada letra respira e a palavra lê
+   como marca, nao como titulo. A regua fina abaixo ecoa a faixa colorida da assinatura
+   oficial e amarra o nome ao componente que a plataforma usa para interpretar. */
+.logo__nome {
+  font-family: var(--ff-display); font-size: 1.42rem; font-weight: 800;
+  letter-spacing: .16em; line-height: 1; text-indent: .16em;
+  background: linear-gradient(100deg, var(--n-000) 30%, var(--v-300));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.logo__regua {
+  height: 2.5px; border-radius: 2px; margin: 1px 0 2px;
+  background: linear-gradient(90deg, var(--v-600), var(--v-400) 55%, var(--sig-ambar));
+}
 .logo__sub { font-size: 9.5px; font-weight: 600; color: var(--n-400);
-             letter-spacing: .01em; white-space: nowrap; line-height: 1.2; }
+             letter-spacing: .015em; white-space: nowrap; line-height: 1.2; }
 @media (max-width:860px){ .logo__sub { display: none; } }
 @media (max-width:640px){
   .logo__simbolo { width: 34px; height: 34px; }
@@ -317,11 +327,19 @@
                     background: #E3EAE5; overflow: hidden; }
 .limitante__barra i { display: block; height: 100%; background: var(--sig-laranja); }
 
-.trilha__item { display: grid; grid-template-columns: 128px minmax(0,1fr); gap: var(--e-4);
-                padding: var(--e-3) 0; border-bottom: 1px solid #EAF0EC; font-size: var(--fs-sm); }
+/* 128px nao cabiam "graos_convencional", e o inline-flex sem min-width:0 nao encolhe:
+   a etiqueta vazava por cima da coluna do texto e as duas se sobrepunham. */
+.trilha__item { display: grid; grid-template-columns: 168px minmax(0,1fr); gap: var(--e-4);
+                padding: var(--e-3) 0; border-bottom: 1px solid #EAF0EC;
+                font-size: var(--fs-sm); align-items: start; }
 @media (max-width:620px){ .trilha__item { grid-template-columns:1fr; gap:var(--e-1);} }
-.trilha__ref { display: inline-flex; align-items: center; gap: .4rem; font-weight: 800;
-               font-size: var(--fs-xs); color: var(--v-700); }
+.trilha__ref { display: flex; align-items: flex-start; gap: .4rem; min-width: 0;
+               font-weight: 800; font-size: var(--fs-xs); color: var(--v-700);
+               overflow-wrap: anywhere; line-height: 1.35; }
+.trilha__ref .ico { margin-top: 1px; }
+.trilha__vezes { display: inline-block; margin-left: .3rem; padding: 0 .35rem;
+                 border-radius: 999px; background: #EAF0EC; color: #5C6F64;
+                 font-size: 9px; font-weight: 700; }
 .trilha__txt { color: #405146; line-height: 1.55; }
 
 .doc__rodape { margin-top: var(--e-7); padding-top: var(--e-4); border-top: 1px solid #D8E2DB;
@@ -637,3 +655,79 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 .trilha__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs);
                  color: #7A8C82; }
 .doc__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs); color: #7A8C82; }
+
+/* =========================================================================
+   Modo claro: correcoes de contraste
+   -------------------------------------------------------------------------
+   O par. 2.3 do plano e explicito: --v-400 NAO e cor de texto sobre branco
+   (cerca de 2,2:1). Onde o verde vivo era texto no modo escuro, o modo claro usa
+   --v-700. E onde uma cor vivia de opacidade baixa sobre fundo escuro, ela
+   precisa de mais opacidade sobre branco para manter a mesma leitura.
+   ====================================================================== */
+
+/* A assinatura usa degrade do branco ao verde: em fundo claro sumia. */
+:root[data-tema="claro"] .logo__nome {
+  background: linear-gradient(100deg, #0D1410 30%, var(--v-700));
+  -webkit-background-clip: text; background-clip: text;
+}
+
+/* Verde vivo como texto sobre claro falha no contraste minimo. */
+:root[data-tema="claro"] .hero h1 em,
+:root[data-tema="claro"] .grupo__cab .ico,
+:root[data-tema="claro"] .bloco__cab .ico,
+:root[data-tema="claro"] .leitura__cab .ico,
+:root[data-tema="claro"] .campo__label b { color: var(--v-700); }
+
+/* Fundos de realce com 6 a 9% de verde somem sobre branco. */
+:root[data-tema="claro"] .pilar__ico { background: rgba(78,154,42,.12);
+                                       border-color: rgba(78,154,42,.28);
+                                       color: var(--v-700); }
+:root[data-tema="claro"] .selo { background: rgba(78,154,42,.1);
+                                 border-color: rgba(78,154,42,.3); }
+:root[data-tema="claro"] .leitura__cab { background: rgba(78,154,42,.08); }
+:root[data-tema="claro"] .etapa.is-ativa { background: rgba(78,154,42,.1);
+                                           border-color: rgba(78,154,42,.4); }
+:root[data-tema="claro"] .grupo.is-sel { background: rgba(78,154,42,.1); }
+:root[data-tema="claro"] .comp .col-siras { background: rgba(78,154,42,.07); }
+:root[data-tema="claro"] .linha--destaque { background: rgba(78,154,42,.08); }
+:root[data-tema="claro"] .linha--destaque .linha__val { color: var(--v-700); }
+
+/* A regua vive de opacidade: .3 sobre escuro e discreto, sobre branco e invisivel. */
+:root[data-tema="claro"] .regua__faixa { opacity: .42; }
+:root[data-tema="claro"] .regua__faixa.f-a { opacity: .62; }
+:root[data-tema="claro"] .regua__faixa.is-atual { opacity: 1; box-shadow: none; }
+
+/* Ficha: o preenchimento a 13% desaparece sobre claro. */
+:root[data-tema="claro"] .ficha { background: color-mix(in srgb, var(--cor) 22%, #fff);
+                                  color: color-mix(in srgb, var(--cor) 72%, #0D1410); }
+:root[data-tema="claro"] .aviso { background: color-mix(in srgb, var(--cor) 14%, #fff); }
+:root[data-tema="claro"] .aviso strong { color: color-mix(in srgb, var(--cor) 70%, #0D1410); }
+
+/* Tela de calculo no modo claro. */
+:root[data-tema="claro"] .passo.is-ativo { background: rgba(78,154,42,.12);
+                                           border-color: rgba(78,154,42,.35); }
+:root[data-tema="claro"] .passo.is-ativo .passo__ico { background: rgba(78,154,42,.18);
+                                                       color: var(--v-700); }
+:root[data-tema="claro"] .passo__marca { color: var(--v-700); }
+:root[data-tema="claro"] .calculando__barra { background: rgba(13,20,16,.08); }
+:root[data-tema="claro"] .calculando__pulso { border-color: var(--v-600); }
+
+/* =========================================================================
+   Impressao: correcoes vistas no PDF gerado
+   ====================================================================== */
+@media print {
+  /* A largura util de uma A4 retrato cai dentro da consulta de 720px, entao a
+     regra de tela estreita entrava no papel e virava a seta de lado, com o texto
+     na vertical. No papel os dois cenarios continuam lado a lado. */
+  .cenarios { grid-template-columns: 1fr auto 1fr; gap: var(--e-4); }
+  .cenarios__seta { transform: none; }
+  .cenarios__seta span { writing-mode: horizontal-tb; }
+  .cenario .aptidao__selo { min-height: 0; padding: var(--e-4) var(--e-3); }
+
+  /* A trilha e a maior secao do laudo: em papel ela informa, nao protagoniza. */
+  .trilha__item { grid-template-columns: 150px minmax(0,1fr); padding: 6pt 0;
+                  font-size: 8.5pt; }
+  .trilha__fonte { font-size: 7.5pt; }
+  .orientacao { break-inside: avoid; }
+  .sec { margin-top: var(--e-5); }
+}

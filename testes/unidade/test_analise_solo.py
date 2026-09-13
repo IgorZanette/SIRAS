@@ -141,3 +141,19 @@ class TestContextoFaixaFisica:
     def test_profundidade_incorporacao_cm_20_ou_30_nao_levanta(self):
         _contexto_valido(profundidade_incorporacao_cm=20.0)
         _contexto_valido(profundidade_incorporacao_cm=30.0)
+
+
+def test_argila_acima_de_100_e_recusada():
+    """Fração granulométrica em porcentagem: acima de 100 não é teor improvável, é
+    aritmeticamente impossível. Mesma natureza do limite de v_percent — plausibilidade
+    física, e não limiar agronômico adotado pelo SIRAS."""
+    campos = dict(
+        ph_agua=6.0, indice_smp=6.0, mo=3.0, p=10.0, k=80.0,
+        ctc_ph7=9.0, al=1.0, ca=2.0, mg=1.0, v_percent=50.0,
+    )
+
+    AnaliseSolo(argila=100.0, **campos)  # o limite em si é aceito
+
+    for fora in (100.1, 140.0, -0.1):
+        with pytest.raises(ValueError, match="argila"):
+            AnaliseSolo(argila=fora, **campos)

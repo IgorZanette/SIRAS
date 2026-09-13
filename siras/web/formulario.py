@@ -74,11 +74,7 @@ FAIXA_DO_CAMPO = {
     "v_percent": (0, 100), "sub_v_percent": (0, 100),
     "saturacao_al": (0, 100),
     "prnt": (0, 100),
-    # Argila SEM teto de propósito: AnaliseSolo valida só `>= 0`. Declarar 100 aqui
-    # faria o formulário recusar um valor que o motor aceita — a interface passaria a
-    # ter um limite próprio, que é exatamente o que este módulo não faz. Se o teto de
-    # 100% deve existir, o lugar dele é o domínio, e a decisão é do autor.
-    "argila": (0, None),
+    "argila": (0, 100),
     "mo": (0, None), "p": (0, None), "k": (0, None), "ctc_ph7": (0, None),
     "al": (0, None), "ca": (0, None), "mg": (0, None),
     "sub_al": (0, None), "sub_ca": (0, None), "sub_mg": (0, None), "sub_k": (0, None),

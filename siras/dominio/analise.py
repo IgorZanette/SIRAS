@@ -123,8 +123,14 @@ class AnaliseSolo:
         if not 3.0 <= self.indice_smp <= 8.0:
             raise ValueError("'indice_smp' deve estar em faixa física plausível (3,0 a 8,0).")
 
-        if self.argila < 0:
-            raise ValueError("'argila' não pode ser negativo.")
+        # Argila é fração granulométrica em porcentagem: acima de 100 não é teor
+        # improvável, é aritmeticamente impossível. Mesma natureza do limite de
+        # v_percent — plausibilidade física, não limiar agronômico adotado.
+        if not 0.0 <= self.argila <= 100.0:
+            raise ValueError(
+                "'argila' deve estar em faixa física plausível para uma fração "
+                "granulométrica em porcentagem (0 a 100)."
+            )
 
         if self.mo < 0:
             raise ValueError("'mo' não pode ser negativo.")

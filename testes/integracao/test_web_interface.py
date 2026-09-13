@@ -59,39 +59,56 @@ def test_a_cultura_e_um_link_de_verdade(cliente):
 
 # --- marca --------------------------------------------------------------------
 
-def test_a_assinatura_e_montada_e_nao_uma_imagem_unica(cliente):
-    """Símbolo vetorial + nome em Sora. Como imagem única, o nome ficava achatado na
-    altura da barra e obrigava a escolher um tamanho de arquivo."""
+def test_a_assinatura_usa_a_marca_oficial_montada(cliente):
+    """Ícone e palavra recortados do lockup oficial e montados em HTML, e não servidos
+    como uma imagem só: montados, a palavra troca de cor com o tema e a assinatura some
+    sozinha em tela estreita, sem um segundo arquivo."""
     html = cliente.get("/").get_data(as_text=True)
 
-    assert "img/marca/siras-simbolo.svg" in html
-    assert 'class="logo__nome"' in html
-    assert "siras-logo.png" not in html, "voltou a usar a logo achatada em PNG"
+    assert "img/marca/siras-icone-64.png" in html
+    assert "img/marca/siras-texto.png" in html
+    assert "img/marca/siras-texto-escuro.png" in html
+
+
+def test_a_palavra_da_marca_troca_com_o_tema():
+    """O original é branco e sumiria no modo claro; a versão escura troca só os pixels
+    brancos e preserva a folha verde do "A"."""
+    assert re.search(r"\.logo__nome--claro \{[^}]*display: none", _TELAS_CSS)
+    assert re.search(
+        r':root\[data-tema="claro"\] \.logo__nome--escuro \{[^}]*display: none', _TELAS_CSS
+    )
 
 
 @pytest.mark.parametrize(
     "arquivo",
-    ["img/favicon.svg", "img/marca/siras-simbolo.svg", "img/marca/siras-icone-180.png"],
+    ["img/marca/siras-icone-32.png", "img/marca/siras-icone-64.png",
+     "img/marca/siras-icone-180.png", "img/marca/siras-icone-256.png",
+     "img/marca/siras-texto.png", "img/marca/siras-texto-escuro.png"],
 )
 def test_os_arquivos_de_marca_sao_servidos(cliente, arquivo):
     assert cliente.get(f"/static/{arquivo}").status_code == 200
 
 
-def test_a_pagina_declara_o_favicon(cliente):
+def test_a_pagina_declara_o_favicon_em_dois_tamanhos(cliente):
+    """O navegador escolhe o mais próximo do que precisa: servir só o de 256 px faria o
+    Chrome reamostrar para 16 px a cada pintura da aba."""
     html = cliente.get("/").get_data(as_text=True)
 
-    assert 'rel="icon"' in html
+    assert 'sizes="32x32"' in html
+    assert 'sizes="64x64"' in html
     assert 'rel="apple-touch-icon"' in html
 
 
-def test_a_marca_de_tela_e_vetorial_e_leve(cliente):
-    """O que a tela carrega em toda página é só o símbolo em SVG: uma forma que serve de
-    16 px a 512 px, sem reamostragem e sem escolher tamanho."""
-    simbolo = cliente.get("/static/img/marca/siras-simbolo.svg")
-    favicon = cliente.get("/static/img/favicon.svg")
+def test_a_marca_carregada_em_toda_pagina_e_leve(cliente):
+    """O lockup original tem 2172 px de largura e 355 KB. O que a barra carrega é o
+    ícone de 64 px mais a palavra — servir o original reduzido por CSS custaria isso a
+    cada carregamento e renderizaria pior."""
+    total = sum(
+        len(cliente.get(f"/static/img/marca/{nome}").data)
+        for nome in ("siras-icone-64.png", "siras-texto.png")
+    )
 
-    assert b"<svg" in simbolo.data and b"<svg" in favicon.data
-    assert len(simbolo.data) + len(favicon.data) < 12 * 1024
+    assert total < 60 * 1024, f"{total // 1024} KB de marca na barra"
 
 
 # --- leitura ao vivo ----------------------------------------------------------
@@ -352,11 +369,7 @@ def test_a_etiqueta_da_trilha_nao_invade_a_coluna_do_texto():
 
 # --- contraste no modo claro --------------------------------------------------
 
-def test_a_assinatura_nao_some_no_modo_claro():
-    """O nome usa degradê do branco ao verde: sobre fundo claro ficava invisível."""
-    assert re.search(
-        r':root\[data-tema="claro"\] \.logo__nome \{[^}]*#0D1410', _TELAS_CSS
-    )
+
 
 
 def test_o_verde_vivo_nao_e_texto_sobre_claro():

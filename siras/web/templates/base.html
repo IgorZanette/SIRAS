@@ -25,11 +25,13 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin
       href="{{ url_for('static', filename='fonts/manrope-latin.woff2') }}">
 
-{# Ícone de aba em SVG: uma forma só serve de 16 px a 512 px, e a 16 px o desenho
-   reduzido (o S que também é estrato) sobrevive, enquanto o símbolo completo viraria
-   mancha. O apple-touch-icon fica em PNG porque o iOS ignora SVG aqui — e ali o
-   tamanho é 180 px, onde o símbolo completo tem espaço para ser lido. #}
-<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+{# Ícone de aba: o próprio ícone da marca, recortado pelo conteúdo e quadrado. Dois
+   tamanhos porque o navegador escolhe o mais próximo do que precisa — servir só o de
+   256 px faria o Chrome reamostrar para 16 px a cada pintura da aba. #}
+<link rel="icon" type="image/png" sizes="32x32"
+      href="{{ url_for('static', filename='img/marca/siras-icone-32.png') }}">
+<link rel="icon" type="image/png" sizes="64x64"
+      href="{{ url_for('static', filename='img/marca/siras-icone-64.png') }}">
 <link rel="apple-touch-icon"
       href="{{ url_for('static', filename='img/marca/siras-icone-180.png') }}">
 
@@ -44,18 +46,22 @@
 
 <header class="barra nao-imprime">
   <div class="env barra__int">
-    {# Assinatura montada: símbolo vetorial + nome em Sora, em vez de uma imagem única.
-       O nome renderiza na tipografia do sistema, fica nítido em qualquer densidade de
-       tela, pesa dois quilobytes e acompanha a paleta — um PNG achatava o texto e
-       obrigava a escolher um tamanho. #}
+    {# Assinatura oficial: ícone e palavra recortados do lockup, montados em HTML em vez
+       de servidos como uma imagem só. Montados, a palavra pode trocar de cor com o tema
+       (o original é branco e sumiria no modo claro) e a assinatura abaixo some sozinha
+       em tela estreita, sem precisar de um segundo arquivo. #}
     <a class="logo" href="{{ url_for('siras.inicio') }}"
-       aria-label="SIRAS — interpretação e recomendação agronômica de solo">
-      <img class="logo__simbolo" src="{{ url_for('static', filename='img/marca/siras-simbolo.svg') }}"
+       aria-label="SIRAS — sistema de interpretação e recomendação agronômica de solo">
+      <img class="logo__icone" src="{{ url_for('static', filename='img/marca/siras-icone-64.png') }}"
            alt="" width="64" height="64">
       <span class="logo__assinatura">
-        <span class="logo__nome">SIRAS</span>
-        <span class="logo__regua" aria-hidden="true"></span>
-        <span class="logo__sub">Interpretação e recomendação agronômica de solo</span>
+        <img class="logo__nome logo__nome--escuro"
+             src="{{ url_for('static', filename='img/marca/siras-texto.png') }}"
+             alt="SIRAS" width="420" height="82">
+        <img class="logo__nome logo__nome--claro"
+             src="{{ url_for('static', filename='img/marca/siras-texto-escuro.png') }}"
+             alt="SIRAS" width="420" height="82">
+        <span class="logo__sub">Sistema de interpretação e recomendação agronômica de solo</span>
       </span>
     </a>
     <nav class="barra__nav">

@@ -43,32 +43,24 @@
 }
 .barra__int { display: flex; align-items: center; justify-content: space-between;
               gap: var(--e-5); min-height: 68px; }
-.logo { display: flex; align-items: center; gap: .7rem; text-decoration: none; flex: none; }
-.logo__simbolo { width: 40px; height: 40px; display: block; flex: none;
-                 transition: transform var(--tr); }
-.logo:hover .logo__simbolo { transform: translateY(-2px); }
+.logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; flex: none; }
+.logo__icone { width: 42px; height: 42px; display: block; flex: none;
+               transition: transform var(--tr); }
+.logo:hover .logo__icone { transform: translateY(-2px) scale(1.04); }
 .logo__assinatura { display: grid; gap: 3px; }
-/* O nome em Sora 800 com tracking ABERTO e um degrade sutil do branco ao verde claro.
-   Caixa alta com letra fechada vira bloco; aberta, cada letra respira e a palavra lê
-   como marca, nao como titulo. A regua fina abaixo ecoa a faixa colorida da assinatura
-   oficial e amarra o nome ao componente que a plataforma usa para interpretar. */
-.logo__nome {
-  font-family: var(--ff-display); font-size: 1.42rem; font-weight: 800;
-  letter-spacing: .16em; line-height: 1; text-indent: .16em;
-  background: linear-gradient(100deg, var(--n-000) 30%, var(--v-300));
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
-}
-.logo__regua {
-  height: 2.5px; border-radius: 2px; margin: 1px 0 2px;
-  background: linear-gradient(90deg, var(--v-600), var(--v-400) 55%, var(--sig-ambar));
-}
-.logo__sub { font-size: 9.5px; font-weight: 600; color: var(--n-400);
-             letter-spacing: .015em; white-space: nowrap; line-height: 1.2; }
-@media (max-width:860px){ .logo__sub { display: none; } }
+/* A palavra e imagem, e nao texto: e o desenho oficial, com a folha no "A". Altura fixa
+   e largura automatica para o atributo width do <img> nao a achatar. */
+.logo__nome { height: 22px; width: auto; display: block; }
+.logo__nome--claro { display: none; }
+:root[data-tema="claro"] .logo__nome--escuro { display: none; }
+:root[data-tema="claro"] .logo__nome--claro { display: block; }
+.logo__sub { font-size: 9px; font-weight: 600; color: var(--n-400);
+             letter-spacing: .04em; text-transform: uppercase;
+             white-space: nowrap; line-height: 1.2; }
+@media (max-width:900px){ .logo__sub { display: none; } }
 @media (max-width:640px){
-  .logo__simbolo { width: 34px; height: 34px; }
-  .logo__nome { font-size: 1.1rem; }
+  .logo__icone { width: 34px; height: 34px; }
+  .logo__nome { height: 18px; }
 }
 .barra__nav { display: flex; align-items: center; gap: var(--e-3); }
 /* Em tela estreita a logo e a acao primaria e que precisam do espaco. */

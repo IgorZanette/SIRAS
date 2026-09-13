@@ -520,6 +520,12 @@ def variaveis_condicionais(
 
     if grupo == "frutiferas":
         fases = [fase for fase in _FASES_DE_FRUTIFERA if fase in entrada]
+        # O mirtileiro e o morangueiro declaram na base que crescimento e manutenção são
+        # um bloco só. Oferecer "Crescimento" para eles era propor uma opção que o motor
+        # recusa sempre — a tela perguntava algo que nunca teria resposta. Quem declara a
+        # unificação é a base, e é dela que a tela tira isto.
+        if entrada.get("crescimento_e_manutencao_unificados"):
+            fases = [fase for fase in fases if fase != "crescimento"]
         if fases:
             variaveis.append({
                 "campo": "fase",

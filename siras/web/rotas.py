@@ -46,6 +46,17 @@ from siras.web import formulario
 
 bp = Blueprint("siras", __name__)
 
+#: Moldura da mensagem quando o motor recusa por limite declarado, e não por erro.
+#:
+#: A diferença importa para quem lê: "o sistema falhou" e "o Manual não publica a
+#: correspondência que essa recomendação exigiria" são coisas distintas, e a segunda é uma
+#: resposta legítima de um sistema especialista honesto. O texto do motor vem inteiro, sem
+#: resumo, porque é ele que diz exatamente o que falta.
+_LIMITE_DECLARADO = (
+    "Esta combinação está fora do que o SIRAS recomenda, e não é um erro de "
+    "preenchimento: {motivo}"
+)
+
 def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
     """Tudo que a tela de dados oferece sai da base de conhecimento.
 
@@ -269,6 +280,17 @@ def laudo():
         # Erro de escopo ou de base incompleta, não de digitação: o formulário volta
         # preenchido e a mensagem do motor aparece inteira, sem tradução que a apague.
         return _tela_de_dados(cultura_id, leitura, erro_do_motor=str(erro)), 422
+    except NotImplementedError as erro:
+        # Limite DECLARADO do sistema, e não falha: há fases que o Manual indexa pela
+        # análise foliar, sem correspondência publicada com a análise de solo, e o motor
+        # se recusa a recomendar ali em vez de inventar a conversão.
+        #
+        # Sem este ramo a escolha de "Manutenção" numa macieira derrubava a aplicação com
+        # HTTP 500 e rastro de pilha na tela — a tela oferece a fase, e quem a escolhia
+        # recebia um erro de programa em vez da explicação de por que não há resposta.
+        return _tela_de_dados(
+            cultura_id, leitura, erro_do_motor=_LIMITE_DECLARADO.format(motivo=erro)
+        ), 422
 
     blocos = [
         {

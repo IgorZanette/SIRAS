@@ -256,6 +256,12 @@ def _observacao_do_nitrogenio(laudo: Laudo) -> str:
         if laudo.adubacao.motivo_n == "fixacao_biologica_de_nitrogenio":
             return "Cultura não recebe adubação nitrogenada: fixação biológica de nitrogênio."
         return f"Sem dose de nitrogênio: {laudo.adubacao.motivo_n.replace('_', ' ')}."
+    # Nem toda cultura dosa N pela faixa de matéria orgânica: a frutífera em crescimento
+    # dosa por ano após o plantio, e outras por faixa de produtividade. Nesses casos
+    # faixa_mo vem vazia, e a frase anterior afirmava um critério que não foi usado —
+    # imprimindo, ainda por cima, "(None)" no documento assinado.
+    if laudo.adubacao.faixa_mo is None:
+        return "Dose publicada pelo Manual para esta fase sem passar pela faixa de matéria orgânica."
     faixa = _ROTULO_POR_FAIXA_MO.get(laudo.adubacao.faixa_mo, laudo.adubacao.faixa_mo)
     return f"Dose definida pela faixa de matéria orgânica da amostra ({faixa})."
 

@@ -1,3 +1,29 @@
+{% import "_macros/ico.html" as _i %}
+
+{# Marca de campo dispensável mais a dica do "por que preencher".
+
+   Um campo opcional sem sinal vira campo ignorado: quem passa os olhos pula tudo que
+   não tem asterisco. O selo diz que não precisa; a dica diz o que se ganha preenchendo
+   — e é ela que transforma "opcional" em escolha informada em vez de campo pulado.
+
+   A dica abre no ponteiro E no foco do teclado, e some com Esc (interacoes.js): conteúdo
+   que aparece ao passar o mouse precisa ser dispensável sem mover o ponteiro (WCAG
+   1.4.13). O texto vive no DOM o tempo todo, então leitor de tela o alcança pelo
+   aria-describedby, e não depende de o balão estar visível.
+#}
+{% macro opcional(id, motivo=None) -%}
+<span class="campo__opcional">opcional</span>
+{%- if motivo %}
+<span class="dica">
+  <button class="dica__gatilho" type="button"
+          aria-label="Por que preencher {{ id }}" aria-describedby="{{ id }}-dica">
+    {{ _i.ico("info", "ico ico--sm") }}
+  </button>
+  <span class="dica__balao" role="tooltip" id="{{ id }}-dica">{{ motivo }}</span>
+</span>
+{%- endif %}
+{%- endmacro %}
+
 {# Campo numérico da análise de solo (PLANO-FRONTEND §7.1).
 
    A unidade fica DENTRO do campo, à direita, e não numa legenda abaixo: o usuário a lê
@@ -9,11 +35,12 @@
    preenchido, em vez de exigir que o técnico redigite os onze campos por causa de um.
 #}
 {% macro campo(id, rotulo, unidade=None, ajuda=None, obrigatorio=False,
-               passo="0.1", placeholder="", valor=None, erro=False, faixa=None) %}
+               passo="0.1", placeholder="", valor=None, erro=False, faixa=None,
+               motivo=None) %}
   <label class="campo{% if erro %} campo--erro{% endif %}{% if valor %} campo--preenchido{% endif %}"
          for="{{ id }}">
     <span class="campo__label">
-      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% endif %}
+      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% else %} {{ opcional(id, motivo) }}{% endif %}
     </span>
     <span class="campo__caixa">
       {# Os espaços antes de cada {% raw %}{% if %}{% endraw %} são necessários: trim_blocks remove a quebra de
@@ -33,10 +60,18 @@
 
    opcoes: lista de (valor, rótulo)
 #}
-{% macro campo_escolha(id, rotulo, opcoes, ajuda=None, obrigatorio=False, valor=None) %}
+{% macro campo_escolha(id, rotulo, opcoes, ajuda=None, obrigatorio=False, valor=None,
+                      motivo=None) %}
+  {# Um <select> cujas opções nunca incluem o vazio JÁ vem preenchido: "cultivo" abre em
+     1º e "profundidade" abre em 20 cm. Esses não são campos opcionais, são campos com
+     padrão — chamá-los de opcionais diria que dá para deixar em branco, o que é falso, e
+     gastaria o selo justamente onde ele não informa nada. O selo só aparece onde ficar
+     em branco é mesmo possível. #}
+  {% set vazio = namespace(possivel=false) %}
+  {% for opcao_valor, _rotulo in opcoes %}{% if opcao_valor == "" %}{% set vazio.possivel = true %}{% endif %}{% endfor %}
   <label class="campo" for="{{ id }}">
     <span class="campo__label">
-      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% endif %}
+      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% elif vazio.possivel %} {{ opcional(id, motivo) }}{% endif %}
     </span>
     <span class="campo__caixa">
       <select id="{{ id }}" name="{{ id }}"
@@ -53,9 +88,9 @@
 
 {# Campo de texto livre. Existe separado do numérico porque não tem unidade, não tem
    passo e não tem faixa: é identificação, não medida. #}
-{% macro campo_texto(id, rotulo, ajuda=None, valor=None, placeholder=None) %}
+{% macro campo_texto(id, rotulo, ajuda=None, valor=None, placeholder=None, motivo=None) %}
   <label class="campo{% if valor %} campo--preenchido{% endif %}" for="{{ id }}">
-    <span class="campo__label">{{ rotulo }}</span>
+    <span class="campo__label">{{ rotulo }} {{ opcional(id, motivo) }}</span>
     <span class="campo__caixa">
       <input type="text" id="{{ id }}" name="{{ id }}" autocomplete="off"{% if valor %} value="{{ valor }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}>
     </span>

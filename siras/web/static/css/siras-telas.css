@@ -985,3 +985,76 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
   .talhao:first-child { break-before: avoid; }
   .totais { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* =========================================================================
+   Campo opcional: o selo e a dica do "por que preencher"
+   -------------------------------------------------------------------------
+   Um campo opcional sem sinal vira campo ignorado - quem passa os olhos pula
+   tudo que nao tem asterisco. O selo diz que nao precisa; a dica diz o que se
+   ganha preenchendo, e e ela que transforma "opcional" em escolha informada.
+
+   O selo e deliberadamente discreto: ele informa, e nao compete com o rotulo do
+   campo nem com o asterisco do obrigatorio, que continua sendo o sinal forte.
+   ====================================================================== */
+.campo__opcional {
+  font-size: var(--fs-3xs); font-weight: 600; letter-spacing: .04em;
+  text-transform: lowercase; color: var(--n-500);
+  padding: .1rem .35rem; border-radius: var(--r-pilula);
+  border: 1px solid var(--n-700); background: transparent;
+  vertical-align: middle;
+}
+
+.dica { position: relative; display: inline-flex; vertical-align: middle; }
+.dica__gatilho {
+  display: inline-grid; place-content: center;
+  width: 18px; height: 18px; padding: 0; margin-left: .15rem;
+  border: 0; border-radius: 50%; background: transparent;
+  color: var(--n-500); cursor: help;
+  transition: color var(--tr), background var(--tr);
+}
+.dica__gatilho:hover { color: var(--v-400); background: rgba(140,226,63,.12); }
+.dica__gatilho:focus-visible { outline: 2px solid var(--v-400); outline-offset: 2px; }
+
+/* O balao nasce no DOM e so fica invisivel: leitor de tela o alcanca pelo
+   aria-describedby sem depender de ele estar na tela. */
+.dica__balao {
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: max-content; max-width: 280px; z-index: 60;
+  padding: var(--e-3) var(--e-4); border-radius: var(--r-campo);
+  background: var(--n-800); color: var(--n-200);
+  border: var(--borda-forte); box-shadow: var(--luz-topo);
+  font-size: var(--fs-2xs); font-weight: 400; line-height: 1.45;
+  letter-spacing: 0; text-transform: none; white-space: normal;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity var(--tr), transform var(--tr), visibility var(--tr);
+}
+/* Abre no ponteiro E no foco do teclado. O :hover na .dica inteira, e nao so no
+   gatilho, e o que permite levar o ponteiro ate o balao sem ele sumir no
+   caminho - exigencia de conteudo em hover (WCAG 1.4.13). */
+.dica:hover .dica__balao,
+.dica__gatilho:focus-visible ~ .dica__balao,
+.dica__balao:hover {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+/* Fechado com Esc (interacoes.js): enquanto a marca estiver posta, nem ponteiro
+   nem foco reabrem, ou a dica voltaria no mesmo quadro em que foi dispensada. */
+.dica.is-dispensada .dica__balao {
+  opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
+}
+
+/* Perto da borda direita da grade o balao centrado sairia da tela. */
+.grade > .campo:last-child .dica__balao,
+.grade > .campo:nth-child(3n) .dica__balao { left: auto; right: 0; transform: translateY(4px); }
+.grade > .campo:last-child .dica:hover .dica__balao,
+.grade > .campo:nth-child(3n) .dica:hover .dica__balao { transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dica__balao { transition: none; }
+}
+
+/* Nada disto e documento: some do papel junto com o resto dos controles. */
+@media print {
+  .campo__opcional, .dica { display: none !important; }
+}

@@ -100,7 +100,7 @@
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_contexto %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
                    leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
-                   faixas.get(campo_id)) }}
+                   faixas.get(campo_id), motivos.get(campo_id)) }}
         {% endfor %}
       </div>
     </div>
@@ -123,14 +123,15 @@
                            ([] if variavel.obrigatorio else [("", "Não se aplica")]) + variavel.valores,
                            obrigatorio=variavel.obrigatorio,
                            ajuda=variavel.ajuda or variavel.condicao,
-                           valor=leitura.valores.get(variavel.campo)) }}
+                           valor=leitura.valores.get(variavel.campo),
+                           motivo=motivos.get(variavel.campo)) }}
         {% else %}
         {{ c.campo(variavel.campo, variavel.rotulo, variavel.unidade,
                    variavel.ajuda or variavel.condicao,
                    variavel.obrigatorio, "0.1", "",
                    leitura.valores.get(variavel.campo),
                    variavel.campo in leitura.campos_com_erro,
-                   (0, None)) }}
+                   (0, None), motivos.get(variavel.campo)) }}
         {% endif %}
         {% endfor %}
       </div>
@@ -147,7 +148,7 @@
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_acidez %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
                    leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
-                   faixas.get(campo_id)) }}
+                   faixas.get(campo_id), motivos.get(campo_id)) }}
         {% endfor %}
       </div>
     </div>
@@ -162,8 +163,31 @@
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_fertilidade %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
                    leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
-                   faixas.get(campo_id)) }}
+                   faixas.get(campo_id), motivos.get(campo_id)) }}
         {% endfor %}
+      </div>
+    </div>
+
+    {# ——— A área analisada ———
+       Visível, e não recolhida junto dos dados do profissional: propriedade, talhão e
+       área descrevem O QUE está sendo analisado. A área em especial tem consequência
+       direta no que o laudo entrega, e escondê-la fazia o recurso passar despercebido. #}
+    <div class="painel bloco">
+      <div class="bloco__cab">
+        {{ i.ico("perfil") }}
+        <h3>A área analisada</h3>
+        <span class="t-aux">Opcional — identifica o laudo e habilita o total a comprar</span>
+      </div>
+      <div class="grade">
+        {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_da_area %}
+        {{ c.campo_texto(campo_id, rotulo, ajuda, leitura.valores.get(campo_id),
+                         placeholder=exemplo, motivo=motivos.get(campo_id)) }}
+        {% endfor %}
+        {{ c.campo(campo_area[0], campo_area[1], campo_area[2], campo_area[3],
+                   false, campo_area[5], campo_area[6],
+                   leitura.valores.get(campo_area[0]),
+                   campo_area[0] in leitura.campos_com_erro, faixas.get(campo_area[0]),
+                   motivos.get(campo_area[0])) }}
       </div>
     </div>
 
@@ -181,7 +205,7 @@
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_subsuperficie %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
                    leitura.valores.get(campo_id), campo_id in leitura.campos_com_erro,
-                   faixas.get(campo_id)) }}
+                   faixas.get(campo_id), motivos.get(campo_id)) }}
         {% endfor %}
       </div>
     </details>
@@ -192,20 +216,14 @@
     <details class="painel bloco">
       <summary class="bloco__cab" style="cursor:pointer">
         {{ i.ico("laudo") }}
-        <h3>Responsável técnico e propriedade</h3>
+        <h3>Responsável técnico</h3>
         <span class="t-aux">Opcional — sai impresso no laudo</span>
       </summary>
       <div class="grade">
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_responsavel %}
         {{ c.campo_texto(campo_id, rotulo, ajuda, leitura.valores.get(campo_id),
-                         placeholder=exemplo) }}
+                         placeholder=exemplo, motivo=motivos.get(campo_id)) }}
         {% endfor %}
-        {# A área acompanha o talhão a que pertence, e não o bloco de cálculo: ela não
-           entra em dose nenhuma. Serve para o laudo somar quanto comprar. #}
-        {{ c.campo(campo_area[0], campo_area[1], campo_area[2], campo_area[3],
-                   false, campo_area[5], campo_area[6],
-                   leitura.valores.get(campo_area[0]),
-                   campo_area[0] in leitura.campos_com_erro, faixas.get(campo_area[0])) }}
       </div>
     </details>
 
@@ -223,7 +241,7 @@
       <div data-talhoes-lista>
         {% for indice in talhoes_extras %}
         {{ tl.cartao(indice, campos_do_talhao, faixas, leitura.valores,
-                     leitura.campos_com_erro) }}
+                     leitura.campos_com_erro, motivos, campo_area) }}
         {% endfor %}
       </div>
 
@@ -239,7 +257,7 @@
     {# Molde do cartão, com __IDX__ no lugar do índice. Fica num <template> para que o
        navegador não o envie junto do formulário nem o conte na navegação por teclado. #}
     <template id="molde-talhao">
-      {{ tl.cartao("__IDX__", campos_do_talhao, faixas, {}, []) }}
+      {{ tl.cartao("__IDX__", campos_do_talhao, faixas, {}, [], motivos, campo_area) }}
     </template>
 
     <div class="rodape-acoes">

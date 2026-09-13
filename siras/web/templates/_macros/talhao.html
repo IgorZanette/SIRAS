@@ -12,7 +12,7 @@
 {% import "_macros/campo.html" as c %}
 {% import "_macros/ico.html" as i %}
 
-{% macro cartao(indice, campos, faixas, valores, com_erro) %}
+{% macro cartao(indice, campos, faixas, valores, com_erro, motivos, campo_area) %}
 {% set n = indice|string %}
 <div class="talhao-cartao painel" data-talhao="{{ n }}">
   <div class="talhao-cartao__cab">
@@ -28,17 +28,16 @@
     {{ c.campo_texto("talhao__" ~ n, "Nome do talhão",
                      "Como esta área aparece no laudo",
                      valores.get("talhao__" ~ n),
-                     placeholder="Ex.: B2") }}
-    {{ c.campo("area_ha__" ~ n, "Área do talhão", "ha",
-               "Opcional. Preenchida em todos os talhões, o laudo soma as quantidades",
-               false, "0.1", "12,5",
+                     placeholder="Ex.: B2", motivo=motivos.get("talhao")) }}
+    {{ c.campo("area_ha__" ~ n, campo_area[1], campo_area[2], campo_area[3],
+               false, campo_area[5], campo_area[6],
                valores.get("area_ha__" ~ n), ("area_ha__" ~ n) in com_erro,
-               faixas.get("area_ha")) }}
+               faixas.get("area_ha"), motivos.get("area_ha")) }}
 
     {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos %}
     {{ c.campo(campo_id ~ "__" ~ n, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,
                valores.get(campo_id ~ "__" ~ n), (campo_id ~ "__" ~ n) in com_erro,
-               faixas.get(campo_id)) }}
+               faixas.get(campo_id), motivos.get(campo_id)) }}
     {% endfor %}
   </div>
 </div>

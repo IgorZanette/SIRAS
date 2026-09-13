@@ -132,4 +132,40 @@
       });
     }
   }
+
+  /* ---------------------------------------------------------------------
+     Dica do campo opcional: dispensavel com Esc
+     ---------------------------------------------------------------------
+     Conteudo que aparece ao passar o mouse precisa poder ser fechado sem
+     mover o ponteiro (WCAG 1.4.13) - alguem usando ampliacao de tela pode ter
+     o balao cobrindo justamente o campo que ia preencher.
+
+     O CSS abre a dica no :hover e no :focus-visible; nao ha como ensinar Esc a
+     uma pseudo-classe. A marca is-dispensada vence as duas por !important, e
+     sai assim que o ponteiro deixa a dica ou o foco muda - senao o campo
+     ficaria sem dica pelo resto da visita.
+     ------------------------------------------------------------------ */
+  document.addEventListener("keydown", function (evento) {
+    if (evento.key !== "Escape") {
+      return;
+    }
+    Array.prototype.forEach.call(document.querySelectorAll(".dica"), function (dica) {
+      dica.classList.add("is-dispensada");
+    });
+  });
+
+  function reabilitar(evento) {
+    var dica = evento.target.closest ? evento.target.closest(".dica") : null;
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".dica.is-dispensada"),
+      function (outra) {
+        if (outra !== dica) {
+          outra.classList.remove("is-dispensada");
+        }
+      }
+    );
+  }
+
+  document.addEventListener("mouseover", reabilitar);
+  document.addEventListener("focusin", reabilitar);
 })();

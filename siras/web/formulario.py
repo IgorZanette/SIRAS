@@ -83,6 +83,19 @@ FAIXA_DO_CAMPO = {
     "area_ha": (0, None),
 }
 
+#: Identificação da ÁREA analisada. Fica visível no formulário, e não recolhida junto
+#: dos dados do profissional: propriedade, talhão e área descrevem o que está sendo
+#: analisado, e a área tem consequência direta no que o laudo entrega.
+CAMPOS_DA_AREA: Tuple[Tuple[Any, ...], ...] = (
+    ("propriedade", "Propriedade", None,
+     "Nome da fazenda ou do estabelecimento", False, "", "Ex.: Fazenda Santa Rita"),
+    # Talhão tem campo próprio, e não dividindo um com a propriedade: são dois níveis
+    # diferentes da mesma identificação, e é o talhão que passa a repetir quando a
+    # análise cobre mais de uma área.
+    ("talhao", "Talhão", None,
+     "A área amostrada dentro da propriedade", False, "", "Ex.: A1"),
+)
+
 #: Identificação do responsável técnico. NÃO entra em AnaliseSolo nem em Contexto: não
 #: é dado da análise nem do cálculo, é metadado do documento. O motor não a conhece, e
 #: gerar_laudo() continua sendo função pura de análise, cultura e contexto.
@@ -93,18 +106,79 @@ FAIXA_DO_CAMPO = {
 #: sozinho não informa isso, e o asterisco marca o obrigatório — não o contrário.
 CAMPOS_RESPONSAVEL: Tuple[Tuple[Any, ...], ...] = (
     ("responsavel_nome", "Nome do responsável técnico", None,
-     "Sai impresso no laudo, acima da linha de assinatura", False, "", "Opcional"),
+     "Sai impresso no laudo, acima da linha de assinatura", False, "", "Ex.: Maria Souza"),
     ("responsavel_registro", "Registro profissional", None,
-     "CREA, CRT ou outro conselho, com a UF", False, "", "Opcional — ex.: CREA-RS 123456"),
-    ("responsavel_documento", "CPF ou CNPJ", None, None, False, "", "Opcional"),
-    ("propriedade", "Propriedade", None,
-     "Nome da fazenda ou do estabelecimento", False, "", "Opcional"),
-    # Talhão tem campo próprio, e não dividindo um com a propriedade: são dois níveis
-    # diferentes da mesma identificação, e é o talhão que passa a repetir quando a
-    # análise cobre mais de uma área.
-    ("talhao", "Talhão", None,
-     "A área amostrada dentro da propriedade", False, "", "Opcional"),
+     "CREA, CRT ou outro conselho, com a UF", False, "", "Ex.: CREA-RS 123456"),
+    ("responsavel_documento", "CPF ou CNPJ", None, None, False, "", "Ex.: 000.000.000-00"),
 )
+
+#: Por que valeria a pena preencher cada campo OPCIONAL.
+#:
+#: Um campo opcional sem explicação vira um campo ignorado: quem olha a tela rápido pula
+#: tudo que não tem asterisco, e perde recurso que o sistema só entrega com o dado em
+#: mãos. Cada frase aqui diz o que MUDA no resultado, e não o que o campo significa —
+#: significado já é papel do texto de ajuda logo abaixo do campo.
+#:
+#: Nenhuma delas promete critério agronômico novo: descrevem o que o motor já faz com o
+#: valor, e cada uma corresponde a um caminho que existe no código.
+MOTIVO_DE_PREENCHER: Dict[str, str] = {
+    "area_ha": (
+        "Com a área de todos os talhões preenchida, o laudo deixa de dar só a dose por "
+        "hectare e passa a somar a quantidade total a comprar — quantas toneladas de "
+        "calcário e quantos quilos de adubo a lavoura inteira exige."
+    ),
+    "saturacao_al": (
+        "Informada, o sistema usa a saturação por alumínio medida pelo laboratório. Em "
+        "branco, ele a deriva de Al, Ca, Mg e K — o que continua correto, mas é uma "
+        "conta a partir de outros valores, e não o dado medido."
+    ),
+    "expectativa_rendimento": (
+        "Algumas culturas recebem um incremento de dose acima de um rendimento de "
+        "referência publicado pelo Manual. Sem este campo, a dose fica a da tabela, sem "
+        "esse acréscimo."
+    ),
+    "propriedade": "Sai impressa no cabeçalho do laudo, identificando a que área ele se refere.",
+    "talhao": (
+        "Sai impresso no cabeçalho do laudo. Passa a ser obrigatório quando a análise "
+        "cobre mais de um talhão, para que cada recomendação diga a qual área pertence."
+    ),
+    "responsavel_nome": (
+        "Sai impresso acima da linha de assinatura, e aí basta assinar e carimbar — em "
+        "branco, a linha sai vazia para preencher à mão."
+    ),
+    "responsavel_registro": (
+        "Sai impresso junto do nome. É o que dá ao documento validade como peça técnica "
+        "assinada por profissional habilitado."
+    ),
+    "responsavel_documento": "Sai impresso junto do registro, na identificação de quem assina.",
+
+    # As três variáveis condicionais que a base declara como dispensáveis. São opcionais
+    # porque só valem em certas fases — e é justamente nessas fases que o motor as exige
+    # para conseguir chegar a uma dose.
+    "ano": (
+        "Na fase de manutenção do pomar, o Manual escalona a dose por ano após o plantio. "
+        "Sem este campo, o sistema não consegue emitir a recomendação dessa fase."
+    ),
+    "produtividade_estimada": (
+        "Na fase de manutenção, várias frutíferas têm a dose escalonada por faixa de "
+        "produtividade. Sem este campo, o sistema não consegue emitir a recomendação "
+        "dessa fase."
+    ),
+    "momento": (
+        "Na fase de plantio e crescimento, as doses de N, P e K mudam conforme o momento "
+        "da aplicação. Sem este campo, o sistema não consegue emitir a recomendação "
+        "dessa fase."
+    ),
+}
+
+#: A camada de 10-20 cm inteira tem um motivo só: é um critério de calagem que a lê.
+_MOTIVO_DA_SUBSUPERFICIE = (
+    "O critério de plantio direto consolidado COM restrições decide pela camada de "
+    "10-20 cm (Manual 2016, Tab. 5.3, notas 6-7). Sem ela, esse critério não pode ser "
+    "aplicado e resta escolher outro sistema de manejo."
+)
+for _campo in CAMPOS_SUBSUPERFICIE:
+    MOTIVO_DE_PREENCHER.setdefault(_campo[0], _MOTIVO_DA_SUBSUPERFICIE)
 
 _TODOS_OS_CAMPOS = CAMPOS_ACIDEZ + CAMPOS_FERTILIDADE + CAMPOS_SUBSUPERFICIE + CAMPOS_CONTEXTO
 _ROTULO_POR_CAMPO = {campo[0]: campo[1] for campo in _TODOS_OS_CAMPOS}
@@ -123,7 +197,7 @@ CAMPOS_DO_TALHAO: Tuple[Tuple[Any, ...], ...] = (
 #: faltando, a soma seria sobre um conjunto incompleto e diria menos do que aparenta.
 CAMPO_AREA: Tuple[Any, ...] = (
     "area_ha", "Área do talhão", "ha",
-    "Opcional. Preenchida em todos os talhões, o laudo soma as quantidades a comprar",
+    "Em hectares, como consta na declaração da área",
     False, "0.1", "12,5",
 )
 
@@ -160,7 +234,7 @@ class LeituraFormulario:
         entrada de cálculo: o motor não a recebe."""
         return {
             chave[0]: (self.valores.get(chave[0]) or "").strip()
-            for chave in CAMPOS_RESPONSAVEL
+            for chave in CAMPOS_RESPONSAVEL + CAMPOS_DA_AREA
         }
 
     @property
@@ -826,7 +900,9 @@ __all__ = [
     "CAMPOS_SUBSUPERFICIE",
     "LeituraFormulario",
     "BlocoDeTalhao",
+    "CAMPOS_DA_AREA",
     "CAMPOS_DO_TALHAO",
+    "MOTIVO_DE_PREENCHER",
     "CAMPO_AREA",
     "antecedentes_da_cultura",
     "para_numero",

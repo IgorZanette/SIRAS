@@ -905,11 +905,100 @@ def test_a_area_identificada_sai_no_cabecalho_do_laudo(cliente):
     assert "Talhão 3B" in html
 
 
-def test_os_campos_dispensaveis_dizem_que_sao_opcionais(cliente):
-    """Num bloco em que todo campo é dispensável, o rótulo sozinho não informa isso — o
-    asterisco marca o obrigatório, não o contrário."""
+def test_todo_campo_dispensavel_e_marcado_como_opcional(cliente):
+    """Um campo opcional sem sinal vira campo ignorado: quem passa os olhos pula tudo que
+    não tem asterisco. O asterisco marca o obrigatório — e nada marcava o contrário."""
+    from siras.web import formulario
+
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+    opcionais = [
+        campo[0]
+        for campo in (formulario.CAMPOS_ACIDEZ + formulario.CAMPOS_FERTILIDADE
+                      + formulario.CAMPOS_SUBSUPERFICIE + formulario.CAMPOS_CONTEXTO
+                      + formulario.CAMPOS_DA_AREA + formulario.CAMPOS_RESPONSAVEL)
+        if not campo[4]
+    ] + ["area_ha"]
+
+    for campo in opcionais:
+        rotulo = re.search(
+            rf'<label class="campo[^"]*"\s*for="{campo}">.*?</span>', tela, re.S
+        )
+        assert rotulo, f"{campo} não está na tela"
+        assert "campo__opcional" in rotulo.group(0), f"{campo} não é marcado como opcional"
+
+
+def test_todo_campo_opcional_diz_por_que_valeria_preencher(cliente):
+    """'Opcional' sozinho ensina a pular. A dica é o que transforma isso em escolha
+    informada — por exemplo, que a área habilita o total a comprar."""
+    from siras.web import formulario
+
     tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
 
-    for campo in ("responsavel_nome", "responsavel_documento", "propriedade", "talhao"):
-        bloco = re.search(rf'<input type="text" id="{campo}"[^>]*>', tela).group(0)
-        assert "placeholder=" in bloco and "Opcional" in bloco, f"{campo} não diz ser opcional"
+    for campo, motivo in formulario.MOTIVO_DE_PREENCHER.items():
+        if f'id="{campo}"' not in tela:
+            continue  # campo de subsuperfície de outro grupo, ou talhão adicional
+        assert f'id="{campo}-dica"' in tela, f"{campo} não tem dica"
+        assert motivo[:40] in tela, f"a dica de {campo} não traz o motivo"
+
+
+def test_a_dica_da_area_promete_o_total_e_nao_a_dose_por_hectare(cliente):
+    """É o exemplo que o autor pediu nominalmente: quem preenche a área passa a receber
+    a quantidade total a comprar, e não só a dose por hectare."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+    balao = re.search(r'id="area_ha-dica">([^<]*)<', tela).group(1)
+
+    assert "total" in balao.lower() and "hectare" in balao.lower()
+
+
+def test_a_dica_e_dispensavel_sem_mover_o_ponteiro():
+    """Conteúdo que aparece ao passar o mouse precisa poder ser fechado sem tirar o
+    ponteiro dali (WCAG 1.4.13): o balão pode estar cobrindo o campo seguinte."""
+    codigo = (_ESTATICOS / "js" / "interacoes.js").read_text(encoding="utf-8")
+
+    assert "is-dispensada" in codigo
+    assert 'evento.key !== "Escape"' in codigo
+    assert re.search(r"\.dica\.is-dispensada \.dica__balao", _TELAS_CSS)
+
+
+def test_o_balao_existe_no_dom_mesmo_fechado(cliente):
+    """Leitor de tela chega ao texto pelo aria-describedby, sem depender de o balão estar
+    visível — por isso ele é escondido por visibilidade, e não removido."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'aria-describedby="area_ha-dica"' in tela
+    assert re.search(r"\.dica__balao \{[^}]*visibility: hidden", _TELAS_CSS, re.S)
+
+
+def test_a_area_fica_visivel_e_nao_recolhida(cliente):
+    """Escondida dentro do bloco recolhido do responsável, a área passava despercebida —
+    e com ela o total a comprar."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    antes_do_details = tela.split("<details")[0]
+    assert 'id="area_ha"' in antes_do_details
+    assert 'id="propriedade"' in antes_do_details and 'id="talhao"' in antes_do_details
+
+
+@pytest.mark.parametrize("cultura", ["soja", "abacateiro", "erva-mate"])
+def test_nenhum_selo_de_opcional_fica_sem_explicacao(cliente, cultura):
+    """A recíproca do teste acima: marcar um campo como dispensável sem dizer o que se
+    ganha preenchendo é meio caminho — ensina a pular e não oferece o motivo de não
+    pular. Vale para as variáveis condicionais, que vêm da base e não do código."""
+    tela = cliente.get(f"/analise/dados?cultura_id={cultura}").get_data(as_text=True)
+
+    assert tela.count("campo__opcional") == tela.count("dica__balao"), (
+        "há campo marcado como opcional sem a dica do porquê"
+    )
+
+
+def test_select_com_padrao_nao_se_chama_opcional(cliente):
+    """'Cultivo' abre em 1º e 'Profundidade' em 20 cm: já vêm preenchidos. Chamá-los de
+    opcionais diria que dá para deixar em branco, o que é falso — e gastaria o selo
+    justamente onde ele não informa nada."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    for campo in ("cultivo", "profundidade_incorporacao_cm"):
+        rotulo = re.search(
+            rf'<label class="campo[^"]*"\s*for="{campo}">.*?</span>', tela, re.S
+        ).group(0)
+        assert "campo__opcional" not in rotulo, f"{campo} tem padrão e não é opcional"

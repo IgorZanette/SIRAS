@@ -80,6 +80,8 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
         "campos_subsuperficie": formulario.CAMPOS_SUBSUPERFICIE,
         "campos_contexto": formulario.CAMPOS_CONTEXTO,
         "campos_responsavel": formulario.CAMPOS_RESPONSAVEL,
+        "campos_da_area": formulario.CAMPOS_DA_AREA,
+        "motivos": formulario.MOTIVO_DE_PREENCHER,
         "campos_do_talhao": formulario.CAMPOS_DO_TALHAO,
         "campo_area": formulario.CAMPO_AREA,
     }

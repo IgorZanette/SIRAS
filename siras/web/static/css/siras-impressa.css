@@ -15,6 +15,13 @@
    .f-mb a .f-ma. Entao a conversao nao reescreve componente por componente:
    redefine a rampa uma vez, em cinza, e ficha, regua, selo e dose seguem juntos.
 
+   POR QUE TODO SELETOR COMECA COM :root
+   O tema claro pinta com ":root[data-tema=claro] .classe", que pesa 0,3,0.
+   "body.impressa .classe" pesa 0,2,1 e PERDE - foi assim que o botao Imprimir
+   saiu com texto escuro sobre fundo preto no modo claro, ilegivel. O ":root na
+   frente leva esta folha a 0,3,1 e a poe acima do tema, que e onde ela tem de
+   estar: aqui o tema da aplicacao nao vale, o documento e preto e branco.
+
    A rampa e MONOTONA de claro para escuro (muito baixo -> muito alto): num
    documento sem cor a unica coisa que distingue cinco faixas e a luminosidade, e
    ela precisa crescer na mesma direcao que a grandeza, ou a regua passa a mentir.
@@ -25,7 +32,7 @@
 /* --- A folha ------------------------------------------------------------ */
 @page { size: A4 portrait; margin: 16mm 14mm; }
 
-body.impressa {
+:root body.impressa {
   background: #FFFFFF;
   background-image: none;
   color: #000000;
@@ -33,9 +40,9 @@ body.impressa {
 
 /* Em tela, a largura da coluna imita a A4 util: quem abre a versao impressa
    esta conferindo a paginacao, e uma coluna de 1200px nao mostraria isso. */
-body.impressa .env { max-width: 186mm; padding: 0 var(--e-4); }
+:root body.impressa .env { max-width: 186mm; padding: 0 var(--e-4); }
 
-body.impressa .doc {
+:root body.impressa .doc {
   background: #FFFFFF;
   color: #000000;
   box-shadow: none;
@@ -47,104 +54,122 @@ body.impressa .doc {
 
 /* Nada da aplicacao acompanha o documento: aqui ele nao esta dentro de uma
    ferramenta, ele E a entrega. */
-body.impressa .barra,
-body.impressa .etapas,
-body.impressa .progresso,
-body.impressa .guia,
-body.impressa .calculando { display: none !important; }
+:root body.impressa .barra,
+:root body.impressa .etapas,
+:root body.impressa .progresso,
+:root body.impressa .guia,
+:root body.impressa .calculando { display: none !important; }
 
 /* --- Tipografia --------------------------------------------------------- */
-body.impressa .doc__cab h2 { color: #000000; }
-body.impressa .doc__meta,
-body.impressa .doc__data,
-body.impressa .doc__fonte,
-body.impressa .t-rotulo,
-body.impressa .t-aux,
-body.impressa .sec__intro,
-body.impressa .dose__obs { color: #3A3A3A; }
-body.impressa .doc__cultura strong { color: #000000; }
-body.impressa .numero,
-body.impressa .numero--sec { color: #000000; }
+:root body.impressa .doc__cab h2 { color: #000000; }
+:root body.impressa .doc__meta,
+:root body.impressa .doc__data,
+:root body.impressa .doc__fonte,
+:root body.impressa .t-rotulo,
+:root body.impressa .t-aux,
+:root body.impressa .sec__intro,
+:root body.impressa .dose__obs { color: #3A3A3A; }
+:root body.impressa .doc__cultura strong { color: #000000; }
+:root body.impressa .numero,
+:root body.impressa .numero--sec { color: #000000; }
 
 /* --- A rampa de cinco classes ------------------------------------------- */
-body.impressa .f-mb { --cor: #E2E2E2; }
-body.impressa .f-b  { --cor: #BDBDBD; }
-body.impressa .f-m  { --cor: #949494; }
-body.impressa .f-a  { --cor: #666666; }
-body.impressa .f-ma { --cor: #3A3A3A; }
+:root body.impressa .f-mb { --cor: #E2E2E2; }
+:root body.impressa .f-b  { --cor: #BDBDBD; }
+:root body.impressa .f-m  { --cor: #949494; }
+:root body.impressa .f-a  { --cor: #666666; }
+:root body.impressa .f-ma { --cor: #3A3A3A; }
 
 /* A regua deixa de usar opacidade: o tom ja e o dado. Opacidade sobre branco
    clarearia a rampa inteira e encostaria as cinco faixas umas nas outras. */
-body.impressa .regua__faixa,
-body.impressa .atributo .regua__faixa { opacity: 1; box-shadow: none; }
-body.impressa .regua__faixa.is-atual,
-body.impressa .atributo .regua__faixa.is-atual {
+:root body.impressa .regua__faixa,
+:root body.impressa .atributo .regua__faixa { opacity: 1; box-shadow: none; }
+:root body.impressa .regua__faixa.is-atual,
+:root body.impressa .atributo .regua__faixa.is-atual {
   opacity: 1;
   box-shadow: none;
   outline: 1.5px solid #000000;
   outline-offset: 1px;
 }
-body.impressa .regua__marcador { background: #000000; width: 3px; margin-left: -1.5px; }
-body.impressa .regua__rotulos { color: #3A3A3A; }
-body.impressa .regua__rotulos .is-atual { color: #000000; font-weight: 800; }
+:root body.impressa .regua__marcador { background: #000000; width: 3px; margin-left: -1.5px; }
+:root body.impressa .regua__rotulos { color: #3A3A3A; }
+:root body.impressa .regua__rotulos .is-atual { color: #000000; font-weight: 800; }
 
 /* A ficha usava --cor como cor de TEXTO, e um cinza claro ali some. O texto vai
    a preto e o tom da classe fica no ponto, que e onde ele informa sem atrapalhar
    a leitura. */
-body.impressa .ficha {
+:root body.impressa .ficha {
   color: #000000;
   background: #FFFFFF;
   border: 1px solid #000000;
 }
-body.impressa .ficha::before { border: 1px solid #000000; }
+:root body.impressa .ficha::before { border: 1px solid #000000; }
 
 /* --- Blocos ------------------------------------------------------------- */
-body.impressa .dose {
+:root body.impressa .dose {
   background: #FFFFFF;
   border: 1px solid #8A8A8A;
   border-top: 2.5pt solid #000000;
 }
-body.impressa .dose--neutra { border-top-color: #8A8A8A; }
+:root body.impressa .dose--neutra { border-top-color: #8A8A8A; }
 
-body.impressa .aptidao__selo {
+:root body.impressa .aptidao__selo {
   background: #FFFFFF;
   border: 1.5pt solid #000000;
 }
-body.impressa .aptidao__selo .ico { color: #000000; }
+:root body.impressa .aptidao__selo .ico { color: #000000; }
 
-body.impressa .limitante__barra { background: #FFFFFF; border: 1px solid #8A8A8A; }
-body.impressa .limitante__barra i { background: #000000; }
+:root body.impressa .limitante__barra { background: #FFFFFF; border: 1px solid #8A8A8A; }
+:root body.impressa .limitante__barra i { background: #000000; }
 
-body.impressa .orientacao {
+:root body.impressa .orientacao {
   background: #FFFFFF;
   border: 1px solid #C4C4C4;
   border-left: 2.5pt solid #000000;
 }
 
-body.impressa .painel,
-body.impressa .aviso {
+:root body.impressa .painel,
+:root body.impressa .aviso {
   background: #FFFFFF;
   border: 1px solid #8A8A8A;
   color: #000000;
 }
-body.impressa .aviso .ico,
-body.impressa .aviso strong { color: #000000; }
+:root body.impressa .aviso .ico,
+:root body.impressa .aviso strong { color: #000000; }
 
-body.impressa .assinatura__linha { border-top-color: #000000; }
-body.impressa .assinatura__nome { color: #000000; }
-body.impressa .assinatura__papel,
-body.impressa .assinatura__dados { color: #1F1F1F; }
-body.impressa .assinatura__carimbo { color: #555555; }
+:root body.impressa .assinatura__linha { border-top-color: #000000; }
+:root body.impressa .assinatura__nome { color: #000000; }
+:root body.impressa .assinatura__papel,
+:root body.impressa .assinatura__dados { color: #1F1F1F; }
+:root body.impressa .assinatura__carimbo { color: #555555; }
 
-body.impressa .doc__rodape { border-top-color: #8A8A8A; color: #3A3A3A; }
+:root body.impressa .doc__rodape { border-top-color: #8A8A8A; color: #3A3A3A; }
 
-body.impressa .talhao { border-bottom-color: #000000; }
-body.impressa .talhao__n { color: #3A3A3A; }
-body.impressa .talhao__nome { color: #000000; }
-body.impressa .talhao__area { color: #1F1F1F; }
-body.impressa .total { background: #FFFFFF; border: 1px solid #8A8A8A; }
-body.impressa .total__nome { color: #1F1F1F; }
-body.impressa .trilha__fonte { color: #555555; }
+:root body.impressa .talhao { border-bottom-color: #000000; }
+:root body.impressa .talhao__n { color: #3A3A3A; }
+:root body.impressa .talhao__nome { color: #000000; }
+:root body.impressa .talhao__area { color: #1F1F1F; }
+:root body.impressa .total { background: #FFFFFF; border: 1px solid #8A8A8A; }
+:root body.impressa .total__nome { color: #1F1F1F; }
+:root body.impressa .trilha__fonte { color: #555555; }
+:root body.impressa .trilha__modulo { color: #3A3A3A; }
+:root body.impressa .trilha__ref { color: #000000; }
+:root body.impressa .trilha__vezes { background: #E2E2E2; color: #1F1F1F; }
+:root body.impressa .sec--nota { border-top-color: #8A8A8A; }
+/* O link para as tabelas nao e impresso, mas esta na tela desta versao: verde
+   ali seria a unica cor da pagina. */
+:root body.impressa .trilha__link { color: #000000; text-decoration: underline; }
+
+/* Restos de verde dentro do documento. Todos vinham de regras de tela que o
+   preto e branco nao alcancava: o icone de cada cabecalho de secao, a seta
+   entre os dois cenarios de aptidao e a tarja da orientacao de parcelamento. */
+:root body.impressa .sec__cab .ico { color: #000000; }
+:root body.impressa .cenarios__seta { color: #000000; }
+:root body.impressa .cenarios__seta .ico { color: #000000; }
+:root body.impressa .orientacao--parcelamento,
+:root body.impressa .orientacao--calagem,
+:root body.impressa .orientacao--restricao { border-left-color: #000000; }
+:root body.impressa .campo__label b { color: #000000; }
 
 /* --- Barra de acoes desta tela ------------------------------------------ */
 /* Existe so na tela: e o que permite conferir a paginacao antes de gastar papel. */
@@ -154,23 +179,23 @@ body.impressa .trilha__fonte { color: #555555; }
   border-bottom: 1px solid #C4C4C4;
 }
 .acoes-impressa__nota { font-size: var(--fs-xs); color: #555555; margin-left: auto; }
-body.impressa .btn--contorno { background: #FFFFFF; color: #000000; border-color: #000000; }
-body.impressa .btn--primario { background: #000000; color: #FFFFFF; border-color: #000000; }
+:root body.impressa .btn--contorno { background: #FFFFFF; color: #000000; border-color: #000000; }
+:root body.impressa .btn--primario { background: #000000; color: #FFFFFF; border-color: #000000; }
 
 /* --- Impressao propriamente dita ---------------------------------------- */
 @media print {
-  body.impressa .env { max-width: none; padding: 0; }
-  body.impressa .acoes-impressa { display: none !important; }
+  :root body.impressa .env { max-width: none; padding: 0; }
+  :root body.impressa .acoes-impressa { display: none !important; }
 
   /* Os cinzas da rampa SAO o dado: sem isto o navegador os descarta ao imprimir
      e as cinco faixas viram cinco retangulos brancos. */
-  body.impressa .regua__faixa,
-  body.impressa .regua__marcador,
-  body.impressa .ficha,
-  body.impressa .ficha::before,
-  body.impressa .dose,
-  body.impressa .limitante__barra i,
-  body.impressa .aptidao__selo {
+  :root body.impressa .regua__faixa,
+  :root body.impressa .regua__marcador,
+  :root body.impressa .ficha,
+  :root body.impressa .ficha::before,
+  :root body.impressa .dose,
+  :root body.impressa .limitante__barra i,
+  :root body.impressa .aptidao__selo {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

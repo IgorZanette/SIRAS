@@ -116,7 +116,7 @@ def test_a_quebra_e_restringida_ao_item_e_nao_a_secao():
     bloco = _bloco_de_impressao()
 
     assert re.search(r"section,\s*\.painel\s*\{[^}]*break-inside:\s*auto", bloco)
-    for item in (".dose", ".atributo", ".trilha__item", ".limitante"):
+    for item in (".dose", ".atributo", ".trilha__passo", ".limitante"):
         assert re.search(rf"{re.escape(item)}[^{{]*\{{[^}}]*break-inside:\s*avoid", bloco), (
             f"{item} pode partir entre páginas"
         )

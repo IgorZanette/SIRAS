@@ -41,16 +41,44 @@
   background: rgba(10,15,12,.78); backdrop-filter: blur(14px) saturate(140%);
   border-bottom: var(--borda);
 }
+/* --- Tamanho da barra e da marca ---------------------------------------
+   A barra abre GRANDE e encolhe quando a pagina rola. Nao e enfeite: no topo
+   ela e a apresentacao do sistema, e dali para baixo o conteudo e que importa
+   - devolver a altura ao conteudo e o que um cabecalho fixo deve fazer.
+
+   Os tres tamanhos vivem em variaveis para nao existirem numeros soltos: a
+   altura da barra, o lado do icone e a altura da palavra encolhem juntos, na
+   mesma proporcao, e e isso que mantem a assinatura equilibrada nos dois
+   estados. --barra-escala vale 1 no topo e 0.8 depois da rolagem. */
+.barra {
+  --barra-escala: 1;
+  --barra-altura: 95px;
+  --marca-icone: 59px;
+  --marca-palavra: 31px;
+}
+.barra.is-reduzida { --barra-escala: .8; }
+
 .barra__int { display: flex; align-items: center; justify-content: space-between;
-              gap: var(--e-5); min-height: 68px; }
+              gap: var(--e-5);
+              min-height: calc(var(--barra-altura) * var(--barra-escala));
+              transition: min-height var(--tr); }
 .logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; flex: none; }
-.logo__icone { width: 42px; height: 42px; display: block; flex: none;
-               transition: transform var(--tr); }
+.logo__icone { width: calc(var(--marca-icone) * var(--barra-escala));
+               height: calc(var(--marca-icone) * var(--barra-escala));
+               display: block; flex: none;
+               transition: transform var(--tr), width var(--tr), height var(--tr); }
 .logo:hover .logo__icone { transform: translateY(-2px) scale(1.04); }
 .logo__assinatura { display: grid; gap: 3px; }
 /* A palavra e imagem, e nao texto: e o desenho oficial, com a folha no "A". Altura fixa
    e largura automatica para o atributo width do <img> nao a achatar. */
-.logo__nome { height: 22px; width: auto; display: block; }
+.logo__nome { height: calc(var(--marca-palavra) * var(--barra-escala)); width: auto;
+              display: block; transition: height var(--tr); }
+
+/* Quem pediu menos movimento recebe os dois tamanhos, e nenhuma animacao entre
+   eles: o encolhimento continua acontecendo, so nao desliza. */
+@media (prefers-reduced-motion: reduce) {
+  .barra__int, .logo__icone, .logo__nome { transition: none; }
+}
 .logo__nome--claro { display: none; }
 :root[data-tema="claro"] .logo__nome--escuro { display: none; }
 :root[data-tema="claro"] .logo__nome--claro { display: block; }
@@ -59,8 +87,7 @@
              white-space: nowrap; line-height: 1.2; }
 @media (max-width:900px){ .logo__sub { display: none; } }
 @media (max-width:640px){
-  .logo__icone { width: 34px; height: 34px; }
-  .logo__nome { height: 18px; }
+  .barra { --barra-altura: 72px; --marca-icone: 44px; --marca-palavra: 24px; }
 }
 .barra__nav { display: flex; align-items: center; gap: var(--e-3); }
 /* Em tela estreita a logo e a acao primaria e que precisam do espaco. */
@@ -201,7 +228,9 @@
          grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); }
 .grade > * { min-width: 0; }
 
-.leitura { position: sticky; top: 84px; overflow: hidden; }
+/* Cola abaixo da barra JA REDUZIDA: quando este painel gruda, a pagina rolou, e
+   a barra ali ja esta nos 80%. Medir pela altura cheia deixaria uma faixa morta. */
+.leitura { position: sticky; top: 92px; overflow: hidden; }
 .leitura__cab { display: flex; align-items: center; gap: var(--e-3);
                 padding: var(--e-4) var(--e-5); border-bottom: var(--borda);
                 background: rgba(140,226,63,.06); }
@@ -319,20 +348,42 @@
                     background: #E3EAE5; overflow: hidden; }
 .limitante__barra i { display: block; height: 100%; background: var(--sig-laranja); }
 
-/* 128px nao cabiam "graos_convencional", e o inline-flex sem min-width:0 nao encolhe:
-   a etiqueta vazava por cima da coluna do texto e as duas se sobrepunham. */
-.trilha__item { display: grid; grid-template-columns: 168px minmax(0,1fr); gap: var(--e-4);
-                padding: var(--e-3) 0; border-bottom: 1px solid #EAF0EC;
-                font-size: var(--fs-sm); align-items: start; }
-@media (max-width:620px){ .trilha__item { grid-template-columns:1fr; gap:var(--e-1);} }
-.trilha__ref { display: flex; align-items: flex-start; gap: .4rem; min-width: 0;
-               font-weight: 800; font-size: var(--fs-xs); color: var(--v-700);
-               overflow-wrap: anywhere; line-height: 1.35; }
-.trilha__ref .ico { margin-top: 1px; }
-.trilha__vezes { display: inline-block; margin-left: .3rem; padding: 0 .35rem;
+/* --- Trilha: nota de rodape, e nao capitulo -----------------------------
+   E a secao que da ao laudo valor em analise de credito rural, e tambem a mais
+   longa: mais de vinte passos. Em corpo de leitura ocupava metade do documento
+   e competia com a recomendacao, que e o que o tecnico veio buscar.
+
+   Aqui ela e referencia: corpo pequeno, linhas rentes, e cada passo cabendo numa
+   linha so - etiqueta, o que a regra decidiu, e a fonte no fim da mesma frase.
+   Continua conferivel item a item, sem disputar atencao com as doses. */
+.sec--nota { margin-top: var(--e-7); padding-top: var(--e-4);
+             border-top: 1px solid #D8E2DB; }
+.sec__cab--nota { gap: var(--e-3); flex-wrap: wrap; margin-bottom: var(--e-3); }
+.sec__cab--nota h3 { font-size: var(--fs-md); }
+.sec__cab--nota .t-aux { font-size: var(--fs-2xs); }
+.trilha__link { margin-left: auto; font-size: var(--fs-2xs); font-weight: 700;
+                color: var(--v-700); white-space: nowrap; }
+
+.trilha { margin: 0; font-size: var(--fs-2xs); line-height: 1.45; }
+.trilha__modulo { margin: var(--e-3) 0 2px; font-family: var(--ff-ui);
+                  font-size: var(--fs-3xs); font-weight: 700; letter-spacing: .07em;
+                  text-transform: uppercase; color: #7A8C82; }
+.trilha__modulo:first-child { margin-top: 0; }
+
+/* 128px nao cabiam "graos_convencional", e o inline-flex sem min-width:0 nao
+   encolhe: a etiqueta vazava por cima da coluna do texto. 148px cabem, e o
+   overflow-wrap cobre o identificador que ainda assim passar. */
+.trilha__passo { display: grid; grid-template-columns: 148px minmax(0,1fr);
+                 gap: var(--e-3); margin: 0; padding: 3px 0;
+                 border-bottom: 1px solid #F1F5F2; align-items: baseline; }
+.trilha__passo:last-child { border-bottom: 0; }
+@media (max-width:620px){ .trilha__passo { grid-template-columns: 1fr; gap: 0; } }
+.trilha__ref { min-width: 0; font-weight: 700; color: #40694F;
+               overflow-wrap: anywhere; }
+.trilha__vezes { display: inline-block; margin-left: .25rem; padding: 0 .3rem;
                  border-radius: 999px; background: #EAF0EC; color: #5C6F64;
                  font-size: 9px; font-weight: 700; }
-.trilha__txt { color: #405146; line-height: 1.55; }
+.trilha__txt { color: #405146; min-width: 0; }
 
 .doc__rodape { margin-top: var(--e-7); padding-top: var(--e-4); border-top: 1px solid #D8E2DB;
                font-size: var(--fs-xs); color: #5C6F64; line-height: 1.55; }
@@ -376,7 +427,7 @@
      de empurrar a secao para a pagina seguinte -- sobra meia folha em branco e a
      secao quebra do mesmo jeito. Restringir item a item quebra onde deve. */
   section, .painel { break-inside: auto; }
-  .dose, .atributo, .trilha__item, .limitante, .aptidao__selo { break-inside: avoid; }
+  .dose, .atributo, .trilha__passo, .limitante, .aptidao__selo { break-inside: avoid; }
 
   /* Titulo orfao no pe da pagina e o defeito mais visivel de um laudo impresso. */
   .sec__cab, h2, h3, h4 { break-after: avoid; }
@@ -731,9 +782,10 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
   .cenario .aptidao__selo { min-height: 0; padding: var(--e-4) var(--e-3); }
 
   /* A trilha e a maior secao do laudo: em papel ela informa, nao protagoniza. */
-  .trilha__item { grid-template-columns: 150px minmax(0,1fr); padding: 6pt 0;
-                  font-size: 8.5pt; }
-  .trilha__fonte { font-size: 7.5pt; }
+  .trilha { font-size: 7.5pt; }
+  .trilha__passo { grid-template-columns: 120px minmax(0,1fr); padding: 2pt 0; }
+  .trilha__fonte { font-size: 6.5pt; }
+  .trilha__modulo { font-size: 6.5pt; margin-top: 5pt; }
   .orientacao { break-inside: avoid; }
   .sec { margin-top: var(--e-5); }
 }
@@ -754,7 +806,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 .orientacao__txt { font-size: var(--fs-sm); color: #0D1410; line-height: 1.55; }
 
 /* A fonte acompanha a regra sem competir com ela. */
-.trilha__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs);
+.trilha__fonte { display: inline; margin-left: .4rem; font-size: var(--fs-3xs);
                  color: #7A8C82; }
 .doc__fonte { display: block; margin-top: 2px; font-size: var(--fs-3xs); color: #7A8C82; }
 
@@ -1058,3 +1110,66 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 @media print {
   .campo__opcional, .dica { display: none !important; }
 }
+
+/* =========================================================================
+   Ajustes de legibilidade e encaixe dos campos
+   -------------------------------------------------------------------------
+   Tres defeitos que so aparecem preenchendo o formulario de verdade, e que
+   tinham a mesma origem: o corpo de 18px em fonte display dentro da caixa.
+
+   1. Num <select> com opcao longa - "Plantio direto consolidado com
+      restricoes" - o texto nao cabia e ficava cortado pela seta.
+   2. Numa coluna de 170px, o valor digitado encostava na unidade.
+   3. A ajuda abaixo do campo, a 11px, ficava pequena demais para o texto que
+      mais explica o que preencher.
+
+   O valor continua sendo o elemento de maior peso do campo, so que em 16px, e
+   a ajuda sobe para 12px. A troca e deliberada: o numero nao precisa gritar, e
+   a frase que ensina a preenche-lo precisa ser legivel.
+   ====================================================================== */
+.campo__caixa input, .campo__caixa select { font-size: var(--fs-md); }
+/* O <select> carrega frase, e nao numero: pesa menos e cabe mais. */
+.campo__caixa select { font-size: var(--fs-sm); font-weight: 600; }
+.campo__ajuda { font-size: var(--fs-2xs); line-height: 1.45; }
+
+/* O rotulo agora carrega selo e dica alem do nome: sem quebra, um rotulo longo
+   empurrava o "i" para fora da coluna. */
+.campo__label { flex-wrap: wrap; row-gap: 2px; }
+
+/* --- Alinhamento entre campos vizinhos ---------------------------------
+   Cada .campo tem tres partes de altura propria - rotulo, caixa e ajuda - e
+   textos de ajuda de tamanhos diferentes desalinhavam as caixas da mesma
+   linha: uma comecava onde a outra ja terminara.
+
+   Com subgrid as tres partes passam a dividir as MESMAS faixas da grade, e as
+   caixas se alinham independentemente do tamanho do texto em volta. Onde
+   subgrid nao existe, o layout anterior continua valendo - desalinhado, e
+   funcionando. */
+.grade { grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); }
+
+@supports (grid-template-rows: subgrid) {
+  .grade { grid-auto-rows: auto; }
+  .grade > .campo { grid-row: span 3; grid-template-rows: subgrid;
+                    display: grid; row-gap: var(--e-2); }
+}
+
+/* --- O "i" da dica ------------------------------------------------------
+   Sem fundo nem contorno ele desaparecia dentro do rotulo, nos dois temas: um
+   traco fino cinza ao lado de um texto em negrito nao e alvo, e ninguem
+   descobria que havia explicacao ali. Agora e um alvo redondo, com a cor de
+   acao do sistema. */
+.dica__gatilho {
+  width: 20px; height: 20px;
+  color: var(--v-300);
+  background: rgba(140,226,63,.16);
+  border: 1px solid rgba(140,226,63,.42);
+}
+.dica__gatilho:hover { color: var(--n-950); background: var(--v-400);
+                       border-color: var(--v-400); }
+:root[data-tema="claro"] .dica__gatilho {
+  color: var(--v-700);
+  background: rgba(78,154,42,.14);
+  border-color: rgba(78,154,42,.45);
+}
+:root[data-tema="claro"] .dica__gatilho:hover { color: #FFFFFF; background: var(--v-700);
+                                                border-color: var(--v-700); }

@@ -395,7 +395,7 @@ def test_a_trilha_nao_repete_a_mesma_fonte(cliente):
     assert trilha.count("composicao_aptidao") == 0, "identificador cru na tela"
     assert "Composição da classe" in trilha
     # Os sete fatores aparecem uma vez cada, e não duas.
-    assert trilha.count('class="trilha__item"') == 12
+    assert trilha.count('class="trilha__passo"') == 12
 
 
 def test_a_repeticao_continua_registrada(cliente):

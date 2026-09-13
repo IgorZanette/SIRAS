@@ -41,7 +41,7 @@
     <a class="btn btn--contorno btn--pequeno{% if cenario_ativo == cenario.id %} is-ativo{% endif %}"
        href="{{ url_for('siras.dados', cultura_id=cultura_id, exemplo=cenario.id) }}"
        title="{{ cenario.resumo }}">
-      {{ i.ico("edita", "ico ico--sm") }} {{ cenario.nome }}
+      {{ i.ico("exemplo", "ico ico--sm") }} {{ cenario.nome }}
     </a>
     {% endfor %}
   </div>
@@ -112,7 +112,7 @@
     {% if variaveis %}
     <div class="painel bloco">
       <div class="bloco__cab">
-        {{ i.ico("broto") }}
+        {{ i.ico("manejo") }}
         <h3>Manejo da cultura</h3>
         <span class="t-aux">O Manual publica recomendações distintas para {{ cultura_nome }}</span>
       </div>
@@ -174,7 +174,7 @@
        direta no que o laudo entrega, e escondê-la fazia o recurso passar despercebido. #}
     <div class="painel bloco">
       <div class="bloco__cab">
-        {{ i.ico("perfil") }}
+        {{ i.ico("area") }}
         <h3>A área analisada</h3>
         <span class="t-aux">Opcional — identifica o laudo e habilita o total a comprar</span>
       </div>
@@ -197,7 +197,7 @@
        respeito. Abrir sozinha quando o manejo a exige é a etapa 5. #}
     <details class="painel bloco">
       <summary class="bloco__cab" style="cursor:pointer;list-style:none">
-        {{ i.ico("perfil") }}
+        {{ i.ico("subsolo") }}
         <h3>Subsuperfície, 10–20 cm</h3>
         <span class="t-aux">Exigida pelo plantio direto consolidado com restrições</span>
       </summary>
@@ -215,7 +215,7 @@
        anexar o laudo a um projeto precisa, e aí ele já sai impresso para assinar. #}
     <details class="painel bloco">
       <summary class="bloco__cab" style="cursor:pointer">
-        {{ i.ico("laudo") }}
+        {{ i.ico("assina") }}
         <h3>Responsável técnico</h3>
         <span class="t-aux">Opcional — sai impresso no laudo</span>
       </summary>
@@ -233,7 +233,7 @@
        mesmo manejo, mesmo corretivo, e um documento só com uma recomendação por área. #}
     <div class="painel bloco talhoes" data-talhoes>
       <div class="bloco__cab">
-        {{ i.ico("perfil") }}
+        {{ i.ico("talhoes") }}
         <h3>Outros talhões</h3>
         <span class="t-aux">Mesma cultura e mesmo manejo, outra amostra</span>
       </div>
@@ -250,7 +250,7 @@
         nome de cada área passa a ser obrigatório.
       </p>
       <button class="btn btn--contorno" type="button" data-adicionar-talhao>
-        {{ i.ico("edita", "ico ico--sm") }} Adicionar novo talhão
+        {{ i.ico("adiciona", "ico ico--sm") }} Adicionar novo talhão
       </button>
     </div>
 
@@ -294,4 +294,5 @@
 <script src="{{ url_for('static', filename='js/leitura-ao-vivo.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/gerando.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/talhoes.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/envio.js') }}" defer></script>
 {% endblock %}

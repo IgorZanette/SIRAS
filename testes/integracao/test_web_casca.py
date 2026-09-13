@@ -25,11 +25,18 @@ _TEMPLATES = Path(__file__).parent.parent.parent / "siras" / "web" / "templates"
 #: Os 24 símbolos do conjunto (PLANO-FRONTEND §6.3), mais a marca e os três que a
 #: interface pediu depois: sol e lua para o alternador de tema, e a lupa. Todos seguem
 #: as regras da família, inclusive a onda de horizonte que assina o conjunto.
+#:
+#: Os dez últimos nasceram de um pedido específico: nenhum bloco deve tomar emprestado o
+#: símbolo de outro. "A área analisada", "Subsuperfície" e "Outros talhões" dividiam o
+#: mesmo desenho de perfil, e "Cultura e manejo" dividia o broto com "Manejo da cultura" —
+#: três blocos vizinhos com o mesmo ícone deixam de identificar seja lá o que for.
 _ICONES_ESPERADOS = {
     "perfil", "broto", "calagem", "analise", "regua", "alvo", "aptidao", "laudo", "rastro",
     "graos", "hortalicas", "tuberculos", "frutiferas", "erva", "comerciais",
     "alerta", "confere", "avanca", "volta", "imprime", "edita", "baixa", "info",
     "sol", "lua", "lupa",
+    "manejo", "aplicar", "area", "subsolo", "talhao", "talhoes", "assina", "soma",
+    "adiciona", "exemplo",
     "marca",
 }
 

@@ -34,6 +34,19 @@
    `valor` existe para o re-render depois de um erro de validação: o formulário volta
    preenchido, em vez de exigir que o técnico redigite os onze campos por causa de um.
 #}
+{# Rodape do campo: a ajuda e, quando houver, o aviso de validacao.
+
+   Existe como UM elemento so, e sempre, por dois motivos. O primeiro e de layout: a
+   grade alinha os campos por subgrid, com uma faixa para o rotulo, uma para a caixa e
+   uma para o rodape — um quarto filho injetado pelo JavaScript nao teria faixa e caia
+   por cima da ajuda, que foi exatamente o defeito. O segundo e de leitura: ajuda e erro
+   falam do mesmo campo e pertencem ao mesmo lugar, um abaixo do outro.
+
+   Nasce mesmo sem ajuda: um campo sem texto explicativo ainda pode receber aviso. #}
+{% macro rodape(id, ajuda=None) -%}
+<span class="campo__rodape">{% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}</span>
+{%- endmacro %}
+
 {% macro campo(id, rotulo, unidade=None, ajuda=None, obrigatorio=False,
                passo="0.1", placeholder="", valor=None, erro=False, faixa=None,
                motivo=None) %}
@@ -51,7 +64,7 @@
          escrita no código, nunca texto vindo do usuário. #}
       {% if unidade %}<span class="campo__unidade">{{ unidade|safe }}</span>{% endif %}
     </span>
-    {% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}
+    {{ rodape(id, ajuda) }}
   </label>
 {% endmacro %}
 
@@ -82,7 +95,7 @@
         {% endfor %}
       </select>
     </span>
-    {% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}
+    {{ rodape(id, ajuda) }}
   </label>
 {% endmacro %}
 
@@ -94,6 +107,6 @@
     <span class="campo__caixa">
       <input type="text" id="{{ id }}" name="{{ id }}" autocomplete="off"{% if valor %} value="{{ valor }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}>
     </span>
-    {% if ajuda %}<span class="campo__ajuda" id="{{ id }}-ajuda">{{ ajuda }}</span>{% endif %}
+    {{ rodape(id, ajuda) }}
   </label>
 {% endmacro %}

@@ -52,11 +52,11 @@
    estados. --barra-escala vale 1 no topo e 0.8 depois da rolagem. */
 .barra {
   --barra-escala: 1;
-  --barra-altura: 95px;
-  --marca-icone: 59px;
-  --marca-palavra: 31px;
+  --barra-altura: 85px;
+  --marca-icone: 53px;
+  --marca-palavra: 28px;
 }
-.barra.is-reduzida { --barra-escala: .8; }
+.barra.is-reduzida { --barra-escala: .85; }
 
 .barra__int { display: flex; align-items: center; justify-content: space-between;
               gap: var(--e-5);
@@ -87,7 +87,7 @@
              white-space: nowrap; line-height: 1.2; }
 @media (max-width:900px){ .logo__sub { display: none; } }
 @media (max-width:640px){
-  .barra { --barra-altura: 72px; --marca-icone: 44px; --marca-palavra: 24px; }
+  .barra { --barra-altura: 65px; --marca-icone: 40px; --marca-palavra: 22px; }
 }
 .barra__nav { display: flex; align-items: center; gap: var(--e-3); }
 /* Em tela estreita a logo e a acao primaria e que precisam do espaco. */
@@ -230,7 +230,7 @@
 
 /* Cola abaixo da barra JA REDUZIDA: quando este painel gruda, a pagina rolou, e
    a barra ali ja esta nos 80%. Medir pela altura cheia deixaria uma faixa morta. */
-.leitura { position: sticky; top: 92px; overflow: hidden; }
+.leitura { position: sticky; top: 84px; overflow: hidden; }
 .leitura__cab { display: flex; align-items: center; gap: var(--e-3);
                 padding: var(--e-4) var(--e-5); border-bottom: var(--borda);
                 background: rgba(140,226,63,.06); }
@@ -1173,3 +1173,55 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 }
 :root[data-tema="claro"] .dica__gatilho:hover { color: #FFFFFF; background: var(--v-700);
                                                 border-color: var(--v-700); }
+
+/* =========================================================================
+   Rodape do campo: ajuda e aviso no mesmo lugar
+   -------------------------------------------------------------------------
+   O aviso de validacao era injetado solto no fim do rotulo. Com a grade
+   alinhando os campos por subgrid - uma faixa para o rotulo, uma para a caixa,
+   uma para o rodape - esse quarto filho ficava sem faixa e era desenhado POR
+   CIMA da ajuda: as duas frases sobrepostas, ilegiveis. Agora ajuda e aviso
+   dividem um rodape proprio, um abaixo do outro.
+   ====================================================================== */
+.campo__rodape { display: grid; gap: 2px; align-content: start; min-width: 0; }
+.campo__erro { margin-top: 0; }
+
+/* Resumo do envio incompleto, acima do formulario. */
+.resumo-envio { margin-bottom: var(--e-5); }
+
+/* =========================================================================
+   Barra de rolagem propria
+   -------------------------------------------------------------------------
+   A barra do sistema operacional e a ultima peca generica de uma interface que
+   desenhou o proprio conjunto de icones e a propria paleta - e num tema escuro
+   ela aparece clara, denunciando que a pagina foi pintada por cima de outra
+   coisa. Esta segue a paleta e escurece junto no tema claro.
+
+   scrollbar-width/-color atendem Firefox; ::-webkit-scrollbar, os demais. Onde
+   nenhum dos dois existir, a barra nativa continua servindo - nada depende dela
+   para funcionar.
+   ====================================================================== */
+* { scrollbar-width: thin; scrollbar-color: var(--n-700) transparent; }
+
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--n-700);
+  border-radius: 999px;
+  /* A borda transparente com background-clip afina o polegar sem estreitar a
+     area de arrasto: o alvo continua com 11px, e so a pintura encolhe. */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--v-600); background-clip: content-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+:root[data-tema="claro"] * { scrollbar-color: #AEBFB4 transparent; }
+:root[data-tema="claro"] ::-webkit-scrollbar-thumb { background: #AEBFB4;
+                                                     background-clip: content-box; }
+:root[data-tema="claro"] ::-webkit-scrollbar-thumb:hover { background: var(--v-700);
+                                                           background-clip: content-box; }
+
+/* No papel nao ha rolagem, e no laudo impresso a barra nao deve existir nem na
+   tela de conferencia da paginacao. */
+@media print { ::-webkit-scrollbar { display: none; } }

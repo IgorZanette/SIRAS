@@ -45,7 +45,8 @@ def test_a_barra_e_a_marca_encolhem_juntas():
     for token in ("--barra-escala", "--barra-altura", "--marca-icone", "--marca-palavra"):
         assert token in blocos, f"{token} não é declarado na barra"
 
-    assert re.search(r"\.barra\.is-reduzida \{[^}]*--barra-escala:\s*\.8", _TELAS_CSS)
+    # .85: rolando, a barra fica 15% menor que o tamanho de repouso.
+    assert re.search(r"\.barra\.is-reduzida \{[^}]*--barra-escala:\s*\.85\s*;", _TELAS_CSS)
     assert re.search(r"min-height: calc\(var\(--barra-altura\) \* var\(--barra-escala\)\)",
                      _TELAS_CSS)
     assert re.search(r"\.logo__icone \{[^}]*calc\(var\(--marca-icone\)", _TELAS_CSS, re.S)
@@ -212,3 +213,161 @@ def test_cada_resto_de_verde_do_documento_foi_neutralizado(seletor):
     assert re.search(rf":root body\.impressa {seletor}", _IMPRESSA_CSS), (
         f"{seletor} ainda pode sair colorido no papel"
     )
+
+
+# --- rodapé do campo: ajuda e aviso sem sobreposição ----------------------------
+
+def test_todo_campo_tem_um_rodape_proprio(cliente):
+    """O aviso de validação era injetado solto no fim do rótulo. Com a grade alinhando os
+    campos por subgrid, esse quarto filho ficava sem faixa e era desenhado POR CIMA da
+    ajuda — as duas frases sobrepostas."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert tela.count("campo__rodape") >= tela.count("campo__ajuda")
+    assert re.search(r"\.campo__rodape \{ display: grid", _TELAS_CSS)
+
+
+def test_o_aviso_nasce_dentro_do_rodape():
+    codigo = (_ESTATICOS / "js" / "interacoes.js").read_text(encoding="utf-8")
+
+    assert '.campo__rodape") || rotulo).appendChild(aviso)' in codigo
+
+
+def test_a_ajuda_continua_ligada_ao_campo_por_aria(cliente):
+    """Mover a ajuda para dentro do rodapé não pode soltá-la do campo que ela explica."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'aria-describedby="ph_agua-ajuda"' in tela
+    assert 'id="ph_agua-ajuda"' in tela
+
+
+# --- validação alcança os talhões acrescentados depois --------------------------
+
+def test_a_validacao_e_delegada_e_nao_ligada_campo_a_campo():
+    """Um talhão acrescentado pelo botão nasce depois da carga da página. Ligando ouvinte
+    a ouvinte, esses cartões ficavam sem validação nenhuma — dava para digitar -500 de pH
+    ali e nada acusava."""
+    codigo = (_ESTATICOS / "js" / "interacoes.js").read_text(encoding="utf-8")
+
+    assert 'document.addEventListener("focusout"' in codigo, (
+        "blur não sobe na árvore e não pode ser delegado"
+    )
+    assert 'document.addEventListener("input"' in codigo
+    assert "querySelectorAll('.campo input[type=\"number\"]')" not in codigo
+
+
+def test_os_campos_do_talhao_adicional_declaram_a_mesma_faixa(cliente):
+    """Sem min e max, a validação imediata não tem o que comparar."""
+    dados = {
+        "cultura_id": "soja", "criterio_id": "graos_convencional", "cultivo": "1",
+        "profundidade_incorporacao_cm": "20", "prnt": "100",
+        "ph_agua": "5.1", "indice_smp": "5.4", "argila": "38", "mo": "2.8",
+        "p": "11", "k": "96", "ctc_ph7": "9.4", "al": "1.2", "ca": "2.4", "mg": "1.1",
+        "v_percent": "42", "talhao": "A1", "talhao__2": "B2", "ph_agua__2": "5.8",
+    }
+    tela = cliente.post("/analise/dados", data=dados).get_data(as_text=True)
+
+    campo = re.search(r'<input[^>]*id="ph_agua__2"[^>]*>', tela).group(0)
+    assert 'min="0"' in campo and 'max="14"' in campo
+    assert "required" in campo
+
+
+def test_o_talhao_adicional_e_obrigatorio_campo_a_campo(cliente):
+    """Os campos do cartão saem do mesmo macro do formulário principal: se um for
+    obrigatório lá, é obrigatório aqui."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+    molde = tela[tela.index('id="molde-talhao"'):]
+
+    # O id do molde é o nome do campo mais "__" mais a marca "__IDX__", que o JavaScript
+    # troca pelo índice do talhão ao clonar.
+    for campo in ("ph_agua", "indice_smp", "argila", "mo", "p", "k", "ctc_ph7"):
+        marcacao = re.search(rf'<input[^>]*id="{campo}____IDX__"[^>]*>', molde).group(0)
+        assert "required" in marcacao, f"{campo} não é obrigatório no cartão de talhão"
+
+
+# --- o aviso de campo obrigatório é do programa ---------------------------------
+
+def test_o_formulario_troca_a_bolha_do_navegador_pela_propria():
+    """A bolha nativa é cinza, escrita pelo sistema operacional, mostra um campo por vez e
+    some ao primeiro clique — a única peça da tela que não pertence ao produto."""
+    codigo = (_ESTATICOS / "js" / "envio.js").read_text(encoding="utf-8")
+
+    assert 'setAttribute("novalidate"' in codigo
+    assert "Este campo precisa ser preenchido." in codigo
+    assert "preventDefault" in codigo
+
+
+def test_o_novalidate_e_posto_pelo_script_e_nao_escrito_no_html(cliente):
+    """Desligar a validação no HTML deixaria quem está sem JavaScript sem nenhuma, e o
+    servidor recebendo envio vazio."""
+    tela = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+    formulario = re.search(r"<form[^>]*data-formulario-analise[^>]*>", tela).group(0)
+
+    assert "novalidate" not in formulario
+
+
+def test_o_aviso_marca_todos_os_campos_de_uma_vez():
+    """Um campo por clique faz o usuário descobrir o formulário aos poucos."""
+    codigo = (_ESTATICOS / "js" / "envio.js").read_text(encoding="utf-8")
+
+    assert "vazios.forEach(avisar)" in codigo
+    assert "campos obrigatórios" in codigo
+    assert "vazios[0].focus" in codigo
+
+
+def test_a_tela_de_calculo_nao_sobe_sobre_envio_barrado():
+    """O véu abriria sobre um formulário que nem foi enviado e ficaria girando."""
+    codigo = (_ESTATICOS / "js" / "gerando.js").read_text(encoding="utf-8")
+
+    assert "checkValidity()" in codigo
+
+
+def test_o_envio_e_carregado_na_tela_de_dados(cliente):
+    assert "js/envio.js" in cliente.get(
+        "/analise/dados?cultura_id=soja"
+    ).get_data(as_text=True)
+
+
+# --- nada genérico: a barra de rolagem também é do sistema ----------------------
+
+def test_a_barra_de_rolagem_segue_a_paleta():
+    """A barra do sistema operacional é a última peça genérica de uma interface que
+    desenhou o próprio conjunto de ícones — e num tema escuro ela aparece clara."""
+    assert "::-webkit-scrollbar-thumb" in _TELAS_CSS
+    assert re.search(r"scrollbar-color: var\(--n-700\)", _TELAS_CSS)
+    assert re.search(r':root\[data-tema="claro"\] \* \{ scrollbar-color:', _TELAS_CSS)
+
+
+# --- cada bloco com o seu próprio símbolo ---------------------------------------
+
+def test_nenhum_bloco_do_formulario_toma_emprestado_o_icone_de_outro(cliente):
+    """Três blocos vizinhos com o mesmo desenho deixam de identificar seja lá o que for:
+    'A área analisada', 'Subsuperfície' e 'Outros talhões' dividiam o mesmo perfil."""
+    tela = cliente.get("/analise/dados?cultura_id=abacateiro").get_data(as_text=True)
+
+    icones = re.findall(r'<div class="bloco__cab">\s*<svg[^>]*><use href="[^"]*#i-([a-z-]+)"', tela)
+    icones += re.findall(
+        r'<summary class="bloco__cab"[^>]*>\s*<svg[^>]*><use href="[^"]*#i-([a-z-]+)"', tela
+    )
+
+    assert len(icones) >= 5, f"poucos blocos encontrados: {icones}"
+    assert len(icones) == len(set(icones)), f"ícone repetido entre blocos: {icones}"
+
+
+@pytest.mark.parametrize(
+    "nome",
+    ["manejo", "aplicar", "area", "subsolo", "talhao", "talhoes", "assina", "soma",
+     "adiciona", "exemplo"],
+)
+def test_todo_icone_novo_segue_as_regras_da_familia(nome):
+    """Grade de 24, traço de 1.75, sem preenchimento, e a onda de horizonte que assina o
+    conjunto — é ela que separa este desenho de qualquer biblioteca genérica."""
+    sprite = (_ESTATICOS / "img" / "siras-icons.svg").read_text(encoding="utf-8")
+    simbolo = re.search(rf'<symbol id="i-{nome}".*?</symbol>', sprite, re.S).group(0)
+
+    assert 'viewBox="0 0 24 24"' in simbolo
+    assert 'stroke-width="1.75"' in simbolo
+    assert 'fill="none"' in simbolo
+    assert 'stroke="currentColor"' in simbolo
+    # A onda: uma curva em S dupla, com dois pares de controle espelhados.
+    assert re.search(r"c[\d\s.,-]+s[\d\s.,-]+", simbolo), f"i-{nome} não tem onda de horizonte"

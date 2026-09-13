@@ -26,10 +26,13 @@
 
   /* --- 1. validacao imediata ---------------------------------------------- */
   function mensagemDeErro(campo) {
-    var valor = decimal(campo.value);
     if (campo.value.trim() === "") {
-      return campo.required ? "Campo obrigatório." : null;
+      return campo.required ? "Este campo precisa ser preenchido." : null;
     }
+    if (campo.tagName === "SELECT" || campo.type === "text") {
+      return null;
+    }
+    var valor = decimal(campo.value);
     if (valor === null) {
       return "Informe um número.";
     }
@@ -65,28 +68,55 @@
       aviso = document.createElement("span");
       aviso.className = "campo__erro";
       aviso.setAttribute("role", "alert");
-      rotulo.appendChild(aviso);
+      /* DENTRO do rodape, e nao solto no fim do rotulo. A grade alinha os campos
+         por subgrid, com uma faixa para o rotulo, uma para a caixa e uma para o
+         rodape: um quarto filho nao teria faixa e caia por cima da ajuda. */
+      (rotulo.querySelector(".campo__rodape") || rotulo).appendChild(aviso);
     }
     aviso.textContent = erro;
   }
 
-  var numericos = document.querySelectorAll('.campo input[type="number"]');
-  Array.prototype.forEach.call(numericos, function (campo) {
+  function avaliavel(alvo) {
+    return alvo
+      && alvo.matches
+      && alvo.matches('.campo input[type="number"], .campo input[type="text"], .campo select');
+  }
+
+  /* Delegado no documento, e nao ligado campo a campo na carga. Um talhao
+     acrescentado depois nasce com os mesmos campos e precisa da mesma validacao;
+     ligando um a um, os cartoes criados pelo botao "Adicionar novo talhao"
+     ficavam sem nenhuma - digitava-se -500 de pH ali e nada acusava.
+
+     focusout no lugar de blur porque blur nao sobe na arvore e nao pode ser
+     delegado. */
+  document.addEventListener("focusout", function (evento) {
+    if (!avaliavel(evento.target)) {
+      return;
+    }
     /* Só depois do primeiro blur: avisar enquanto a pessoa digita o primeiro
        dígito acusaria erro em todo valor pela metade. */
-    campo.addEventListener("blur", function () {
-      campo.dataset.tocado = "1";
-      avaliar(campo);
-    });
-    campo.addEventListener("input", function () {
-      var rotulo = campo.closest(".campo");
-      if (rotulo) {
-        rotulo.classList.toggle("campo--preenchido", campo.value.trim() !== "");
-      }
-      if (campo.dataset.tocado) {
-        avaliar(campo);
-      }
-    });
+    evento.target.dataset.tocado = "1";
+    avaliar(evento.target);
+  });
+
+  document.addEventListener("input", function (evento) {
+    if (!avaliavel(evento.target)) {
+      return;
+    }
+    var rotulo = evento.target.closest(".campo");
+    if (rotulo) {
+      rotulo.classList.toggle("campo--preenchido", evento.target.value.trim() !== "");
+    }
+    if (evento.target.dataset.tocado) {
+      avaliar(evento.target);
+    }
+  });
+
+  document.addEventListener("change", function (evento) {
+    if (avaliavel(evento.target) && evento.target.tagName === "SELECT") {
+      evento.target.dataset.tocado = "1";
+      avaliar(evento.target);
+    }
   });
 
   /* --- 2. contadores ------------------------------------------------------ */

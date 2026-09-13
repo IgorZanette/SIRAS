@@ -530,27 +530,6 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
   display: grid; justify-items: center; text-align: center; gap: var(--e-4);
 }
 
-.calculando__marca { position: relative; display: grid; place-items: center;
-                     width: 96px; height: 96px; }
-.calculando__simbolo { width: 64px; height: 64px; position: relative; z-index: 1;
-                       animation: brotar 2.6s ease-in-out infinite; }
-/* O simbolo e um broto: a animacao dele e crescer, nao girar. */
-@keyframes brotar {
-  0%, 100% { transform: translateY(2px) scale(.97) }
-  50%      { transform: translateY(-3px) scale(1.03) }
-}
-/* Anel que se expande a partir do simbolo, como a agua no solo. */
-.calculando__pulso {
-  position: absolute; inset: 0; border-radius: 50%;
-  border: 2px solid var(--v-400);
-  animation: pulsar 2.6s cubic-bezier(.2, 0, .2, 1) infinite;
-}
-@keyframes pulsar {
-  0%   { transform: scale(.62); opacity: .55 }
-  70%  { transform: scale(1.18); opacity: 0 }
-  100% { opacity: 0 }
-}
-
 .calculando__titulo { font-size: var(--fs-xl); letter-spacing: -.02em; max-width: 22ch; }
 .calculando__sub { font-size: var(--fs-sm); color: var(--n-400); max-width: 42ch; }
 
@@ -598,9 +577,8 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
    tema ja zera as transicoes; aqui as animacoes em laco tambem param, porque sao
    as que causam desconforto vestibular. */
 @media (prefers-reduced-motion: reduce) {
-  .calculando, .calculando__halo, .calculando__simbolo,
-  .calculando__pulso, .passo.is-ativo .passo__ico { animation: none !important; }
-  .calculando__pulso { opacity: .3; }
+  .calculando, .calculando__halo,
+  .passo.is-ativo .passo__ico { animation: none !important; }
 }
 
 /* =========================================================================
@@ -757,7 +735,6 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 :root[data-tema="claro"] .passo.is-ativo .passo__ico { background: rgba(78,154,42,.18);
                                                        color: var(--v-700); }
 :root[data-tema="claro"] .calculando__barra { background: rgba(13,20,16,.08); }
-:root[data-tema="claro"] .calculando__pulso { border-color: var(--v-600); }
 
 /* O documento ja e claro: no modo claro ele perde a sombra de cartao flutuante e
    ganha uma borda, senao vira uma mancha branca sobre outra. */
@@ -1252,4 +1229,265 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 @media print {
   /* O ambar da marca e informacao: sem isto ela sai como um circulo vazio. */
   .aptidao__atencao { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* =========================================================================
+   Tela de calculo: a cena do monolito de solo
+   -------------------------------------------------------------------------
+   A tela anterior era um simbolo pulsando sobre uma lista. Correta, e sem
+   graca: nada nela dizia o que o sistema estava fazendo que um carregamento
+   qualquer nao dissesse.
+
+   A cena e um monolito de solo - o corte de perfil que se leva ao laboratorio -
+   e cada movimento e um passo real do motor, acendendo junto dele na lista:
+   a leitura varre as camadas, o calcario cai e fica na superficie, P e K sobem
+   da camada de referencia, a camada corrigida muda de tom, e um traco liga as
+   leituras. O broto cresce com o progresso, raiz primeiro, e abre a ultima
+   folha quando o laudo fica pronto.
+
+   E divertida no sentido que interessa a um sistema profissional: da prazer de
+   olhar porque ENSINA, e nao porque distrai. O plano (par. 5) proibe animacao que
+   decora e permite a que responde a acao - esta responde, e some com o laudo.
+
+   O script so diz em que passo se esta (data-etapa) e quais ja passaram
+   (.passou-N). Tudo o que cada passo desenha mora aqui.
+   ====================================================================== */
+.calculando { overflow-y: auto; }
+
+/* --- Paleta da cena ------------------------------------------------------
+   Terra, e nao verde: o solo e o assunto, e o verde fica reservado ao que o
+   sistema faz com ele - a leitura, a correcao, o broto. Tons de baixa saturacao,
+   que leem como fotografia de perfil e nao como ilustracao infantil. */
+.calculando {
+  --solo-a: #6B5238;
+  --solo-b: #56412C;
+  --solo-c: #3F3021;
+  --solo-grao: rgba(255, 244, 225, .18);
+  --solo-regua: rgba(233, 240, 235, .45);
+  --vitrine: rgba(233, 240, 235, .16);
+  --calcario: #EFE9DC;
+  --leitura: var(--v-400);
+  --broto: var(--v-400);
+  --broto-fundo: var(--v-600);
+  --semente: #C9A66B;
+}
+:root[data-tema="claro"] .calculando {
+  --solo-a: #8A6A48;
+  --solo-b: #735737;
+  --solo-c: #5C4529;
+  --solo-grao: rgba(255, 250, 240, .24);
+  --solo-regua: rgba(13, 20, 16, .5);
+  --vitrine: rgba(13, 20, 16, .16);
+  --calcario: #FFFFFF;
+  --leitura: var(--v-600);
+  --broto: var(--v-600);
+  --broto-fundo: var(--v-700);
+}
+
+/* --- Assinatura ---------------------------------------------------------- */
+.calculando__assinatura { display: flex; align-items: center; gap: .6rem; }
+.calculando__icone { width: 34px; height: 34px; }
+.calculando__palavra { height: 18px; width: auto; }
+.calculando__palavra--claro { display: none; }
+:root[data-tema="claro"] .calculando__palavra--escuro { display: none; }
+:root[data-tema="claro"] .calculando__palavra--claro { display: block; }
+
+/* --- O monolito ---------------------------------------------------------- */
+.cena { width: min(360px, 100%); height: auto; overflow: visible; }
+
+.cena__horizonte--a { fill: var(--solo-a); }
+.cena__horizonte--b { fill: var(--solo-b); }
+.cena__horizonte--c { fill: var(--solo-c); }
+.cena__graos circle { fill: var(--solo-grao); }
+.cena__vitrine { fill: none; stroke: var(--vitrine); stroke-width: 1.5; }
+.cena__regua line { stroke: var(--solo-regua); stroke-width: 1.2; stroke-linecap: round; }
+.cena__regua text { fill: var(--solo-regua); font: 600 8.5px var(--ff-ui); }
+
+/* SVG com transform em CSS: a caixa de referencia precisa ser a propria forma,
+   ou a origem de escala e giro cai no canto da cena inteira. */
+.cena__folha, .cena__nutriente, .cena__marco, .cena__broto {
+  transform-box: fill-box;
+}
+
+/* --- 1 e 3. Leitura: a linha que varre as camadas ------------------------- */
+.cena__leitura { opacity: 0; transition: opacity 280ms ease; }
+.cena__scanner { fill: var(--leitura); }
+.calculando[data-etapa="1"] .cena__leitura,
+.calculando[data-etapa="3"] .cena__leitura {
+  opacity: 1;
+  animation: varrer 1.3s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+}
+@keyframes varrer {
+  from { transform: translateY(0); }
+  to   { transform: translateY(86px); }
+}
+
+/* --- 2. Calagem: o calcario cai, e o que cai fica ------------------------- */
+.cena__calcario circle { fill: var(--calcario); opacity: 0; }
+.calculando[data-etapa="2"] .cena__calcario circle {
+  animation: cair 1.05s cubic-bezier(.55, 0, 1, .45) infinite;
+}
+.cena__calcario circle:nth-child(2) { animation-delay: .32s; }
+.cena__calcario circle:nth-child(3) { animation-delay: .12s; }
+.cena__calcario circle:nth-child(4) { animation-delay: .48s; }
+.cena__calcario circle:nth-child(5) { animation-delay: .22s; }
+.cena__calcario circle:nth-child(6) { animation-delay: .6s; }
+.cena__calcario circle:nth-child(7) { animation-delay: .38s; }
+@keyframes cair {
+  0%   { opacity: 0; transform: translateY(0); }
+  18%  { opacity: .95; }
+  82%  { opacity: .95; }
+  100% { opacity: 0; transform: translateY(50px); }
+}
+.cena__camada-calcario {
+  fill: none; stroke: var(--calcario); stroke-width: 3; stroke-linecap: round;
+  opacity: 0; transition: opacity 600ms ease;
+}
+.calculando.passou-2 .cena__camada-calcario { opacity: .55; }
+
+/* --- 3. Fosforo e potassio sobem da camada de referencia ------------------ */
+.cena__nutriente { opacity: 0; }
+.cena__nutriente circle { fill: rgba(140, 226, 63, .16); stroke: var(--leitura); stroke-width: 1.2; }
+.cena__nutriente text {
+  fill: var(--leitura); font: 800 8.5px var(--ff-display);
+  text-anchor: middle; dominant-baseline: central;
+}
+.calculando[data-etapa="3"] .cena__nutriente { animation: subir 1.6s ease-out infinite; }
+.calculando[data-etapa="3"] .cena__nutriente--k { animation-delay: .55s; }
+@keyframes subir {
+  0%   { opacity: 0; transform: translateY(12px); }
+  25%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-9px); }
+}
+
+/* --- 4. Aptidao: a camada corrigida muda de tom --------------------------- */
+.cena__correcao { fill: var(--v-400); opacity: 0; transition: opacity 900ms ease; }
+.calculando[data-etapa="4"] .cena__correcao,
+.calculando.passou-4 .cena__correcao { opacity: .17; }
+
+/* --- 5. Trilha: o traco que liga as leituras ------------------------------- */
+.cena__trilha {
+  fill: none; stroke: var(--leitura); stroke-width: 1.4; stroke-linecap: round;
+  stroke-dasharray: 160; stroke-dashoffset: 160;
+  transition: stroke-dashoffset 900ms cubic-bezier(.3, 0, .2, 1);
+}
+.calculando[data-etapa="5"] .cena__trilha,
+.calculando.passou-5 .cena__trilha { stroke-dashoffset: 0; }
+.cena__marco { fill: var(--leitura); transform: scale(0); transform-origin: 50% 50%;
+               transition: transform 360ms cubic-bezier(.3, 1.6, .5, 1); }
+.calculando[data-etapa="5"] .cena__marco,
+.calculando.passou-5 .cena__marco { transform: scale(1); }
+.calculando[data-etapa="5"] .cena__marco:nth-of-type(2) { transition-delay: .3s; }
+.calculando[data-etapa="5"] .cena__marco:nth-of-type(3) { transition-delay: .6s; }
+
+/* --- O broto: cresce com o progresso, raiz primeiro ------------------------
+   A ordem e a da planta, e nao a de uma barra: primeiro a raiz (passado o
+   primeiro passo), depois o caule subindo em degraus, as folhas se abrindo, e a
+   ultima folha so quando o laudo fica pronto. */
+.cena__semente { fill: var(--semente); }
+.cena__raizes path {
+  fill: none; stroke: var(--semente); stroke-width: 1.3; stroke-linecap: round;
+  stroke-dasharray: 26; stroke-dashoffset: 26;
+  transition: stroke-dashoffset 700ms cubic-bezier(.3, 0, .2, 1);
+}
+.calculando.passou-1 .cena__raizes path { stroke-dashoffset: 0; }
+
+.cena__caule {
+  fill: none; stroke: var(--broto); stroke-width: 2.4; stroke-linecap: round;
+  stroke-dasharray: 42; stroke-dashoffset: 42;
+  transition: stroke-dashoffset 700ms cubic-bezier(.3, 0, .2, 1);
+}
+.calculando.passou-1 .cena__caule { stroke-dashoffset: 32; }
+.calculando.passou-2 .cena__caule { stroke-dashoffset: 20; }
+.calculando.passou-3 .cena__caule { stroke-dashoffset: 9; }
+.calculando.passou-4 .cena__caule { stroke-dashoffset: 0; }
+
+.cena__folha {
+  fill: var(--broto); stroke: var(--broto-fundo); stroke-width: .8;
+  transform: scale(0);
+  transition: transform 560ms cubic-bezier(.3, 1.5, .5, 1);
+}
+.cena__folha--esq  { transform-origin: 100% 100%; }
+.cena__folha--dir  { transform-origin: 0% 100%; }
+.cena__folha--topo { transform-origin: 50% 100%; }
+.calculando.passou-3 .cena__folha--esq,
+.calculando.passou-4 .cena__folha--dir,
+.calculando[data-etapa="pronto"] .cena__folha--topo { transform: scale(1); }
+
+/* Pronto: o broto balanca uma vez por respiracao, e a cena descansa. */
+.cena__broto { transform-origin: 50% 100%; }
+.calculando[data-etapa="pronto"] .cena__broto {
+  animation: balancar 2.2s ease-in-out infinite;
+}
+@keyframes balancar {
+  0%, 100% { transform: rotate(0deg); }
+  30%      { transform: rotate(-3deg); }
+  70%      { transform: rotate(2.4deg); }
+}
+
+/* --- Telas baixas: a cena cede espaco, os passos continuam inteiros ------- */
+@media (max-height: 820px) {
+  .cena { width: min(270px, 100%); }
+  .calculando__conteudo { gap: var(--e-3); }
+}
+@media (max-height: 680px) {
+  .passo__txt small { display: none; }
+}
+
+/* --- Menos movimento -------------------------------------------------------
+   A informacao continua inteira: os passos acendem e o broto aparece em cada
+   degrau. So para o que se repete em laco - a varredura, a queda, a subida, o
+   balanco -, que e o que causa desconforto vestibular. */
+@media (prefers-reduced-motion: reduce) {
+  .calculando[data-etapa] .cena__leitura,
+  .calculando[data-etapa] .cena__calcario circle,
+  .calculando[data-etapa] .cena__nutriente,
+  .calculando[data-etapa="pronto"] .cena__broto { animation: none !important; }
+  .cena__caule, .cena__raizes path, .cena__folha, .cena__trilha,
+  .cena__marco, .cena__correcao, .cena__camada-calcario { transition: none !important; }
+  .calculando[data-etapa="3"] .cena__nutriente { opacity: 1; }
+}
+
+/* =========================================================================
+   A marca do SIRAS no laudo
+   -------------------------------------------------------------------------
+   O laudo saia sem nenhum sinal de onde veio: um documento impresso, anexado a
+   um projeto de credito, lido por alguem que nunca abriu o sistema - e nada
+   nele dizia SIRAS. A marca vai no alto, como em qualquer papel timbrado, e o
+   rodape repete a origem com a data, que e o que se procura quando o documento
+   ja se separou do resto da pasta.
+
+   A PALAVRA E A VERSAO ESCURA, e nao a branca da barra: o laudo e papel branco
+   nos dois temas, e a palavra clara sumiria nele.
+
+   A marca identifica, e nao compete: fica acima do titulo, pequena, com uma
+   linha fina separando-a do conteudo - quem le procura a recomendacao, e so
+   depois quer saber de quem ela e.
+   ====================================================================== */
+.doc__marca {
+  flex-basis: 100%;
+  display: flex; align-items: center; gap: .55rem;
+  padding-bottom: var(--e-4);
+  border-bottom: 1px solid #E3EAE5;
+}
+.doc__marca-icone { width: 30px; height: 30px; flex: none; }
+.doc__marca-palavra { height: 17px; width: auto; flex: none; }
+.doc__marca-sub {
+  margin-left: auto; text-align: right;
+  font-size: var(--fs-3xs); font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: #7A8C82;
+}
+@media (max-width: 620px) { .doc__marca-sub { display: none; } }
+
+.doc__assinatura-siras {
+  display: flex; align-items: center; gap: .4rem;
+  margin-bottom: var(--e-2); font-weight: 700; color: #405146;
+}
+.doc__assinatura-siras img { width: 16px; height: 16px; flex: none; }
+
+@media print {
+  .doc__marca-icone { width: 24px; height: 24px; }
+  .doc__marca-palavra { height: 14px; }
+  .doc__marca { padding-bottom: 8pt; }
 }

@@ -6,20 +6,138 @@
    leitura ao vivo (PLANO-FRONTEND §9.3), aplicado ao único momento em que o usuário não
    tem nada para fazer além de olhar.
 
+   A CENA acima dos passos é um monólito de solo — o corte de perfil que se leva ao
+   laboratório — e nada nela se mexe por acaso. Cada movimento é um passo real do motor,
+   acendendo junto dele:
+
+     1. análise   — uma linha de leitura varre as camadas de cima a baixo;
+     2. calagem   — o calcário cai sobre a superfície e fica nela;
+     3. P e K     — os dois nutrientes sobem da camada de referência;
+     4. aptidão   — a camada corrigida ganha o tom de solo tratado;
+     5. trilha    — um traço liga as leituras, como a trilha liga cada dose à tabela.
+
+   E o broto cresce com o progresso: raiz primeiro, depois caule e folhas, e a última
+   folha abre quando o laudo fica pronto. É a única licença da cena — a de mostrar,
+   numa planta, que a espera está andando.
+
    Fica no HTML da página, e não montada por JavaScript, para que a sequência use os
-   mesmos ícones e componentes do resto do sistema. #}
+   mesmos ícones e componentes do resto do sistema. O script só diz em que passo se
+   está (data-etapa) e quais já passaram (passou-N); o que cada passo desenha mora no
+   CSS. #}
 {% import "_macros/ico.html" as i %}
 
-<div class="calculando nao-imprime" id="calculando" hidden aria-hidden="true">
+<div class="calculando nao-imprime" id="calculando" hidden aria-hidden="true" data-etapa="0">
   <div class="calculando__halo" aria-hidden="true"></div>
 
   <div class="calculando__conteudo" role="status" aria-live="polite">
-    <div class="calculando__marca">
-      <img class="calculando__simbolo"
-           src="{{ url_for('static', filename='img/marca/siras-icone-256.png') }}"
-           alt="" width="256" height="256">
-      <span class="calculando__pulso" aria-hidden="true"></span>
+
+    {# A assinatura do sistema acompanha a espera: é o momento em que a tela inteira é
+       uma coisa só, e ela precisa dizer de quem é. #}
+    <div class="calculando__assinatura">
+      <img class="calculando__icone"
+           src="{{ url_for('static', filename='img/marca/siras-icone-64.png') }}"
+           alt="" width="64" height="64">
+      <img class="calculando__palavra calculando__palavra--escuro"
+           src="{{ url_for('static', filename='img/marca/siras-texto.png') }}"
+           alt="SIRAS" width="300" height="67">
+      <img class="calculando__palavra calculando__palavra--claro"
+           src="{{ url_for('static', filename='img/marca/siras-texto-escuro.png') }}"
+           alt="" width="300" height="67">
     </div>
+
+    <svg class="cena" viewBox="0 0 320 200" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id="cena-vitrine">
+          <rect x="40" y="40" width="272" height="156" rx="14"/>
+        </clipPath>
+      </defs>
+
+      {# Régua de profundidade: a camada de referência e a subsuperfície que o
+         formulário pergunta. #}
+      <g class="cena__regua">
+        <line x1="30" y1="100" x2="30" y2="166"/>
+        <line x1="26" y1="100" x2="34" y2="100"/>
+        <line x1="26" y1="134" x2="34" y2="134"/>
+        <line x1="26" y1="166" x2="34" y2="166"/>
+        <text x="22" y="103" text-anchor="end">0</text>
+        <text x="22" y="137" text-anchor="end">10</text>
+        <text x="22" y="169" text-anchor="end">20 cm</text>
+      </g>
+
+      <g clip-path="url(#cena-vitrine)">
+        <path class="cena__horizonte cena__horizonte--a"
+              d="M40 100 C62 93 80 107 104 100 S146 93 168 100 S210 107 232 100 S274 93 312 100 V196 H40 Z"/>
+        <path class="cena__horizonte cena__horizonte--b"
+              d="M40 134 C62 128 80 140 104 134 S146 128 168 134 S210 140 232 134 S274 128 312 134 V196 H40 Z"/>
+        <path class="cena__horizonte cena__horizonte--c"
+              d="M40 166 C62 161 80 171 104 166 S146 161 168 166 S210 171 232 166 S274 161 312 166 V196 H40 Z"/>
+
+        <g class="cena__graos">
+          <circle cx="70" cy="118" r="1.4"/><circle cx="138" cy="112" r="1.2"/>
+          <circle cx="206" cy="122" r="1.5"/><circle cx="284" cy="114" r="1.2"/>
+          <circle cx="88" cy="150" r="1.6"/><circle cx="160" cy="146" r="1.3"/>
+          <circle cx="230" cy="152" r="1.5"/><circle cx="296" cy="146" r="1.3"/>
+          <circle cx="64" cy="178" r="1.8"/><circle cx="124" cy="184" r="1.4"/>
+          <circle cx="198" cy="176" r="1.6"/><circle cx="268" cy="184" r="1.5"/>
+        </g>
+
+        {# 4. aptidão: a camada de referência depois da correção. #}
+        <path class="cena__correcao"
+              d="M40 100 C62 93 80 107 104 100 S146 93 168 100 S210 107 232 100 S274 93 312 100 V134 H40 Z"/>
+
+        {# 2. calagem: o que fica na superfície depois que o calcário cai. #}
+        <path class="cena__camada-calcario"
+              d="M40 100 C62 93 80 107 104 100 S146 93 168 100 S210 107 232 100 S274 93 312 100"/>
+
+        {# 1 e 3. leitura das camadas. #}
+        <g class="cena__leitura">
+          <rect class="cena__scanner" x="40" y="102" width="272" height="2" rx="1"/>
+        </g>
+
+        {# 3. fósforo e potássio, subindo da camada de referência. #}
+        <g class="cena__nutriente cena__nutriente--p">
+          <circle cx="112" cy="122" r="8"/>
+          <text x="112" y="122">P</text>
+        </g>
+        <g class="cena__nutriente cena__nutriente--k">
+          <circle cx="252" cy="126" r="8"/>
+          <text x="252" y="126">K</text>
+        </g>
+
+        {# 5. trilha: o traço que liga as leituras. #}
+        <path class="cena__trilha" d="M112 122 C140 112 150 108 176 104 C200 108 222 116 252 126"/>
+        <circle class="cena__marco" cx="112" cy="122" r="2.6"/>
+        <circle class="cena__marco" cx="176" cy="104" r="2.6"/>
+        <circle class="cena__marco" cx="252" cy="126" r="2.6"/>
+
+        <g class="cena__raizes">
+          <path d="M176 101 C176 108 172 114 168 120"/>
+          <path d="M176 101 C177 110 182 116 186 124"/>
+          <path d="M176 102 L176 118"/>
+        </g>
+      </g>
+
+      <rect class="cena__vitrine" x="40" y="40" width="272" height="156" rx="14"/>
+
+      {# 2. calagem: as partículas que caem. #}
+      <g class="cena__calcario">
+        <circle cx="92" cy="46" r="2.2"/><circle cx="118" cy="52" r="2"/>
+        <circle cx="142" cy="44" r="2.2"/><circle cx="214" cy="50" r="2"/>
+        <circle cx="240" cy="46" r="2.2"/><circle cx="264" cy="54" r="2"/>
+        <circle cx="290" cy="48" r="2.2"/>
+      </g>
+
+      <g class="cena__broto">
+        <ellipse class="cena__semente" cx="176" cy="101" rx="4" ry="2.6"/>
+        <path class="cena__caule" d="M176 100 C176 88 173 76 177 62"/>
+        <path class="cena__folha cena__folha--esq"
+              d="M175 82 C163 80 155 72 154 64 C164 64 172 71 175 82 Z"/>
+        <path class="cena__folha cena__folha--dir"
+              d="M177 74 C189 72 197 64 198 56 C188 56 180 63 177 74 Z"/>
+        <path class="cena__folha cena__folha--topo"
+              d="M177 63 C173 56 174 49 179 44 C183 50 182 57 177 63 Z"/>
+      </g>
+    </svg>
 
     <h2 class="calculando__titulo">Estamos calculando as melhores doses para você</h2>
     <p class="calculando__sub">

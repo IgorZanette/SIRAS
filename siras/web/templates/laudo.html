@@ -86,6 +86,18 @@
      documento, não ferramenta. #}
   <article class="doc">
     <header class="doc__cab">
+      {# A marca do sistema no documento, como em papel timbrado. Sem ela, um laudo
+         impresso e anexado a um projeto não dizia de onde tinha saído. A palavra é a
+         versão escura: o laudo é papel branco nos dois temas. #}
+      <div class="doc__marca">
+        <img class="doc__marca-icone"
+             src="{{ url_for('static', filename='img/marca/siras-icone-64.png') }}"
+             alt="" width="64" height="64">
+        <img class="doc__marca-palavra"
+             src="{{ url_for('static', filename='img/marca/siras-texto-escuro.png') }}"
+             alt="SIRAS" width="300" height="67">
+        <span class="doc__marca-sub">Sistema de interpretação e recomendação agronômica de solo</span>
+      </div>
       <div>
         <h2>Laudo de recomendação</h2>
         <div class="doc__meta">
@@ -179,6 +191,13 @@
       </section>
 
       <footer class="doc__rodape">
+        {# A origem repetida no pé, com a data: é o que se procura quando o documento
+           já se separou do resto da pasta, e a primeira folha não está mais junto. #}
+        <div class="doc__assinatura-siras">
+          <img src="{{ url_for('static', filename='img/marca/siras-icone-64.png') }}"
+               alt="" width="64" height="64">
+          <span>Laudo gerado pelo SIRAS em {{ emitido_em }}</span>
+        </div>
         Fonte normativa: Comissão de Química e Fertilidade do Solo — RS/SC.
         <em>Manual de Calagem e Adubação para os Estados do Rio Grande do Sul e de Santa
         Catarina.</em> 11. ed. 2016. Critérios de aptidão edáfica conforme o Caderno de

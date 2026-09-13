@@ -39,6 +39,15 @@ DESTINO = Path(__file__).resolve().parent.parent / "siras" / "web" / "static" / 
 #: Cor do texto no modo claro. É o --n-100 do tema claro.
 TINTA_CLARA = (13, 20, 16)
 
+#: Largura da palavra "SIRAS" servida à barra.
+#:
+#: A barra a exibe com 22 px de altura (.logo__nome), e 300 px de largura dão 67 px —
+#: três vezes a altura de exibição, o que cobre telas de densidade 2x e 3x com folga.
+#: Não é número escolhido por gosto: o lockup novo é um desenho com gradiente e brilho,
+#: e nele cada pixel a mais pesa. A 420 px a palavra sozinha custava 60 KB e estourava o
+#: orçamento de marca da barra; a 300 px custa 34 KB e é indistinguível na tela.
+LARGURA_DO_TEXTO = 300
+
 
 def _colunas_com_conteudo(imagem: Image.Image) -> list:
     alfa = imagem.getchannel("A")
@@ -146,8 +155,8 @@ def main(caminho: Optional[str] = None) -> int:
 
     print(f"gerando em {DESTINO}:")
     _salvar(lockup, DESTINO / "siras-lockup.png", 640, "largura")
-    _salvar(texto, DESTINO / "siras-texto.png", 420, "largura")
-    _salvar(texto_escuro, DESTINO / "siras-texto-escuro.png", 420, "largura")
+    _salvar(texto, DESTINO / "siras-texto.png", LARGURA_DO_TEXTO, "largura")
+    _salvar(texto_escuro, DESTINO / "siras-texto-escuro.png", LARGURA_DO_TEXTO, "largura")
     for tamanho in (256, 180, 64, 32):
         _salvar(icone_quadrado, DESTINO / f"siras-icone-{tamanho}.png", tamanho, "altura")
     return 0

@@ -118,6 +118,10 @@
   border: 1.5pt solid #000000;
 }
 :root body.impressa .aptidao__selo .ico { color: #000000; }
+/* Na folha preto e branco a marca de atencao vira contorno: o ambar nao
+   sobrevive a uma laser monocromatica, e a forma sobrevive. */
+:root body.impressa .aptidao__atencao { color: #000000; border-color: #000000;
+                                        background: #FFFFFF; }
 
 :root body.impressa .limitante__barra { background: #FFFFFF; border: 1px solid #8A8A8A; }
 :root body.impressa .limitante__barra i { background: #000000; }

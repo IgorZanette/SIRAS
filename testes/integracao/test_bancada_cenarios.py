@@ -283,7 +283,10 @@ def test_todo_laudo_sai_completo(cliente, telas, cultura, cenario):
     assert len(re.findall(r'class="dose[ "]', laudo)) == 4, (
         f"{cultura} / {cenario}: o veredito não tem as quatro saídas"
     )
-    assert laudo.count('class="aptidao__selo"') == 2, (
+    # O delimitador depois de "selo" é necessário: o selo ganha o modificador
+    # --atencao quando a classe é "Apta com restrições", e a classe exata deixaria de
+    # casar justamente nesses laudos.
+    assert len(re.findall(r'class="aptidao__selo[ "]', laudo)) == 2, (
         f"{cultura} / {cenario}: falta um dos dois cenários de aptidão"
     )
     assert 'class="trilha__passo"' in laudo, f"{cultura} / {cenario}: laudo sem trilha"

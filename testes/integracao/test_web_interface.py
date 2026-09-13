@@ -150,7 +150,9 @@ def test_o_laudo_mostra_as_duas_aptidoes_lado_a_lado(cliente):
 
     assert "Hoje" in html
     assert "Após a correção" in html
-    assert html.count('class="aptidao__selo"') == 2
+    # O delimitador depois de "selo": o selo ganha o modificador --atencao quando a
+    # classe é "Apta com restrições".
+    assert len(re.findall(r'class="aptidao__selo[ "]', html)) == 2
     assert "Fatores de limitação, na situação atual" in html
 
 

@@ -371,3 +371,68 @@ def test_todo_icone_novo_segue_as_regras_da_familia(nome):
     assert 'stroke="currentColor"' in simbolo
     # A onda: uma curva em S dupla, com dois pares de controle espelhados.
     assert re.search(r"c[\d\s.,-]+s[\d\s.,-]+", simbolo), f"i-{nome} não tem onda de horizonte"
+
+
+# --- o selo de aptidão ----------------------------------------------------------
+
+_APTA_COM_RESTRICOES = {
+    "cultura_id": "soja", "criterio_id": "graos_convencional", "cultivo": "1",
+    "profundidade_incorporacao_cm": "20", "prnt": "100",
+    "ph_agua": "6.0", "indice_smp": "6.1", "argila": "16", "mo": "1.6",
+    "p": "22.0", "k": "120", "ctc_ph7": "5.1",
+    "al": "0.0", "ca": "3.1", "mg": "1.2", "v_percent": "68",
+}
+
+_APTA = dict(
+    _APTA_COM_RESTRICOES,
+    ph_agua="6.3", indice_smp="6.2", argila="44", mo="3.6",
+    p="28.0", k="210", ctc_ph7="14.2", al="0.0", ca="7.4", mg="2.8", v_percent="78",
+)
+
+
+def test_apta_com_restricoes_sai_verde_e_nao_amarela(cliente):
+    """Âmbar ali dizia que a área não está apta. Ela está: a restrição qualifica a
+    aptidão, não a retira — e um selo amarelo logo abaixo da recomendação fazia o leitor
+    entender que a recomendação não seria suficiente."""
+    html = cliente.post("/analise/laudo", data=_APTA_COM_RESTRICOES).get_data(as_text=True)
+
+    assert "Apta com restrições" in html
+    assert "--cor:#57A331" in html
+    assert "--cor:var(--sig-ambar)" not in html
+
+
+def test_a_apta_recebe_o_verde_mais_vivo(cliente):
+    html = cliente.post("/analise/laudo", data=_APTA).get_data(as_text=True)
+
+    assert "--cor:#3E8F14" in html
+
+
+def test_a_ressalva_ganha_uma_marca_discreta_de_atencao(cliente):
+    html = cliente.post("/analise/laudo", data=_APTA_COM_RESTRICOES).get_data(as_text=True)
+
+    assert "aptidao__selo--atencao" in html
+    assert "aptidao__atencao" in html
+    assert re.search(r"\.aptidao__atencao \{[^}]*width: 22px", _TELAS_CSS, re.S), (
+        "a marca precisa ser pequena: ela avisa, não compete com o veredito"
+    )
+
+
+def test_a_apta_sem_ressalva_nao_ganha_marca(cliente):
+    html = cliente.post("/analise/laudo", data=_APTA).get_data(as_text=True)
+
+    assert "aptidao__atencao" not in html
+
+
+def test_a_marca_de_atencao_e_decorativa_para_o_leitor_de_tela(cliente):
+    """O rótulo 'Apta com restrições' já diz o que ela marca: anunciá-la de novo seria
+    repetição (WCAG 1.4.1 exige o texto, não o dobro dele)."""
+    html = cliente.post("/analise/laudo", data=_APTA_COM_RESTRICOES).get_data(as_text=True)
+    marca = re.search(r'<span class="aptidao__atencao"[^>]*>', html).group(0)
+
+    assert 'aria-hidden="true"' in marca
+
+
+def test_no_papel_preto_e_branco_a_marca_vira_contorno():
+    """O âmbar não sobrevive a uma laser monocromática; a forma sobrevive."""
+    assert re.search(r":root body\.impressa \.aptidao__atencao \{[^}]*border-color: #000000",
+                     _IMPRESSA_CSS, re.S)

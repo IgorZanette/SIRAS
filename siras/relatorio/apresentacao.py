@@ -41,16 +41,38 @@ _ROTULO_POR_GRAU = {
     "NULO": "Nula", "LIGEIRO": "Ligeira", "MODERADO": "Moderada",
     "FORTE": "Forte", "MUITO_FORTE": "Muito forte",
 }
-#: Cor e ícone do selo de aptidão. Aqui o sinal de diagnóstico carrega significado — é
-#: a gravidade da limitação —, que é a única razão pela qual o plano (§2.1) admite usar
-#: coral, laranja e âmbar. O rótulo textual vai sempre junto (WCAG 1.4.1).
+#: Cor, ícone e marca de atenção do selo de aptidão. O sinal de diagnóstico carrega
+#: significado — é a gravidade da limitação —, que é a única razão pela qual o plano
+#: (§2.1) admite usar coral, laranja e âmbar. O rótulo textual vai sempre junto
+#: (WCAG 1.4.1).
+#:
+#: AS DUAS PRIMEIRAS SÃO VERDES, e a de restrições deixou de ser âmbar. Âmbar ali dizia
+#: que a área não está apta, e ela está: a restrição qualifica a aptidão, não a retira.
+#: Quem lia o selo amarelo entendia que a recomendação emitida logo acima não seria
+#: suficiente — conclusão oposta à do CCAE. O que a restrição merece é uma marca discreta
+#: de atenção, e é o que ela recebe, sem tomar o selo inteiro.
+#:
+#: OS VALORES SÃO LITERAIS, e não tokens de tema, porque o selo vive dentro do laudo, que
+#: é papel branco nos dois temas. Com var(--sig-ambar) o selo mudava de cor junto com a
+#: interface e, no tema escuro, saía em #FFC93D sobre branco — 1,54:1, praticamente
+#: invisível no documento.
+#:
+#: Os dois verdes foram MEDIDOS contra o branco em scripts/conferir_contraste.py, e não
+#: escolhidos no olho: o selo é componente, e o piso é 3:1 (WCAG 1.4.11). É esse piso que
+#: limita quanto o verde de restrições pode clarear — acima de luminosidade 0,42 na matiz
+#: da marca ele reprova, e um contorno que ninguém enxerga não informa nada.
 _SELO_POR_CLASSE_APTIDAO = {
-    "APTA": ("var(--v-600)", "confere"),
-    "APTA_COM_RESTRICOES": ("var(--sig-ambar)", "broto"),
-    "RESTRITA": ("var(--sig-laranja)", "alerta"),
-    "INAPTA_SEM_CORRECAO": ("var(--sig-coral)", "alerta"),
-    "INDETERMINADA": ("var(--n-500)", "info"),
+    #                    cor         ícone       atenção
+    "APTA":             ("#3E8F14", "confere",  False),  # 4,08:1 - verde vivo, saturado
+    "APTA_COM_RESTRICOES": ("#57A331", "broto", True),   # 3,14:1 - o mesmo verde, mais claro
+    "RESTRITA":         ("var(--sig-laranja)", "alerta", False),
+    "INAPTA_SEM_CORRECAO": ("var(--sig-coral)", "alerta", False),
+    "INDETERMINADA":    ("var(--n-500)", "info", False),
 }
+
+#: Âmbar da marca de atenção. Medido em 3,48:1 sobre branco — é um sinal pequeno, e
+#: pequeno demais para valer menos que o piso de componente.
+_AMBAR_DE_ATENCAO = "#B28100"
 _NOME_POR_FATOR = {
     "composicao_aptidao": "Composição da classe",
     "aptidao_indeterminada": "Aptidão indeterminada",
@@ -375,12 +397,18 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
 
 def _aptidao(laudo: Laudo) -> Dict[str, Any]:
     def cenario(resultado) -> Dict[str, Any]:
-        cor, icone = _SELO_POR_CLASSE_APTIDAO.get(resultado.classe, ("var(--n-500)", "info"))
+        cor, icone, atencao = _SELO_POR_CLASSE_APTIDAO.get(
+            resultado.classe, ("var(--n-500)", "info", False)
+        )
         return {
             "classe": resultado.classe,
             "rotulo": _ROTULO_POR_CLASSE_APTIDAO.get(resultado.classe, resultado.classe),
             "cor": cor,
             "icone": icone,
+            # Marca discreta, e não a cor do selo: a restrição pede atenção sem desmentir
+            # a aptidão que o rótulo afirma.
+            "atencao": atencao,
+            "cor_atencao": _AMBAR_DE_ATENCAO,
             "fator_determinante": _NOME_POR_FATOR.get(
                 resultado.fator_determinante, resultado.fator_determinante
             ),

@@ -1225,3 +1225,31 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 /* No papel nao ha rolagem, e no laudo impresso a barra nao deve existir nem na
    tela de conferencia da paginacao. */
 @media print { ::-webkit-scrollbar { display: none; } }
+
+/* =========================================================================
+   Selo de aptidao: a ressalva nao tira a aptidao
+   -------------------------------------------------------------------------
+   "Apta com restricoes" era ambar, e ambar ali dizia que a area nao esta apta.
+   Ela esta: a restricao qualifica a aptidao, nao a retira, e quem lia o selo
+   amarelo logo abaixo da recomendacao entendia que a recomendacao nao seria
+   suficiente - o oposto do que o CCAE afirma.
+
+   As duas classes aptas sao verdes agora, separadas por vivacidade: a apta em
+   verde saturado, a com restricoes no mesmo verde, mais claro. A ressalva ganha
+   uma marca de atencao pequena, no canto, em ambar - presente o bastante para
+   ser notada, discreta o bastante para nao disputar com o veredito.
+   ====================================================================== */
+.aptidao__selo--atencao { position: relative; }
+.aptidao__atencao {
+  position: absolute; top: 7px; right: 7px;
+  display: grid; place-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  color: var(--cor-atencao);
+  background: #FFFFFF;
+  border: 1px solid var(--cor-atencao);
+}
+
+@media print {
+  /* O ambar da marca e informacao: sem isto ela sai como um circulo vazio. */
+  .aptidao__atencao { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

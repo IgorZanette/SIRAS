@@ -70,9 +70,19 @@
            emitida acima. É o que integra os dois módulos do sistema. #}
         <div class="cenarios">
           <div class="cenario">
-            <div class="aptidao__selo" style="--cor:{{ laudo.aptidao.atual.cor }}">
+            {# A marca de atenção acompanha "Apta com restrições": a ressalva pede
+               cuidado sem desmentir a aptidão que o rótulo afirma, então ela é um
+               sinal pequeno no canto, e não a cor do selo inteiro. Decorativa para
+               o leitor de tela — o rótulo textual já diz o que ela marca. #}
+            <div class="aptidao__selo{% if laudo.aptidao.atual.atencao %} aptidao__selo--atencao{% endif %}"
+                 style="--cor:{{ laudo.aptidao.atual.cor }};--cor-atencao:{{ laudo.aptidao.atual.cor_atencao }}">
               {{ i.ico(laudo.aptidao.atual.icone, "ico ico--lg") }}
               <div class="aptidao__grau">{{ laudo.aptidao.atual.rotulo }}</div>
+              {% if laudo.aptidao.atual.atencao %}
+              <span class="aptidao__atencao" aria-hidden="true">
+                {{ i.ico("alerta", "ico ico--sm") }}
+              </span>
+              {% endif %}
             </div>
             <div class="cenario__rotulo">Hoje</div>
             <p class="cenario__nota">
@@ -89,9 +99,19 @@
           </div>
 
           <div class="cenario">
-            <div class="aptidao__selo" style="--cor:{{ laudo.aptidao.potencial.cor }}">
+            {# A marca de atenção acompanha "Apta com restrições": a ressalva pede
+               cuidado sem desmentir a aptidão que o rótulo afirma, então ela é um
+               sinal pequeno no canto, e não a cor do selo inteiro. Decorativa para
+               o leitor de tela — o rótulo textual já diz o que ela marca. #}
+            <div class="aptidao__selo{% if laudo.aptidao.potencial.atencao %} aptidao__selo--atencao{% endif %}"
+                 style="--cor:{{ laudo.aptidao.potencial.cor }};--cor-atencao:{{ laudo.aptidao.potencial.cor_atencao }}">
               {{ i.ico(laudo.aptidao.potencial.icone, "ico ico--lg") }}
               <div class="aptidao__grau">{{ laudo.aptidao.potencial.rotulo }}</div>
+              {% if laudo.aptidao.potencial.atencao %}
+              <span class="aptidao__atencao" aria-hidden="true">
+                {{ i.ico("alerta", "ico ico--sm") }}
+              </span>
+              {% endif %}
             </div>
             <div class="cenario__rotulo">Após a correção</div>
             <p class="cenario__nota">

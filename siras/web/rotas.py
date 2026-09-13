@@ -59,10 +59,14 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
         "cultura_nome": nome_de_exibicao(cultura_id, dados) if cultura_id else "",
         "grupo": grupo,
         "manejos": formulario.opcoes_de_manejo(dados, grupo),
-        "antecedentes": formulario.antecedentes_disponiveis(dados_graos) if grupo == "graos" else [],
-        "culturas_com_antecedente": (
-            formulario.culturas_que_exigem_antecedente(dados_graos, dados)
+        # Só as antecedentes que ESTA cultura aceita. A união de todas as de grãos fazia
+        # a tela oferecer opção que o motor recusa.
+        "antecedentes": (
+            formulario.antecedentes_da_cultura(dados_graos, cultura_id)
             if grupo == "graos" else []
+        ),
+        "exige_antecedente": (
+            grupo == "graos" and formulario.exige_antecedente(dados_graos, cultura_id)
         ),
         "variaveis": formulario.variaveis_condicionais(
             cultura_id, grupo, dados_do_grupo(grupo)

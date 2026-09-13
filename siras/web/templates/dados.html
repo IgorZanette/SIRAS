@@ -49,7 +49,7 @@
   <div style="margin-top:var(--e-5)">
     {% set _corpo %}
       {% if leitura.faltando %}Faltam valores em: {{ leitura.faltando|join(", ") }}.{% endif %}
-      {% if leitura.invalidos %} {{ leitura.invalidos|join("; ") }}. Confira a unidade no laudo do laboratório.{% endif %}
+      {% if leitura.invalidos %} {{ leitura.invalidos|join("; ") }}.{% if leitura.tem_erro_numerico %} Confira a unidade no laudo do laboratório.{% endif %}{% endif %}
     {% endset %}
     {{ av.aviso("erro", "O laudo não foi gerado", _corpo) }}
   </div>
@@ -84,10 +84,17 @@
                            [("20", "20 cm — padrão"), ("30", "30 cm")],
                            ajuda="As duas profundidades que o Manual discute",
                            valor=leitura.valores.get("profundidade_incorporacao_cm")) }}
+        {# O campo só existe para as culturas que dosam N cruzando matéria orgânica com a
+           antecedente. Para as demais não é opcional: é inaplicável, e oferecê-lo com um
+           "Não se aplica" pré-selecionado ensinava a deixá-lo em branco justamente onde
+           ele é obrigatório. #}
+        {% if exige_antecedente %}
         {{ c.campo_escolha("antecedente", "Cultura antecedente",
-                           [("", "Não se aplica")] + antecedentes,
-                           ajuda="Exigida por: " + culturas_com_antecedente|join(", "),
+                           [("", "Selecione a antecedente")] + antecedentes,
+                           ajuda="O que ocupou a área antes desta cultura: define a dose de nitrogênio junto com a matéria orgânica",
+                           obrigatorio=True,
                            valor=leitura.valores.get("antecedente")) }}
+        {% endif %}
         {% endif %}
         {% for campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo in campos_contexto %}
         {{ c.campo(campo_id, rotulo, unidade, ajuda, obrigatorio, passo, exemplo,

@@ -738,3 +738,86 @@ def test_a_volta_preserva_ate_o_valor_que_o_motor_recusou(cliente):
     ).get_data(as_text=True)
 
     assert 'value="valor invalido"' in html
+
+
+# --- cultura antecedente -------------------------------------------------------
+
+_SEM_ANTECEDENTE = {k: v for k, v in _ANALISE_COMPLETA.items()}
+
+
+@pytest.mark.parametrize(
+    "cultura, esperados",
+    [
+        ("aveia_preta", {"leguminosa", "graminea"}),
+        ("milho", {"leguminosa", "graminea", "consorciacao_ou_pousio"}),
+    ],
+)
+def test_a_tela_oferece_so_as_antecedentes_que_a_cultura_aceita(cliente, cultura, esperados):
+    """A união das antecedentes de todas as culturas de grãos fazia a tela propor
+    'consorciação ou pousio' para a aveia, que só aceita leguminosa e gramínea: o usuário
+    escolhia de uma lista legítima e o motor recusava."""
+    html = cliente.get(f"/analise/dados?cultura_id={cultura}").get_data(as_text=True)
+    bloco = re.search(r'<select id="antecedente".*?</select>', html, re.S).group(0)
+
+    oferecidas = {v for v, _ in re.findall(r'<option value="([^"]*)"[^>]*>([^<]*)<', bloco)}
+    assert oferecidas == esperados | {""}
+
+
+def test_quem_nao_dosa_n_pela_antecedente_nao_ve_o_campo(cliente):
+    """A soja fixa nitrogênio biologicamente: para ela a antecedente não é opcional, é
+    inaplicável."""
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'id="antecedente"' not in html
+
+
+def test_a_antecedente_ausente_e_avisada_como_campo_faltando(cliente):
+    """Era o defeito: deixar em branco devolvia a mensagem interna do módulo de adubação
+    ('modelo mo_x_antecedente exige...') direto na tela."""
+    resposta = cliente.post(
+        "/analise/laudo", data=dict(_SEM_ANTECEDENTE, cultura_id="aveia_preta")
+    )
+    html = resposta.get_data(as_text=True)
+
+    assert resposta.status_code == 422
+    assert "Faltam valores em:" in html and "Cultura antecedente" in html
+    assert "mo_x_antecedente" not in html, "vazou nome de modelo da base para a tela"
+
+
+def test_a_antecedente_de_outra_cultura_e_recusada_com_a_lista_certa(cliente):
+    """'consorciacao_ou_pousio' vale para o milho e não para a aveia. A recusa precisa
+    dizer o que vale AQUI."""
+    html = cliente.post(
+        "/analise/laudo",
+        data=dict(_SEM_ANTECEDENTE, cultura_id="aveia_preta",
+                  antecedente="consorciacao_ou_pousio"),
+    ).get_data(as_text=True)
+
+    assert "esta cultura aceita Leguminosa, Gramínea" in html
+    assert "mo_x_antecedente" not in html
+
+
+def test_com_a_antecedente_o_laudo_sai(cliente):
+    resposta = cliente.post(
+        "/analise/laudo",
+        data=dict(_SEM_ANTECEDENTE, cultura_id="aveia_preta", antecedente="graminea"),
+    )
+
+    assert resposta.status_code == 200
+    assert "Laudo de recomendação" in resposta.get_data(as_text=True)
+
+
+def test_a_dica_de_unidade_so_aparece_para_erro_de_medida(cliente):
+    """'Confira a unidade no laudo do laboratório' é conselho certo para um pH fora de
+    faixa e sem sentido para uma escolha de lista, que não tem unidade."""
+    escolha = cliente.post(
+        "/analise/laudo",
+        data=dict(_SEM_ANTECEDENTE, cultura_id="aveia_preta", antecedente="invalida"),
+    ).get_data(as_text=True)
+    medida = cliente.post(
+        "/analise/laudo",
+        data=dict(_ANALISE_COMPLETA, ph_agua="22"),
+    ).get_data(as_text=True)
+
+    assert "Confira a unidade" not in escolha
+    assert "Confira a unidade" in medida

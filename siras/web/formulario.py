@@ -112,6 +112,8 @@ class LeituraFormulario:
     invalidos: List[str] = field(default_factory=list)
     #: ids dos campos a marcar com .campo--erro
     campos_com_erro: List[str] = field(default_factory=list)
+    #: subconjunto de 'invalidos' que veio de campo de escolha, e não de medida
+    invalidos_de_escolha: List[str] = field(default_factory=list)
     #: o que veio do formulário, para devolver a tela preenchida
     valores: Dict[str, str] = field(default_factory=dict)
 
@@ -123,6 +125,20 @@ class LeituraFormulario:
             chave[0]: (self.valores.get(chave[0]) or "").strip()
             for chave in CAMPOS_RESPONSAVEL
         }
+
+    @property
+    def tem_erro_numerico(self) -> bool:
+        """Sobrou algum erro que não veio de campo de escolha?
+
+        Separa as duas naturezas porque a tela sugere "confira a unidade no laudo do
+        laboratório" — conselho certo para um pH fora de faixa e sem sentido para uma
+        cultura antecedente, que não tem unidade e é escolhida de uma lista.
+
+        A conta é por exclusão, e não por campo marcado: as recusas de faixa vêm do
+        domínio já formatadas e não nomeiam o campo de volta, então perguntar quais
+        campos estão marcados perderia justamente o erro de medida mais comum.
+        """
+        return len(self.invalidos) > len(self.invalidos_de_escolha)
 
     @property
     def ok(self) -> bool:
@@ -447,23 +463,35 @@ def variaveis_condicionais(
     return variaveis
 
 
-def antecedentes_disponiveis(dados_graos: Dict[str, Any]) -> List[Tuple[str, str]]:
-    """Antecedentes declarados pelas culturas cujo modelo de N depende delas."""
-    vistos: Dict[str, None] = {}
-    for entrada in dados_graos["adubacao_n"]["culturas"].values():
-        for antecedente in entrada.get("antecedentes", ()):
-            vistos.setdefault(antecedente, None)
-    return [(a, a.replace("_", " ").capitalize()) for a in vistos]
+#: Rótulos das antecedentes. O identificador da base é legível, mas "Consorciacao ou
+#: pousio" sem acento e com a primeira letra maiúscula é texto de máquina numa tela que
+#: o técnico lê. Só tradução de rótulo — a lista de quais existem continua vindo da base.
+_ROTULO_DE_ANTECEDENTE = {
+    "leguminosa": "Leguminosa",
+    "graminea": "Gramínea",
+    "consorciacao_ou_pousio": "Consorciação ou pousio",
+}
 
 
-def culturas_que_exigem_antecedente(dados_graos: Dict[str, Any], dados: Dict[str, Any]) -> List[str]:
-    from siras.relatorio.apresentacao import nome_de_exibicao
+def antecedentes_da_cultura(dados_graos: Dict[str, Any], cultura_id: str) -> List[Tuple[str, str]]:
+    """Antecedentes que ESTA cultura aceita, e não a união de todas as de grãos.
 
-    return sorted(
-        nome_de_exibicao(cultura_id, dados)
-        for cultura_id, entrada in dados_graos["adubacao_n"]["culturas"].items()
-        if entrada["modelo"] == "mo_x_antecedente"
-    )
+    A distinção não é cosmética: o milho aceita 'consorciacao_ou_pousio', e aveia, trigo,
+    centeio, cevada e triticale não. Oferecer a união deixava a tela propor uma opção que
+    o motor recusa — o usuário escolhia de uma lista legítima e recebia erro.
+    """
+    entrada = dados_graos["adubacao_n"]["culturas"].get(cultura_id, {})
+    return [
+        (a, _ROTULO_DE_ANTECEDENTE.get(a, a.replace("_", " ").capitalize()))
+        for a in entrada.get("antecedentes") or ()
+    ]
+
+
+def exige_antecedente(dados_graos: Dict[str, Any], cultura_id: str) -> bool:
+    """A cultura dosa N cruzando matéria orgânica com a antecedente (modelo
+    'mo_x_antecedente')? Então sem antecedente não há dose de N a calcular."""
+    entrada = dados_graos["adubacao_n"]["culturas"].get(cultura_id, {})
+    return entrada.get("modelo") == "mo_x_antecedente"
 
 
 def _montar_subsuperficie(numeros: Dict[str, Optional[float]]) -> Optional[Camada]:
@@ -549,6 +577,7 @@ def ler(
         leitura.invalidos.append(
             f"Cultura: “{cultura_id}” não está no catálogo de culturas do escopo"
         )
+        leitura.invalidos_de_escolha.append(leitura.invalidos[-1])
         leitura.campos_com_erro.append("cultura_id")
 
     criterio_id = (form.get("criterio_id") or "").strip()
@@ -558,7 +587,31 @@ def ler(
         leitura.campos_com_erro.append("criterio_id")
     elif criterio_id not in criterios:
         leitura.invalidos.append(f"Sistema de manejo: “{criterio_id}” não corresponde a nenhum critério")
+        leitura.invalidos_de_escolha.append(leitura.invalidos[-1])
         leitura.campos_com_erro.append("criterio_id")
+
+    # A antecedente é obrigatória para as culturas de grãos cujo modelo de N é
+    # 'mo_x_antecedente', e inexistente para todas as outras. Validada aqui porque o
+    # motor já a exigia: sem isto, deixá-la em branco devolvia a mensagem interna do
+    # módulo de adubação à tela, em vez do aviso de campo faltando que todo campo
+    # obrigatório recebe.
+    if grupo == "graos":
+        from siras.conhecimento.carregador import carregar_dados_graos
+
+        dados_graos = carregar_dados_graos()
+        antecedente = (form.get("antecedente") or "").strip()
+        if exige_antecedente(dados_graos, cultura_id):
+            aceitos = dict(antecedentes_da_cultura(dados_graos, cultura_id))
+            if not antecedente:
+                leitura.faltando.append("Cultura antecedente")
+                leitura.campos_com_erro.append("antecedente")
+            elif antecedente not in aceitos:
+                leitura.invalidos.append(
+                    f"Cultura antecedente: esta cultura aceita "
+                    f"{', '.join(aceitos.values())}"
+                )
+                leitura.invalidos_de_escolha.append(leitura.invalidos[-1])
+                leitura.campos_com_erro.append("antecedente")
 
     if leitura.faltando or leitura.invalidos:
         return leitura
@@ -613,10 +666,10 @@ __all__ = [
     "CAMPOS_FERTILIDADE",
     "CAMPOS_SUBSUPERFICIE",
     "LeituraFormulario",
-    "antecedentes_disponiveis",
+    "antecedentes_da_cultura",
     "para_numero",
     "culturas_disponiveis",
-    "culturas_que_exigem_antecedente",
+    "exige_antecedente",
     "grupo_da_cultura",
     "variaveis_condicionais",
     "ler",

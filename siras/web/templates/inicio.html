@@ -2,12 +2,24 @@
 {% import "_macros/ico.html" as i %}
 {% import "_macros/ficha.html" as f %}
 
+{# Tela inicial. A anterior explicava O QUE o sistema faz; esta começa pelo que a pessoa
+   GANHA — e fala com o produtor e com o técnico com o mesmo peso.
+
+   REGRA DESTA PÁGINA: nenhum benefício com número inventado. Não há "aumente X% a
+   produtividade", "economize R$ Y/ha", depoimento ou logo de cliente. O convencimento se
+   apoia no que é verificável: o que o Manual afirma (alvo na classe Alto, dose baixa ou
+   nula em Muito alto, calcário pelo critério da cultura e não pelo pH de referência), os
+   fatos do próprio sistema (escopo, trilha, offline, gratuito) e os números que a própria
+   pessoa digita (área e preços, na calculadora de custo do laudo). #}
+
 {% block barra_nav %}
-<a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">Iniciar análise</a>
+<a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">Fazer minha análise</a>
 {% endblock %}
 
 {% block conteudo %}
-<main>
+<main class="inicio">
+
+  {# ——— 1. A promessa ——— #}
   <section class="hero">
     {# O único halo do projeto. Não se repete em outra tela: gradiente decorativo
        espalhado por todas as seções é o que faz uma página parecer template. #}
@@ -16,31 +28,37 @@
       <div>
         <span class="selo">
           {{ i.ico("confere", "ico ico--sm") }}
-          Manual de Calagem e Adubação RS/SC · 2016
+          Gratuito · Manual de Calagem e Adubação RS/SC · 2016
         </span>
-        <h1 class="t-hero">Uma análise de solo. <em>Três decisões</em> de manejo.</h1>
+        <h1 class="t-hero hero__promessa">Calcário e adubo na dose que o seu solo pede. <em>Nem a mais, nem a menos.</em></h1>
         <p class="t-corpo hero__texto">
-          Informe o laudo do laboratório e a cultura. O SIRAS calcula calagem, adubação e
-          aptidão edáfica — e mostra qual tabela do Manual gerou cada número. Sem cadastro
-          e sem enviar dado para servidor nenhum.
+          Informe a análise de solo e a cultura. O SIRAS diz quanto calcário e quanto
+          nitrogênio, fósforo e potássio aplicar, se a área é apta para a cultura — e mostra
+          a tabela do Manual por trás de cada número. Sem cadastro, sem internet, sem custo.
         </p>
         <div class="hero__acoes">
           <a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">
-            Iniciar análise {{ i.ico("avanca", "ico ico--sm") }}
+            Fazer minha análise {{ i.ico("avanca", "ico ico--sm") }}
+          </a>
+          {# O exemplo abre o formulário já preenchido com um laudo de laboratório de
+             demonstração (siras/web/exemplo.py): quem só quer conhecer vê o resultado
+             sem digitar dezessete campos, e o laudo sai do motor de verdade. #}
+          <a class="btn btn--contorno" href="{{ url_for('siras.dados', cultura_id='soja', exemplo='argiloso') }}">
+            {{ i.ico("exemplo", "ico ico--sm") }} Ver um laudo de exemplo
           </a>
         </div>
         <div class="hero__prova">
           <div>
             <div class="prova__n" data-contador="{{ total_de_culturas }}">{{ total_de_culturas }}</div>
-            <div class="prova__r">culturas e grupos de culturas do escopo</div>
+            <div class="prova__r">culturas e grupos de culturas do Manual</div>
           </div>
           <div>
             <div class="prova__n" data-contador="3">3</div>
-            <div class="prova__r">saídas por análise: calagem, adubação e aptidão</div>
+            <div class="prova__r">recomendações numa análise: calcário, adubo e aptidão</div>
           </div>
           <div>
-            <div class="prova__n" data-contador="2">2</div>
-            <div class="prova__r">cenários de aptidão: o atual e o depois da correção</div>
+            <div class="prova__n">Grátis</div>
+            <div class="prova__r">sem cadastro e sem enviar dado para servidor nenhum</div>
           </div>
         </div>
       </div>
@@ -52,7 +70,7 @@
         <div class="perfil-viz__cab">
           <div style="display:flex;align-items:center;gap:.6rem">
             {{ i.ico("regua") }}
-            <strong style="font-size:var(--fs-sm)">As cinco classes do Manual</strong>
+            <strong style="font-size:var(--fs-sm)">Mais adubo não é mais produção</strong>
           </div>
           <span class="t-aux" style="font-size:10px">disponibilidade de P e K</span>
         </div>
@@ -77,87 +95,321 @@
             situa a máxima resposta econômica — e não o extremo da escala.
           </p>
           <p class="t-aux">
-            {{ f.ficha("ma", "Muito alto") }} começa no dobro do teor crítico e indica
-            teor acima da demanda da cultura: dose baixa ou nula, e atenção ao limite
-            crítico ambiental. Por isso a escala não é um semáforo.
+            Em {{ f.ficha("ma", "Muito alto") }} o teor já passa da demanda da cultura: a
+            dose é baixa ou nula. Adubar ali é dinheiro que não volta em produção.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="faixa faixa--alt">
+  {# ——— 2. O problema ——— #}
+  <section class="faixa faixa--alt" aria-labelledby="titulo-problema">
     <div class="env">
       <div class="cab-secao">
-        <h2 class="t-tela">Três saídas de uma única análise</h2>
-        <p>Com a regra visível por trás de cada uma.</p>
+        <span class="sobretitulo">O problema</span>
+        <h2 class="t-tela" id="titulo-problema">O custo de adubar no escuro</h2>
+        <p>Calcário e fertilizante estão entre os maiores gastos da lavoura. Errar a dose
+           custa dos dois lados — e nenhum dos dois aparece na hora da compra.</p>
       </div>
       <div class="pilares">
-        <article class="painel pilar">
+        <article class="painel pilar pilar--problema">
+          <span class="pilar__ico">{{ i.ico("soma", "ico ico--lg") }}</span>
+          <h3>Aplicar onde o solo já tem</h3>
+          <p>Com fósforo ou potássio em Muito alto, o Manual indica dose baixa ou nula.
+             O que passa disso é gasto que não volta em produção, e soma risco ambiental.</p>
+        </article>
+        <article class="painel pilar pilar--problema">
+          <span class="pilar__ico">{{ i.ico("alerta", "ico ico--lg") }}</span>
+          <h3>Faltar onde o solo limita</h3>
+          <p>Acidez e teores baixos seguram a resposta da lavoura a tudo o que foi
+             investido nela. O SIRAS aponta qual atributo limita a área — antes do plantio.</p>
+        </article>
+        <article class="painel pilar pilar--problema">
           <span class="pilar__ico">{{ i.ico("calagem", "ico ico--lg") }}</span>
-          <h3>Calagem</h3>
-          <p>Dose de calcário pelo índice SMP, dirigida pelo critério de grupo da cultura
-             e pelo sistema de manejo, e ajustada ao PRNT do corretivo informado.</p>
-        </article>
-        <article class="painel pilar">
-          <span class="pilar__ico">{{ i.ico("alvo", "ico ico--lg") }}</span>
-          <h3>Adubação</h3>
-          <p>N, P<sub>2</sub>O<sub>5</sub> e K<sub>2</sub>O em kg/ha pela classe de
-             disponibilidade do solo e pela expectativa de rendimento da área.</p>
-        </article>
-        <article class="painel pilar">
-          <span class="pilar__ico">{{ i.ico("aptidao", "ico ico--lg") }}</span>
-          <h3>Aptidão edáfica</h3>
-          <p>Grau de aptidão da cultura naquela área e os atributos que limitam, na
-             situação atual e na que resulta das correções recomendadas.</p>
+          <h3>Calcário na hora errada</h3>
+          <p>O pH de referência da cultura não é o gatilho da calagem. Confundir os dois leva
+             a corrigir o que não precisava — ou a deixar sem correção o que precisava.</p>
         </article>
       </div>
     </div>
   </section>
 
-  <section class="faixa">
+  {# ——— 3. Antes e depois ——— #}
+  <section class="faixa" aria-labelledby="titulo-comparativo">
     <div class="env">
       <div class="cab-secao">
-        <h2 class="t-tela">De onde vem cada número</h2>
-        <p>Toda saída do SIRAS é rastreável até a regra e a tabela do Manual que a
-           produziram. O laudo traz essa trilha em seção própria — não como nota de
-           rodapé —, para que o técnico possa conferir e para que o documento tenha
-           utilidade em análise de crédito rural.</p>
+        <span class="sobretitulo">A diferença</span>
+        <h2 class="t-tela" id="titulo-comparativo">Do jeito tradicional × com o SIRAS</h2>
+        <p>O cálculo é o mesmo do Manual. O que muda é quem faz a consulta, a conta e o
+           documento.</p>
       </div>
-      <div class="pilares">
-        <article class="painel pilar">
-          <span class="pilar__ico">{{ i.ico("rastro", "ico ico--lg") }}</span>
-          <h3>Cada dose cita a tabela</h3>
-          <p>A trilha registra a regra aplicada, as entradas que ela leu e a página do
-             Manual de onde saiu o valor.</p>
-        </article>
-        <article class="painel pilar">
-          <span class="pilar__ico">{{ i.ico("imprime", "ico ico--lg") }}</span>
-          <h3>Sai em papel sem retrabalho</h3>
-          <p>O laudo é uma superfície branca dentro do sistema, com folha de impressão
-             própria em A4.</p>
-        </article>
-        <article class="painel pilar">
-          <span class="pilar__ico">{{ i.ico("perfil", "ico ico--lg") }}</span>
-          <h3>Roda local e offline</h3>
-          <p>Sem cadastro, sem banco de dados e sem chamada de rede. A análise não sai
-             da máquina de quem a digitou.</p>
-        </article>
+      <div class="comparativo-rolagem">
+        <table class="comparativo">
+          <thead>
+            <tr>
+              <th scope="col"><span class="comparativo__oculto">Etapa</span></th>
+              <th scope="col">Do jeito tradicional</th>
+              <th scope="col" class="comparativo__siras">Com o SIRAS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Consulta</th>
+              <td>Várias tabelas do Manual abertas, uma para cada atributo</td>
+              <td class="comparativo__siras">{{ i.ico("confere", "ico ico--sm") }} Uma tela, que consulta todas</td>
+            </tr>
+            <tr>
+              <th scope="row">Conta do calcário</th>
+              <td>Índice SMP, fator do manejo e PRNT calculados à mão</td>
+              <td class="comparativo__siras">{{ i.ico("confere", "ico ico--sm") }} Dose pronta, já no PRNT do seu calcário</td>
+            </tr>
+            <tr>
+              <th scope="row">Fósforo e potássio</th>
+              <td>Classe lida por argila e por CTC, sujeita a linha trocada</td>
+              <td class="comparativo__siras">{{ i.ico("confere", "ico ico--sm") }} Classe lida da tabela certa e mostrada numa régua</td>
+            </tr>
+            <tr>
+              <th scope="row">Aptidão da área</th>
+              <td>Raramente avaliada junto da recomendação</td>
+              <td class="comparativo__siras">{{ i.ico("confere", "ico ico--sm") }} Hoje e depois da correção, com o atributo que limita</td>
+            </tr>
+            <tr>
+              <th scope="row">Documento</th>
+              <td>Redigido do zero, sem a fonte de cada número</td>
+              <td class="comparativo__siras">{{ i.ico("confere", "ico ico--sm") }} Laudo A4 com a tabela de cada dose, pronto para assinar</td>
+            </tr>
+            <tr>
+              <th scope="row">Compra</th>
+              <td>Quantidade e custo estimados por fora, numa planilha</td>
+              <td class="comparativo__siras">{{ i.ico("confere", "ico ico--sm") }} Total a comprar e custo calculados com os seus preços</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
 
-  <section class="faixa faixa--alt">
-    <div class="env" style="display:grid;gap:var(--e-5);justify-items:start">
-      <h2 class="t-secao">Comece pela cultura</h2>
-      <p class="t-corpo">
-        Ela define o critério de calagem, o grupo de exigência em fósforo e potássio e
-        quais informações de manejo o Manual pede.
+  {# ——— 4. Como funciona ——— #}
+  <section class="faixa faixa--alt" aria-labelledby="titulo-como">
+    <div class="env">
+      <div class="cab-secao">
+        <span class="sobretitulo">Como funciona</span>
+        <h2 class="t-tela" id="titulo-como">Três passos, do laudo do laboratório à compra</h2>
+      </div>
+      <ol class="como">
+        <li class="painel como__passo">
+          <span class="como__n">1</span>
+          <span class="pilar__ico">{{ i.ico("broto", "ico ico--lg") }}</span>
+          <h3>Escolha a cultura</h3>
+          <p>Ela define o critério de calagem e quais informações de manejo o Manual pede.</p>
+        </li>
+        <li class="painel como__passo">
+          <span class="como__n">2</span>
+          <span class="pilar__ico">{{ i.ico("analise", "ico ico--lg") }}</span>
+          <h3>Digite a análise de solo</h3>
+          <p>A interpretação aparece enquanto você digita, e um número trocado salta aos
+             olhos no próprio campo. Tem vários talhões? Analise todos juntos.</p>
+        </li>
+        <li class="painel como__passo">
+          <span class="como__n">3</span>
+          <span class="pilar__ico">{{ i.ico("laudo", "ico ico--lg") }}</span>
+          <h3>Receba o laudo</h3>
+          <p>Doses por hectare, aptidão da área, total a comprar e o custo com os preços que
+             você informar — em cores para a tela, ou em preto e branco para imprimir.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  {# ——— 5. Para quem ——— #}
+  <section class="faixa" aria-labelledby="titulo-publico">
+    <div class="env">
+      <div class="cab-secao">
+        <span class="sobretitulo">Para quem</span>
+        <h2 class="t-tela" id="titulo-publico">Feito para quem planta e para quem recomenda</h2>
+      </div>
+      <div class="publicos">
+        <article class="painel painel--marca publico">
+          <div class="publico__cab">
+            <span class="pilar__ico">{{ i.ico("graos", "ico ico--lg") }}</span>
+            <h3>Para o produtor</h3>
+          </div>
+          <ul class="publico__lista">
+            <li>{{ i.ico("confere", "ico ico--sm") }} Saiba quanto calcário e adubo comprar antes de ir à revenda</li>
+            <li>{{ i.ico("confere", "ico ico--sm") }} Deixe de adubar o que o solo já tem de sobra</li>
+            <li>{{ i.ico("confere", "ico ico--sm") }} Veja quanto custa a recomendação de cada talhão, com os seus preços</li>
+            <li>{{ i.ico("confere", "ico ico--sm") }} Descubra o que limita a área antes de investir nela</li>
+          </ul>
+        </article>
+        <article class="painel painel--marca publico">
+          <div class="publico__cab">
+            <span class="pilar__ico">{{ i.ico("assina", "ico ico--lg") }}</span>
+            <h3>Para o agrônomo e o técnico</h3>
+          </div>
+          <ul class="publico__lista">
+            <li>{{ i.ico("confere", "ico ico--sm") }} Recomendação sem abrir tabela por tabela nem refazer a conta do PRNT</li>
+            <li>{{ i.ico("confere", "ico ico--sm") }} Cada número com a regra e a tabela do Manual que o produziu</li>
+            <li>{{ i.ico("confere", "ico ico--sm") }} Laudo A4 com espaço para nome, registro e assinatura</li>
+            <li>{{ i.ico("confere", "ico ico--sm") }} Vários talhões de uma propriedade num documento só</li>
+          </ul>
+        </article>
+      </div>
+      <p class="t-aux publicos__nota">
+        Útil também para quem estuda o Manual e para quem precisa de uma recomendação com
+        fonte documentada, como na análise de crédito rural.
       </p>
-      <a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">
-        Iniciar análise {{ i.ico("avanca", "ico ico--sm") }}
-      </a>
-      <p class="t-aux" style="max-width:var(--largura-leitura)">
+    </div>
+  </section>
+
+  {# ——— 6. O laudo ———
+     A prévia é a ESTRUTURA do documento, com barras no lugar dos valores: mostrar doses
+     aqui seria número agronômico de vitrine. Quem quiser valores reais abre o exemplo. #}
+  <section class="faixa faixa--alt" aria-labelledby="titulo-laudo">
+    <div class="env vitrine">
+      <div>
+        <span class="sobretitulo">O resultado</span>
+        <h2 class="t-tela" id="titulo-laudo">Um laudo que se explica</h2>
+        <ul class="vitrine__lista">
+          <li>
+            <span class="pilar__ico">{{ i.ico("alvo") }}</span>
+            <div><strong>As quatro doses em destaque</strong>
+              <p>Calcário, N, P<sub>2</sub>O<sub>5</sub> e K<sub>2</sub>O por hectare, na primeira dobra.</p></div>
+          </li>
+          <li>
+            <span class="pilar__ico">{{ i.ico("aptidao") }}</span>
+            <div><strong>A aptidão em dois cenários</strong>
+              <p>O solo de hoje e o solo depois da correção — a diferença é o ganho da recomendação.</p></div>
+          </li>
+          <li>
+            <span class="pilar__ico">{{ i.ico("rastro") }}</span>
+            <div><strong>De onde vem cada número</strong>
+              <p>A regra aplicada, os valores lidos e a tabela do Manual, em seção própria.</p></div>
+          </li>
+          <li>
+            <span class="pilar__ico">{{ i.ico("soma") }}</span>
+            <div><strong>Quanto comprar e quanto custa</strong>
+              <p>Com as áreas e os preços que você informar. Os preços ficam só na sua tela.</p></div>
+          </li>
+        </ul>
+        <a class="btn btn--contorno" href="{{ url_for('siras.dados', cultura_id='soja', exemplo='argiloso') }}">
+          {{ i.ico("exemplo", "ico ico--sm") }} Abrir o exemplo
+        </a>
+      </div>
+
+      <figure class="previa" aria-label="Ilustração da estrutura do laudo, sem valores">
+        <div class="previa__folha">
+          <div class="previa__marca">
+            <img src="{{ url_for('static', filename='img/marca/siras-icone-64.png') }}" alt="" width="64" height="64">
+            <img src="{{ url_for('static', filename='img/marca/siras-texto-escuro.png') }}" alt="" width="300" height="67">
+          </div>
+          <div class="previa__titulo">Laudo de recomendação</div>
+          <div class="previa__doses">
+            <div><span>Calcário</span><i></i></div>
+            <div><span>N</span><i></i></div>
+            <div><span>P<sub>2</sub>O<sub>5</sub></span><i></i></div>
+            <div><span>K<sub>2</sub>O</span><i></i></div>
+          </div>
+          <div class="previa__cenarios">
+            <div class="previa__selo previa__selo--hoje">Hoje</div>
+            <span class="previa__seta">{{ i.ico("avanca", "ico ico--sm") }}</span>
+            <div class="previa__selo previa__selo--depois">Depois da correção</div>
+          </div>
+          <div class="previa__linhas"><i></i><i></i><i></i></div>
+          <div class="previa__assina">Responsável Técnico</div>
+        </div>
+        <figcaption class="t-aux">Estrutura do laudo — ilustração sem valores.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  {# ——— 7. Confiança ——— #}
+  <section class="faixa" aria-labelledby="titulo-confianca">
+    <div class="env">
+      <div class="cab-secao">
+        <span class="sobretitulo">Por que confiar</span>
+        <h2 class="t-tela" id="titulo-confianca">A recomendação oficial do RS e SC, sem atalho</h2>
+        <p>O SIRAS não tem fórmula própria: aplica as tabelas da Comissão de Química e
+           Fertilidade do Solo e diz, em cada número, qual delas usou.</p>
+      </div>
+      <div class="confianca">
+        <div class="confianca__item">
+          <span class="pilar__ico">{{ i.ico("marca", "ico ico--lg") }}</span>
+          <strong>Fonte oficial</strong>
+          <span>Manual de Calagem e Adubação RS/SC, 11ª edição, 2016</span>
+        </div>
+        <div class="confianca__item">
+          <span class="pilar__ico">{{ i.ico("frutiferas", "ico ico--lg") }}</span>
+          <strong>{{ total_de_culturas }} culturas</strong>
+          <span>Grãos, hortaliças, tubérculos, frutíferas, erva-mate, cana e tabaco</span>
+        </div>
+        <div class="confianca__item">
+          <span class="pilar__ico">{{ i.ico("perfil", "ico ico--lg") }}</span>
+          <strong>Seus dados ficam com você</strong>
+          <span>Roda no seu computador, offline, sem banco de dados</span>
+        </div>
+        <div class="confianca__item">
+          <span class="pilar__ico">{{ i.ico("lupa", "ico ico--lg") }}</span>
+          <strong>Tudo conferível</strong>
+          <span>As tabelas do Manual ficam abertas para consulta a qualquer momento</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ——— 8. Perguntas ——— #}
+  <section class="faixa faixa--alt" aria-labelledby="titulo-perguntas">
+    <div class="env perguntas">
+      <div class="cab-secao">
+        <span class="sobretitulo">Dúvidas</span>
+        <h2 class="t-tela" id="titulo-perguntas">Perguntas frequentes</h2>
+      </div>
+      <div class="perguntas__lista">
+        <details class="pergunta">
+          <summary>O SIRAS substitui o agrônomo?</summary>
+          <p>Não. É ferramenta de apoio à decisão: faz a consulta e a conta, e o laudo tem
+             espaço para a assinatura do responsável técnico, que continua respondendo pela
+             recomendação oficial.</p>
+        </details>
+        <details class="pergunta">
+          <summary>Quanto custa?</summary>
+          <p>Nada. O SIRAS é gratuito e não pede cadastro.</p>
+        </details>
+        <details class="pergunta">
+          <summary>Serve para a minha região?</summary>
+          <p>O SIRAS segue o Manual do Rio Grande do Sul e de Santa Catarina. Fora desses
+             estados, as tabelas oficiais são outras.</p>
+        </details>
+        <details class="pergunta">
+          <summary>Que análise de solo eu preciso?</summary>
+          <p>A análise de rotina do laboratório: pH em água, índice SMP, argila, matéria
+             orgânica, fósforo, potássio, CTC a pH 7,0, alumínio, cálcio e magnésio.</p>
+        </details>
+        <details class="pergunta">
+          <summary>Precisa de internet?</summary>
+          <p>Não. O sistema roda no seu computador, e a análise digitada não sai dele.</p>
+        </details>
+        <details class="pergunta">
+          <summary>Os preços que eu digito ficam salvos?</summary>
+          <p>Não. A calculadora de custo faz a conta na própria tela, e os preços somem quando
+             a página é fechada.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  {# ——— 9. Chamada final ——— #}
+  <section class="faixa chamada">
+    <div class="env chamada__int">
+      <h2 class="t-tela">Sua próxima compra de calcário e adubo começa pela análise de solo</h2>
+      <p class="t-corpo">Escolha a cultura, digite o laudo do laboratório e saiba o que aplicar —
+         e quanto isso custa — antes de gastar.</p>
+      <div class="hero__acoes">
+        <a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">
+          Fazer minha análise {{ i.ico("avanca", "ico ico--sm") }}
+        </a>
+      </div>
+      <p class="t-aux chamada__aviso">
         O SIRAS é ferramenta de apoio à decisão e não substitui a responsabilidade técnica
         de profissional habilitado na emissão de recomendações oficiais de correção e
         adubação. Fonte normativa: Comissão de Química e Fertilidade do Solo — RS/SC,

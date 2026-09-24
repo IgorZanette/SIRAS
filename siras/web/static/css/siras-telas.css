@@ -1597,3 +1597,245 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 
 /* A correcao do solo na cena segue o verde da planta, que ja muda com o tema. */
 .cena__correcao { fill: var(--broto); }
+
+
+/* =========================================================================
+   Tela inicial: do que o sistema faz ao que a pessoa ganha
+   -------------------------------------------------------------------------
+   A pagina anterior descrevia funcoes. Esta conta uma historia em nove
+   dobras: a promessa, o problema, a diferenca, como funciona, para quem, o
+   resultado, a confianca, as duvidas e a chamada final.
+
+   Nenhum beneficio com numero inventado: nada de "X% a mais" nem "R$ Y
+   economizados". O que convence e verificavel - o que o Manual afirma, os
+   fatos do sistema e os numeros que a propria pessoa digita no laudo.
+   ====================================================================== */
+.sobretitulo {
+  display: inline-block; margin-bottom: var(--e-3);
+  font-size: var(--fs-2xs); font-weight: 800; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--v-400);
+}
+.hero .hero__promessa { max-width: 17ch; font-size: clamp(2.2rem, 5.2vw, 4.25rem); }
+
+/* --- O problema: o icone em ambar de atencao, nao em verde de acao -------- */
+.pilar--problema .pilar__ico { color: #E8B04A; background: rgba(232, 176, 74, .12);
+                               border-color: rgba(232, 176, 74, .3); }
+
+/* --- Do jeito tradicional x com o SIRAS ------------------------------------ */
+.comparativo-rolagem { overflow-x: auto; border: var(--borda); border-radius: var(--r-painel);
+                       background: var(--n-850); }
+.comparativo { width: 100%; min-width: 640px; border-collapse: collapse; font-size: var(--fs-sm); }
+.comparativo th, .comparativo td { padding: var(--e-4) var(--e-5); text-align: left;
+                                   vertical-align: top; border-bottom: var(--borda); }
+.comparativo tbody tr:last-child > * { border-bottom: 0; }
+.comparativo thead th { font-size: var(--fs-2xs); font-weight: 800; letter-spacing: .08em;
+                        text-transform: uppercase; color: var(--n-400); }
+.comparativo tbody th { width: 18%; font-weight: 700; color: var(--n-100); }
+.comparativo td { color: var(--n-400); }
+.comparativo td.comparativo__siras { color: var(--n-100); background: rgba(140, 226, 63, .06); }
+.comparativo thead .comparativo__siras { color: var(--v-400); background: rgba(140, 226, 63, .1); }
+.comparativo td.comparativo__siras .ico { color: var(--v-400); margin-right: .35rem; vertical-align: -3px; }
+.comparativo__oculto { position: absolute; width: 1px; height: 1px; overflow: hidden;
+                       clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* --- Como funciona ---------------------------------------------------------- */
+.como { list-style: none; margin: 0; padding: 0; display: grid;
+        grid-template-columns: repeat(3, 1fr); gap: var(--e-4); }
+@media (max-width: 900px) { .como { grid-template-columns: 1fr; } }
+.como__passo { position: relative; padding: var(--e-5); display: grid; gap: var(--e-3);
+               align-content: start; }
+.como__passo h3 { font-size: var(--fs-lg); }
+.como__passo p { font-size: var(--fs-sm); color: var(--n-400); }
+.como__n { position: absolute; top: var(--e-4); right: var(--e-5); line-height: 1;
+           font-family: var(--ff-display); font-size: var(--fs-3xl); font-weight: 700;
+           color: rgba(140, 226, 63, .22); }
+
+/* --- Para quem: produtor e tecnico com o mesmo peso ------------------------- */
+.publicos { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+@media (max-width: 900px) { .publicos { grid-template-columns: 1fr; } }
+.publico { padding: var(--e-6); display: grid; gap: var(--e-5); align-content: start; }
+.publico__cab { display: flex; align-items: center; gap: var(--e-4); }
+.publico__cab h3 { font-size: var(--fs-xl); }
+.publico__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-3); }
+.publico__lista li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--e-3);
+                     font-size: var(--fs-md); line-height: 1.5; color: var(--n-300); }
+.publico__lista .ico { color: var(--v-400); margin-top: 3px; }
+.publicos__nota { margin-top: var(--e-5); max-width: var(--largura-leitura); }
+
+/* --- O resultado: a lista e a previa do laudo --------------------------------
+   A previa e a ESTRUTURA do documento, com barras no lugar dos valores. Papel
+   branco nos dois temas, como o proprio laudo. */
+.vitrine { display: grid; grid-template-columns: 1.1fr .9fr; gap: var(--e-8); align-items: center; }
+@media (max-width: 980px) { .vitrine { grid-template-columns: 1fr; gap: var(--e-6); } }
+.vitrine__lista { list-style: none; margin: var(--e-6) 0; padding: 0; display: grid; gap: var(--e-4); }
+.vitrine__lista li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e-4);
+                     align-items: start; }
+.vitrine__lista strong { font-size: var(--fs-md); }
+.vitrine__lista p { margin-top: 2px; font-size: var(--fs-sm); color: var(--n-400); }
+
+.previa { margin: 0; display: grid; gap: var(--e-3); justify-items: center; }
+.previa__folha {
+  width: min(340px, 100%); max-width: 100%; aspect-ratio: 210 / 297;
+  display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 12px;
+  padding: 28px 30px; border-radius: var(--r-doc);
+  background: #FFFFFF; color: #0D1410;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .6), 0 0 0 1px rgba(13, 20, 16, .06);
+  transform: rotate(-1.5deg);
+}
+.previa__marca { display: flex; align-items: center; gap: 6px; padding-bottom: 10px;
+                 border-bottom: 1px solid #E3EAE5; }
+.previa__marca img:first-child { width: 18px; height: 18px; }
+.previa__marca img:last-child { width: auto; height: 10px; }
+.previa__titulo { font-family: var(--ff-display); font-weight: 700; font-size: .95rem; }
+.previa__doses { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.previa__doses div { display: grid; gap: 5px; padding: 6px 7px; border: 1px solid #E3EAE5;
+                     border-radius: 3px; }
+.previa__doses span { font-size: .6rem; font-weight: 700; color: #5C6F64; }
+.previa__doses i { display: block; width: 70%; height: 9px; border-radius: 2px; background: #D3DED7; }
+.previa__cenarios { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; }
+.previa__selo { padding: 10px 4px; border-radius: 8px; text-align: center;
+                font-size: .58rem; font-weight: 800; }
+.previa__selo--hoje { background: #E7F4DF; color: #34701F; }
+.previa__selo--depois { background: #4E9A2A; color: #FFFFFF; }
+.previa__seta { color: #7A8C82; }
+.previa__linhas { display: grid; gap: 5px; align-content: start; }
+.previa__linhas i { display: block; height: 5px; border-radius: 2px; background: #E3EAE5; }
+.previa__linhas i:nth-child(2) { width: 86%; }
+.previa__linhas i:nth-child(3) { width: 64%; }
+.previa__assina { justify-self: center; width: 60%; padding-top: 4px; border-top: 1px solid #0D1410;
+                  text-align: center; font-size: .5rem; color: #405146; }
+@media (prefers-reduced-motion: no-preference) {
+  .previa__folha { transition: transform 400ms cubic-bezier(.2, 0, .2, 1); }
+  .previa:hover .previa__folha { transform: rotate(0deg) translateY(-4px); }
+}
+
+/* --- Por que confiar ---------------------------------------------------------- */
+.confianca { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--e-4); }
+@media (max-width: 980px) { .confianca { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .confianca { grid-template-columns: 1fr; } }
+.confianca__item { display: grid; gap: var(--e-2); align-content: start; padding: var(--e-5) 0 0;
+                   border-top: 2px solid rgba(140, 226, 63, .35); }
+.confianca__item strong { margin-top: var(--e-2); font-size: var(--fs-lg); }
+.confianca__item span:last-child { font-size: var(--fs-sm); color: var(--n-400); }
+
+/* --- Perguntas frequentes ------------------------------------------------------- */
+.perguntas { display: grid; grid-template-columns: .8fr 1.2fr; gap: var(--e-7); align-items: start; }
+@media (max-width: 900px) { .perguntas { grid-template-columns: 1fr; gap: 0; } }
+.perguntas__lista { display: grid; gap: var(--e-3); }
+.pergunta { border: var(--borda); border-radius: var(--r-campo); background: var(--n-850); }
+.pergunta > summary { display: flex; justify-content: space-between; gap: var(--e-4);
+                      padding: var(--e-4) var(--e-5); cursor: pointer; list-style: none;
+                      font-weight: 700; }
+.pergunta > summary::-webkit-details-marker { display: none; }
+.pergunta > summary::marker { content: ""; }
+.pergunta > summary::after { content: "+"; flex: none; font-weight: 800; color: var(--v-400);
+                             transition: transform var(--tr); }
+.pergunta[open] > summary::after { transform: rotate(45deg); }
+.pergunta p { padding: 0 var(--e-5) var(--e-4); font-size: var(--fs-sm); line-height: 1.6;
+              color: var(--n-300); }
+
+/* --- Chamada final -------------------------------------------------------------- */
+.chamada { background: radial-gradient(ellipse at 50% 0%, rgba(140, 226, 63, .12), transparent 60%); }
+.chamada__int { display: grid; justify-items: center; gap: var(--e-5); text-align: center; }
+.chamada__int h2 { max-width: 26ch; }
+.chamada__aviso { max-width: var(--largura-leitura); margin-top: var(--e-4); }
+
+/* =========================================================================
+   Calculadora de custo do laudo
+   -------------------------------------------------------------------------
+   Fora do documento e fora da impressao: preco e negocio de quem compra, e o
+   laudo e peca tecnica assinada. Nenhum campo vem preenchido.
+   ====================================================================== */
+.custo { margin-top: var(--e-6); padding: var(--e-6); display: grid; gap: var(--e-5); }
+.custo__cab { display: flex; align-items: flex-start; gap: var(--e-4); }
+.custo__cab > .ico { flex: none; width: 28px; height: 28px; color: var(--v-400); }
+.custo__cab p { max-width: 70ch; margin-top: var(--e-2); }
+.custo__grade { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--e-6); align-items: start; }
+@media (max-width: 900px) { .custo__grade { grid-template-columns: 1fr; } }
+.custo__entradas { display: grid; gap: var(--e-4); }
+.custo__insumo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3) var(--e-4);
+                 padding-bottom: var(--e-4); border-bottom: var(--borda); }
+.custo__insumo:last-child { padding-bottom: 0; border-bottom: 0; }
+@media (max-width: 560px) { .custo__insumo { grid-template-columns: 1fr; } }
+.custo__nome { grid-column: 1 / -1; font-weight: 700; }
+.custo__campo { display: grid; gap: 4px; font-size: var(--fs-2xs); color: var(--n-400); }
+.custo__caixa { display: flex; align-items: center; overflow: hidden; border: var(--borda);
+                border-radius: var(--r-campo); background: var(--n-800); }
+.custo__caixa span { padding: 0 .6rem; font-size: var(--fs-xs); color: var(--n-400); }
+.custo__caixa input { flex: 1; min-width: 0; padding: .6rem .2rem; border: 0; outline: none;
+                      background: transparent; color: var(--n-100); font: inherit;
+                      font-size: var(--fs-md); }
+.custo__caixa:focus-within { border-color: var(--v-400); }
+.custo__calcario { align-self: end; margin: 0; font-size: var(--fs-2xs); color: var(--n-400); }
+.custo__saida { display: grid; gap: var(--e-4); padding: var(--e-5); border-radius: var(--r-painel);
+                background: rgba(140, 226, 63, .05); border: 1px solid rgba(140, 226, 63, .2); }
+.custo__talhao { display: grid; gap: var(--e-2); }
+.custo__talhao + .custo__talhao { padding-top: var(--e-4); border-top: var(--borda); }
+.custo__talhao-nome { font-size: var(--fs-sm); font-weight: 800; }
+.custo__linha { display: flex; justify-content: space-between; gap: var(--e-4);
+                font-size: var(--fs-xs); color: var(--n-300); }
+.custo__linha strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.custo__linha--total { font-size: var(--fs-md); color: var(--n-100); }
+.custo__linha--total strong { color: var(--v-400); }
+.custo__propriedade { padding-top: var(--e-4); border-top: 2px solid rgba(140, 226, 63, .35); }
+.custo__vazio, .custo__aviso { margin: 0; font-size: var(--fs-xs); color: var(--n-400); }
+.custo__aviso { color: #E8B04A; }
+.custo__nota { margin: 0; }
+
+/* --- Tema claro: verde e ambar legiveis sobre branco -------------------------- */
+:root[data-tema="claro"] .sobretitulo,
+:root[data-tema="claro"] .comparativo thead .comparativo__siras,
+:root[data-tema="claro"] .comparativo td.comparativo__siras .ico,
+:root[data-tema="claro"] .publico__lista .ico,
+:root[data-tema="claro"] .pergunta > summary::after,
+:root[data-tema="claro"] .custo__cab > .ico,
+:root[data-tema="claro"] .custo__linha--total strong { color: var(--v-700); }
+:root[data-tema="claro"] .comparativo-rolagem,
+:root[data-tema="claro"] .pergunta { background: #FFFFFF; border-color: rgba(13, 20, 16, .08); }
+:root[data-tema="claro"] .comparativo td.comparativo__siras { background: rgba(78, 154, 42, .08); }
+:root[data-tema="claro"] .comparativo thead .comparativo__siras { background: rgba(78, 154, 42, .12); }
+:root[data-tema="claro"] .como__n { color: rgba(78, 154, 42, .32); }
+:root[data-tema="claro"] .pilar--problema .pilar__ico { color: #8A5A00; background: rgba(178, 129, 0, .1);
+                                                        border-color: rgba(178, 129, 0, .3); }
+:root[data-tema="claro"] .confianca__item { border-top-color: rgba(78, 154, 42, .45); }
+:root[data-tema="claro"] .previa__folha { box-shadow: 0 30px 50px -30px rgba(13, 20, 16, .35),
+                                                      0 0 0 1px rgba(13, 20, 16, .08); }
+:root[data-tema="claro"] .chamada { background: radial-gradient(ellipse at 50% 0%, rgba(78, 154, 42, .1), transparent 60%); }
+:root[data-tema="claro"] .custo__caixa { background: #FFFFFF; border-color: rgba(13, 20, 16, .16); }
+:root[data-tema="claro"] .custo__caixa:focus-within { border-color: var(--v-700); }
+:root[data-tema="claro"] .custo__saida { background: rgba(78, 154, 42, .06); border-color: rgba(78, 154, 42, .25); }
+:root[data-tema="claro"] .custo__aviso { color: #8A5A00; }
+
+/* --- Calculadora: formulas da revenda -------------------------------------------
+   Cada formula vira um cartao com quanto aplicar, o que entrega frente a
+   recomendacao e quanto custa. A mais barata entre as que atendem ganha o selo. */
+.custo__grupo { margin: 0; padding: 0; border: 0; display: grid; gap: var(--e-3); min-width: 0; }
+.custo__grupo legend { padding: 0; margin-bottom: var(--e-2); font-weight: 700; }
+.custo__grupo legend small { margin-left: .35rem; font-size: var(--fs-2xs); font-weight: 600; color: var(--n-400); }
+.custo__explica { margin: 0; }
+.custo__opcao { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: var(--e-3); align-items: end; }
+.custo__opcao--simples { grid-template-columns: 1fr 1fr; }
+@media (max-width: 560px) { .custo__opcao, .custo__opcao--simples { grid-template-columns: 1fr; } }
+
+.formula { display: grid; gap: var(--e-2); padding: var(--e-4); border: var(--borda);
+           border-radius: var(--r-campo); background: var(--n-850); }
+.formula--melhor { border-color: var(--v-400); }
+.formula__cab { display: flex; align-items: center; justify-content: space-between; gap: var(--e-3); }
+.formula__cab strong { font-family: var(--ff-display); font-size: var(--fs-lg); }
+.formula__selo { padding: .2rem .6rem; border-radius: var(--r-pilula); font-size: var(--fs-2xs);
+                 font-weight: 800; background: var(--v-400); color: #08140B; }
+.formula .custo__linha small { font-size: var(--fs-3xs); color: var(--n-400); }
+.formula__tabela { width: 100%; border-collapse: collapse; font-size: var(--fs-2xs);
+                   font-variant-numeric: tabular-nums; }
+.formula__tabela th, .formula__tabela td { padding: 4px 0 4px var(--e-2); text-align: right;
+                                           border-bottom: var(--borda); }
+.formula__tabela th:first-child { padding-left: 0; text-align: left; }
+.formula__tabela thead th { font-weight: 700; color: var(--n-400); }
+.formula__falta, .formula__nao { color: #E8B04A; }
+.formula__nao { margin: 0; font-size: var(--fs-xs); }
+
+:root[data-tema="claro"] .formula { background: #FFFFFF; border-color: rgba(13, 20, 16, .1); }
+:root[data-tema="claro"] .formula--melhor { border-color: var(--v-700); }
+:root[data-tema="claro"] .formula__selo { background: var(--v-700); color: #FFFFFF; }
+:root[data-tema="claro"] .formula__falta,
+:root[data-tema="claro"] .formula__nao { color: #8A5A00; }

@@ -63,7 +63,7 @@ o gabarito calculado pelo autor.
 
 | Verificação | Resultado |
 |---|---|
-| Suíte completa (`python -m pytest --completa`) | 4400 passando, 1 pulado, 4 min 28 s |
+| Suíte completa (`python -m pytest --completa`) | 4891 passando, nenhum pulado, 4 min 21 s (medida em 24/09/2026). A camada rápida sozinha são 2179 testes em ~1 min |
 | Bancada: 61 culturas × 10 perfis de solo | todos os laudos completos — quatro doses, dois cenários de aptidão, trilha — e sem vocabulário de máquina no documento |
 | Estados que a tela oferece | 340 geram laudo; 22 são recusados nomeando o campo que a fase exige; 5 são recusados por limite declarado; nenhum derruba a aplicação |
 | Oráculo externo (`validar_anexo1.py`) | 0 divergências em 32 classificações de P e K |

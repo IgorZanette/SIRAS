@@ -32,20 +32,30 @@ pip install -r requirements.txt
 python app.py
 ```
 
-**Estado atual:** a camada web (Flask) ainda não foi implementada — `python app.py` hoje só
-confirma que o ambiente está configurado, sem subir servidor. O motor de inferência
-(calagem e adubação de grãos) já funciona e é validado por linha de comando; ver
-`docs/ROADMAP.md` para o que falta.
+`python app.py` sobe a aplicação em <http://127.0.0.1:5000>, com host fixo em `127.0.0.1`:
+o SIRAS roda local e offline, sem banco de dados, sem autenticação e sem chamada de rede.
+
+O fluxo é de três telas — escolha da cultura, análise de solo e laudo. A análise pode cobrir
+vários talhões num documento só, e o laudo sai em cores para a tela ou em folha A4 preto e
+branco para impressão.
 
 ## Testes
 
+A suíte tem duas camadas: a rápida, para rodar a cada alteração, e a completa, que acrescenta
+as bancadas de 61 culturas × 10 perfis de solo.
+
 ```bash
-pytest                            # todos os testes
-python scripts/valida_base.py     # valida dados/comum/ contra os schemas
+pytest                            # camada rápida
+pytest --completa                 # tudo, incluindo as bancadas
+python scripts/valida_base.py     # valida dados/ contra os schemas
+python validar_anexo1.py          # classificações de P e K contra o Anexo 1 do Manual
+python scripts/conferir_contraste.py   # contraste da paleta nos dois temas
 ```
 
-`testes/test_validacao.py` e `scripts/gera_tabela_concordancia.py` (comparação com o
-oráculo, Seção 4.4 da proposta) ainda não existem — ver `docs/ROADMAP.md`, etapas g/h.
+A conformidade do módulo de aptidão contra o Caderno de Critérios roda junto da camada
+rápida (`testes/unidade/test_conformidade_aptidao.py`), sobre o conjunto de casos de
+`testes/casos/` — as entradas e o gabarito ficam em arquivos separados, para que o gabarito
+permaneça independente do código.
 
 ## Organização do repositório
 
@@ -59,11 +69,18 @@ oráculo, Seção 4.4 da proposta) ainda não existem — ver `docs/ROADMAP.md`,
 | `dados/comum/` | Tabelas gerais do Manual (SMP, pH de referência, critérios de calagem, interpretação de P/K) |
 | `dados/culturas/<grupo>/` | Tabelas de adubação compartilhadas por grupo de cultura (grãos, hortaliças, tubérculos, outras comerciais, frutíferas, erva-mate) |
 | `testes/casos/` | Casos de teste e valores de referência (oráculo da validação) |
+| `scripts/` | Utilitários de conferência: schemas da base, contraste da paleta, geração dos arquivos da marca |
+| `validar_anexo1.py` | Confere as classificações de P e K contra o Anexo 1 do Manual (oráculo externo) |
 | `docs/` | Documentação técnica, decisões de projeto e rastreabilidade das fontes |
 
 Documentos principais:
 
 - [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) — visão de arquitetura e fluxo de processamento
+- [`docs/CCAE-v1.2.md`](docs/CCAE-v1.2.md) — Caderno de Critérios de Aptidão Edáfica, versão
+  aprovada pelo orientador; [`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md) é o rascunho em aprovação
+- [`docs/CCAE-implementacao.md`](docs/CCAE-implementacao.md) — do Caderno ao código: estruturas
+  JSON, contrato do motor e ordem de trabalho
+- [`docs/HANDOFF-aptidao.md`](docs/HANDOFF-aptidao.md) — resumo de retomada do módulo de aptidão
 - [`docs/BASE_DE_CONHECIMENTO.md`](docs/BASE_DE_CONHECIMENTO.md) — formato dos arquivos JSON
 - [`docs/VALIDACAO.md`](docs/VALIDACAO.md) — protocolo de validação e hipóteses
 - [`docs/mapa_manual.md`](docs/mapa_manual.md) — rastreabilidade tabela do Manual → arquivo
@@ -77,7 +94,26 @@ Documentos principais:
 
 ## Estado do projeto
 
-Em desenvolvimento. Consulte [`docs/ROADMAP.md`](docs/ROADMAP.md) para o estado atual de cada etapa.
+Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+**Pronto** (24/09/2026):
+
+- **Motor** — calagem, adubação e aptidão edáfica para as **61 culturas e grupos de culturas** do
+  escopo, com `gerar_laudo()` como ponto de entrada único e uma trilha que registra cada decisão
+  com a regra e a tabela do Manual que a produziram.
+- **Aptidão edáfica** — implementada conforme o Caderno de Critérios ([`docs/CCAE-v1.2.md`](docs/CCAE-v1.2.md),
+  versão aprovada), com os cenários atual e potencial. Conformidade de **100%** sobre os casos
+  gabaritados à mão pelo autor, em classe, fator determinante e grau de cada fator.
+- **Aplicação web** — as três telas, leitura ao vivo da interpretação enquanto se digita, vários
+  talhões num laudo, versão impressa em A4, temas claro e escuro, e calculadora que compara
+  fórmulas NPK com os preços que o usuário informar.
+- **Suíte** — 4891 testes passando (camada completa, 4 min 21 s).
+
+**Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
+avaliação de usabilidade (SUS) — sprints S5 e S6.
+
+**Pendente de terceiros:** aprovação do rascunho [`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md) pelo
+orientador e a busca na literatura pedida por ele (P4 e P6 no roadmap).
 
 ## Ferramentas de desenvolvimento
 

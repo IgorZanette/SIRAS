@@ -39,6 +39,7 @@ from siras.relatorio.apresentacao import (
     apresentar_leitura,
     consolidar_por_area,
     formatar_numero,
+    insumos_para_custo,
     nome_de_exibicao,
 )
 from siras.web import exemplo as exemplo_de_formulario
@@ -306,6 +307,9 @@ def laudo():
         blocos=blocos,
         # O total só faz sentido a partir de duas áreas, e só quando todas as informaram.
         total=consolidar_por_area(resolvidos) if len(resolvidos) > 1 else None,
+        # Doses para a calculadora de custo, que multiplica pelos preços que a pessoa
+        # digita. Só doses: preço e teor de fertilizante nunca saem do sistema.
+        custo=insumos_para_custo(resolvidos),
         # O cabeçalho é único e fala do que os talhões compartilham: cultura, manejo,
         # PRNT e critério de calagem saem do primeiro, porque são os mesmos em todos.
         laudo=blocos[0]["laudo"],

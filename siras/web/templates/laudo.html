@@ -208,5 +208,140 @@
       </footer>
     </div>
   </article>
+
+  {# ——— Quanto vai custar ———
+     Ferramenta, e não documento: fica FORA do laudo e fora da impressão. Os preços são
+     negócio de quem compra, e o laudo é peça técnica assinada — misturar os dois poria
+     número comercial num documento de recomendação.
+
+     Nenhum valor vem preenchido. O teor do fertilizante está no rótulo do produto que a
+     pessoa compra; sugerir um "típico" seria afirmação agronômica da interface. #}
+  {% if not impressa and custo.grandezas|selectattr("tem_dose")|list %}
+  <section class="painel custo nao-imprime" data-custo aria-labelledby="custo-titulo">
+    <div class="custo__cab">
+      {{ i.ico("soma") }}
+      <div>
+        <h2 class="t-secao" id="custo-titulo">Quanto vai custar</h2>
+        <p class="t-aux">
+          Digite as fórmulas que a revenda oferece e o preço da saca. O SIRAS calcula quanto
+          aplicar de cada uma, o que ela entrega frente à recomendação e quanto custa, por
+          hectare{% if blocos|length > 1 %}, por talhão{% endif %} e, com as áreas informadas,
+          para a área inteira.
+        </p>
+      </div>
+    </div>
+
+    {% set calagem = custo.grandezas|selectattr("chave", "equalto", "calagem")|first %}
+    {% set adubo = custo.grandezas|rejectattr("chave", "equalto", "calagem")|selectattr("tem_dose")|list %}
+    <div class="custo__grade">
+      <div class="custo__entradas">
+        {% if calagem.tem_dose %}
+        <fieldset class="custo__grupo">
+          <legend>Calcário</legend>
+          <div class="custo__opcao custo__opcao--simples">
+            <label class="custo__campo">
+              <span>Preço do calcário</span>
+              <span class="custo__caixa">
+                <span>R$</span>
+                <input type="text" inputmode="decimal" autocomplete="off" data-calcario-preco
+                       placeholder="por tonelada" aria-label="Preço do calcário, em reais por tonelada">
+                <span>/t</span>
+              </span>
+            </label>
+            <p class="custo__calcario">A dose do laudo já é do seu calcário, no PRNT informado.</p>
+          </div>
+        </fieldset>
+        {% endif %}
+
+        {% if adubo %}
+        <fieldset class="custo__grupo">
+          <legend>Adubo formulado</legend>
+          <p class="t-aux custo__explica">
+            Até três opções, como no rótulo (N-P<sub>2</sub>O<sub>5</sub>-K<sub>2</sub>O). A dose de
+            cada fórmula é a menor que cobre o fósforo e o potássio da recomendação; o nitrogênio que
+            faltar vai para o complemento.
+          </p>
+          {% for n in range(1, 4) %}
+          <div class="custo__opcao" data-formula-opcao>
+            <label class="custo__campo">
+              <span>Fórmula {{ n }}</span>
+              <span class="custo__caixa">
+                <input type="text" autocomplete="off" data-formula placeholder="como no rótulo"
+                       aria-label="Fórmula {{ n }}, como no rótulo: N, P2O5 e K2O">
+              </span>
+            </label>
+            <label class="custo__campo">
+              <span>Peso da saca</span>
+              <span class="custo__caixa">
+                <input type="text" inputmode="decimal" autocomplete="off" data-saca-peso
+                       placeholder="da embalagem" aria-label="Peso da saca da fórmula {{ n }}, em quilos">
+                <span>kg</span>
+              </span>
+            </label>
+            <label class="custo__campo">
+              <span>Preço da saca</span>
+              <span class="custo__caixa">
+                <span>R$</span>
+                <input type="text" inputmode="decimal" autocomplete="off" data-saca-preco
+                       placeholder="na revenda" aria-label="Preço da saca da fórmula {{ n }}, em reais">
+              </span>
+            </label>
+          </div>
+          {% endfor %}
+        </fieldset>
+
+        <fieldset class="custo__grupo" data-complemento>
+          <legend>Complemento de nitrogênio <small>opcional</small></legend>
+          <p class="t-aux custo__explica">
+            O adubo nitrogenado que você usaria para o N que a fórmula não cobre. Preenchido, o
+            custo de cada fórmula inclui o complemento, e a comparação fica justa.
+          </p>
+          <div class="custo__opcao">
+            <label class="custo__campo">
+              <span>Teor de N no produto</span>
+              <span class="custo__caixa">
+                <input type="text" inputmode="decimal" autocomplete="off" data-comp-teor
+                       placeholder="garantia do rótulo" aria-label="Teor de nitrogênio do complemento, em porcentagem">
+                <span>%</span>
+              </span>
+            </label>
+            <label class="custo__campo">
+              <span>Peso da saca</span>
+              <span class="custo__caixa">
+                <input type="text" inputmode="decimal" autocomplete="off" data-comp-peso
+                       placeholder="da embalagem" aria-label="Peso da saca do complemento, em quilos">
+                <span>kg</span>
+              </span>
+            </label>
+            <label class="custo__campo">
+              <span>Preço da saca</span>
+              <span class="custo__caixa">
+                <span>R$</span>
+                <input type="text" inputmode="decimal" autocomplete="off" data-comp-preco
+                       placeholder="na revenda" aria-label="Preço da saca do complemento, em reais">
+              </span>
+            </label>
+          </div>
+        </fieldset>
+        {% endif %}
+      </div>
+      <div class="custo__saida" data-custo-saida aria-live="polite"></div>
+    </div>
+
+    <p class="t-aux custo__nota">
+      Critério de dose: a maior entre a quantidade de fórmula que cobre o P<sub>2</sub>O<sub>5</sub>
+      e a que cobre o K<sub>2</sub>O — nenhum dos dois fica devendo, e o que sobra aparece na
+      tabela. O SIRAS não indica quando aplicar o complemento de N. Os preços não são salvos e não
+      entram no laudo.
+    </p>
+  </section>
+  <script type="application/json" id="custo-dados">{{ custo|tojson }}</script>
+  {% endif %}
 </main>
+{% endblock %}
+
+{% block scripts %}
+{% if not impressa %}
+<script src="{{ url_for('static', filename='js/custo.js') }}" defer></script>
+{% endif %}
 {% endblock %}

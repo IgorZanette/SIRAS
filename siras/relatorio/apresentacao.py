@@ -724,6 +724,46 @@ def _dose_somavel(dose: Any) -> Optional[float]:
     return float(dose)
 
 
+_ROTULO_SIMPLES = {"calagem": "Calcário", "n": "Nitrogênio", "p2o5": "Fósforo", "k2o": "Potássio"}
+
+
+def insumos_para_custo(blocos: Sequence[Any]) -> Dict[str, Any]:
+    """As doses por hectare de cada talhão, no formato que a calculadora de custo lê.
+
+    A calculadora (static/js/custo.js) multiplica estas doses pelos preços e teores que a
+    PESSOA digita. Daqui não sai preço, teor de fertilizante nem conversão: só a saída do
+    motor, com a mesma regra do total a comprar — dose publicada como teto ou intervalo
+    vira None e fica fora da conta, em vez de virar um custo com precisão que a fonte não dá.
+
+    `tem_dose` diz se a grandeza merece campo de preço: não tem quando a dose é zero em
+    todos os talhões, porque perguntar o preço do que não será comprado é ruído.
+    """
+    talhoes: List[Dict[str, Any]] = []
+    for bloco in blocos:
+        laudo = bloco.laudo
+        doses = {}
+        for _nome, chave, _unidade in _GRANDEZAS_CONSOLIDAVEIS:
+            bruta = laudo.calagem.nc_t_ha if chave == "calagem" else getattr(laudo.adubacao, chave)
+            doses[chave] = _dose_somavel(bruta)
+        area = getattr(bloco, "area_ha", None)
+        talhoes.append({
+            "rotulo": getattr(bloco, "rotulo", None) or "",
+            "area_ha": float(area) if area is not None else None,
+            "doses": doses,
+        })
+
+    grandezas = [
+        {
+            "nome": nome,
+            "rotulo": _ROTULO_SIMPLES[chave],
+            "chave": chave,
+            "tem_dose": any(t["doses"][chave] is None or t["doses"][chave] > 0 for t in talhoes),
+        }
+        for nome, chave, _unidade in _GRANDEZAS_CONSOLIDAVEIS
+    ]
+    return {"grandezas": grandezas, "talhoes": talhoes}
+
+
 def consolidar_por_area(blocos: Sequence[Any]) -> Optional[Dict[str, Any]]:
     """Quantidade total a comprar, a partir das doses por hectare e da área de cada talhão.
 

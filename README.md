@@ -68,8 +68,9 @@ permaneça independente do código.
 | `siras/web/` | Camada web (Flask) |
 | `dados/comum/` | Tabelas gerais do Manual (SMP, pH de referência, critérios de calagem, interpretação de P/K) |
 | `dados/culturas/<grupo>/` | Tabelas de adubação compartilhadas por grupo de cultura (grãos, hortaliças, tubérculos, outras comerciais, frutíferas, erva-mate) |
+| `dados/mercado/` | **Dado de mercado, não do Manual:** catálogo de formulações NPK comerciais, com fonte declarada por entrada (ver `docs/decisoes/0007`) |
 | `testes/casos/` | Casos de teste e valores de referência (oráculo da validação) |
-| `scripts/` | Utilitários de conferência: schemas da base, contraste da paleta, geração dos arquivos da marca |
+| `scripts/` | Utilitários: conferência de schemas e de contraste, geração dos arquivos da marca, consolidação do questionário de usabilidade |
 | `validar_anexo1.py` | Confere as classificações de P e K contra o Anexo 1 do Manual (oráculo externo) |
 | `docs/` | Documentação técnica, decisões de projeto e rastreabilidade das fontes |
 
@@ -83,6 +84,9 @@ Documentos principais:
 - [`docs/HANDOFF-aptidao.md`](docs/HANDOFF-aptidao.md) — resumo de retomada do módulo de aptidão
 - [`docs/BASE_DE_CONHECIMENTO.md`](docs/BASE_DE_CONHECIMENTO.md) — formato dos arquivos JSON
 - [`docs/VALIDACAO.md`](docs/VALIDACAO.md) — protocolo de validação e hipóteses
+- [`docs/USABILIDADE.md`](docs/USABILIDADE.md) — protocolo do teste de usabilidade, com os
+  [roteiros](docs/roteiros/) e os [instrumentos](docs/instrumentos/) (questionário das dez
+  heurísticas de Nielsen, TCLE e ficha do participante)
 - [`docs/mapa_manual.md`](docs/mapa_manual.md) — rastreabilidade tabela do Manual → arquivo
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — cronograma e estado de cada etapa
 - [`docs/decisoes/`](docs/decisoes/) — registros de decisão de arquitetura
@@ -107,7 +111,10 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`
 - **Aplicação web** — as três telas, leitura ao vivo da interpretação enquanto se digita, vários
   talhões num laudo, versão impressa em A4, temas claro e escuro, e calculadora que compara
   fórmulas NPK com os preços que o usuário informar.
-- **Suíte** — 4891 testes passando (camada completa, 4 min 21 s).
+- **Indicação de formulação** — o laudo diz qual adubo formulado atende a recomendação e em que
+  dose, a partir de um catálogo de mercado com fonte declarada por entrada — que **não** é do
+  Manual, e cuja ausência não impede o laudo de sair completo ([ADR 0007](docs/decisoes/0007-indicacao-de-formulacao-do-adubo.md)).
+- **Suíte** — 4919 testes passando (camada completa, 4 min 19 s).
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
 avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em

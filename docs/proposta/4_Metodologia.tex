@@ -343,9 +343,10 @@ a partir dos objetivos específicos enunciados na \cref{sec:obj_espec}.
     com ferramenta existente e decisão sobre as hipóteses formuladas na
     \cref{sec:hipoteses};
 
-  \item \textbf{Avaliação de usabilidade:} aplicação do roteiro de
-    tarefas e do questionário SUS com usuários do público-alvo, conforme
-    a \cref{sec:val_usabilidade}, e coleta do retorno qualitativo;
+  \item \textbf{Teste de usabilidade:} aplicação dos três roteiros de
+    tarefas e do questionário pós-teste estruturado pelas dez heurísticas
+    de Nielsen com usuários do público-alvo, conforme a
+    \cref{sec:val_usabilidade}, e coleta do retorno qualitativo;
 
   \item \textbf{Redação final:} consolidação da monografia, com a
     discussão dos resultados frente aos trabalhos relacionados, e
@@ -446,23 +447,56 @@ ferramenta.
 
 A terceira dimensão avalia a experiência de uso do sistema com usuários
 reais, aspecto não capturado pelas duas anteriores. Após a conclusão do
-protótipo funcional, será conduzida uma avaliação de usabilidade com um
-pequeno grupo de participantes do público-alvo (estudantes de agronomia,
-técnicos agrícolas ou agrônomos), nos quais cada participante executará
-um roteiro de tarefas típicas --- selecionar uma cultura, informar os
-dados de uma análise de solo e interpretar o laudo gerado. Ao final, os
-participantes responderão ao questionário \textbf{System Usability Scale
-(SUS)} \citep{Brooke1996}, instrumento validado e amplamente utilizado
-para mensurar a usabilidade percebida, que produz um escore de 0 a 100.
-Como referência de interpretação, adota-se o valor consagrado na
-literatura da escala, segundo o qual uma pontuação SUS média igual ou
-superior a 68 indica usabilidade satisfatória \citep{Brooke1996}.
-Complementarmente, será coletado retorno \textbf{qualitativo} por meio
-de perguntas abertas sobre dificuldades encontradas e sugestões de
-melhoria. Os resultados dessa etapa não testam as hipóteses
-H\textsubscript{1.1} e H\textsubscript{1.2}, de natureza técnica, mas
-fornecem evidências sobre a adequação da interface ao público-alvo e
-subsidiam ajustes finais e recomendações de trabalhos futuros.
+protótipo funcional, será conduzido um \textbf{teste de usabilidade} com
+5 a 8 participantes do público-alvo (estudantes concluintes de agronomia,
+técnicos agrícolas e agrônomos), precedido de um estudo-piloto com um
+participante que não integra a amostra.
+
+Cada participante percorre \textbf{três roteiros} em sessão única de
+aproximadamente 35 minutos: (i)~uma demonstração conduzida pelo
+pesquisador sobre um cenário pronto, que dá o primeiro contato com a
+ferramenta; (ii)~um cenário fechado, entregue em ficha impressa, que o
+participante executa \textbf{sozinho} --- selecionar a cultura, informar
+os dados da análise de solo e interpretar o laudo gerado; e (iii)~a
+geração de um laudo \textbf{livre}, com a cultura e os dados que o
+próprio participante escolher, que expõe o sistema a combinações não
+previstas no roteiro anterior.
+
+Concluída a sessão, o participante responde, em momento separado e sem a
+presença do pesquisador, a um \textbf{questionário pós-teste estruturado
+pelas dez heurísticas de Nielsen} \citep{Nielsen1994}. Para cada
+heurística, atribui uma nota de severidade de 0 a 4 --- de ``não é um
+problema'' a ``catástrofe'' --- e descreve, em texto livre, as falhas
+encontradas e as telas em que ocorrem. O instrumento se encerra com
+quatro perguntas abertas sobre a ferramenta como um todo.
+
+Adota-se esse instrumento em lugar do \emph{System Usability Scale}
+(SUS) \citep{Brooke1996} porque o SUS produz um escore único de
+usabilidade percebida, ao passo que esta etapa precisa produzir um
+\textbf{diagnóstico acionável}: a grade das heurísticas classifica cada
+problema relatado pela dimensão de usabilidade que ele viola e permite
+ordenar as correções por severidade. Perde-se a comparabilidade com a
+extensa literatura de escores SUS, o que se registra como limitação.
+
+Cabe a distinção terminológica: o que se conduz aqui \textbf{não é uma
+avaliação heurística} no sentido de \cite{NielsenMolich1990}, que designa
+a inspeção de uma interface por especialistas em usabilidade, sem
+usuários e sem tarefas. Trata-se de teste com usuários finais seguido de
+questionário organizado pelas heurísticas, e as notas de severidade ---
+atribuídas por usuários a heurísticas, e não por avaliadores a problemas
+--- exprimem \textbf{percepção de gravidade}, analisada por estatística
+descritiva, sem inferência, dada a dimensão da amostra.
+
+O dimensionamento da amostra segue \cite{NielsenLandauer1993}, segundo os
+quais cerca de cinco participantes revelam a maior parte dos problemas de
+usabilidade de uma interface. A versão avaliada é congelada antes da
+primeira sessão e mantida inalterada até a última, de modo que todos os
+participantes avaliem o mesmo sistema. Aplica-se termo de consentimento
+livre e esclarecido; a etapa não requer submissão ao comitê de ética em
+pesquisa. Os resultados não testam as hipóteses H\textsubscript{1.1} e
+H\textsubscript{1.2}, de natureza técnica, mas fornecem evidências sobre
+a adequação da interface ao público-alvo e subsidiam ajustes finais e
+recomendações de trabalhos futuros.
 
 %-------------------------------------------------------------------
 \section{Cronograma}\label{sec:cronograma}
@@ -499,7 +533,7 @@ f) Módulos de recomendação e aptidão      &   &   &   & X & X &   &   &   & 
 \textbf{-- Marco M2 (demais grupos)}      &   &   &   &   & X &   &   &   &   \\
 g) Casos de teste e oráculo               &   &   &   & X & X & X &   &   &   \\
 h) Validação e análise                    &   &   &   &   &   & X & X &   &   \\
-i) Avaliação de usabilidade (SUS)         &   &   &   &   &   &   & X & X &   \\
+i) Teste de usabilidade                   &   &   &   &   &   & X & X & X &   \\
 j) Redação da monografia                  &   &   &   & X & X & X & X & X &   \\
 k) Revisão final, entrega e apresentação  &   &   &   &   &   &   &   & X & X \\
 \hline

@@ -89,11 +89,30 @@ que o SIRAS oferece e as demais não — em especial a aptidão edáfica integra
 
 ## Usabilidade
 
-Roteiro de tarefas (selecionar cultura, informar análise, interpretar o laudo) com 5 a 10
-participantes do público-alvo, seguido do questionário **SUS**.
+**Protocolo completo em [`USABILIDADE.md`](USABILIDADE.md).** Resumo do que mudou e por quê:
 
-- Escala: Brooke (1996).
-- Referência de 68 como média: **Bangor, Kortum & Miller (2008)** e **Sauro (2011)** — *não* é de
-  Brooke (1996); a proposta precisa dessa correção.
+Decidido com o orientador em **24/09/2026**: sai o **SUS**, entram **três roteiros de teste com
+usuários do público-alvo** e um **questionário pós-teste estruturado pelas dez heurísticas de
+Nielsen**, com quatro perguntas abertas ao final. O SUS entrega um número; esta etapa precisa
+entregar uma lista priorizada de correções, e é isso que as heurísticas dão.
+
+- 5 a 8 participantes (mais 1 no piloto), em duas partes: sessão de roteiros (~35 min) e
+  questionário respondido depois, no Google Forms.
+- **Nomenclatura obrigatória no texto:** *teste de usabilidade com usuários, seguido de
+  questionário pós-teste estruturado pelas dez heurísticas de Nielsen* — **nunca** "avaliação
+  heurística", que no método de Nielsen e Molich (1990) é inspeção por especialistas em
+  usabilidade, sem usuários e sem tarefas. Ver `USABILIDADE.md` §2.
+- A escala 0–4 é adaptação declarada: no método original a severidade é atribuída a **problemas**,
+  por avaliadores; aqui é atribuída a **heurísticas**, por usuários, e mede percepção de gravidade.
+- Estatística **descritiva**, sem inferência: amostra pequena e por conveniência.
 - Confirmado com o orientador (Rafael Rieder) que a avaliação de usabilidade não requer submissão
-  ao comitê de ética (CEP). Será aplicado TCLE aos participantes.
+  ao comitê de ética (CEP). É aplicado TCLE aos participantes ([`instrumentos/tcle.md`](instrumentos/tcle.md)).
+- A interface é congelada na tag `usabilidade-v1` antes da primeira sessão e não muda até a última.
+
+Consolidação por `scripts/consolidar_heuristicas.py`, análogo ao
+`gera_tabela_concordancia.py` da dimensão de correção.
+
+**A proposta ainda descreve o SUS** (§4.4.3 e a linha (i) do cronograma) e precisa ser corrigida —
+pendência P3 do [`ROADMAP.md`](ROADMAP.md). Enquanto o texto do SUS estava lá, valia também a
+correção de atribuição: a referência de 68 como média é de **Bangor, Kortum & Miller (2008)** e
+**Sauro (2011)**, não de Brooke (1996).

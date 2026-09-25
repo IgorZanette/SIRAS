@@ -1,9 +1,15 @@
 /* ============================================================================
    SIRAS - quanto vai custar: calcario e adubo formulado
    ----------------------------------------------------------------------------
-   Compara as formulas que a revenda oferece contra a recomendacao do laudo, com
-   os precos, pesos de saca e formulas QUE A PESSOA DIGITA. Nenhuma formula,
-   nenhum peso de saca e nenhum preco vem do sistema.
+   Compara formulas contra a recomendacao do laudo, com os precos e pesos de saca
+   QUE A PESSOA DIGITA. Nenhum peso de saca e nenhum preco vem do sistema.
+
+   As formulas vem pre-preenchidas com as que o laudo indicou, a partir do
+   catalogo de mercado (dados/mercado/formulacoes.json) - pedido do autor em
+   24/09/2026: quem nao encontrar o adubo indicado na revenda compara o que tem
+   disponivel contra o que o SIRAS indicou, sem redigitar os dois. Os campos
+   continuam editaveis, e o catalogo vazio devolve a tela ao estado anterior,
+   com as tres vagas em branco.
 
    Criterio de dose (decisao do autor, 13/09/2026): a formula tem proporcao fixa,
    e a recomendacao raramente sai na mesma proporcao. Para cada formula ha duas
@@ -348,6 +354,25 @@
     saida.innerHTML = html;
   }
 
+  /* --- pre-preenchimento ------------------------------------------------- */
+
+  function preencherSugeridas() {
+    var sugeridas = dados.sugeridas || [];
+    if (!sugeridas.length) {
+      return;
+    }
+    var campos = Array.prototype.slice.call(raiz.querySelectorAll("[data-formula]"));
+    sugeridas.slice(0, campos.length).forEach(function (sugerida, i) {
+      // So preenche campo vazio: se a pessoa ja digitou algo, o que ela digitou manda.
+      if (String(campos[i].value || "").trim() !== "") {
+        return;
+      }
+      campos[i].value = sugerida.formula;
+      campos[i].setAttribute("data-sugerida", sugerida.rotulo);
+    });
+  }
+
+  preencherSugeridas();
   raiz.addEventListener("input", calcular);
   calcular();
 })();

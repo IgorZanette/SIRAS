@@ -860,6 +860,51 @@ class Carregador:
                 f"— algum valor em 'culturas' foi alterado sem atualizar o checksum"
             )
 
+    def validar_formulacoes(self, dados: Dict) -> None:
+        """Invariantes do catálogo de formulações NPK.
+
+        Não há invariante agronômica a checar aqui — o catálogo não é do Manual. O que se
+        checa é o que um erro de digitação quebraria: id repetido, soma de garantias acima
+        de 100% (são porcentagens em massa de um mesmo produto) e formulação sem nenhum
+        nutriente, que não teria como entrar em conta nenhuma.
+        """
+        vistos = set()
+        for i, f in enumerate(dados.get("formulacoes", [])):
+            contexto = f"formulacoes[{i}] (id '{f.get('id')}')"
+
+            if f["id"] in vistos:
+                raise ErroCarregamento(f"{contexto}: id repetido no catálogo")
+            vistos.add(f["id"])
+
+            soma = f["n"] + f["p2o5"] + f["k2o"]
+            if soma > 100:
+                raise ErroCarregamento(
+                    f"{contexto}: as garantias somam {soma:g}% — são porcentagens em massa "
+                    f"do mesmo produto e não podem passar de 100%"
+                )
+            if soma <= 0:
+                raise ErroCarregamento(
+                    f"{contexto}: formulação sem N, P2O5 nem K2O — não entrega nutriente algum"
+                )
+
+    def carregar_formulacoes(self) -> Dict[str, Any]:
+        """Carrega e valida dados/mercado/formulacoes.json.
+
+        Fora de dados/comum/ de propósito: aquele diretório é transcrição conferida do
+        Manual, e este arquivo é dado de mercado. Misturar os dois apagaria a distinção
+        que a monografia precisa declarar.
+        """
+        base_dir = Path(__file__).parent.parent.parent
+        caminho = base_dir / "dados" / "mercado" / "formulacoes.json"
+
+        try:
+            dados = self._carregar_json(caminho)
+            self._validar_schema_json("formulacoes.json", "formulacoes_v1", dados)
+            self.validar_formulacoes(dados)
+            return dados
+        except ErroCarregamento as e:
+            raise ErroCarregamento(f"formulacoes.json: {e}")
+
     def carregar_dados_comum(self) -> Dict[str, Dict[str, Any]]:
         """
         Carrega e valida todos os arquivos de dados/comum/.
@@ -1158,3 +1203,11 @@ def carregar_dados_erva_mate() -> Dict[str, Dict[str, Any]]:
     if _carregador_global is None:
         _carregador_global = Carregador()
     return _carregador_global.carregar_dados_erva_mate()
+
+
+def carregar_formulacoes() -> Dict[str, Any]:
+    """Carrega o catálogo de formulações NPK comerciais com cache global."""
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_formulacoes()

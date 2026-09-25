@@ -157,7 +157,8 @@ def test_a_trilha_continua_completa(cliente):
     html = cliente.post("/analise/laudo", data=_ANALISE).get_data(as_text=True)
 
     assert html.count('class="trilha__passo"') >= 10
-    assert html.count('class="trilha__modulo"') == 3
+    # Quatro módulos desde 24/09/2026: calagem, adubação, adubo formulado e aptidão.
+    assert html.count('class="trilha__modulo"') == 4
 
 
 # --- a versão impressa é mesmo preto e branco -----------------------------------

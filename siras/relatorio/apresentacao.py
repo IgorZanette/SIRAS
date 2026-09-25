@@ -460,6 +460,8 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
     def modulo(regra: str) -> str:
         if regra.startswith("R-ADU"):
             return "Adubação"
+        if regra.startswith("R-FOR"):
+            return "Adubo formulado"
         if regra.startswith(("F1_", "F2_", "F3_", "F4_", "F5_", "F6_", "F7_")) or "aptidao" in regra:
             return "Aptidão edáfica"
         return "Calagem"
@@ -509,6 +511,27 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
         vistos[chave] = item
         itens.append(item)
     return itens
+
+
+#: Ordem em que os módulos aparecem na trilha — a mesma em que o laudo os apresenta.
+_ORDEM_DOS_MODULOS = ("Calagem", "Adubação", "Adubo formulado", "Aptidão edáfica")
+
+
+def _modulos_da_trilha(itens: List[Dict[str, Any]]) -> List[str]:
+    """Os módulos presentes na trilha, na ordem canônica, sem perder nenhum.
+
+    Esta lista morava no template, escrita à mão. Quando a indicação de adubo formulado
+    entrou (24/09/2026) ela trouxe um módulo novo, que o template não listava — e o passo
+    simplesmente não foi impresso, sem erro e sem aviso. Um passo do Trace some do laudo
+    caladinho é exatamente o que a trilha existe para impedir.
+
+    Aqui, módulo desconhecido vai para o fim em vez de desaparecer: é melhor o laudo
+    mostrar uma seção com nome estranho do que esconder uma decisão que o motor tomou.
+    """
+    presentes = {item["modulo"] for item in itens}
+    conhecidos = [m for m in _ORDEM_DOS_MODULOS if m in presentes]
+    novos = sorted(presentes - set(_ORDEM_DOS_MODULOS))
+    return conhecidos + novos
 
 
 #: Classes das escalas de três e quatro faixas de interpretacao_geral.json (MO, CTC, Ca,
@@ -701,6 +724,60 @@ def _orientacoes(laudo: Laudo) -> List[Dict[str, Any]]:
     return [item for item in itens if item["texto"]]
 
 
+def _opcao_formulada(opcao: Any) -> Dict[str, Any]:
+    """Uma formulação avaliada, no formato que o template imprime.
+
+    Como no resto do módulo, o arredondamento aqui é de exibição: o motor devolve a dose
+    cheia e a escolha entre formulações roda sobre o valor cheio (motor/formulacao.py).
+    Sobra e falta saem em kg/ha inteiros, como as doses de nutriente do resto do laudo.
+    """
+    return {
+        "rotulo": opcao.rotulo,
+        "teores": (
+            f"{formatar_enxuto(opcao.n)}-{formatar_enxuto(opcao.p2o5)}-"
+            f"{formatar_enxuto(opcao.k2o)}"
+        ),
+        "atende": opcao.atende,
+        "motivo_nao_atende": opcao.motivo_nao_atende,
+        "dose": formatar_numero(opcao.dose_kg_ha, 0) if opcao.atende else "—",
+        "entrega_n": formatar_numero(opcao.entrega_n, 0) if opcao.atende else "—",
+        "entrega_p2o5": formatar_numero(opcao.entrega_p2o5, 0) if opcao.atende else "—",
+        "entrega_k2o": formatar_numero(opcao.entrega_k2o, 0) if opcao.atende else "—",
+        "excesso_p2o5": formatar_numero(opcao.excesso_p2o5, 0) if opcao.atende else "—",
+        "excesso_k2o": formatar_numero(opcao.excesso_k2o, 0) if opcao.atende else "—",
+        # None quando o Manual não publica a dose de N como número: dizer "falta 0" ali
+        # afirmaria que o N está coberto, e o que se sabe é que não há com o que comparar.
+        "falta_n": None if opcao.falta_n is None else formatar_numero(opcao.falta_n, 0),
+        "excesso_n": None if opcao.excesso_n is None else formatar_numero(opcao.excesso_n, 0),
+        "fonte": opcao.fonte,
+    }
+
+
+def _formulacao(laudo: Laudo) -> Dict[str, Any]:
+    """O cartão do adubo formulado.
+
+    Fica DENTRO do laudo, ao contrário dos preços: dizer qual fonte de nutriente aplicar é
+    recomendação técnica, e o documento é assinado por quem responde por ela. O preço de
+    cada fórmula continua fora, na calculadora — ver o comentário em templates/laudo.html.
+    """
+    indicacao = laudo.formulacao
+    if indicacao is None or indicacao.indicada is None:
+        return {
+            "tem": False,
+            "motivo": indicacao.motivo_sem_indicacao if indicacao else None,
+            "criterio": indicacao.criterio if indicacao else "",
+            "indicada": None,
+            "alternativas": [],
+        }
+    return {
+        "tem": True,
+        "motivo": None,
+        "criterio": indicacao.criterio,
+        "indicada": _opcao_formulada(indicacao.indicada),
+        "alternativas": [_opcao_formulada(o) for o in indicacao.ranking[1:]],
+    }
+
+
 #: As quatro grandezas do veredito, na mesma ordem e com os mesmos nomes com que o laudo
 #: as apresenta. A unidade aqui e a do TOTAL: a dose e por hectare, a compra nao e.
 _GRANDEZAS_CONSOLIDAVEIS = (
@@ -761,7 +838,53 @@ def insumos_para_custo(blocos: Sequence[Any]) -> Dict[str, Any]:
         }
         for nome, chave, _unidade in _GRANDEZAS_CONSOLIDAVEIS
     ]
-    return {"grandezas": grandezas, "talhoes": talhoes}
+    return {
+        "grandezas": grandezas,
+        "talhoes": talhoes,
+        "sugeridas": _formulacoes_sugeridas(blocos),
+    }
+
+
+def _formulacoes_sugeridas(blocos: Sequence[Any]) -> List[Dict[str, Any]]:
+    """As formulações que a calculadora já abre preenchidas, no máximo três.
+
+    Pedido do autor em 24/09/2026: a indicação do laudo entra na calculadora pronta, para
+    que quem não encontrar aquele adubo na revenda compare o que tem disponível contra o
+    que o SIRAS indicou, em vez de digitar as duas.
+
+    A indicação de CADA talhão entra primeiro, porque com análises diferentes num mesmo
+    laudo as doses diferem e a melhor formulação pode não ser a mesma. Só depois as
+    próximas colocadas do primeiro talhão completam as três vagas. Preço não vai: é o
+    único campo que a pessoa precisa mesmo trazer da revenda.
+    """
+    sugeridas: List[Dict[str, Any]] = []
+    vistos: set = set()
+
+    def acrescentar(opcao: Any) -> None:
+        if not opcao.atende or opcao.id in vistos or len(sugeridas) >= 3:
+            return
+        vistos.add(opcao.id)
+        sugeridas.append({
+            "id": opcao.id,
+            "rotulo": opcao.rotulo,
+            "formula": (
+                f"{formatar_enxuto(opcao.n)}-{formatar_enxuto(opcao.p2o5)}-"
+                f"{formatar_enxuto(opcao.k2o)}"
+            ),
+        })
+
+    indicacoes = [
+        indicacao
+        for indicacao in (getattr(bloco.laudo, "formulacao", None) for bloco in blocos)
+        if indicacao is not None
+    ]
+    for indicacao in indicacoes:
+        if indicacao.indicada is not None:
+            acrescentar(indicacao.indicada)
+    for indicacao in indicacoes:
+        for opcao in indicacao.ranking:
+            acrescentar(opcao)
+    return sugeridas
 
 
 def consolidar_por_area(blocos: Sequence[Any]) -> Optional[Dict[str, Any]]:
@@ -816,6 +939,7 @@ def consolidar_por_area(blocos: Sequence[Any]) -> Optional[Dict[str, Any]]:
 
 def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
     """Monta o modelo de exibição do laudo. O template só itera sobre o que sai daqui."""
+    trilha = _trilha(laudo)
     return {
         "cultura": nome_de_exibicao(laudo.cultura_id, dados),
         "cultura_id": laudo.cultura_id,
@@ -828,8 +952,10 @@ def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
         "veredito": _veredito(laudo),
         "teores": _teores(laudo),
         "aptidao": _aptidao(laudo),
-        "trilha": _trilha(laudo),
+        "trilha": trilha,
+        "trilha_modulos": _modulos_da_trilha(trilha),
         "orientacoes": _orientacoes(laudo),
+        "formulacao": _formulacao(laudo),
         "criterio_calagem": laudo.calagem.criterio,
     }
 

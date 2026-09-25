@@ -396,8 +396,25 @@ def test_a_trilha_nao_repete_a_mesma_fonte(cliente):
     assert trilha.count("F1_acidez") == 0, "identificador cru na tela"
     assert trilha.count("composicao_aptidao") == 0, "identificador cru na tela"
     assert "Composição da classe" in trilha
-    # Os sete fatores aparecem uma vez cada, e não duas.
-    assert trilha.count('class="trilha__passo"') == 12
+    # Os sete fatores aparecem uma vez cada, e não duas. O 13º passo é o R-FOR-01, a
+    # indicação de adubo formulado (24/09/2026): mesmo sem catálogo cadastrado ele aparece,
+    # porque decidir não indicar também é decisão do motor e o CLAUDE.md não abre exceção.
+    assert trilha.count('class="trilha__passo"') == 13
+
+
+def test_todo_modulo_da_trilha_chega_impresso(cliente):
+    """Nenhum módulo do Trace pode sumir do laudo.
+
+    Guarda uma regressão de classe, não um número. A lista de módulos já morou escrita à
+    mão no template: quando o motor ganhou o módulo de adubo formulado (24/09/2026), o
+    passo dele deixou de ser impresso sem erro e sem aviso. Agora a lista vem da
+    apresentação, e este teste confere que cada módulo que ela declara aparece na tela.
+    """
+    html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
+    trilha = html[html.index("De onde vem cada número"):]
+
+    for modulo in ("Calagem", "Adubação", "Adubo formulado", "Aptidão edáfica"):
+        assert modulo in trilha, f"módulo '{modulo}' registrado no Trace e ausente do laudo"
 
 
 def test_a_repeticao_continua_registrada(cliente):

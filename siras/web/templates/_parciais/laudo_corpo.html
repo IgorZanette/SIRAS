@@ -1,4 +1,5 @@
-{# Corpo do laudo de UM talhão: veredito, interpretação, como aplicar, aptidão e trilha.
+{# Corpo do laudo de UM talhão: veredito, interpretação, qual adubo comprar, como
+   aplicar, aptidão e trilha.
 
    Está em parcial porque a análise de várias áreas repete exatamente isto, uma vez por
    talhão, dentro do mesmo documento. Manter duas cópias — uma para o laudo de uma área e
@@ -43,7 +44,100 @@
         </div>
       </section>
 
-      {# ——— 3. Como aplicar ——— #}
+      {# ——— 3. Qual adubo comprar ———
+         Fica DENTRO do laudo, ao contrário dos preços: dizer qual fonte de nutriente
+         aplicar é recomendação técnica, e o documento é assinado por quem responde por
+         ela. O catálogo de formulações é dado de mercado, não do Manual, e o cartão diz
+         isso na cara — por isso a fonte de cada entrada aparece impressa. #}
+      {% if laudo.formulacao.tem %}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("comerciais") }}<h3>Qual adubo comprar</h3></div>
+        <p class="sec__intro">
+          A recomendação acima está em nutriente. O que a revenda vende é adubo formulado.
+          Abaixo, a formulação do catálogo que atende esta recomendação com a menor sobra.
+        </p>
+
+        <div class="formulacao">
+          <div class="formulacao__indicada">
+            <div class="formulacao__cab">
+              <span class="formulacao__rotulo">{{ laudo.formulacao.indicada.rotulo }}</span>
+              <span class="formulacao__dose">
+                {{ laudo.formulacao.indicada.dose }} kg/ha
+              </span>
+            </div>
+            <table class="formulacao__tab">
+              <caption class="t-aux">O que esta dose entrega, frente à recomendação</caption>
+              <thead>
+                <tr><th scope="col">Nutriente</th><th scope="col">Entrega</th><th scope="col">Sobra</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">P<sub>2</sub>O<sub>5</sub></th>
+                  <td>{{ laudo.formulacao.indicada.entrega_p2o5 }} kg/ha</td>
+                  <td>{{ laudo.formulacao.indicada.excesso_p2o5 }} kg/ha</td>
+                </tr>
+                <tr>
+                  <th scope="row">K<sub>2</sub>O</th>
+                  <td>{{ laudo.formulacao.indicada.entrega_k2o }} kg/ha</td>
+                  <td>{{ laudo.formulacao.indicada.excesso_k2o }} kg/ha</td>
+                </tr>
+                <tr>
+                  <th scope="row">N</th>
+                  <td>{{ laudo.formulacao.indicada.entrega_n }} kg/ha</td>
+                  <td>
+                    {% if laudo.formulacao.indicada.falta_n is none %}
+                      —
+                    {% elif laudo.formulacao.indicada.falta_n != "0" %}
+                      falta {{ laudo.formulacao.indicada.falta_n }} kg/ha
+                    {% else %}
+                      {{ laudo.formulacao.indicada.excesso_n }} kg/ha
+                    {% endif %}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            {% if laudo.formulacao.indicada.falta_n is not none
+                  and laudo.formulacao.indicada.falta_n != "0" %}
+            <p class="t-aux formulacao__complemento">
+              O nitrogênio que a fórmula não cobre — {{ laudo.formulacao.indicada.falta_n }} kg/ha
+              de N — precisa de fonte à parte. O SIRAS não indica qual, nem quando aplicá-la.
+            </p>
+            {% endif %}
+          </div>
+
+          {% if laudo.formulacao.alternativas %}
+          <details class="formulacao__alt">
+            <summary>Outras formulações do catálogo ({{ laudo.formulacao.alternativas|length }})</summary>
+            <ul class="formulacao__lista">
+              {% for alt in laudo.formulacao.alternativas %}
+              <li>
+                <b>{{ alt.rotulo }}</b> —
+                {% if alt.atende %}
+                  {{ alt.dose }} kg/ha; sobra {{ alt.excesso_p2o5 }} de P<sub>2</sub>O<sub>5</sub>
+                  e {{ alt.excesso_k2o }} de K<sub>2</sub>O
+                  {%- if alt.falta_n is not none and alt.falta_n != "0" %},
+                  falta {{ alt.falta_n }} de N{% endif %}
+                {% else %}
+                  não atende: {{ alt.motivo_nao_atende }}
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          </details>
+          {% endif %}
+
+          <p class="t-aux formulacao__nota">
+            Critério: {{ laudo.formulacao.criterio }}.
+            As formulações vêm de um catálogo de mercado mantido no SIRAS
+            (fonte desta: {{ laudo.formulacao.indicada.fonte }}) e <b>não</b> do Manual de
+            Calagem e Adubação, que não publica lista de adubos comerciais. Confira a
+            garantia no rótulo do produto antes de comprar.
+          </p>
+        </div>
+      </section>
+      {% endif %}
+
+      {# ——— 4. Como aplicar ——— #}
       {% if laudo.orientacoes %}
       <section class="sec">
         <div class="sec__cab">{{ i.ico("aplicar") }}<h3>Como aplicar</h3></div>
@@ -62,7 +156,7 @@
       </section>
       {% endif %}
 
-      {# ——— 4. Aptidão edáfica ——— #}
+      {# ——— 5. Aptidão edáfica ——— #}
       <section class="sec">
         <div class="sec__cab">{{ i.ico("aptidao") }}<h3>Aptidão edáfica</h3></div>
         {# Os dois cenários lado a lado, e não um deles em prosa: pelo CCAE §7, a
@@ -175,7 +269,7 @@
         {% endfor %}
       </section>
 
-      {# ——— 4. Trilha: o diferencial declarado do SIRAS, em nota de rodapé ———
+      {# ——— 6. Trilha: o diferencial declarado do SIRAS, em nota de rodapé ———
 
          Compacta de propósito. É a seção que dá ao laudo valor em análise de crédito
          rural, e é também a mais longa — mais de vinte passos. Em corpo de leitura ela
@@ -201,7 +295,10 @@
            dose para testar a exequibilidade (CCAE §7.2), e essa é uma decisão que o
            sistema realmente tomou. #}
         <dl class="trilha">
-          {% for modulo in ["Calagem", "Adubação", "Aptidão edáfica"] %}
+          {# A lista de módulos vem da apresentação, e não escrita aqui: escrita aqui, um
+             módulo novo no motor some do laudo sem erro nenhum — foi o que aconteceu
+             quando a indicação de adubo formulado entrou, em 24/09/2026. #}
+          {% for modulo in laudo.trilha_modulos %}
           {% set passos = laudo.trilha|selectattr("modulo", "equalto", modulo)|list %}
           {% if passos %}
           <dt class="trilha__modulo">{{ modulo }}</dt>

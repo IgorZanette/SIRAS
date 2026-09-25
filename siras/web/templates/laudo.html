@@ -214,8 +214,11 @@
      negócio de quem compra, e o laudo é peça técnica assinada — misturar os dois poria
      número comercial num documento de recomendação.
 
-     Nenhum valor vem preenchido. O teor do fertilizante está no rótulo do produto que a
-     pessoa compra; sugerir um "típico" seria afirmação agronômica da interface. #}
+     Desde 24/09/2026 as fórmulas chegam preenchidas com as que o laudo indicou, do
+     catálogo de mercado, para que quem não encontrar o adubo indicado compare o que tem
+     disponível sem redigitar os dois. Preço e peso de saca continuam vindo só da pessoa:
+     esses estão na revenda, não no sistema. Teor de fertilizante fora do catálogo também
+     não se sugere — sai do rótulo do produto. #}
   {% if not impressa and custo.grandezas|selectattr("tem_dose")|list %}
   <section class="painel custo nao-imprime" data-custo aria-labelledby="custo-titulo">
     <div class="custo__cab">
@@ -260,6 +263,10 @@
             Até três opções, como no rótulo (N-P<sub>2</sub>O<sub>5</sub>-K<sub>2</sub>O). A dose de
             cada fórmula é a menor que cobre o fósforo e o potássio da recomendação; o nitrogênio que
             faltar vai para o complemento.
+            {% if custo.sugeridas %}
+            As que o laudo indicou já vêm preenchidas — troque por outra se a revenda não tiver
+            essa, e a comparação sai lado a lado.
+            {% endif %}
           </p>
           {% for n in range(1, 4) %}
           <div class="custo__opcao" data-formula-opcao>

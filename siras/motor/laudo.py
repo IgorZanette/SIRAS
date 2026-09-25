@@ -30,6 +30,7 @@ from siras.conhecimento.carregador import (
     carregar_dados_hortalicas,
     carregar_dados_outras,
     carregar_dados_tuberculos,
+    carregar_formulacoes,
 )
 from siras.dominio.analise import AnaliseSolo, Contexto
 from siras.dominio.laudo import Laudo, RecomendacaoAdubacao, RecomendacaoCalagem
@@ -47,6 +48,7 @@ from siras.motor.adubacao import (
 )
 from siras.motor.aptidao import avaliar_aptidao
 from siras.motor.calagem import calcular_calagem, resolver_criterio_id
+from siras.motor.formulacao import indicar_formulacao
 from siras.motor.trace import Trace
 
 #: Carregador da adubação de cada grupo.
@@ -498,6 +500,11 @@ def gerar_laudo(
     calagem = _calagem(analise, cultura_id, contexto, trace, dados)
     adubacao = _ADUBACAO_POR_GRUPO[grupo](analise, cultura_id, contexto, trace, dados)
 
+    # Depois da adubação, e a partir dela: a formulação não é uma recomendação nova, é a
+    # tradução da que acabou de sair para o produto que se compra. O catálogo é dado de
+    # mercado; vazio, a indicação sai None e o laudo segue completo.
+    formulacao = indicar_formulacao(adubacao, carregar_formulacoes(), trace)
+
     # CCAE §7: os dois cenários saem sempre juntos — a diferença entre eles é o ganho
     # atribuível à recomendação emitida acima, e é o que integra os dois módulos.
     aptidao_atual = avaliar_aptidao(analise, cultura_id, "ATUAL", contexto, trace, dados)
@@ -513,6 +520,7 @@ def gerar_laudo(
         aptidao_atual=aptidao_atual,
         aptidao_potencial=aptidao_potencial,
         trace=trace,
+        formulacao=formulacao,
     )
 
 

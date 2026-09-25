@@ -70,6 +70,52 @@ class RecomendacaoAdubacao:
 
 
 @dataclass(frozen=True)
+class OpcaoFormulacao:
+    """Uma formulação NPK do catálogo, avaliada contra a recomendação desta análise.
+
+    As quantidades vêm em kg/ha e SEM arredondamento — quem arredonda é a apresentação.
+    Os campos opcionais são None quando não há como calculá-los: `dose_kg_ha` e as
+    entregas quando a formulação não atende, e `falta_n`/`excesso_n` quando o Manual não
+    publica a dose de N como número (teto, intervalo ou lacuna declarada).
+    """
+
+    id: str
+    rotulo: str
+    #: garantias do rótulo, em % de massa
+    n: float
+    p2o5: float
+    k2o: float
+    dose_kg_ha: Optional[float]
+    entrega_n: Optional[float]
+    entrega_p2o5: Optional[float]
+    entrega_k2o: Optional[float]
+    excesso_p2o5: Optional[float]
+    excesso_k2o: Optional[float]
+    falta_n: Optional[float]
+    excesso_n: Optional[float]
+    atende: bool
+    motivo_nao_atende: Optional[str]
+    #: de onde veio a entrada do catálogo. Dado de mercado, não do Manual.
+    fonte: str = ""
+
+
+@dataclass(frozen=True)
+class IndicacaoFormulacao:
+    """Qual adubo formulado comprar, e as alternativas em ordem.
+
+    `indicada` é None quando não há o que indicar — catálogo vazio, recomendação sem dose
+    numérica de P e K, ou nenhuma formulação capaz de atender. Isso não é erro: o laudo
+    segue completo sem a indicação, e `motivo_sem_indicacao` diz o que faltou.
+    """
+
+    indicada: Optional[OpcaoFormulacao]
+    #: todas as avaliadas, as que atendem primeiro e em ordem de preferência
+    ranking: List[OpcaoFormulacao] = field(default_factory=list)
+    motivo_sem_indicacao: Optional[str] = None
+    criterio: str = ""
+
+
+@dataclass(frozen=True)
 class Laudo:
     """Saída única do motor para uma análise, uma cultura e um contexto.
 
@@ -89,6 +135,15 @@ class Laudo:
     aptidao_potencial: "ResultadoAptidao"
     #: trilha de inferência completa — é o que alimenta a seção "De onde vem cada número"
     trace: "Trace" = field(repr=False)
+    #: adubo formulado que atende a recomendação. None quando o catálogo de mercado está
+    #: vazio — o laudo continua completo, só sem a ponte para o que se compra na revenda.
+    formulacao: Optional[IndicacaoFormulacao] = None
 
 
-__all__ = ["Laudo", "RecomendacaoAdubacao", "RecomendacaoCalagem"]
+__all__ = [
+    "IndicacaoFormulacao",
+    "Laudo",
+    "OpcaoFormulacao",
+    "RecomendacaoAdubacao",
+    "RecomendacaoCalagem",
+]

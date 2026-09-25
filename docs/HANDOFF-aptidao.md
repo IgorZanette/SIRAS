@@ -26,8 +26,8 @@ A consequência prática: o CCAE foi **escrito e aprovado pelo orientador antes*
 
 | Arquivo | Papel |
 |---|---|
-| `docs/CCAE-v1.3.md` | Rascunho da v1.3, aguardando aprovação: exequibilidade pela `NC` antes do arredondamento, procedência da exceção Ca/Mg, estratos da §9.2 |
-| `docs/CCAE-v1.2.md` | **Especificação normativa vigente** (tag `criterios-v1.2`). Fatores F1–F7, graus, composição, cenários |
+| `docs/CCAE-v1.3.md` | **Especificação normativa vigente** (tag `criterios-v1.3`, aprovada em 24/09/2026). Fatores F1–F7, graus, composição, cenários; exequibilidade pela `NC` antes do arredondamento, leitura `≥` da exceção Ca/Mg fundamentada em A-11 |
+| `docs/CCAE-v1.2.md` | Versão anterior (tag `criterios-v1.2`). A v1.3 não altera limiar nem gabarito |
 | `docs/CCAE-v1.1.md` | Versão sob a qual o conjunto de conformidade foi executado. A v1.2 não altera a função de mapeamento — só a derivação da regra de F1 no ramo (b) |
 | `docs/CCAE-implementacao.md` | Estruturas JSON, contrato do motor, convenções de intervalo |
 | `testes/casos/entradas_aptidao.json` | 92 casos, **só entradas** |

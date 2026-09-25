@@ -76,8 +76,8 @@ permaneça independente do código.
 Documentos principais:
 
 - [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) — visão de arquitetura e fluxo de processamento
-- [`docs/CCAE-v1.2.md`](docs/CCAE-v1.2.md) — Caderno de Critérios de Aptidão Edáfica, versão
-  aprovada pelo orientador; [`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md) é o rascunho em aprovação
+- [`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md) — Caderno de Critérios de Aptidão Edáfica, versão
+  vigente, aprovada pelo orientador em 24/09/2026 (tag `criterios-v1.3`)
 - [`docs/CCAE-implementacao.md`](docs/CCAE-implementacao.md) — do Caderno ao código: estruturas
   JSON, contrato do motor e ordem de trabalho
 - [`docs/HANDOFF-aptidao.md`](docs/HANDOFF-aptidao.md) — resumo de retomada do módulo de aptidão
@@ -101,8 +101,8 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`
 - **Motor** — calagem, adubação e aptidão edáfica para as **61 culturas e grupos de culturas** do
   escopo, com `gerar_laudo()` como ponto de entrada único e uma trilha que registra cada decisão
   com a regra e a tabela do Manual que a produziram.
-- **Aptidão edáfica** — implementada conforme o Caderno de Critérios ([`docs/CCAE-v1.2.md`](docs/CCAE-v1.2.md),
-  versão aprovada), com os cenários atual e potencial. Conformidade de **100%** sobre os casos
+- **Aptidão edáfica** — implementada conforme o Caderno de Critérios ([`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md),
+  versão vigente), com os cenários atual e potencial. Conformidade de **100%** sobre os casos
   gabaritados à mão pelo autor, em classe, fator determinante e grau de cada fator.
 - **Aplicação web** — as três telas, leitura ao vivo da interpretação enquanto se digita, vários
   talhões num laudo, versão impressa em A4, temas claro e escuro, e calculadora que compara
@@ -110,10 +110,13 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`
 - **Suíte** — 4891 testes passando (camada completa, 4 min 21 s).
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
-avaliação de usabilidade (SUS) — sprints S5 e S6.
+avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em
+[`docs/USABILIDADE.md`](docs/USABILIDADE.md): três roteiros de teste com usuários do público-alvo
+e questionário pós-teste estruturado pelas dez heurísticas de Nielsen, em lugar do SUS previsto
+na proposta.
 
-**Pendente de terceiros:** aprovação do rascunho [`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md) pelo
-orientador e a busca na literatura pedida por ele (P4 e P6 no roadmap).
+**Pendente de terceiros:** recrutamento dos participantes da avaliação de usabilidade, o catálogo
+de formulações comerciais e a busca na literatura pedida pelo orientador (P4, P7 e P8 no roadmap).
 
 ## Ferramentas de desenvolvimento
 

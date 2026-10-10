@@ -49,126 +49,140 @@
          aplicar é recomendação técnica, e o documento é assinado por quem responde por
          ela.
 
-         O MÉTODO é do Manual (§8.3, p. 311): a dose se ancora no nutriente mais
-         deficiente no solo. O CATÁLOGO de fórmulas não é — é dado de mercado, e o cartão
-         diz isso onde a pessoa lê, não em nota de rodapé. #}
+         TRÊS CAMINHOS, e não um (ADR 0009). Não existe catálogo oficial de fórmulas
+         comercializadas no Brasil — boa parte é feita sob encomenda —, então indicar uma
+         só seria fingir uma certeza que o mercado não tem. O laudo mostra a fórmula ideal
+         (para encomendar), as melhores que existem no catálogo (para comprar) e a mistura
+         de simples (que sempre resolve), e deixa a escolha com quem compra. #}
       {% if laudo.formulacao.tem %}
-      {% set f = laudo.formulacao.indicada %}
       <section class="sec">
         <div class="sec__cab">{{ i.ico("comerciais") }}<h3>Qual adubo comprar</h3></div>
         <p class="sec__intro">
-          A recomendação acima está em nutriente; a revenda vende adubo formulado. A dose
-          abaixo é ancorada no {{ f.ancora|safe }}, o nutriente mais deficiente nesta
-          análise, que por isso é atendido na medida exata.
+          A recomendação acima está em nutriente; a revenda vende adubo. Abaixo, três
+          formas de chegar lá — da fórmula exata, para encomendar, ao que se acha pronto.
         </p>
 
         <div class="formulacao">
-          <div class="formulacao__indicada">
-            <div class="formulacao__cab">
-              <span class="formulacao__rotulo">{{ f.id }}</span>
-              <span class="formulacao__dose">{{ f.dose }} kg/ha</span>
+
+          {# --- A. fórmula ideal --- #}
+          {% if laudo.formulacao.ideais %}
+          <div class="formulacao__caminho">
+            <div class="formulacao__caminho-tit">
+              Fórmula ideal para esta recomendação
+              <small>referência para pedido sob encomenda</small>
             </div>
-
-            {% if f.ancora_por_fallback %}
-            <p class="t-aux formulacao__ressalva">
-              Esta fase não classifica o teor por faixa, então não há como dizer qual
-              nutriente está mais deficiente. A dose foi ancorada no de maior quantidade
-              recomendada — é leitura do SIRAS, não do Manual.
-            </p>
-            {% endif %}
-
             <table class="formulacao__tab">
-              <caption class="t-aux">O que esta dose entrega, frente à recomendação</caption>
               <thead>
                 <tr>
-                  <th scope="col">Nutriente</th>
-                  <th scope="col">Entrega</th>
-                  <th scope="col">Falta</th>
-                  <th scope="col">Sobra</th>
+                  <th scope="col">Fórmula</th><th scope="col">Dose</th>
+                  <th scope="col">N em cobertura</th>
                 </tr>
               </thead>
               <tbody>
+                {% for op in laudo.formulacao.ideais %}
                 <tr>
-                  <th scope="row">P<sub>2</sub>O<sub>5</sub></th>
-                  <td>{{ f.entrega_p2o5 }} kg/ha</td>
-                  <td>{{ f.falta_p2o5 }} kg/ha</td>
-                  <td>{{ f.excesso_p2o5 }} kg/ha</td>
+                  <th scope="row">{{ op.id }}</th>
+                  <td>{{ op.dose }} kg/ha</td>
+                  <td>
+                    {%- set ureia = op.complementos|selectattr("momento", "equalto", "cobertura")|first -%}
+                    {% if ureia %}{{ ureia.dose }} kg/ha de {{ ureia.produto }}{% else %}—{% endif %}
+                  </td>
                 </tr>
-                <tr>
-                  <th scope="row">K<sub>2</sub>O</th>
-                  <td>{{ f.entrega_k2o }} kg/ha</td>
-                  <td>{{ f.falta_k2o }} kg/ha</td>
-                  <td>{{ f.excesso_k2o }} kg/ha</td>
-                </tr>
-                <tr>
-                  <th scope="row">N</th>
-                  <td>{{ f.entrega_n }} kg/ha</td>
-                  <td>{{ f.n_cobertura }} kg/ha</td>
-                  <td>{{ f.excesso_n }} kg/ha</td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
+            <p class="t-aux">
+              As três têm a mesma proporção da recomendação, em concentrações diferentes.
+              {% if laudo.formulacao.sem_n_de_plantio %}
+              <b>Saíram sem nitrogênio</b> porque a parcela de N a aplicar na semeadura não
+              foi informada — todo o N foi para cobertura. Informe esse valor no formulário
+              para obter a fórmula ternária.
+              {% endif %}
+              O SIRAS não verifica se a fórmula é fabricável com as matérias-primas
+              disponíveis: ela é referência para cotação, não produto garantido.
+            </p>
+          </div>
+          {% endif %}
 
-            {% if f.complementos %}
-            <div class="formulacao__comp">
-              <div class="formulacao__comp-tit">Completar com</div>
+          {# --- B. melhores do catálogo --- #}
+          {% if laudo.formulacao.catalogo %}
+          <div class="formulacao__caminho">
+            <div class="formulacao__caminho-tit">
+              Melhores opções prontas
+              <small>do catálogo do SIRAS e das fórmulas que você informou</small>
+            </div>
+            {% for op in laudo.formulacao.catalogo %}
+            <div class="formulacao__opcao{% if loop.first %} formulacao__opcao--melhor{% endif %}">
+              <div class="formulacao__cab">
+                <span class="formulacao__rotulo">
+                  {{ op.id }}
+                  {% if op.do_usuario %}<span class="formulacao__marca">sua</span>{% endif %}
+                  {% if loop.first %}<span class="formulacao__marca formulacao__marca--melhor">melhor opção</span>{% endif %}
+                </span>
+                <span class="formulacao__dose">{{ op.dose }} kg/ha</span>
+              </div>
+              <p class="t-aux">
+                Entrega {{ op.entrega_p2o5 }} de P<sub>2</sub>O<sub>5</sub>,
+                {{ op.entrega_k2o }} de K<sub>2</sub>O e {{ op.entrega_n }} de N, em kg/ha.
+                {%- if op.tem_excesso %} Sobram
+                {{ op.excesso_p2o5 }} de P<sub>2</sub>O<sub>5</sub>,
+                {{ op.excesso_k2o }} de K<sub>2</sub>O e {{ op.excesso_n }} de N.{% endif %}
+              </p>
+              {% if op.complementos %}
               <ul class="formulacao__lista">
-                {% for c in f.complementos %}
+                {% for c in op.complementos %}
                 <li>
                   <b>{{ c.dose }} kg/ha de {{ c.produto }}</b>
-                  {% if c.momento == "cobertura" %}
-                    em cobertura, para o N que a fórmula não entrega
-                  {% else %}
-                    junto da fórmula, para fechar o {{ c.nutriente|safe }}
-                  {% endif %}
+                  {% if c.momento == "cobertura" %}em cobertura, para o N restante
+                  {% else %}junto da fórmula, para fechar o {{ c.nutriente|safe }}{% endif %}
                 </li>
                 {% endfor %}
               </ul>
-              <p class="t-aux">
-                Doses pelas garantias mínimas da Tab. 8.4 do Manual (p. 304). O produto que
-                tu compras costuma declarar mais — confere o rótulo. O SIRAS não diz em que
-                momento parcelar a cobertura.
-              </p>
+              {% endif %}
+              <p class="t-aux">Total aplicado, somando tudo: {{ op.massa_total }} kg/ha.</p>
             </div>
-            {% endif %}
-
-            {% if f.tem_excesso_n %}
-            <p class="t-aux formulacao__ressalva">
-              Esta fórmula entrega {{ f.excesso_n }} kg/ha de N acima do recomendado. Para
-              esta cultura isso é adubo pago sem necessidade — e, em leguminosa, N que a
-              fixação biológica já supre.
-            </p>
-            {% endif %}
+            {% endfor %}
           </div>
+          {% endif %}
 
-          {% if laudo.formulacao.alternativas %}
-          <details class="formulacao__alt">
-            <summary>Outras fórmulas do catálogo ({{ laudo.formulacao.alternativas|length }})</summary>
+          {# --- C. mistura de simples --- #}
+          {% if laudo.formulacao.mistura %}
+          <div class="formulacao__caminho">
+            <div class="formulacao__caminho-tit">
+              Mistura de adubos simples
+              <small>sempre exata, e sempre disponível</small>
+            </div>
             <ul class="formulacao__lista">
-              {% for alt in laudo.formulacao.alternativas %}
+              {% for c in laudo.formulacao.mistura.complementos %}
               <li>
-                <b>{{ alt.id }}</b> — {{ alt.dose }} kg/ha;
-                desvio de {{ alt.desvio }}% frente à recomendação
-                {%- if alt.tem_falta %}, com falta a complementar{% endif %}
+                <b>{{ c.dose }} kg/ha de {{ c.produto }}</b>
+                {% if c.momento == "cobertura" %}em cobertura{% else %}no plantio{% endif %}
+                — para o {{ c.nutriente|safe }}
               </li>
               {% endfor %}
             </ul>
-          </details>
+            <p class="t-aux">
+              Atende a recomendação na medida exata, sem sobra nem falta. É a régua contra
+              a qual se leem os desvios das outras duas opções.
+              Total: {{ laudo.formulacao.mistura.massa_total }} kg/ha.
+            </p>
+          </div>
           {% endif %}
 
-          <p class="t-aux formulacao__nota">
-            <b>Método:</b> Manual de Calagem e Adubação, §8.3, p. 311 — a dose se ancora no
-            nutriente mais deficiente no solo; o que falta do outro vai para complemento e o
-            N restante para cobertura. Entre as fórmulas, vence a de menor desvio frente à
-            recomendação.
-            <b>Catálogo:</b> as fórmulas vêm de uma lista de mercado mantida no SIRAS, e
-            <b>não</b> do Manual, que não publica lista de adubos comerciais — o mercado é
-            muito maior do que ela, e boa parte das fórmulas é feita sob encomenda. Se a tua
-            revenda tiver outra, usa a calculadora abaixo para comparar.
-            <b>O que este ranking não considera:</b> preço. O Manual manda escolher pelo
-            menor custo por unidade de NPK (p. 310), e o SIRAS não tem preços — a comparação
-            de custo fica na calculadora, com os valores que tu informares.
-          </p>
+          {# --- avisos (ADR 0009, D12) --- #}
+          <div class="formulacao__avisos">
+            {% for aviso in laudo.formulacao.avisos %}
+            <p class="t-aux">{{ aviso }}</p>
+            {% endfor %}
+            <p class="t-aux">
+              <b>Critério:</b> {{ laudo.formulacao.criterio }}.
+              O <b>método</b> é do Manual de Calagem e Adubação, §8.3, p. 311, e as
+              garantias dos adubos simples são da Tab. 8.4, p. 304. O <b>catálogo</b> de
+              fórmulas é uma lista de mercado mantida no SIRAS, e <b>não</b> do Manual,
+              que não publica lista de adubos comerciais. Confira a garantia no rótulo
+              antes de comprar.
+            </p>
+          </div>
         </div>
       </section>
       {% endif %}

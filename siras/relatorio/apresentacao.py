@@ -753,63 +753,70 @@ def _complemento_legivel(complemento: Any) -> Dict[str, Any]:
     }
 
 
-def _opcao_formulada(opcao: Any) -> Dict[str, Any]:
-    """Uma fórmula avaliada, no formato que o template imprime.
+def _opcao_adubacao(opcao: Any) -> Dict[str, Any]:
+    """Uma forma de atender a recomendação, no formato que o template imprime.
 
-    Como no resto do módulo, o arredondamento aqui é de exibição: o motor devolve as doses
-    cheias e a escolha entre fórmulas roda sobre o valor cheio (motor/formulacao.py).
-    Falta e sobra saem em kg/ha inteiros, como as doses de nutriente do resto do laudo.
+    Serve aos quatro tipos da ADR 0009 — fórmula do catálogo, fórmula do usuário, fórmula
+    ideal e mistura de simples —, porque todas respondem à mesma pergunta e o laudo as
+    apresenta lado a lado.
+
+    Como no resto do módulo, o arredondamento é de exibição: o motor devolve as doses
+    cheias, e a escolha entre opções roda sobre o valor cheio.
     """
+    falta_p = opcao.falta.get("p2o5", 0.0)
+    falta_k = opcao.falta.get("k2o", 0.0)
     return {
-        "id": opcao.id,
+        "tipo": opcao.tipo,
+        "id": opcao.formula_id,
         "dose": formatar_numero(opcao.dose_kg_ha, 0),
-        "ancora": _NOME_DO_NUTRIENTE.get(opcao.ancora, opcao.ancora),
-        "ancora_por_fallback": opcao.ancora_por_fallback,
-        "entrega_n": formatar_numero(opcao.entrega_n, 0),
-        "entrega_p2o5": formatar_numero(opcao.entrega_p2o5, 0),
-        "entrega_k2o": formatar_numero(opcao.entrega_k2o, 0),
-        "falta_p2o5": formatar_numero(opcao.falta_p2o5, 0),
-        "falta_k2o": formatar_numero(opcao.falta_k2o, 0),
-        "excesso_p2o5": formatar_numero(opcao.excesso_p2o5, 0),
-        "excesso_k2o": formatar_numero(opcao.excesso_k2o, 0),
-        "excesso_n": formatar_numero(opcao.excesso_n, 0),
-        "n_cobertura": formatar_numero(opcao.n_cobertura, 0),
+        "tem_dose": opcao.dose_kg_ha > 0,
+        "ancora": _NOME_DO_NUTRIENTE.get(opcao.ancora, opcao.ancora or ""),
+        "entrega_n": formatar_numero(opcao.fornecido.get("n", 0.0), 0),
+        "entrega_p2o5": formatar_numero(opcao.fornecido.get("p2o5", 0.0), 0),
+        "entrega_k2o": formatar_numero(opcao.fornecido.get("k2o", 0.0), 0),
+        "falta_p2o5": formatar_numero(falta_p, 0),
+        "falta_k2o": formatar_numero(falta_k, 0),
+        "excesso_n": formatar_numero(opcao.excesso.get("n", 0.0), 0),
+        "excesso_p2o5": formatar_numero(opcao.excesso.get("p2o5", 0.0), 0),
+        "excesso_k2o": formatar_numero(opcao.excesso.get("k2o", 0.0), 0),
         # Zero não é "—": zero aqui é afirmação — a fórmula cobriu o nutriente na medida.
-        "tem_falta": opcao.falta_p2o5 > 0.5 or opcao.falta_k2o > 0.5,
-        "tem_excesso_n": opcao.excesso_n > 0.5,
-        "tem_cobertura": opcao.n_cobertura > 0.5,
-        "desvio": formatar_numero(opcao.desvio_relativo * 100, 1),
+        "tem_falta": falta_p > 0.5 or falta_k > 0.5,
+        "tem_excesso": any(v > 0.5 for v in opcao.excesso.values()),
+        "massa_total": formatar_numero(opcao.massa_total_kg_ha, 0),
         "complementos": [_complemento_legivel(c) for c in opcao.complementos],
         "origem": opcao.origem,
         "fontes": opcao.fontes,
+        "do_usuario": opcao.tipo == "usuario",
     }
 
 
 def _formulacao(laudo: Laudo) -> Dict[str, Any]:
-    """O cartão do adubo formulado.
+    """Os três caminhos do adubo (ADR 0009).
 
-    Fica DENTRO do laudo, ao contrário dos preços: dizer qual fonte de nutriente aplicar é
-    recomendação técnica, e o documento é assinado por quem responde por ela. O preço de
-    cada fórmula continua fora, na calculadora — ver o comentário em templates/laudo.html.
+    Ficam DENTRO do laudo, ao contrário dos preços: dizer qual fonte de nutriente aplicar
+    é recomendação técnica, e o documento é assinado por quem responde por ela. O preço
+    continua fora, na calculadora — ver o comentário em templates/laudo.html.
     """
-    indicacao = laudo.formulacao
-    if indicacao is None or indicacao.indicada is None:
-        return {
-            "tem": False,
-            "motivo": indicacao.motivo_sem_indicacao if indicacao else None,
-            "criterio": indicacao.criterio if indicacao else "",
-            "indicada": None,
-            "alternativas": [],
-        }
+    resultado = laudo.formulacao
+    if resultado is None:
+        return {"tem": False, "motivo": None, "criterio": "", "ideais": [],
+                "catalogo": [], "mistura": None, "avisos": [], "sem_n_de_plantio": False}
+
+    ideais = [_opcao_adubacao(o) for o in resultado.ideais]
+    do_catalogo = [_opcao_adubacao(o) for o in resultado.catalogo]
+    mistura = _opcao_adubacao(resultado.mistura) if resultado.mistura else None
+
     return {
-        "tem": True,
-        "motivo": None,
-        "criterio": indicacao.criterio,
-        "indicada": _opcao_formulada(indicacao.indicada),
-        # Três alternativas, e não o catálogo inteiro: a lista existe para a pessoa ter
-        # para onde ir se a revenda não tiver a indicada, não para percorrer 38 opções
-        # dentro de um laudo impresso.
-        "alternativas": [_opcao_formulada(o) for o in indicacao.ranking[1:4]],
+        # Basta UM caminho existir para a seção valer a pena: a mistura de simples sozinha
+        # já responde "o que aplicar", mesmo sem catálogo e sem fórmula ideal.
+        "tem": bool(ideais or do_catalogo or mistura),
+        "motivo": resultado.motivo_sem_indicacao,
+        "criterio": resultado.criterio,
+        "ideais": ideais,
+        "catalogo": do_catalogo,
+        "mistura": mistura,
+        "avisos": resultado.avisos,
+        "sem_n_de_plantio": resultado.sem_n_de_plantio,
     }
 
 
@@ -881,44 +888,41 @@ def insumos_para_custo(blocos: Sequence[Any]) -> Dict[str, Any]:
 
 
 def _formulacoes_sugeridas(blocos: Sequence[Any]) -> List[Dict[str, Any]]:
-    """As formulações que a calculadora já abre preenchidas, no máximo três.
+    """As fórmulas que a calculadora já abre preenchidas, no máximo três.
 
     Pedido do autor em 24/09/2026: a indicação do laudo entra na calculadora pronta, para
     que quem não encontrar aquele adubo na revenda compare o que tem disponível contra o
     que o SIRAS indicou, em vez de digitar as duas.
 
-    A indicação de CADA talhão entra primeiro, porque com análises diferentes num mesmo
-    laudo as doses diferem e a melhor formulação pode não ser a mesma. Só depois as
-    próximas colocadas do primeiro talhão completam as três vagas. Preço não vai: é o
-    único campo que a pessoa precisa mesmo trazer da revenda.
+    As melhores do catálogo de CADA talhão entram primeiro, porque com análises diferentes
+    num mesmo laudo as doses diferem e a melhor fórmula pode não ser a mesma. Só as do
+    catálogo: a fórmula ideal é referência para encomenda, e pô-la na calculadora de preço
+    convidaria a cotar um produto que não está na prateleira.
     """
     sugeridas: List[Dict[str, Any]] = []
     vistos: set = set()
 
     def acrescentar(opcao: Any) -> None:
-        if opcao.id in vistos or len(sugeridas) >= 3:
+        if opcao.formula_id in vistos or len(sugeridas) >= 3:
             return
-        vistos.add(opcao.id)
+        vistos.add(opcao.formula_id)
         sugeridas.append({
-            "id": opcao.id,
-            "rotulo": opcao.id,
-            "formula": (
-                f"{formatar_enxuto(opcao.n)}-{formatar_enxuto(opcao.p2o5)}-"
-                f"{formatar_enxuto(opcao.k2o)}"
+            "id": opcao.formula_id,
+            "rotulo": opcao.formula_id,
+            "formula": "-".join(
+                formatar_enxuto(opcao.teores.get(i, 0.0)) for i in ("n", "p2o5", "k2o")
             ),
         })
 
-    indicacoes = [
-        indicacao
-        for indicacao in (getattr(bloco.laudo, "formulacao", None) for bloco in blocos)
-        if indicacao is not None
+    resultados = [
+        resultado
+        for resultado in (getattr(bloco.laudo, "formulacao", None) for bloco in blocos)
+        if resultado is not None
     ]
-    for indicacao in indicacoes:
-        if indicacao.indicada is not None:
-            acrescentar(indicacao.indicada)
-    for indicacao in indicacoes:
-        for opcao in indicacao.ranking:
-            acrescentar(opcao)
+    for posicao in range(3):
+        for resultado in resultados:
+            if posicao < len(resultado.catalogo):
+                acrescentar(resultado.catalogo[posicao])
     return sugeridas
 
 

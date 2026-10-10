@@ -105,6 +105,54 @@
       </div>
     </div>
 
+    {# Adubo disponível — ADR 0009, D10 e D11.
+
+       Os dois campos são OPCIONAIS e ficam num bloco próprio, depois do manejo, porque
+       nenhum deles é dado de análise de solo: são informação sobre o que a pessoa vai
+       comprar e como vai parcelar. Misturá-los com pH e teores confundiria a origem.
+
+       O N de semeadura não vem da base de propósito: o Manual separa semeadura de
+       cobertura, mas a base guarda o total, e as hortaliças trazem o parcelamento só em
+       prosa. Derivar um número dali seria inferência agronômica do sistema. #}
+    <div class="painel bloco">
+      <div class="bloco__cab">
+        {{ i.ico("comerciais") }}
+        <h3>Adubo disponível <small class="bloco__opcional">opcional</small></h3>
+      </div>
+      <p class="t-aux bloco__intro">
+        Nada aqui é obrigatório. Preenchendo, o laudo fica mais perto do que tu encontras
+        na revenda — e sem preencher ele sai completo do mesmo jeito.
+      </p>
+      <div class="grade">
+        {{ c.campo("n_plantio", "N na semeadura", "kg/ha",
+                   "Quanto do nitrogênio total vai no plantio",
+                   False, "1", "ex.: 10",
+                   leitura.valores.get("n_plantio"),
+                   "n_plantio" in leitura.campos_com_erro, none,
+                   "Preenchendo, a fórmula ideal sai completa, com nitrogênio. Em branco, ela sai só com P e K e todo o N vai para cobertura") }}
+      </div>
+      <fieldset class="formulas-usuario">
+        <legend>Fórmulas que a tua revenda tem</legend>
+        <p class="t-aux">
+          Até três, como no rótulo (N-P<sub>2</sub>O<sub>5</sub>-K<sub>2</sub>O). Elas
+          entram na comparação ao lado das do catálogo do SIRAS — que não é lista oficial,
+          porque lista oficial de fórmulas comercializadas não existe.
+        </p>
+        <div class="grade">
+          {% for n in range(3) %}
+          <label class="campo">
+            <span class="campo__label">Fórmula {{ n + 1 }}</span>
+            <input type="text" name="formula_usuario" autocomplete="off"
+                   class="campo__entrada{% if 'formula_usuario' in leitura.campos_com_erro %} campo__entrada--erro{% endif %}"
+                   placeholder="ex.: 05-20-20"
+                   aria-label="Fórmula disponível {{ n + 1 }}, como no rótulo"
+                   value="{{ (leitura.valores.get('formula_usuario') or [])[n] if (leitura.valores.get('formula_usuario') or [])|length > n else '' }}">
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    </div>
+
     {# Divulgação progressiva (§9.2): este bloco só existe para as culturas cuja
        recomendação o Manual publica por fase, ciclo, tipo ou programa. Quem planta soja
        nunca vê "fase do pomar"; a macieira sempre vê. Quais campos aparecem e com quais

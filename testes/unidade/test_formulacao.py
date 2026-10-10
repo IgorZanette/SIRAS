@@ -1,28 +1,44 @@
 """
-Escolha do adubo formulado (siras/motor/formulacao.py), método do Manual §8.3, p. 311.
+Formulação do adubo (siras/motor/formulacao.py) — casos T1 a T17 da ADR 0009.
 
-O teste mais importante deste arquivo é `TestExemploDoManual`: o Manual publica uma
-recomendação e as doses das três fórmulas que a atendem, e essas doses são oráculo
-externo — não foram calculadas por nós. Se o motor as reproduz, o método está portado
-certo.
+O caso mais importante é o T11: o Manual publica, na p. 311, uma recomendação e as doses
+das três fórmulas que a atendem. Esses números são **oráculo externo** — não foram
+calculados por nós. Se o motor os reproduz, o método está portado certo.
 
-Os teores usados nos demais testes são de fórmulas fictícias, montadas para exercitar
-âncora, falta, sobra e desempate. Não são catálogo de mercado nem transcrição do Manual,
-e nenhum valor daqui pode migrar para dados/mercado/formulas_npk.json.
+Os T8, T9 e T15 são testes de PROPRIEDADE sobre uma grade de recomendações, e não casos
+pontuais. São eles que sustentam a afirmação central da ADR 0009: avaliar os dois pontos
+de quebra nunca é pior do que escolher um deles de antemão. Usam
+`pytest.mark.parametrize` e não `hypothesis`, porque o CLAUDE.md restringe dependências.
+
+O T3 vive em arquivo separado (`test_selecao_formula_t3.py`), por ter sido escrito antes
+do código.
+
+Os teores usados aqui são de fórmulas fictícias, montadas para exercitar a regra. Não são
+catálogo de mercado nem transcrição do Manual, e nenhum valor daqui pode migrar para
+dados/mercado/formulas_npk.json.
 """
 
 import pytest
 
 from siras.conhecimento.carregador import carregar_formulas_npk
 from siras.dominio.laudo import RecomendacaoAdubacao
-from siras.motor.formulacao import escolher_ancora, indicar_formulacao
-from siras.motor.trace import Trace
+from siras.motor.formulacao import (
+    ErroFormulacao,
+    W_EXC,
+    W_FALTA,
+    W_OP,
+    formula_ideal,
+    interpretar_formula_do_usuario,
+    mistura_simples,
+    recomendar_formulacao,
+)
 
 _SIMPLES = [
     {"id": "ureia", "n": 45, "p2o5": 0, "k2o": 0, "uso": ["cobertura_n"]},
     {"id": "superfosfato_triplo", "n": 0, "p2o5": 41, "k2o": 0, "uso": ["complemento_p"]},
     {"id": "cloreto_de_potassio", "n": 0, "p2o5": 0, "k2o": 58, "uso": ["complemento_k"]},
 ]
+_MAPA_SIMPLES = {s["id"]: s for s in _SIMPLES}
 
 
 def formula(id_, n, p, k, uso=("plantio",)):
@@ -38,294 +54,368 @@ def catalogo(*formulas):
     }
 
 
-def adubacao(n=0.0, p2o5=0.0, k2o=0.0, classe_p="muito_baixo", classe_k="alto"):
+def rec(n=0.0, p2o5=0.0, k2o=0.0):
     return RecomendacaoAdubacao(
-        n=n, p2o5=p2o5, k2o=k2o, classe_p=classe_p, classe_k=classe_k
+        n=n, p2o5=p2o5, k2o=k2o, classe_p="muito_baixo", classe_k="muito_baixo"
     )
 
 
-class TestExemploDoManual:
-    """Oráculo externo: Manual §8.3, p. 311.
+def por_id(resultado, formula_id):
+    return next(o for o in resultado.catalogo if o.formula_id == formula_id)
 
-    Para a recomendação de plantio 10-120-80, o Manual publica três fórmulas adequadas e
-    a dose de cada uma: 02-18-12 a 667 kg/ha, 02-24-16 a 500 e 03-30-20 a 400. São as
-    três um múltiplo da proporção 1:12:8, e o Manual as apresenta já calculadas.
+
+def dose_de(opcao, produto):
+    return next(c.dose_kg_ha for c in opcao.complementos if c.produto == produto)
+
+
+# --- T1, T2: o exemplo do Manual, pelo catálogo --------------------------------------
+
+_MANUAL = dict(n=60, p2o5=120, k2o=80)
+_N_PLANTIO_DO_MANUAL = 10
+
+
+class TestExemploDoManualPeloCatalogo:
+    """Oráculo externo: Manual, §8.3, p. 311 — recomendação de plantio 10-120-80.
+
+    As três fórmulas que o Manual lista são múltiplas da proporção 1:12:8 e, por isso,
+    atendem P e K exatamente. A 08-30-20, do levantamento de fórmulas usadas por
+    produtores do Sul, tem a mesma proporção 3:2 e também zera o custo — é a fórmula real
+    de mercado que o Manual não cita.
     """
 
-    RECOMENDACAO = dict(n=10, p2o5=120, k2o=80, classe_p="muito_baixo", classe_k="medio")
+    CATALOGO = catalogo(
+        formula("02-18-12", 2, 18, 12), formula("02-24-16", 2, 24, 16),
+        formula("03-30-20", 3, 30, 20), formula("08-30-20", 8, 30, 20),
+    )
 
     @pytest.mark.parametrize(
-        "formula_id, teores, dose_do_manual",
-        [("02-18-12", (2, 18, 12), 667), ("02-24-16", (2, 24, 16), 500),
-         ("03-30-20", (3, 30, 20), 400)],
+        "formula_id, dose_do_manual",
+        [("02-18-12", 667), ("02-24-16", 500), ("03-30-20", 400), ("08-30-20", 400)],
     )
-    def test_reproduz_a_dose_que_o_manual_publica(self, formula_id, teores, dose_do_manual):
-        r = indicar_formulacao(
-            adubacao(**self.RECOMENDACAO), catalogo(formula(formula_id, *teores))
+    def test_t1_custo_zero_e_a_dose_que_o_manual_publica(self, formula_id, dose_do_manual):
+        r = recomendar_formulacao(rec(**_MANUAL), self.CATALOGO,
+                                  n_plantio=_N_PLANTIO_DO_MANUAL)
+        # Todas as quatro entram no catálogo (top 3 cortaria uma), então avalio direto.
+        opcao = next(
+            o for o in recomendar_formulacao(
+                rec(**_MANUAL), catalogo(next(
+                    f for f in self.CATALOGO["formulas"]["itens"] if f["id"] == formula_id
+                )), n_plantio=_N_PLANTIO_DO_MANUAL
+            ).catalogo
         )
 
-        assert round(r.indicada.dose_kg_ha) == dose_do_manual
+        assert opcao.custo == pytest.approx(0.0)
+        assert round(opcao.dose_kg_ha) == dose_do_manual
+        assert r.catalogo, "o catálogo completo também precisa devolver opções"
 
-    def test_as_tres_do_manual_atendem_p_e_k_exatamente(self):
-        # São múltiplos da proporção da recomendação: nenhuma deixa falta nem sobra.
-        r = indicar_formulacao(
-            adubacao(**self.RECOMENDACAO),
-            catalogo(formula("02-18-12", 2, 18, 12), formula("02-24-16", 2, 24, 16),
-                     formula("03-30-20", 3, 30, 20)),
+    def test_t2_o_n_restante_vira_ureia_em_cobertura(self):
+        r = recomendar_formulacao(
+            rec(**_MANUAL), catalogo(formula("03-30-20", 3, 30, 20)),
+            n_plantio=_N_PLANTIO_DO_MANUAL,
+        )
+        opcao = por_id(r, "03-30-20")
+
+        # 400 kg/ha x 3% = 12 kg de N; faltam 48 dos 60 totais; 48 / 0,45 = 107.
+        assert opcao.fornecido["n"] == pytest.approx(12.0)
+        assert round(dose_de(opcao, "ureia")) == 107
+
+
+# --- T4, T6: mistura de simples --------------------------------------------------------
+
+class TestMisturaDeSimples:
+    def test_t4_doses_exatas_de_tsp_e_kcl(self):
+        r = recomendar_formulacao(rec(n=0, p2o5=60, k2o=60), catalogo())
+
+        assert round(dose_de(r.mistura, "superfosfato_triplo")) == 146
+        assert round(dose_de(r.mistura, "cloreto_de_potassio")) == 103
+        assert all(c.produto != "ureia" for c in r.mistura.complementos)
+
+    def test_t6_so_n_resolve_com_ureia_e_nao_ha_formula_a_indicar(self):
+        r = recomendar_formulacao(rec(n=60, p2o5=0, k2o=0),
+                                  catalogo(formula("10-20-20", 10, 20, 20)))
+
+        assert r.catalogo == []
+        assert r.ideais == []
+        assert round(dose_de(r.mistura, "ureia")) == 133
+        assert "dose numérica" in r.motivo_sem_indicacao
+
+    def test_a_mistura_atende_exatamente_e_por_isso_custa_zero(self):
+        r = recomendar_formulacao(rec(n=40, p2o5=60, k2o=60), catalogo())
+
+        assert r.mistura.custo == 0.0
+        assert all(v == 0.0 for v in r.mistura.excesso.values())
+        assert all(v == 0.0 for v in r.mistura.falta.values())
+
+
+# --- T5, T7: casos de borda da recomendação -------------------------------------------
+
+def test_t5_leguminosa_penaliza_toda_formula_com_nitrogenio():
+    # Soja: n_total = 0 por fixação biológica, e todo N da fórmula é adubo sem função.
+    r = recomendar_formulacao(
+        rec(n=0, p2o5=60, k2o=60),
+        catalogo(formula("10-20-20", 10, 20, 20), formula("02-20-20", 2, 20, 20),
+                 formula("00-20-20", 0, 20, 20)),
+    )
+
+    for opcao in r.catalogo:
+        tem_n = opcao.teores["n"] > 0
+        assert (opcao.excesso["n"] > 0) is tem_n
+    # E a sem nitrogênio vence, porque é a única que não desperdiça nada.
+    assert r.catalogo[0].formula_id == "00-20-20"
+
+
+def test_t7_sem_fosforo_recomendado_a_ancora_e_sempre_o_potassio():
+    r = recomendar_formulacao(
+        rec(n=60, p2o5=0, k2o=80),
+        catalogo(formula("10-20-20", 10, 20, 20), formula("00-00-60", 0, 0, 60)),
+    )
+
+    for opcao in r.catalogo:
+        assert opcao.ancora == "k2o"
+        assert (opcao.excesso["p2o5"] > 0) is (opcao.teores["p2o5"] > 0)
+
+
+# --- T8, T9: propriedades sobre grade --------------------------------------------------
+
+_GRADE = [
+    (n, p, k)
+    for n in (0, 60)
+    for p in (0, 30, 60, 90, 120, 150, 180)
+    for k in (0, 30, 60, 90, 120, 150, 180)
+    if p > 0 or k > 0
+]
+
+_FORMULAS_DA_GRADE = (
+    formula("05-20-20", 5, 20, 20), formula("10-15-15", 10, 15, 15),
+    formula("02-24-16", 2, 24, 16), formula("08-30-20", 8, 30, 20),
+    formula("00-20-05", 0, 20, 5), formula("20-05-20", 20, 5, 20),
+)
+
+
+def _custo_manual(teores, recomendacao, nutriente):
+    """Custo da dose que atende exatamente um nutriente — a regra literal do Manual."""
+    if recomendacao[nutriente] <= 0 or teores[nutriente] <= 0:
+        return None
+    dose = recomendacao[nutriente] * 100.0 / teores[nutriente]
+    fornecido = {i: dose * teores[i] / 100.0 for i in ("n", "p2o5", "k2o")}
+    excesso = sum(max(0.0, fornecido[i] - recomendacao[i]) for i in ("n", "p2o5", "k2o"))
+    faltas = {i: max(0.0, recomendacao[i] - fornecido[i]) for i in ("p2o5", "k2o")}
+    operacoes = sum(1 for v in faltas.values() if v > 0.5)
+    return W_EXC * excesso + W_FALTA * sum(faltas.values()) + W_OP * operacoes
+
+
+@pytest.mark.parametrize("n, p, k", _GRADE, ids=lambda v: str(v))
+def test_t8_o_otimo_nunca_e_pior_que_qualquer_ponto_de_quebra(n, p, k):
+    """A afirmação central da ADR 0009, verificada em vez de argumentada.
+
+    A regra do Manual — ancorar num nutriente escolhido de antemão — produz um dos dois
+    pontos de quebra. Avaliar os dois e ficar com o melhor, portanto, nunca é pior.
+    """
+    recomendacao = {"n": float(n), "p2o5": float(p), "k2o": float(k)}
+    r = recomendar_formulacao(rec(n=n, p2o5=p, k2o=k), catalogo(*_FORMULAS_DA_GRADE))
+
+    for opcao in r.catalogo:
+        for nutriente in ("p2o5", "k2o"):
+            referencia = _custo_manual(opcao.teores, recomendacao, nutriente)
+            if referencia is not None:
+                assert opcao.custo <= referencia + 1e-9, (
+                    f"{opcao.formula_id}: ótimo {opcao.custo:.3f} pior que a âncora "
+                    f"em {nutriente} ({referencia:.3f})"
+                )
+
+
+@pytest.mark.parametrize("n, p, k", _GRADE, ids=lambda v: str(v))
+def test_t9_formula_mais_complementos_nunca_deixam_faltar_p_nem_k(n, p, k):
+    r = recomendar_formulacao(rec(n=n, p2o5=p, k2o=k), catalogo(*_FORMULAS_DA_GRADE))
+
+    for opcao in r.catalogo:
+        for nutriente, produto, teor in (
+            ("p2o5", "superfosfato_triplo", 41), ("k2o", "cloreto_de_potassio", 58)
+        ):
+            entregue = opcao.fornecido[nutriente] + sum(
+                c.dose_kg_ha * teor / 100.0
+                for c in opcao.complementos if c.produto == produto
+            )
+            # A tolerância é a do próprio corte: falta abaixo de 0,5 kg/ha não vira
+            # operação de campo, por decisão declarada.
+            assert entregue >= float({"p2o5": p, "k2o": k}[nutriente]) - 0.5
+
+
+@pytest.mark.parametrize("n, p, k", _GRADE[::7], ids=lambda v: str(v))
+def test_t15_toda_formula_ideal_atende_o_minimo_legal(n, p, k):
+    """A soma das garantias é >= T por construção, e o menor T é 18 (IN 39/2018)."""
+    recomendacao = {"n": float(n), "p2o5": float(p), "k2o": float(k)}
+    for opcao in formula_ideal(recomendacao, float(n) / 2, _MAPA_SIMPLES):
+        soma = sum(opcao.teores.values())
+        ternaria = all(v > 0 for v in opcao.teores.values())
+        assert soma >= (18 if ternaria else 15), f"{opcao.formula_id} soma {soma}"
+
+
+# --- T10: determinismo ------------------------------------------------------------------
+
+def test_t10_mesma_entrada_produz_mesma_saida_e_mesma_ordem():
+    entrada = rec(n=90, p2o5=100, k2o=70)
+    uma = recomendar_formulacao(entrada, catalogo(*_FORMULAS_DA_GRADE), n_plantio=20)
+    outra = recomendar_formulacao(entrada, catalogo(*_FORMULAS_DA_GRADE), n_plantio=20)
+
+    assert [o.formula_id for o in uma.catalogo] == [o.formula_id for o in outra.catalogo]
+    assert [o.formula_id for o in uma.ideais] == [o.formula_id for o in outra.ideais]
+    assert [o.custo for o in uma.catalogo] == [o.custo for o in outra.catalogo]
+
+
+# --- T11, T12, T13: a fórmula ideal ------------------------------------------------------
+
+class TestFormulaIdeal:
+    def test_t11_reproduz_as_tres_formulas_e_doses_do_manual(self):
+        """Oráculo externo. Só passa com o N de plantio informado — ver a ADR 0009."""
+        r = recomendar_formulacao(rec(**_MANUAL), catalogo(),
+                                  n_plantio=_N_PLANTIO_DO_MANUAL)
+
+        assert [o.formula_id for o in r.ideais] == ["02-18-12", "02-24-16", "03-30-20"]
+        assert [round(o.dose_kg_ha) for o in r.ideais] == [667, 500, 400]
+        assert r.sem_n_de_plantio is False
+
+    def test_sem_n_de_plantio_a_ideal_sai_binaria_e_declara(self):
+        r = recomendar_formulacao(rec(**_MANUAL), catalogo())
+
+        assert [o.formula_id for o in r.ideais] == ["00-18-12", "00-24-16", "00-30-20"]
+        assert r.sem_n_de_plantio is True
+
+    def test_t12_soja_sem_nitrogenio(self):
+        r = recomendar_formulacao(rec(n=0, p2o5=90, k2o=60), catalogo(), n_plantio=0)
+
+        assert [o.formula_id for o in r.ideais] == ["00-18-12", "00-24-16", "00-30-20"]
+        assert [round(o.dose_kg_ha) for o in r.ideais] == [500, 375, 300]
+
+    def test_t13_quando_o_potassio_e_maior_a_ancora_passa_a_ser_ele(self):
+        r = recomendar_formulacao(rec(n=120, p2o5=60, k2o=120), catalogo(), n_plantio=20)
+
+        assert [o.formula_id for o in r.ideais] == ["03-09-18", "04-12-24", "05-15-30"]
+        assert [round(o.dose_kg_ha) for o in r.ideais] == [667, 500, 400]
+        assert all(o.ancora == "k2o" for o in r.ideais)
+
+    def test_a_ideal_atende_p_e_k_praticamente_na_medida(self):
+        # O arredondamento das garantias ao inteiro desvia o nutriente secundário em
+        # poucos kg/ha. O laudo mostra esse desvio; aqui se guarda a ordem de grandeza.
+        r = recomendar_formulacao(rec(n=60, p2o5=120, k2o=80), catalogo(),
+                                  n_plantio=_N_PLANTIO_DO_MANUAL)
+
+        for opcao in r.ideais:
+            assert opcao.excesso["p2o5"] + opcao.falta["p2o5"] < 1.0
+            assert opcao.excesso["k2o"] + opcao.falta["k2o"] < 5.0
+
+
+# --- T14: desempate por massa total -------------------------------------------------------
+
+def test_t14_entre_custos_iguais_vence_a_de_menor_massa_total():
+    """D9. As três atendem P na medida e deixam o mesmo K faltando, logo custam igual.
+
+    O que as separa é quanto produto desce do caminhão: fórmula mais complemento mais
+    ureia. 10-25-25 traz mais N, precisa de menos ureia, e por isso ganha.
+    """
+    r = recomendar_formulacao(
+        rec(n=120, p2o5=60, k2o=120),
+        catalogo(formula("04-20-20", 4, 20, 20), formula("05-25-25", 5, 25, 25),
+                 formula("10-25-25", 10, 25, 25)),
+    )
+
+    assert [o.formula_id for o in r.catalogo] == ["10-25-25", "05-25-25", "04-20-20"]
+    assert len({round(o.custo, 6) for o in r.catalogo}) == 1, "os três custam igual"
+    assert [round(o.massa_total_kg_ha) for o in r.catalogo] == [557, 583, 643]
+
+
+# --- T16, T17: fórmula informada pelo usuário ---------------------------------------------
+
+class TestFormulaDoUsuario:
+    def test_t16_a_formula_do_usuario_entra_no_ranking_e_pode_vencer(self):
+        r = recomendar_formulacao(
+            rec(n=0, p2o5=60, k2o=90),
+            catalogo(formula("05-20-20", 5, 20, 20)),
+            formulas_usuario=("00-20-30",),
         )
 
-        for opcao in r.ranking:
-            assert opcao.falta_p2o5 == pytest.approx(0.0, abs=1e-9)
-            assert opcao.falta_k2o == pytest.approx(0.0, abs=1e-9)
-            assert opcao.excesso_p2o5 == pytest.approx(0.0, abs=1e-9)
-            assert opcao.excesso_k2o == pytest.approx(0.0, abs=1e-9)
+        primeira = r.catalogo[0]
+        assert primeira.formula_id == "00-20-30"
+        assert primeira.tipo == "usuario"
+        assert round(primeira.dose_kg_ha) == 300
+        assert primeira.custo == pytest.approx(0.0)
 
-    def test_vence_a_que_tambem_acerta_o_n(self):
-        # Entre as três, só a 02-24-16 entrega exatamente os 10 kg/ha de N recomendados:
-        # 500 x 2% = 10. As outras duas sobram N, e é isso que o desvio captura.
-        r = indicar_formulacao(
-            adubacao(**self.RECOMENDACAO),
-            catalogo(formula("02-18-12", 2, 18, 12), formula("02-24-16", 2, 24, 16),
-                     formula("03-30-20", 3, 30, 20)),
+    def test_t17_formato_invalido_e_erro(self):
+        with pytest.raises(ErroFormulacao, match="formato"):
+            interpretar_formula_do_usuario("abc")
+
+    def test_t17_soma_abaixo_do_minimo_legal_e_aviso_e_nao_erro(self):
+        # Pode ser organomineral, cujo mínimo é menor — recusar seria exagero.
+        entrada = interpretar_formula_do_usuario("04-05-04")
+
+        assert entrada["id"] == "04-05-04"
+        assert any("IN 39/2018" in a for a in entrada["_avisos"])
+
+    def test_soma_acima_do_minimo_nao_gera_aviso(self):
+        # "5-10-5" soma 20, acima dos 18 exigidos de uma ternária. O plano v2 listava
+        # esta fórmula como exemplo de aviso; pela aritmética da IN 39/2018 ela passa.
+        assert interpretar_formula_do_usuario("5-10-5")["_avisos"] == []
+
+    def test_garantias_somando_acima_de_cem_sao_recusadas(self):
+        with pytest.raises(ErroFormulacao, match="100"):
+            interpretar_formula_do_usuario("50-40-30")
+
+    def test_o_aviso_do_usuario_chega_ao_resultado(self):
+        r = recomendar_formulacao(
+            rec(n=0, p2o5=60, k2o=60), catalogo(), formulas_usuario=("04-05-04",)
         )
 
-        assert r.indicada.id == "02-24-16"
-        assert r.indicada.desvio_relativo == pytest.approx(0.0, abs=1e-9)
-        assert r.indicada.n_cobertura == pytest.approx(0.0, abs=1e-9)
+        assert any("IN 39/2018" in a for a in r.avisos)
 
 
-class TestAncora:
-    def test_ancora_no_nutriente_de_classe_mais_baixa(self):
-        # P muito baixo e K alto: a dose se ancora no P, que é atendido exatamente.
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=40, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("10-20-20", 10, 20, 20)),
-        )
+# --- avisos fixos e trilha ------------------------------------------------------------------
 
-        assert r.indicada.ancora == "p2o5"
-        assert r.indicada.entrega_p2o5 == pytest.approx(100.0)
-        assert r.indicada.dose_kg_ha == pytest.approx(500.0)
+def test_os_avisos_do_laudo_estao_sempre_presentes():
+    r = recomendar_formulacao(rec(n=60, p2o5=60, k2o=60), catalogo())
 
-    def test_ancora_no_k_quando_e_o_mais_deficiente(self):
-        r = indicar_formulacao(
-            adubacao(p2o5=40, k2o=100, classe_p="alto", classe_k="muito_baixo"),
-            catalogo(formula("10-20-20", 10, 20, 20)),
-        )
-
-        assert r.indicada.ancora == "k2o"
-        assert r.indicada.entrega_k2o == pytest.approx(100.0)
-
-    def test_empate_de_classe_ancora_na_maior_dose(self):
-        # Decisão do autor (ADR 0008): o Manual não trata o empate.
-        ancora, fallback = escolher_ancora(60, 90, "medio", "medio")
-
-        assert ancora == "k2o" and fallback is False
-
-    def test_classe_ausente_cai_no_fallback_e_declara(self):
-        # Fases de frutífera que não dosam por classe. Ancora pela maior dose, e diz que
-        # ancorou assim — a alternativa seria afirmar uma deficiência que não se sabe.
-        ancora, fallback = escolher_ancora(60, 90, None, None)
-
-        assert ancora == "k2o" and fallback is True
-
-    def test_nutriente_com_dose_zero_nao_disputa_a_ancora(self):
-        ancora, _ = escolher_ancora(80, 0, "alto", "muito_baixo")
-
-        assert ancora == "p2o5"
+    texto = " ".join(r.avisos)
+    assert "não tem preços" in texto           # D12, critério nutricional
+    assert "enxofre" in texto                  # D12, S em fórmulas concentradas
+    assert "compatibilidade" in texto          # D12, mistura de simples
 
 
-class TestFaltaSobraEComplemento:
-    def test_o_outro_nutriente_falta_e_vira_complemento(self):
-        # Fórmula pobre em K frente à recomendação: o K fica devendo e sai como KCl.
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=100, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("00-20-10", 0, 20, 10)),
-        )
+def test_a_trilha_registra_os_pontos_de_quebra_e_a_escolha():
+    from siras.motor.trace import Trace
 
-        assert r.indicada.dose_kg_ha == pytest.approx(500.0)
-        assert r.indicada.falta_k2o == pytest.approx(50.0)
-        kcl = next(c for c in r.indicada.complementos if c.nutriente == "k2o")
-        assert kcl.produto == "cloreto_de_potassio"
-        assert kcl.dose_kg_ha == pytest.approx(50.0 * 100 / 58)
+    trace = Trace()
+    recomendar_formulacao(
+        rec(n=120, p2o5=60, k2o=120), catalogo(formula("05-25-25", 5, 25, 25)), trace
+    )
 
-    def test_o_outro_nutriente_sobra_e_fica_declarado(self):
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=50, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("00-20-20", 0, 20, 20)),
-        )
+    quebras = [p for p in trace if p.regra.startswith("R-FOR-02")]
+    assert len(quebras) == 1
+    assert "05-25-25" in quebras[0].regra
+    assert set(quebras[0].entradas["doses_candidatas"]) == {"p2o5", "k2o"}
+    assert set(quebras[0].saida["custos"]) == {"p2o5", "k2o"}
 
-        assert r.indicada.excesso_k2o == pytest.approx(50.0)
-        assert r.indicada.falta_k2o == pytest.approx(0.0)
-
-    def test_o_n_que_falta_vai_para_cobertura_com_ureia(self):
-        r = indicar_formulacao(
-            adubacao(n=90, p2o5=100, k2o=100, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("02-20-20", 2, 20, 20)),
-        )
-
-        # 500 kg/ha x 2% = 10 kg de N; faltam 80 para os 90 recomendados.
-        assert r.indicada.n_cobertura == pytest.approx(80.0)
-        ureia = next(c for c in r.indicada.complementos if c.momento == "cobertura")
-        assert ureia.dose_kg_ha == pytest.approx(80.0 * 100 / 45)
-
-    def test_falta_irrisoria_nao_vira_operacao_de_campo(self):
-        # Abaixo de 0,5 kg/ha não compensa uma passada de máquina (ADR 0008).
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=100.4, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("00-20-20", 0, 20, 20)),
-        )
-
-        assert r.indicada.complementos == []
+    escolha = [p for p in trace if p.regra.startswith("R-FOR-01")]
+    assert len(escolha) == 1
+    assert "p. 311" in escolha[0].fonte
+    assert "não é fonte do Manual" in escolha[0].fonte
 
 
-class TestLeguminosa:
-    def test_n_da_formula_conta_como_excesso_quando_a_cultura_nao_recebe_n(self):
-        # Soja: n = 0 por fixação biológica. Todo N da fórmula é adubo pago sem função.
-        r = indicar_formulacao(
-            adubacao(n=0, p2o5=100, k2o=100, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("10-20-20", 10, 20, 20)),
-        )
-
-        assert r.indicada.excesso_n == pytest.approx(50.0)
-        assert r.indicada.n_cobertura == pytest.approx(0.0)
-
-    def test_entre_duas_iguais_em_p_e_k_vence_a_de_menos_n(self):
-        r = indicar_formulacao(
-            adubacao(n=0, p2o5=100, k2o=100, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("10-20-20", 10, 20, 20), formula("02-20-20", 2, 20, 20)),
-        )
-
-        assert r.indicada.id == "02-20-20"
-
-
-class TestOrdenacao:
-    def test_vence_a_de_menor_desvio(self):
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=100, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("00-20-20", 0, 20, 20), formula("00-20-05", 0, 20, 5)),
-        )
-
-        assert r.indicada.id == "00-20-20"
-        assert [o.id for o in r.ranking] == ["00-20-20", "00-20-05"]
-
-    def test_empate_de_desvio_desfaz_pela_formula_mais_concentrada(self):
-        # Mesma proporção, concentrações diferentes: as duas acertam P e K, e vence a que
-        # exige menos massa — menos frete e menos embalagem (Manual, p. 310).
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=100, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("00-10-10", 0, 10, 10), formula("00-25-25", 0, 25, 25)),
-        )
-
-        assert r.indicada.id == "00-25-25"
-        assert r.indicada.dose_kg_ha < 500
-
-    def test_ordem_e_deterministica_quando_tudo_empata(self):
-        direta = indicar_formulacao(
-            adubacao(p2o5=100, k2o=100),
-            catalogo(formula("00-20-20", 0, 20, 20), formula("00-20-20", 0, 20, 20)),
-        )
-        assert direta.indicada.id == "00-20-20"
-
-    def test_dose_nao_vem_arredondada_do_motor(self):
-        # 70 / 0,18 = 388,88... Arredondar aqui repetiria o defeito B-8 do CCAE: um valor
-        # arredondado cedo passando a decidir uma comparação.
-        r = indicar_formulacao(
-            adubacao(p2o5=70, k2o=0, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("00-18-00", 0, 18, 0)),
-        )
-
-        assert r.indicada.dose_kg_ha == pytest.approx(388.888, abs=1e-3)
-
-
-class TestSemIndicacao:
-    def test_catalogo_vazio_nao_e_erro(self):
-        r = indicar_formulacao(adubacao(p2o5=90, k2o=60), catalogo())
-
-        assert r.indicada is None
-        assert "vazio" in r.motivo_sem_indicacao
-        assert r.ranking == []
-
-    def test_sem_dose_de_p_nem_de_k_nao_ha_o_que_ancorar(self):
-        r = indicar_formulacao(
-            adubacao(n=40, p2o5=0, k2o=0), catalogo(formula("10-20-20", 10, 20, 20))
-        )
-
-        assert r.indicada is None
-        assert "ancora" in r.motivo_sem_indicacao
-
-    def test_dose_publicada_como_teto_fica_fora_da_conta(self):
-        # Formato do ADR 0004: o Manual publica "<= manutenção" em vez de um número.
-        teto = {"valor": 60, "qualificador": "ate"}
-        r = indicar_formulacao(
-            RecomendacaoAdubacao(n=0, p2o5=teto, k2o=teto),
-            catalogo(formula("10-20-20", 10, 20, 20)),
-        )
-
-        assert r.indicada is None
-
-    def test_formula_sem_o_nutriente_ancora_fica_fora_do_ranking(self):
-        # Ancorar no outro nutriente mudaria o método no meio da comparação.
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=40, classe_p="muito_baixo", classe_k="alto"),
-            catalogo(formula("20-00-20", 20, 0, 20), formula("00-20-20", 0, 20, 20)),
-        )
-
-        assert [o.id for o in r.ranking] == ["00-20-20"]
-
-    def test_nenhuma_formula_do_uso_pedido(self):
-        r = indicar_formulacao(
-            adubacao(p2o5=100, k2o=100),
-            catalogo(formula("00-20-20", 0, 20, 20, uso=("cobertura",))),
-        )
-
-        assert r.indicada is None
-        assert "plantio" in r.motivo_sem_indicacao
-
-
-class TestTrace:
-    def test_registra_um_passo_dizendo_metodo_e_catalogo(self):
-        trace = Trace()
-        indicar_formulacao(
-            adubacao(p2o5=100, k2o=100), catalogo(formula("00-20-20", 0, 20, 20)), trace
-        )
-
-        passos = [p for p in trace if p.regra.startswith("R-FOR-01")]
-        assert len(passos) == 1
-        # A trilha precisa separar as duas procedências numa frase só.
-        assert "p. 311" in passos[0].fonte
-        assert "não é fonte do Manual" in passos[0].fonte
-
-    def test_registra_tambem_quando_nao_ha_indicacao(self):
-        trace = Trace()
-        indicar_formulacao(adubacao(p2o5=90), catalogo(), trace)
-
-        passos = [p for p in trace if p.regra.startswith("R-FOR-01")]
-        assert len(passos) == 1
-        assert passos[0].saida["indicada"] is None
-
+# --- o catálogo real --------------------------------------------------------------------------
 
 class TestCatalogoReal:
-    def test_o_catalogo_real_atende_o_exemplo_do_manual(self):
-        # Integração com o arquivo de verdade: as três fórmulas do Manual estão nele, e a
-        # 08-30-20, citada por produtores do RS/PR/MS, tem a mesma proporção 3:2 e por
-        # isso também atende P e K exatamente. Achar a fórmula real de mercado que o
-        # Manual não cita é o que o catálogo acrescenta ao método.
-        r = indicar_formulacao(
-            adubacao(n=10, p2o5=120, k2o=80, classe_p="muito_baixo", classe_k="medio"),
-            carregar_formulas_npk(),
+    def test_o_catalogo_real_resolve_o_exemplo_do_manual(self):
+        r = recomendar_formulacao(
+            rec(**_MANUAL), carregar_formulas_npk(), n_plantio=_N_PLANTIO_DO_MANUAL
         )
 
-        exatas = {
-            o.id for o in r.ranking
-            if o.falta_p2o5 < 0.01 and o.falta_k2o < 0.01
-            and o.excesso_p2o5 < 0.01 and o.excesso_k2o < 0.01
+        # As quatro de custo zero existem no catálogo; o top 3 mostra três delas.
+        assert all(o.custo == pytest.approx(0.0) for o in r.catalogo)
+        assert {o.formula_id for o in r.catalogo} <= {
+            "02-18-12", "02-24-16", "03-30-20", "08-30-20"
         }
-        assert {"02-18-12", "02-24-16", "03-30-20", "08-30-20"} <= exatas
 
-    def test_toda_formula_do_catalogo_real_cita_fonte_existente(self):
-        catalogo_real = carregar_formulas_npk()
-        chaves = set(catalogo_real["fontes"])
+    def test_a_ideal_e_a_mistura_funcionam_com_o_catalogo_real(self):
+        r = recomendar_formulacao(rec(n=40, p2o5=80, k2o=50), carregar_formulas_npk())
 
-        for f in catalogo_real["formulas"]["itens"]:
-            assert f["fontes"], f"{f['id']} sem fonte"
-            assert set(f["fontes"]) <= chaves, f"{f['id']} cita fonte inexistente"
+        assert len(r.ideais) == 3
+        assert r.mistura is not None
+        assert len(r.catalogo) == 3

@@ -48,7 +48,7 @@ from siras.motor.adubacao import (
 )
 from siras.motor.aptidao import avaliar_aptidao
 from siras.motor.calagem import calcular_calagem, resolver_criterio_id
-from siras.motor.formulacao import indicar_formulacao
+from siras.motor.formulacao import recomendar_formulacao
 from siras.motor.trace import Trace
 
 #: Carregador da adubação de cada grupo.
@@ -501,10 +501,14 @@ def gerar_laudo(
     adubacao = _ADUBACAO_POR_GRUPO[grupo](analise, cultura_id, contexto, trace, dados)
 
     # Depois da adubação, e a partir dela: a formulação não é recomendação nova, é a
-    # tradução da que acabou de sair para o produto que se compra, pelo método do
-    # Manual §8.3, p. 311. O catálogo de fórmulas é dado de mercado; vazio, a indicação
-    # sai None e o laudo segue completo.
-    formulacao = indicar_formulacao(adubacao, carregar_formulas_npk(), trace)
+    # tradução da que acabou de sair para o produto que se compra. Três caminhos, porque
+    # não existe catálogo oficial de fórmulas comercializadas (ADR 0009) — com o catálogo
+    # vazio, a fórmula ideal e a mistura de simples seguem, e o laudo continua completo.
+    formulacao = recomendar_formulacao(
+        adubacao, carregar_formulas_npk(), trace,
+        n_plantio=contexto.n_plantio,
+        formulas_usuario=contexto.formulas_usuario,
+    )
 
     # CCAE §7: os dois cenários saem sempre juntos — a diferença entre eles é o ganho
     # atribuível à recomendação emitida acima, e é o que integra os dois módulos.

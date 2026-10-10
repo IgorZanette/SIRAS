@@ -1,319 +1,507 @@
 """
-Escolha do adubo formulado que atende a recomendação — método do Manual, §8.3, p. 311.
+Como atender a recomendação com produto — três caminhos (ADR 0009).
 
-O laudo entrega a recomendação em nutriente: tantos kg/ha de N, P2O5 e K2O. A revenda
-vende adubo formulado. Este módulo faz a ponte, e faz pelo procedimento que o próprio
-Manual descreve, em quatro passos:
+O laudo entrega a recomendação em nutriente; a revenda vende adubo. A ponte entre as duas
+coisas não tem resposta única, porque **não existe catálogo oficial de fórmulas
+comercializadas no Brasil**: o MAPA registra milhares de produtos, boa parte é feita sob
+encomenda, e fabricantes sequer publicam garantias. Em vez de fingir que uma lista fechada
+resolve, o módulo entrega três respostas e deixa a escolha com quem compra:
 
-1. a fórmula adequada é múltipla da **proporção** da recomendação;
-2. quando não há fórmula exata, a dose se ajusta ao **nutriente mais deficiente no
-   solo**, que por isso é atendido exatamente;
-3. o N que a fórmula traz é descontado do N total, e o **saldo vai para cobertura**;
-4. o que faltar de P ou K vai para **complemento** com fertilizante simples; o que
-   sobrar é adubo pago e não aproveitado.
+    A. fórmula ideal ....... a proporção exata, em três concentrações. Para encomendar
+    B. melhores do catálogo  o que se encontra na revenda, inclusive o que o usuário tem
+    C. mistura de simples .. ureia + superfosfato triplo + KCl. Sempre exata, sempre há
 
-Fronteira de fonte, que importa para a banca. O **método** é do Manual. O **catálogo**
-(dados/mercado/formulas_npk.json) não é: é dado de mercado, com fonte declarada por
-entrada, porque o Manual não publica — e não teria por que publicar — a lista de
-formulações que a indústria vende. As garantias dos fertilizantes simples usados nos
-complementos vêm da Tab. 8.4, p. 304.
+A REGRA DE DOSE (D1). Para uma fórmula de teores f e dose d, o custo é
 
-O que o Manual manda e este módulo **não** faz: escolher pelo menor custo por unidade de
-NPK (p. 310). O SIRAS não tem preços — eles são de quem compra, e entram na calculadora
-de custo, fora do laudo. O ranking aqui é **nutricional**, e o laudo diz isso.
+    custo(d) = W_EXC·Σ max(0, d·fᵢ/100 − rᵢ)        sobre N, P, K
+             + W_FALTA·Σ max(0, rᵢ − d·fᵢ/100)      sobre P, K
+             + W_OP·(nº de complementos de P e K)
+
+Os dois primeiros termos são lineares por partes e convexos em d; soma de convexas é
+convexa; e o mínimo de uma função linear por partes convexa está num ponto de quebra.
+Basta então avaliar d ∈ {r_P·100/f_P, r_K·100/f_K}. A regra do Manual ("ajustar ao
+nutriente mais deficiente") é UM desses dois pontos — avaliar os dois nunca piora o
+resultado, o que o teste T8 verifica sobre uma grade em vez de afirmar.
+
+FRONTEIRA DE FONTE. O método é do Manual (§8.3, p. 310-311) e as garantias dos simples são
+da Tab. 8.4, p. 304. O catálogo de fórmulas NÃO é: é dado de mercado, com fonte por
+entrada. Os pesos de D4 são decisão do autor, declarada na ADR com sua fragilidade.
+
+O que o Manual manda e este módulo não faz: escolher pelo menor custo por unidade de NPK
+(p. 310). O SIRAS não tem preços — são de quem compra — e o laudo diz isso.
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+import re
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from siras.dominio.laudo import Complemento, IndicacaoFormulacao, OpcaoFormulacao, RecomendacaoAdubacao
+from siras.dominio.laudo import (
+    Complemento,
+    OpcaoAdubacao,
+    RecomendacaoAdubacao,
+    ResultadoFormulacao,
+)
 from siras.motor.trace import Trace
 
-#: Ordem das classes de disponibilidade do Manual. Índice menor = mais deficiente, e é
-#: essa ordem que decide a âncora da dose.
-ORDEM_CLASSES = ("muito_baixo", "baixo", "medio", "alto", "muito_alto")
+# --- constantes do método (ADR 0009) ------------------------------------------------
+#
+# Nomeadas e num lugar só, de propósito. Não são configuráveis pela interface: são
+# parâmetros do método, não preferência de uso.
 
-#: Fonte simples usada para cobrir o que a fórmula não entregou, por nutriente. Decisão
-#: do autor entre as fontes da Tab. 8.4: as mais concentradas de cada nutriente, para
-#: minimizar massa transportada. Registrada na ADR 0008.
-FONTE_DE_COMPLEMENTO = {"p2o5": "superfosfato_triplo", "k2o": "cloreto_de_potassio"}
-FONTE_DE_COBERTURA_N = "ureia"
+#: Peso do nutriente aplicado acima do recomendado, por kg. É o mais caro: já foi
+#: comprado e aplicado, e não há como desfazer.
+W_EXC = 1.0
+#: Peso do nutriente que falta, por kg. Menor que o excesso porque a falta ainda pode ser
+#: corrigida com fonte simples — o que é justamente o que o módulo faz.
+W_FALTA = 0.2
+#: Custo de cada produto de complemento de P ou K. Representa a operação de campo a mais.
+#: Mistura unidades com os dois acima de propósito, e a ADR declara a fragilidade: afirma
+#: que uma operação custa o mesmo que 10 kg de nutriente desperdiçado.
+W_OP = 10.0
 
-#: Abaixo disto o complemento não compensa uma operação de campo a mais. Decisão do
-#: autor, ADR 0008.
+#: Abaixo disto o complemento não compensa uma passada de máquina.
 COMPLEMENTO_MINIMO_KG_HA = 0.5
 
-#: Uso da fórmula que o laudo indica. O laudo publica a recomendação de implantação da
-#: cultura, não a de cobertura — o N de cobertura sai como complemento, nomeado.
+#: Concentrações alvo da fórmula ideal: o maior entre P2O5 e K2O vale T (D10). Os três
+#: valores reproduzem as três fórmulas do exemplo do Manual, p. 311.
+ALVOS_DE_CONCENTRACAO = (18, 24, 30)
+
+#: Fontes simples de cada nutriente, por id em fertilizantes_simples (D6).
+FONTE_DE_P = "superfosfato_triplo"
+FONTE_DE_K = "cloreto_de_potassio"
+FONTE_DE_N = "ureia"
+
+#: Quantas fórmulas do catálogo o laudo mostra (D7).
+TOP_DO_CATALOGO = 3
+
+#: Uso filtrado no catálogo: o laudo publica a recomendação de implantação, e o N de
+#: cobertura sai nomeado, como complemento.
 USO_PADRAO = "plantio"
 
 CRITERIO = (
-    "dose ancorada no nutriente mais deficiente no solo, que é atendido exatamente "
-    "(Manual, §8.3, p. 311); o que faltar do outro vai para complemento e o N restante "
-    "para cobertura; ranking pelo menor desvio relativo, com desempate pela fórmula mais "
-    "concentrada"
+    "dose no ponto de quebra de menor custo, com excesso pesando 1,0/kg, falta 0,2/kg e "
+    "cada operação de complemento 10; desempate pela menor massa total aplicada "
+    "(ADR 0009; método do Manual, §8.3, p. 311)"
 )
+
+#: Avisos fixos do laudo (D12). Ficam aqui, e não no template, para que a regra e o texto
+#: que a descreve não possam divergir.
+AVISOS = (
+    "O critério de escolha é nutricional, não financeiro: o SIRAS não tem preços. O "
+    "Manual (p. 310) orienta comparar o custo por unidade de NPK, somado a frete e "
+    "aplicação — faça essa conta com os preços da sua revenda.",
+    "Fórmulas mais concentradas tendem a trazer menos enxofre. Confira o teor e a forma "
+    "do S no rótulo (Manual, p. 311).",
+    "Ao misturar adubos simples, confira a compatibilidade entre os produtos antes de "
+    "homogeneizar (Manual, Fig. 8.2).",
+)
+
+#: Formato aceito para a fórmula que o usuário informa (D11).
+_FORMATO_FORMULA = re.compile(r"^\s*(\d{1,2})\s*-\s*(\d{1,2})\s*-\s*(\d{1,2})\s*$")
+
+#: Mínimos legais de soma NPK da IN 39/2018, art. 9. Abaixo disso é aviso, não erro: pode
+#: ser organomineral, cujo mínimo é menor.
+SOMA_MINIMA_TERNARIA = 18
+SOMA_MINIMA_BINARIA = 15
+
+NUTRIENTES = ("n", "p2o5", "k2o")
 
 
 class ErroFormulacao(Exception):
-    """Catálogo malformado a ponto de a aritmética não fazer sentido."""
+    """Fórmula do usuário em formato que não dá para interpretar."""
 
+
+# --- entrada ------------------------------------------------------------------------
 
 def _dose_numerica(dose: Any) -> Optional[float]:
     """O valor da dose quando ela É um número, e None quando não é.
 
-    Mesma regra do total a comprar (relatorio/apresentacao.py, _dose_somavel): o Manual
-    nem sempre publica um número — há teto ("<= manutenção"), intervalo e lacuna
-    declarada. Dividir qualquer um deles pela garantia de um adubo produziria uma dose de
-    produto com precisão que a fonte não dá.
+    Mesma regra do total a comprar: o Manual nem sempre publica um número — há teto
+    ("<= manutenção"), intervalo e lacuna declarada (ADR 0004). Dividir qualquer um deles
+    pela garantia de um adubo produziria uma dose com precisão que a fonte não dá.
     """
     if isinstance(dose, bool) or not isinstance(dose, (int, float)):
         return None
     return float(dose)
 
 
-def escolher_ancora(
-    p2o5: float, k2o: float, classe_p: Optional[str], classe_k: Optional[str]
-) -> Tuple[Optional[str], bool]:
-    """O nutriente que define a dose, e se a escolha caiu no fallback.
+def interpretar_formula_do_usuario(texto: str) -> Dict[str, Any]:
+    """Converte "NN-NN-NN" numa entrada de catálogo, com os avisos que couberem (D11).
 
-    O Manual manda ancorar no "nutriente mais deficiente no solo" — isto é, o de classe
-    de teor mais baixa. Duas situações que o Manual não trata e que são decisão do autor,
-    declaradas na ADR 0008:
+    Formato inválido levanta erro: não há como adivinhar o que a pessoa quis dizer. Soma
+    abaixo do mínimo legal é só AVISO, porque pode ser organomineral, cujo mínimo é menor.
 
-    - **empate de classe:** ancora no de MAIOR dose recomendada;
-    - **classe ausente:** há fases de frutífera que não dosam por classe de teor, e nelas
-      não há como saber qual nutriente está mais deficiente. Ancora no de maior dose e
-      devolve `True` no segundo elemento, para que a trilha e o laudo digam que a âncora
-      não veio da classe. Mentir por omissão aqui seria pior do que não indicar.
+    Raises:
+        ErroFormulacao: texto fora do formato N-P-K.
     """
-    candidatos = [
-        (chave, dose, classe)
-        for chave, dose, classe in (("p2o5", p2o5, classe_p), ("k2o", k2o, classe_k))
-        if dose > 0
-    ]
-    if not candidatos:
-        return None, False
+    casamento = _FORMATO_FORMULA.match(texto or "")
+    if not casamento:
+        raise ErroFormulacao(
+            f"'{texto}' não está no formato de uma fórmula. Escreva as três garantias do "
+            f"rótulo separadas por hífen, como em 05-20-20"
+        )
+    n, p, k = (int(g) for g in casamento.groups())
+    soma = n + p + k
+    avisos: List[str] = []
+    if soma > 100:
+        raise ErroFormulacao(
+            f"as garantias de '{texto}' somam {soma}% — são porcentagens em massa do "
+            f"mesmo produto e não podem passar de 100%"
+        )
+    if soma <= 0:
+        raise ErroFormulacao(f"'{texto}' não entrega N, P2O5 nem K2O")
 
-    fallback = any(classe not in ORDEM_CLASSES for _c, _d, classe in candidatos)
-    if fallback:
-        candidatos.sort(key=lambda c: -c[1])
-    else:
-        candidatos.sort(key=lambda c: (ORDEM_CLASSES.index(c[2]), -c[1]))
-    return candidatos[0][0], fallback
+    ternaria = all(v > 0 for v in (n, p, k))
+    minimo = SOMA_MINIMA_TERNARIA if ternaria else SOMA_MINIMA_BINARIA
+    if soma < minimo:
+        avisos.append(
+            f"A fórmula {n:02d}-{p:02d}-{k:02d} soma {soma}%, abaixo do mínimo de "
+            f"{minimo}% que a IN 39/2018 exige de um fertilizante mineral "
+            f"{'ternário' if ternaria else 'binário'}. Confira o rótulo — se for "
+            f"organomineral, o mínimo é outro."
+        )
+    return {
+        "id": f"{n:02d}-{p:02d}-{k:02d}",
+        "n": float(n), "p2o5": float(p), "k2o": float(k),
+        "uso": [USO_PADRAO],
+        "fontes": [], "origem": "informada_pelo_usuario",
+        "_avisos": avisos,
+    }
 
+
+# --- custo e avaliação ---------------------------------------------------------------
 
 def _complementos(
     falta: Dict[str, float], n_cobertura: float, simples: Dict[str, Dict[str, Any]]
-) -> List[Complemento]:
+) -> Tuple[Complemento, ...]:
     """Fertilizantes simples para o que a fórmula não cobriu."""
     itens: List[Complemento] = []
-    for nutriente in ("p2o5", "k2o"):
-        kg = falta[nutriente]
-        if kg <= COMPLEMENTO_MINIMO_KG_HA:
-            continue
-        fonte = simples.get(FONTE_DE_COMPLEMENTO[nutriente])
-        if not fonte or not fonte.get(nutriente):
+    for nutriente, id_fonte in (("p2o5", FONTE_DE_P), ("k2o", FONTE_DE_K)):
+        kg = falta.get(nutriente, 0.0)
+        fonte = simples.get(id_fonte)
+        if kg <= COMPLEMENTO_MINIMO_KG_HA or not fonte or not fonte.get(nutriente):
             continue
         itens.append(Complemento(
-            produto=fonte["id"],
-            dose_kg_ha=kg * 100.0 / fonte[nutriente],
-            nutriente=nutriente,
+            produto=id_fonte, dose_kg_ha=kg * 100.0 / fonte[nutriente],
+            nutriente=nutriente, momento="plantio",
         ))
-    if n_cobertura > COMPLEMENTO_MINIMO_KG_HA:
-        fonte = simples.get(FONTE_DE_COBERTURA_N)
-        if fonte and fonte.get("n"):
-            itens.append(Complemento(
-                produto=fonte["id"],
-                dose_kg_ha=n_cobertura * 100.0 / fonte["n"],
-                nutriente="n",
-                momento="cobertura",
-            ))
-    return itens
+    fonte_n = simples.get(FONTE_DE_N)
+    if n_cobertura > COMPLEMENTO_MINIMO_KG_HA and fonte_n and fonte_n.get("n"):
+        itens.append(Complemento(
+            produto=FONTE_DE_N, dose_kg_ha=n_cobertura * 100.0 / fonte_n["n"],
+            nutriente="n", momento="cobertura",
+        ))
+    return tuple(itens)
 
 
-def _avaliar(
-    formula: Dict[str, Any],
-    rec_n: Optional[float],
-    rec_p: float,
-    rec_k: float,
-    ancora: str,
-    por_fallback: bool,
+def _avaliar_dose(
+    teores: Dict[str, float], rec: Dict[str, float], dose: float,
     simples: Dict[str, Dict[str, Any]],
-) -> Optional[OpcaoFormulacao]:
-    """Dose, entrega, falta, excesso e complementos de uma fórmula. None se ela não serve.
+) -> Dict[str, Any]:
+    """Fornecido, excesso, falta, complementos, custo e massa total de uma dose."""
+    fornecido = {i: dose * teores[i] / 100.0 for i in NUTRIENTES}
 
-    Uma fórmula sem o nutriente-âncora não serve: a regra de três da dose dividiria por
-    zero, e ancorar no outro nutriente mudaria o método no meio do ranking.
+    excesso, falta = {}, {}
+    for i in NUTRIENTES:
+        saldo = rec[i] - fornecido[i]
+        # O 0.0 primeiro de propósito: max(-0.0, 0.0) devolveria -0.0, que imprime "-0".
+        falta[i] = max(0.0, saldo)
+        excesso[i] = max(0.0, -saldo)
+
+    # O N que falta não é "falta" para efeito de custo: vai para cobertura, que existe em
+    # qualquer opção e por isso não distingue uma da outra (D5). Só o excesso de N pesa.
+    n_cobertura = falta["n"]
+    complementos = _complementos(falta, n_cobertura, simples)
+    operacoes = sum(1 for c in complementos if c.momento == "plantio")
+
+    custo = (
+        W_EXC * sum(excesso[i] for i in NUTRIENTES)
+        + W_FALTA * (falta["p2o5"] + falta["k2o"])
+        + W_OP * operacoes
+    )
+    massa = dose + sum(c.dose_kg_ha for c in complementos)
+
+    return {
+        "dose": dose, "fornecido": fornecido, "excesso": excesso, "falta": falta,
+        "complementos": complementos, "custo": custo, "massa": massa,
+    }
+
+
+def _pontos_de_quebra(teores: Dict[str, float], rec: Dict[str, float]) -> List[Tuple[str, float]]:
+    """As doses candidatas: a que cobre o P e a que cobre o K, quando existirem (D1)."""
+    candidatos = []
+    for nutriente in ("p2o5", "k2o"):
+        if rec[nutriente] > 0 and teores[nutriente] > 0:
+            candidatos.append((nutriente, rec[nutriente] * 100.0 / teores[nutriente]))
+    return candidatos
+
+
+def _montar_opcao(
+    tipo: str, formula: Dict[str, Any], rec: Dict[str, float],
+    simples: Dict[str, Dict[str, Any]],
+) -> Optional[OpcaoAdubacao]:
+    """Avalia uma fórmula nos seus pontos de quebra e devolve o melhor.
+
+    None quando a fórmula não contém nenhum dos nutrientes exigidos: sem ponto de quebra
+    não há dose a propor, e arbitrar uma seria inventar a resposta.
     """
-    teor = {chave: float(formula[chave]) for chave in ("n", "p2o5", "k2o")}
-    if teor[ancora] <= 0:
+    teores = {i: float(formula[i]) for i in NUTRIENTES}
+    candidatos = _pontos_de_quebra(teores, rec)
+    if not candidatos:
         return None
 
-    necessidade = {"p2o5": rec_p, "k2o": rec_k}
-    dose = necessidade[ancora] * 100.0 / teor[ancora]
-    entrega = {chave: dose * teor[chave] / 100.0 for chave in ("n", "p2o5", "k2o")}
+    avaliados = [(ancora, _avaliar_dose(teores, rec, dose, simples))
+                 for ancora, dose in candidatos]
+    # Empate de custo entre os dois pontos resolve pela menor massa, como no desempate
+    # entre fórmulas (D9) — coerência, e evita depender da ordem da lista.
+    ancora, melhor = min(avaliados, key=lambda par: (par[1]["custo"], par[1]["massa"]))
+    melhor["candidatos"] = {a: (d["dose"], d["custo"]) for a, d in avaliados}
 
-    falta: Dict[str, float] = {}
-    excesso: Dict[str, float] = {}
-    for chave in ("p2o5", "k2o"):
-        saldo = necessidade[chave] - entrega[chave]
-        # O 0.0 vem primeiro de propósito: max(-0.0, 0.0) devolveria -0.0, que imprime
-        # como "-0" no laudo.
-        falta[chave] = max(0.0, saldo)
-        excesso[chave] = max(0.0, -saldo)
-
-    # N sem número publicado (teto, intervalo, lacuna) não tem com o que ser comparado:
-    # não há excesso a afirmar, nem saldo de cobertura a calcular.
-    if rec_n is None:
-        excesso_n = 0.0
-        n_cobertura = 0.0
-    else:
-        excesso_n = max(0.0, entrega["n"] - rec_n)
-        n_cobertura = max(0.0, rec_n - entrega["n"])
-
-    # Falta e excesso pesam igual: falta exige uma operação a mais, excesso é adubo pago
-    # e não aproveitado. Peso igual é decisão do autor (ADR 0008).
-    alvo = rec_p + rec_k
-    desvio = (
-        falta["p2o5"] + falta["k2o"] + excesso["p2o5"] + excesso["k2o"] + excesso_n
-    ) / alvo
-
-    return OpcaoFormulacao(
-        id=formula["id"],
-        n=teor["n"], p2o5=teor["p2o5"], k2o=teor["k2o"],
-        dose_kg_ha=dose,
-        entrega_n=entrega["n"], entrega_p2o5=entrega["p2o5"], entrega_k2o=entrega["k2o"],
-        falta_p2o5=falta["p2o5"], falta_k2o=falta["k2o"],
-        excesso_p2o5=excesso["p2o5"], excesso_k2o=excesso["k2o"], excesso_n=excesso_n,
-        n_cobertura=n_cobertura,
-        desvio_relativo=desvio,
-        ancora=ancora,
-        ancora_por_fallback=por_fallback,
-        complementos=_complementos(falta, n_cobertura, simples),
-        fontes=list(formula.get("fontes") or []),
-        origem=formula.get("origem", ""),
+    return OpcaoAdubacao(
+        tipo=tipo, formula_id=formula["id"], dose_kg_ha=melhor["dose"], ancora=ancora,
+        fornecido=melhor["fornecido"], excesso=melhor["excesso"], falta=melhor["falta"],
+        complementos=melhor["complementos"], custo=melhor["custo"],
+        massa_total_kg_ha=melhor["massa"], teores=teores,
+        fontes=list(formula.get("fontes") or []), origem=formula.get("origem", ""),
+        candidatos=melhor["candidatos"],
     )
 
 
-def indicar_formulacao(
+# --- caminho A: fórmula ideal ---------------------------------------------------------
+
+def formula_ideal(
+    rec: Dict[str, float], n_plantio: float, simples: Dict[str, Dict[str, Any]],
+) -> List[OpcaoAdubacao]:
+    """A proporção exata da recomendação, em três concentrações (D10).
+
+    Escala a recomendação para que o maior entre P2O5 e K2O valha T, arredonda as
+    garantias ao inteiro e calcula a dose pelo nutriente de maior valor. Com N de plantio
+    10, P2O5 120 e K2O 80, produz 02-18-12 (667), 02-24-16 (500) e 03-30-20 (400) — as
+    três fórmulas do exemplo do Manual, p. 311, com as doses que ele publica.
+
+    A soma das garantias é sempre ≥ T, porque o maior teor já vale T, o que atende o
+    mínimo legal da IN 39/2018 para os três alvos.
+
+    `n_plantio` zero produz fórmula binária P-K e manda todo o N para cobertura: é o que
+    acontece quando o usuário não informa a parcela de semeadura, e o laudo declara.
+    """
+    maior = max(rec["p2o5"], rec["k2o"])
+    if maior <= 0:
+        return []
+
+    proporcao = {"n": n_plantio / maior, "p2o5": rec["p2o5"] / maior, "k2o": rec["k2o"] / maior}
+    eixo = "p2o5" if rec["p2o5"] >= rec["k2o"] else "k2o"
+
+    opcoes: List[OpcaoAdubacao] = []
+    vistos = set()
+    for alvo in ALVOS_DE_CONCENTRACAO:
+        # Arredondamento de meio para cima, como a política do trabalho: int(x + 0.5)
+        # em vez de round(), que em Python arredonda meio para o par.
+        teores = {i: float(int(proporcao[i] * alvo + 0.5)) for i in NUTRIENTES}
+        if teores[eixo] <= 0:
+            continue
+        identificador = "-".join(f"{int(teores[i]):02d}" for i in NUTRIENTES)
+        if identificador in vistos:
+            continue
+        vistos.add(identificador)
+
+        dose = rec[eixo] * 100.0 / teores[eixo]
+        avaliado = _avaliar_dose(teores, rec, dose, simples)
+        opcoes.append(OpcaoAdubacao(
+            tipo="ideal", formula_id=identificador, dose_kg_ha=dose, ancora=eixo,
+            fornecido=avaliado["fornecido"], excesso=avaliado["excesso"],
+            falta=avaliado["falta"], complementos=avaliado["complementos"],
+            custo=avaliado["custo"], massa_total_kg_ha=avaliado["massa"], teores=teores,
+        ))
+    return opcoes
+
+
+# --- caminho C: mistura de simples ----------------------------------------------------
+
+def mistura_simples(
+    rec: Dict[str, float], simples: Dict[str, Dict[str, Any]],
+) -> Optional[OpcaoAdubacao]:
+    """Ureia, superfosfato triplo e cloreto de potássio, nas doses exatas.
+
+    É a régua das outras duas: sempre atende a recomendação na medida, e sempre está
+    disponível. O custo é zero por construção, e por isso ela não entra no ranking do
+    catálogo — ela é a referência contra a qual os desvios das outras se leem.
+    """
+    itens: List[Complemento] = []
+    for nutriente, id_fonte, momento in (
+        ("p2o5", FONTE_DE_P, "plantio"),
+        ("k2o", FONTE_DE_K, "plantio"),
+        ("n", FONTE_DE_N, "cobertura"),
+    ):
+        kg = rec[nutriente]
+        fonte = simples.get(id_fonte)
+        if kg <= COMPLEMENTO_MINIMO_KG_HA or not fonte or not fonte.get(nutriente):
+            continue
+        itens.append(Complemento(
+            produto=id_fonte, dose_kg_ha=kg * 100.0 / fonte[nutriente],
+            nutriente=nutriente, momento=momento,
+        ))
+    if not itens:
+        return None
+
+    zerado = {i: 0.0 for i in NUTRIENTES}
+    return OpcaoAdubacao(
+        tipo="mistura_simples", formula_id=None, dose_kg_ha=0.0, ancora=None,
+        fornecido=dict(rec), excesso=dict(zerado), falta=dict(zerado),
+        complementos=tuple(itens), custo=0.0,
+        massa_total_kg_ha=sum(c.dose_kg_ha for c in itens),
+    )
+
+
+# --- ponto de entrada -----------------------------------------------------------------
+
+def _chave_de_ordem(opcao: OpcaoAdubacao):
+    """Menor custo; empate pela menor massa total (D9); depois dose; depois id.
+
+    O id entra por último só para a ordem ser determinística quando duas fórmulas empatam
+    em tudo — sem ele a saída dependeria da ordem do arquivo, e o laudo deixaria de ser
+    reprodutível.
+    """
+    return (opcao.custo, opcao.massa_total_kg_ha, opcao.dose_kg_ha, opcao.formula_id or "")
+
+
+def recomendar_formulacao(
     adubacao: RecomendacaoAdubacao,
     catalogo: Dict[str, Any],
     trace: Optional[Trace] = None,
+    n_plantio: Optional[float] = None,
+    formulas_usuario: Sequence[str] = (),
     uso: str = USO_PADRAO,
-) -> IndicacaoFormulacao:
-    """Escolhe a formulação NPK que melhor atende a recomendação de adubação.
+) -> ResultadoFormulacao:
+    """Os três caminhos para atender a recomendação (ADR 0009).
 
     Args:
-        adubacao: a recomendação já emitida. `n` é o N **total** — a base publica a dose
-            de N como "semeadura + cobertura" (graos_adubacao_n.json), e é sobre o total
-            que o passo 3 do Manual desconta o N da fórmula
+        adubacao: a recomendação emitida. `n` é o N **total** — a base publica a dose como
+            "semeadura + cobertura", e é sobre o total que o saldo de cobertura se calcula
         catalogo: conteúdo de dados/mercado/formulas_npk.json
-        trace: opcional; recebe o passo R-FOR-01 quando informado
-        uso: filtra o catálogo por momento de aplicação ("plantio" ou "cobertura")
+        trace: opcional; recebe os passos R-FOR-01 e R-FOR-02
+        n_plantio: parcela do N na semeadura, informada pelo usuário. None vale 0 e a
+            fórmula ideal sai binária, com a ressalva declarada na saída
+        formulas_usuario: fórmulas que o usuário tem, no formato "NN-NN-NN" (D11)
+        uso: filtra o catálogo por momento de aplicação
 
     Returns:
-        IndicacaoFormulacao. Quando não há o que indicar — catálogo vazio, recomendação
-        sem dose numérica de P e K, ou nenhuma fórmula com o nutriente-âncora —,
-        `indicada` é None e `motivo_sem_indicacao` diz por quê. Nunca levanta exceção por
-        catálogo vazio: um laudo sem indicação de formulação continua completo.
+        ResultadoFormulacao com os três caminhos. Catálogo vazio deixa `catalogo` vazia e
+        os outros dois seguem; sem dose numérica de P e K os três vêm vazios e
+        `motivo_sem_indicacao` diz por quê. Nunca levanta exceção por falta de dado — um
+        laudo sem formulação continua completo.
 
-    As doses saem em kg/ha SEM arredondamento. Arredondar aqui repetiria o defeito B-8 do
-    CCAE, em que um valor arredondado cedo passou a decidir um corte; a apresentação
-    arredonda para exibir, e a comparação entre fórmulas roda sobre o valor cheio.
+    As doses saem SEM arredondamento. Arredondar aqui repetiria o defeito B-8 do CCAE, em
+    que um valor arredondado cedo passou a decidir um corte.
     """
-    bloco_formulas = (catalogo.get("formulas") or {}).get("itens") or []
+    rec = {
+        "n": _dose_numerica(adubacao.n) or 0.0,
+        "p2o5": _dose_numerica(adubacao.p2o5) or 0.0,
+        "k2o": _dose_numerica(adubacao.k2o) or 0.0,
+    }
     simples = {
         item["id"]: item
         for item in (catalogo.get("fertilizantes_simples") or {}).get("itens") or []
     }
+    avisos = list(AVISOS)
 
-    rec_p = _dose_numerica(adubacao.p2o5) or 0.0
-    rec_k = _dose_numerica(adubacao.k2o) or 0.0
-    rec_n = _dose_numerica(adubacao.n)
-
-    def sem_indicacao(motivo: str) -> IndicacaoFormulacao:
+    if rec["p2o5"] <= 0 and rec["k2o"] <= 0:
+        motivo = (
+            "a recomendação não traz dose numérica de P2O5 nem de K2O, e é por esses dois "
+            "que a dose de um adubo formulado se dimensiona"
+        )
         if trace is not None:
             trace.registrar(
-                regra="R-FOR-01: escolha do adubo formulado",
-                entradas={"p2o5": adubacao.p2o5, "k2o": adubacao.k2o, "n": adubacao.n,
-                          "formulas_no_catalogo": len(bloco_formulas), "uso": uso},
-                saida={"indicada": None, "motivo": motivo},
-                fonte=(
-                    "Método: Manual 2016, §8.3, p. 311. Catálogo: "
-                    "dados/mercado/formulas_npk.json (dado de mercado, não do Manual)"
-                ),
+                regra="R-FOR-01: formulação do adubo",
+                entradas={"p2o5": adubacao.p2o5, "k2o": adubacao.k2o, "n": adubacao.n},
+                saida={"caminhos": 0, "motivo": motivo},
+                fonte="Método: Manual 2016, §8.3, p. 311",
             )
-        return IndicacaoFormulacao(
-            indicada=None, ranking=[], motivo_sem_indicacao=motivo, criterio=CRITERIO
+        # A mistura de simples ainda faz sentido quando só há N: ureia resolve.
+        return ResultadoFormulacao(
+            mistura=mistura_simples(rec, simples), avisos=avisos,
+            motivo_sem_indicacao=motivo, criterio=CRITERIO,
         )
 
-    if not bloco_formulas:
-        return sem_indicacao(
-            "o catálogo de fórmulas está vazio — nenhuma fórmula foi cadastrada"
-        )
+    # --- caminho A
+    sem_n = n_plantio is None
+    ideais = formula_ideal(rec, 0.0 if sem_n else float(n_plantio), simples)
 
-    ancora, por_fallback = escolher_ancora(rec_p, rec_k, adubacao.classe_p, adubacao.classe_k)
-    if ancora is None:
-        return sem_indicacao(
-            "a recomendação não traz dose numérica de P2O5 nem de K2O, e é por um desses "
-            "dois que a dose de um adubo formulado se ancora"
-        )
-
-    candidatas = [f for f in bloco_formulas if uso in (f.get("uso") or [])]
-    if not candidatas:
-        return sem_indicacao(f"nenhuma fórmula do catálogo é indicada para {uso}")
+    # --- caminho B
+    do_catalogo = [
+        ("catalogo", f) for f in ((catalogo.get("formulas") or {}).get("itens") or [])
+        if uso in (f.get("uso") or [])
+    ]
+    for texto in formulas_usuario:
+        entrada = interpretar_formula_do_usuario(texto)
+        avisos.extend(entrada.pop("_avisos", []))
+        do_catalogo.append(("usuario", entrada))
 
     avaliadas = [
         opcao for opcao in (
-            _avaliar(f, rec_n, rec_p, rec_k, ancora, por_fallback, simples)
-            for f in candidatas
+            _montar_opcao(tipo, f, rec, simples) for tipo, f in do_catalogo
         ) if opcao is not None
     ]
-    if not avaliadas:
-        rotulo = "P2O5" if ancora == "p2o5" else "K2O"
-        return sem_indicacao(
-            f"nenhuma fórmula de {uso} no catálogo contém {rotulo}, que é o nutriente "
-            f"mais deficiente nesta análise e por isso ancora a dose"
-        )
+    melhores = sorted(avaliadas, key=_chave_de_ordem)[:TOP_DO_CATALOGO]
 
-    # Desempate pela menor dose: fórmula mais concentrada é menos frete, menos embalagem
-    # e menos operação, como o Manual observa na p. 310. O id entra em último lugar só
-    # para a ordem ser determinística quando duas fórmulas empatam em tudo — sem ele, a
-    # saída dependeria da ordem do arquivo e o laudo deixaria de ser reprodutível.
-    ranking = sorted(avaliadas, key=lambda o: (o.desvio_relativo, o.dose_kg_ha, o.id))
-    indicada = ranking[0]
+    # A trilha registra os pontos de quebra SÓ das fórmulas que o laudo mostra. Registrar
+    # as 38 avaliadas encheria o documento impresso com a varredura inteira, e a
+    # deduplicação por (regra, fonte) ainda juntaria todas numa linha só — exibindo os
+    # números de uma delas com a contagem de todas, que é pior do que não registrar.
+    # Quantas foram avaliadas fica dito no passo R-FOR-01, logo abaixo.
+    if trace is not None:
+        for opcao in melhores:
+            trace.registrar(
+                regra=f"R-FOR-02 ({opcao.formula_id}): pontos de quebra",
+                entradas={"tipo": opcao.tipo,
+                          "doses_candidatas": {a: round(d, 2)
+                                               for a, (d, _c) in opcao.candidatos.items()}},
+                saida={"ancora": opcao.ancora, "dose_kg_ha": opcao.dose_kg_ha,
+                       "custos": {a: round(c, 3) for a, (_d, c) in opcao.candidatos.items()}},
+                fonte="ADR 0009, D1 — mínimo de função convexa linear por partes",
+            )
+
+    # --- caminho C
+    mistura = mistura_simples(rec, simples)
 
     if trace is not None:
         trace.registrar(
-            regra="R-FOR-01: escolha do adubo formulado",
+            regra="R-FOR-01: formulação do adubo",
             entradas={
-                "n_total": adubacao.n, "p2o5": rec_p, "k2o": rec_k,
-                "classe_p": adubacao.classe_p, "classe_k": adubacao.classe_k,
-                "ancora": ancora,
-                "ancora_por_fallback": por_fallback,
-                "formulas_avaliadas": len(avaliadas),
-                "uso": uso,
+                "n_total": rec["n"], "p2o5": rec["p2o5"], "k2o": rec["k2o"],
+                "n_plantio": n_plantio, "formulas_avaliadas": len(avaliadas),
+                "formulas_do_usuario": len(formulas_usuario), "uso": uso,
             },
             saida={
-                "indicada": indicada.id,
-                "dose_kg_ha": indicada.dose_kg_ha,
-                "desvio_relativo": indicada.desvio_relativo,
-                "falta_p2o5": indicada.falta_p2o5,
-                "falta_k2o": indicada.falta_k2o,
-                "n_cobertura": indicada.n_cobertura,
+                "ideais": [o.formula_id for o in ideais],
+                "catalogo": [o.formula_id for o in melhores],
+                "melhor_custo": melhores[0].custo if melhores else None,
+                "mistura": bool(mistura),
             },
             fonte=(
-                "Método: Manual 2016, §8.3, p. 311 (dose pelo nutriente mais deficiente); "
-                "fertilizantes simples da Tab. 8.4, p. 304. Catálogo de fórmulas: "
+                "Método: Manual 2016, §8.3, p. 311 e Tab. 8.4, p. 304; dose no ponto de "
+                "quebra de menor custo (ADR 0009). Catálogo de fórmulas: "
                 "dados/mercado/formulas_npk.json — dado de mercado, não é fonte do Manual"
             ),
         )
 
-    return IndicacaoFormulacao(
-        indicada=indicada, ranking=ranking, motivo_sem_indicacao=None, criterio=CRITERIO
+    return ResultadoFormulacao(
+        ideais=ideais, catalogo=melhores, mistura=mistura, avisos=avisos,
+        sem_n_de_plantio=sem_n, criterio=CRITERIO,
     )
 
 
-__all__ = ["CRITERIO", "ORDEM_CLASSES", "ErroFormulacao", "escolher_ancora", "indicar_formulacao"]
+__all__ = [
+    "ALVOS_DE_CONCENTRACAO",
+    "AVISOS",
+    "CRITERIO",
+    "ErroFormulacao",
+    "W_EXC",
+    "W_FALTA",
+    "W_OP",
+    "formula_ideal",
+    "interpretar_formula_do_usuario",
+    "mistura_simples",
+    "recomendar_formulacao",
+]

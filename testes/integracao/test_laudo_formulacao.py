@@ -1,16 +1,19 @@
 """
-A indicação do adubo formulado, do motor até a tela.
+A formulação do adubo, do motor até a tela (ADR 0009).
 
-Três garantias que a banca vai cobrar, e que são o motivo deste arquivo existir:
+Quatro garantias que a banca vai cobrar, e que são o motivo deste arquivo existir:
 
 1. o **método** é do Manual (§8.3, p. 311) e o **catálogo** não é — e o laudo diz as duas
    coisas onde a pessoa lê, não em nota de rodapé;
-2. catálogo vazio não quebra nada: o cartão some e o laudo segue completo;
-3. o arquivo real carrega, e as invariantes de física pegam erro de transcrição.
+2. catálogo vazio não quebra nada: a fórmula ideal e a mistura de simples seguem, porque
+   nenhuma das duas depende de lista de mercado;
+3. o que o usuário informa — N de semeadura e fórmula disponível — atravessa o formulário
+   inteiro até o laudo;
+4. os arquivos reais carregam, e as invariantes pegam erro de transcrição.
 
 As fórmulas dos testes de comportamento são fictícias, injetadas pelo teste. O arquivo
-real (dados/mercado/formulas_npk.json) é dado do autor, e amarrar o teste ao conteúdo
-dele faria a suíte quebrar no dia em que ele acrescentasse uma fórmula.
+real é dado do autor, e amarrar o teste ao conteúdo dele faria a suíte quebrar no dia em
+que ele acrescentasse uma fórmula.
 """
 
 from types import SimpleNamespace
@@ -54,7 +57,6 @@ def _catalogo(*formulas):
 
 @pytest.fixture
 def com_catalogo(monkeypatch):
-    """Injeta um catálogo fictício no lugar do arquivo real."""
     def instalar(*formulas):
         catalogo = _catalogo(*formulas)
         monkeypatch.setattr("siras.motor.laudo.carregar_formulas_npk", lambda: catalogo)
@@ -62,7 +64,7 @@ def com_catalogo(monkeypatch):
     return instalar
 
 
-def _laudo():
+def _laudo(n_plantio=None, formulas_usuario=()):
     analise = AnaliseSolo(
         ph_agua=5.1, indice_smp=5.4, argila=38.0, mo=2.8,
         p=11.0, k=96.0, ctc_ph7=9.4, al=1.2, ca=2.4, mg=1.1, v_percent=42.0,
@@ -70,89 +72,110 @@ def _laudo():
     contexto = Contexto(
         cultura_id="soja", sistema_manejo="convencional", condicao_area="todos os casos",
         prnt=100.0, profundidade_incorporacao_cm=20.0, cultivo=1,
-        expectativa_rendimento=3.0,
+        expectativa_rendimento=3.0, n_plantio=n_plantio,
+        formulas_usuario=tuple(formulas_usuario),
     )
     return gerar_laudo(analise, "soja", contexto, carregar_dados_comum())
 
 
 # --- o motor -----------------------------------------------------------------------
 
-def test_o_laudo_indica_a_formula_de_menor_desvio(com_catalogo):
+def test_o_laudo_traz_os_tres_caminhos(com_catalogo):
     com_catalogo(_f("00-20-20", 0, 20, 20), _f("00-20-05", 0, 20, 5))
 
-    laudo = _laudo()
+    f = _laudo().formulacao
 
-    assert laudo.formulacao.indicada.id == "00-20-20"
-    assert laudo.formulacao.indicada.dose_kg_ha > 0
-    # A âncora precisa ser um dos dois, e precisa ter saído da classe de teor.
-    assert laudo.formulacao.indicada.ancora in ("p2o5", "k2o")
-    assert laudo.formulacao.indicada.ancora_por_fallback is False
+    assert len(f.ideais) == 3, "fórmula ideal em três concentrações"
+    assert f.catalogo, "as melhores do catálogo"
+    assert f.mistura is not None, "mistura de simples"
+    assert f.catalogo[0].formula_id == "00-20-20"
+
+
+def test_catalogo_vazio_deixa_os_outros_dois_caminhos(com_catalogo):
+    com_catalogo()
+
+    f = _laudo().formulacao
+
+    assert f.catalogo == []
+    # A razão de existirem três caminhos: sem lista de mercado, dois ainda respondem.
+    assert len(f.ideais) == 3
+    assert f.mistura is not None
 
 
 def test_a_soja_penaliza_a_formula_rica_em_n(com_catalogo):
     # Leguminosa: n = 0 por fixação biológica, e todo N da fórmula é adubo sem função.
-    com_catalogo(_f("20-20-20", 20, 20, 20), _f("02-20-20", 2, 20, 20))
+    com_catalogo(_f("20-20-20", 20, 20, 20), _f("00-20-20", 0, 20, 20))
 
-    laudo = _laudo()
+    f = _laudo().formulacao
 
-    assert laudo.formulacao.indicada.id == "02-20-20"
-    assert laudo.formulacao.ranking[-1].excesso_n > 0
+    assert f.catalogo[0].formula_id == "00-20-20"
+    assert f.catalogo[-1].excesso["n"] > 0
 
 
-def test_catalogo_vazio_deixa_o_laudo_completo(com_catalogo):
+def test_o_n_de_semeadura_do_usuario_chega_a_formula_ideal(com_catalogo):
     com_catalogo()
 
-    laudo = _laudo()
+    sem = _laudo().formulacao
+    com = _laudo(n_plantio=12).formulacao
 
-    assert laudo.formulacao.indicada is None
-    assert "vazio" in laudo.formulacao.motivo_sem_indicacao
-    assert laudo.calagem is not None
-    assert laudo.aptidao_atual is not None and laudo.aptidao_potencial is not None
+    assert sem.sem_n_de_plantio is True
+    assert all(o.teores["n"] == 0 for o in sem.ideais)
+    assert com.sem_n_de_plantio is False
+    # Soja não recebe N, então mesmo informado o plantio a ideal fica sem nitrogênio:
+    # o que muda é a declaração, não o número. Este caso guarda isso.
+    assert com.ideais
 
 
-def test_a_trilha_registra_a_escolha(com_catalogo):
+def test_a_formula_do_usuario_entra_no_ranking(com_catalogo):
+    com_catalogo(_f("05-20-05", 5, 20, 5))
+
+    f = _laudo(formulas_usuario=("00-20-20",)).formulacao
+
+    assert any(o.tipo == "usuario" for o in f.catalogo)
+
+
+def test_a_trilha_registra_a_escolha_e_os_pontos_de_quebra(com_catalogo):
     com_catalogo(_f("00-20-20", 0, 20, 20))
 
     laudo = _laudo()
 
-    passo = next(p for p in laudo.trace if p.regra.startswith("R-FOR-01"))
-    assert passo.entradas["ancora"] in ("p2o5", "k2o")
-    assert "p. 311" in passo.fonte
+    escolha = next(p for p in laudo.trace if p.regra.startswith("R-FOR-01"))
+    assert "p. 311" in escolha.fonte
+    assert any(p.regra.startswith("R-FOR-02") for p in laudo.trace)
 
 
 def test_o_laudo_real_usa_o_catalogo_de_verdade():
-    # Sem monkeypatch: o arquivo do autor precisa produzir indicação num caso comum.
-    laudo = _laudo()
+    f = _laudo().formulacao
 
-    assert laudo.formulacao.indicada is not None
-    assert laudo.formulacao.indicada.dose_kg_ha > 0
+    assert f.catalogo and f.ideais and f.mistura is not None
 
 
 # --- a apresentação ----------------------------------------------------------------
 
-def test_o_cartao_traz_dose_entrega_e_complementos(com_catalogo):
+def test_o_cartao_traz_os_tres_caminhos_e_os_avisos(com_catalogo):
     com_catalogo(_f("00-20-05", 0, 20, 5))
 
-    modelo = apresentar_laudo(_laudo(), carregar_dados_comum())
-    cartao = modelo["formulacao"]
+    cartao = apresentar_laudo(_laudo(), carregar_dados_comum())["formulacao"]
 
     assert cartao["tem"] is True
-    assert cartao["indicada"]["dose"] != "—"
+    assert cartao["ideais"] and cartao["catalogo"] and cartao["mistura"]
+    assert len(cartao["avisos"]) >= 3
     # Fórmula pobre em K: precisa sair complemento de cloreto de potássio.
-    produtos = [c["produto"] for c in cartao["indicada"]["complementos"]]
+    produtos = [c["produto"] for c in cartao["catalogo"][0]["complementos"]]
     assert "cloreto de potássio" in produtos
 
 
-def test_sem_catalogo_o_cartao_nao_aparece(com_catalogo):
+def test_sem_catalogo_o_cartao_continua_aparecendo(com_catalogo):
     com_catalogo()
 
-    modelo = apresentar_laudo(_laudo(), carregar_dados_comum())
+    cartao = apresentar_laudo(_laudo(), carregar_dados_comum())["formulacao"]
 
-    assert modelo["formulacao"]["tem"] is False
-    assert modelo["formulacao"]["indicada"] is None
+    assert cartao["tem"] is True
+    assert cartao["catalogo"] == []
+    assert cartao["mistura"] is not None
 
 
-def test_a_calculadora_abre_com_as_indicadas(com_catalogo):
+def test_a_calculadora_abre_com_as_do_catalogo(com_catalogo):
     com_catalogo(_f("00-20-20", 0, 20, 20), _f("00-20-05", 0, 20, 5))
 
     custo = insumos_para_custo([
@@ -169,34 +192,68 @@ def test_sem_catalogo_a_calculadora_abre_em_branco(com_catalogo):
         SimpleNamespace(rotulo="", area_ha=None, laudo=_laudo())
     ])
 
+    # A fórmula ideal NÃO entra na calculadora de preço: ela é referência para encomenda,
+    # e cotar um produto que não está na prateleira seria convite a erro.
     assert custo["sugeridas"] == []
 
 
 # --- a tela ------------------------------------------------------------------------
 
-def test_a_tela_mostra_a_indicacao_e_separa_metodo_de_catalogo(com_catalogo):
+def test_a_tela_mostra_os_tres_caminhos_e_separa_metodo_de_catalogo(com_catalogo):
     com_catalogo(_f("00-20-20", 0, 20, 20))
     cliente = criar_app({"TESTING": True}).test_client()
 
     html = cliente.post("/analise/laudo", data=_DADOS_DO_TALHAO).get_data(as_text=True)
 
     assert "Qual adubo comprar" in html
-    assert "00-20-20" in html
-    # As duas procedências, cada uma dita por inteiro: é o que separa norma de mercado.
+    assert "Fórmula ideal para esta recomendação" in html
+    assert "Melhores opções prontas" in html
+    assert "Mistura de adubos simples" in html
+    # As duas procedências, cada uma dita por inteiro.
     assert "§8.3, p. 311" in html
     assert "não publica lista de adubos comerciais" in html
     # E a limitação que o Manual impõe e o SIRAS não cumpre.
     assert "não tem preços" in html
 
 
-def test_sem_catalogo_a_tela_nao_traz_a_secao(com_catalogo):
+def test_sem_catalogo_a_tela_ainda_traz_a_secao(com_catalogo):
     com_catalogo()
     cliente = criar_app({"TESTING": True}).test_client()
 
     html = cliente.post("/analise/laudo", data=_DADOS_DO_TALHAO).get_data(as_text=True)
 
-    assert "Qual adubo comprar" not in html
-    assert "Interpretação dos atributos" in html
+    assert "Qual adubo comprar" in html
+    assert "Mistura de adubos simples" in html
+    assert "Melhores opções prontas" not in html
+
+
+def test_o_formulario_oferece_os_campos_do_adubo():
+    cliente = criar_app({"TESTING": True}).test_client()
+
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'name="n_plantio"' in html
+    assert 'name="formula_usuario"' in html
+
+
+def test_formula_do_usuario_invalida_e_recusada_com_explicacao():
+    cliente = criar_app({"TESTING": True}).test_client()
+    dados = dict(_DADOS_DO_TALHAO, formula_usuario="abacaxi")
+
+    html = cliente.post("/analise/laudo", data=dados).get_data(as_text=True)
+
+    assert "Fórmula disponível" in html
+    assert "05-20-20" in html, "a mensagem precisa mostrar o formato esperado"
+
+
+def test_n_de_semeadura_do_formulario_chega_ao_laudo():
+    cliente = criar_app({"TESTING": True}).test_client()
+    dados = dict(_DADOS_DO_TALHAO, n_plantio="15")
+
+    html = cliente.post("/analise/laudo", data=dados).get_data(as_text=True)
+
+    # Informado, o laudo deixa de exibir a ressalva de que a ideal saiu sem nitrogênio.
+    assert "Saíram sem nitrogênio" not in html
 
 
 # --- os arquivos reais -------------------------------------------------------------

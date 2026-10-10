@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 from siras.dominio.analise import AnaliseSolo, Camada, Contexto
 from siras.dominio.escopo import no_escopo_de_recomendacao
 from siras.dominio.nomes import buscar_por_nome
+from siras.motor.formulacao import ErroFormulacao, interpretar_formula_do_usuario
 
 #: Campos da camada de referência de fertilidade (0-20 cm por padrão).
 #: (id, rótulo, unidade em HTML, ajuda, obrigatório, passo, exemplo)
@@ -928,12 +929,62 @@ def ler(
             cultivo=int(form.get("cultivo") or 1),
             antecedente=(form.get("antecedente") or "").strip() or None,
             variaveis=_ler_variaveis(form, cultura_id, grupo, entradas_do_grupo),
+            n_plantio=_ler_n_plantio(form, leitura),
+            formulas_usuario=_ler_formulas_do_usuario(form, leitura),
         )
     except ValueError as erro:
         leitura.analise = None
         leitura.invalidos.append(str(erro))
 
     return leitura
+
+
+def _ler_n_plantio(form, leitura) -> Optional[float]:
+    """Parcela do N a aplicar na semeadura, em kg/ha. Opcional (ADR 0009, D10).
+
+    Não vem da base: o Manual separa semeadura de cobertura, mas a base guarda o total.
+    Em branco, a fórmula ideal sai binária e o laudo declara que saiu — melhor do que
+    inventar uma fração de parcelamento.
+    """
+    bruto = (form.get("n_plantio") or "").strip()
+    if not bruto:
+        return None
+    try:
+        valor = float(bruto.replace(",", "."))
+    except ValueError:
+        leitura.invalidos.append(
+            "N na semeadura: informe um número em kg/ha, ou deixe em branco"
+        )
+        leitura.campos_com_erro.append("n_plantio")
+        return None
+    if valor < 0:
+        leitura.invalidos.append("N na semeadura: não pode ser negativo")
+        leitura.campos_com_erro.append("n_plantio")
+        return None
+    return valor
+
+
+def _ler_formulas_do_usuario(form, leitura) -> tuple:
+    """Fórmulas que o usuário tem na revenda (ADR 0009, D11).
+
+    Existe porque não há catálogo oficial de fórmulas comercializadas: a que a pessoa
+    encontra pode não estar no nosso. Formato inválido é erro de preenchimento, com a
+    mensagem vinda do próprio motor; soma abaixo do mínimo legal é aviso, e aparece no
+    laudo, não aqui.
+    """
+    lidas = []
+    for bruto in form.getlist("formula_usuario"):
+        texto = (bruto or "").strip()
+        if not texto:
+            continue
+        try:
+            interpretar_formula_do_usuario(texto)
+        except ErroFormulacao as erro:
+            leitura.invalidos.append(f"Fórmula disponível: {erro}")
+            leitura.campos_com_erro.append("formula_usuario")
+            continue
+        lidas.append(texto)
+    return tuple(lidas)
 
 
 __all__ = [

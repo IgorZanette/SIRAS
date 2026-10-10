@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 
 def derivar_saturacao_al(al: float, ca: float, mg: float, k: float) -> float:
@@ -191,6 +191,21 @@ class Contexto:
     #: Manual acrescentaria mais um. Quem sabe quais são exigidas é a função de adubação
     #: do grupo, que já as valida e já nomeia a que faltar.
     variaveis: Dict[str, Any] = field(default_factory=dict)
+    #: Parcela do N total a aplicar na semeadura, em kg/ha. Campo próprio, e não entrada
+    #: de `variaveis`, porque não é variável condicional de grupo: vale para qualquer
+    #: cultura e serve a um módulo só, o da fórmula ideal.
+    #:
+    #: Vem do USUÁRIO, não da base. O Manual separa semeadura de cobertura, mas a base
+    #: guarda o total ("Semeadura + cobertura", graos_adubacao_n.json) e as hortaliças
+    #: trazem o parcelamento só em prosa — derivar um número dali seria inferência
+    #: agronômica do sistema. None significa "não informado": a fórmula ideal sai binária
+    #: e o laudo declara que saiu (ADR 0009, D10).
+    n_plantio: Optional[float] = None
+    #: Fórmulas que o usuário tem disponíveis na revenda, no formato "NN-NN-NN". Entram
+    #: no ranking ao lado das do catálogo, marcadas como informadas por ele (ADR 0009,
+    #: D11) — porque não existe catálogo oficial de fórmulas comercializadas, e a que
+    #: ele encontra pode não estar no nosso.
+    formulas_usuario: Tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         self._validar_campos_obrigatorios()

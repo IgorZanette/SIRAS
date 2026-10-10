@@ -791,6 +791,30 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 .formulacao__indicada { padding: var(--e-4); border-radius: var(--r-doc);
                         background: #FAFCFA; border: 1px solid #E3EAE5;
                         border-left: 3px solid var(--v-600); }
+.formulas-usuario { margin: var(--e-4) 0 0; padding: var(--e-4) 0 0; border: 0;
+                    border-top: 1px dashed var(--n-300); }
+.formulas-usuario legend { padding: 0; font-size: var(--fs-2xs); font-weight: 800;
+                           text-transform: uppercase; letter-spacing: .04em; }
+.bloco__opcional { font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase;
+                   letter-spacing: .04em; opacity: .75; }
+.bloco__intro { margin: 0 0 var(--e-3); }
+.formulacao__caminho { padding: var(--e-4); border-radius: var(--r-doc);
+                       background: #FAFCFA; border: 1px solid #E3EAE5;
+                       border-left: 3px solid var(--v-600); }
+.formulacao__caminho-tit { font-size: var(--fs-sm); font-weight: 800; color: #0D1410;
+                           margin-bottom: var(--e-3); }
+.formulacao__caminho-tit small { display: block; font-size: var(--fs-2xs);
+                                 font-weight: 600; color: #7A8C82; margin-top: 2px; }
+.formulacao__opcao { padding: var(--e-3) 0; border-top: 1px dashed #CFDCD4; }
+.formulacao__opcao:first-of-type { border-top: 0; padding-top: 0; }
+.formulacao__opcao--melhor .formulacao__rotulo { color: var(--v-700); }
+.formulacao__marca { display: inline-block; margin-left: .4rem; padding: 1px 6px;
+                     border-radius: 999px; font-size: var(--fs-3xs); font-weight: 700;
+                     background: #E3EAE5; color: #405146; vertical-align: middle; }
+.formulacao__marca--melhor { background: rgba(78,154,42,.14); color: var(--v-800); }
+.formulacao__avisos { padding-top: var(--e-3); border-top: 1px solid #E3EAE5; }
+.formulacao__avisos p { margin: 0 0 .5rem; }
+.formulacao__avisos p:last-child { margin-bottom: 0; }
 .formulacao__cab { display: flex; flex-wrap: wrap; align-items: baseline;
                    justify-content: space-between; gap: var(--e-2);
                    margin-bottom: var(--e-3); }

@@ -14,7 +14,7 @@ siras.dominio.laudo` arrastaria o motor inteiro junto.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from siras.dominio.analise import AnaliseSolo, Contexto
 
@@ -84,59 +84,66 @@ class Complemento:
 
 
 @dataclass(frozen=True)
-class OpcaoFormulacao:
-    """Uma formulação NPK do catálogo, avaliada contra a recomendação desta análise.
+class OpcaoAdubacao:
+    """Uma forma de atender a recomendação, avaliada e custeada.
 
-    Quantidades em kg/ha e SEM arredondamento — quem arredonda é a apresentação.
+    Cobre os quatro tipos da ADR 0009: uma fórmula do catálogo, uma fórmula que o usuário
+    informou, uma fórmula ideal calculada para esta recomendação, ou a mistura de
+    fertilizantes simples. São todas comparáveis porque todas respondem à mesma pergunta
+    — o que aplicar e quanto —, e por isso compartilham a estrutura.
 
-    A dose é ancorada no nutriente mais deficiente no solo (Manual, §8.3, p. 311), que
-    por isso é atendido exatamente. O outro falta ou sobra, e as duas coisas ficam
-    declaradas: falta exige uma operação a mais, sobra é adubo pago e não aproveitado.
+    Quantidades em kg/ha e SEM arredondamento: quem arredonda é a apresentação, e a
+    escolha entre opções roda sobre o valor cheio.
     """
 
-    id: str
-    #: garantias do rótulo, em % de massa
-    n: float
-    p2o5: float
-    k2o: float
+    #: "catalogo" | "usuario" | "ideal" | "mistura_simples"
+    tipo: str
+    #: None na mistura de simples, que não tem fórmula
+    formula_id: Optional[str]
     dose_kg_ha: float
-    #: kg/ha de cada nutriente que esta dose entrega
-    entrega_n: float
-    entrega_p2o5: float
-    entrega_k2o: float
-    #: kg/ha que ainda faltam depois da fórmula (nunca negativos)
-    falta_p2o5: float
-    falta_k2o: float
-    #: kg/ha aplicados além do recomendado (nunca negativos)
-    excesso_p2o5: float
-    excesso_k2o: float
-    excesso_n: float
-    #: N do total recomendado que a fórmula não entregou, e vai para cobertura
-    n_cobertura: float
-    #: métrica de ordenação: (faltas + excessos) / (P2O5 + K2O recomendados). Menor é melhor
-    desvio_relativo: float
-    #: 'p2o5' ou 'k2o' — o nutriente que definiu a dose
-    ancora: str
-    #: True quando a âncora foi escolhida pela maior dose por falta de classe de teor
-    ancora_por_fallback: bool = False
-    complementos: List[Complemento] = field(default_factory=list)
-    #: de onde veio a entrada do catálogo. Dado de mercado, não do Manual.
+    #: "p2o5" ou "k2o" — o ponto de quebra escolhido. None na mistura de simples
+    ancora: Optional[str]
+    #: kg/ha de n, p2o5 e k2o que a fórmula entrega
+    fornecido: Dict[str, float] = field(default_factory=dict)
+    #: kg/ha aplicados além do recomendado, por nutriente (nunca negativos)
+    excesso: Dict[str, float] = field(default_factory=dict)
+    #: kg/ha que a fórmula não cobriu, por nutriente (nunca negativos)
+    falta: Dict[str, float] = field(default_factory=dict)
+    complementos: Tuple[Complemento, ...] = ()
+    #: valor da função de custo da ADR 0009. Menor é melhor
+    custo: float = 0.0
+    #: fórmula + complementos + ureia de cobertura. É o desempate de D9
+    massa_total_kg_ha: float = 0.0
+    #: garantias do rótulo, em % de massa. Vazio na mistura de simples
+    teores: Dict[str, float] = field(default_factory=dict)
+    #: de onde veio a entrada do catálogo. Vazio nos demais tipos
     fontes: List[str] = field(default_factory=list)
     origem: str = ""
+    #: ponto de quebra -> (dose, custo). É o que a trilha mostra para justificar a
+    #: escolha: as duas doses possíveis e o que cada uma custaria.
+    candidatos: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
-class IndicacaoFormulacao:
-    """Qual adubo formulado comprar, e as alternativas em ordem.
+class ResultadoFormulacao:
+    """Os três caminhos da ADR 0009, sempre os três.
 
-    `indicada` é None quando não há o que indicar — catálogo vazio, recomendação sem dose
-    numérica de P e K, ou nenhuma formulação capaz de atender. Isso não é erro: o laudo
-    segue completo sem a indicação, e `motivo_sem_indicacao` diz o que faltou.
+    Nenhum deles é obrigatório existir: sem catálogo cadastrado, `catalogo` vem vazia e os
+    outros dois seguem; sem dose numérica de P e K, os três vêm vazios e
+    `motivo_sem_indicacao` diz por quê. Em nenhum caso isso é erro — o laudo segue
+    completo.
     """
 
-    indicada: Optional[OpcaoFormulacao]
-    #: todas as avaliadas, em ordem de preferência
-    ranking: List[OpcaoFormulacao] = field(default_factory=list)
+    #: caminho A: uma opção por alvo de concentração (ADR 0009, D10)
+    ideais: List[OpcaoAdubacao] = field(default_factory=list)
+    #: caminho B: as melhores do catálogo, já incluídas as que o usuário informou
+    catalogo: List[OpcaoAdubacao] = field(default_factory=list)
+    #: caminho C: ureia, superfosfato triplo e cloreto de potássio
+    mistura: Optional[OpcaoAdubacao] = None
+    #: avisos fixos do laudo (ADR 0009, D12)
+    avisos: List[str] = field(default_factory=list)
+    #: True quando o N de plantio não foi informado e a fórmula ideal saiu binária
+    sem_n_de_plantio: bool = False
     motivo_sem_indicacao: Optional[str] = None
     criterio: str = ""
 
@@ -161,16 +168,17 @@ class Laudo:
     aptidao_potencial: "ResultadoAptidao"
     #: trilha de inferência completa — é o que alimenta a seção "De onde vem cada número"
     trace: "Trace" = field(repr=False)
-    #: adubo formulado que atende a recomendação. None quando o catálogo de mercado está
-    #: vazio — o laudo continua completo, só sem a ponte para o que se compra na revenda.
-    formulacao: Optional[IndicacaoFormulacao] = None
+    #: como atender a recomendação com produto: fórmula ideal, melhores do catálogo e
+    #: mistura de simples (ADR 0009). Nunca None — sem catálogo, os outros dois caminhos
+    #: seguem, e o laudo continua completo.
+    formulacao: Optional["ResultadoFormulacao"] = None
 
 
 __all__ = [
     "Complemento",
-    "IndicacaoFormulacao",
     "Laudo",
-    "OpcaoFormulacao",
+    "OpcaoAdubacao",
+    "ResultadoFormulacao",
     "RecomendacaoAdubacao",
     "RecomendacaoCalagem",
 ]

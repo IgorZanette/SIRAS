@@ -2,7 +2,7 @@
 Testes de siras/motor/calagem.py.
 
 Caso oficial G-SOJA-01 (testes/casos/casos_recomendacao.json, memória de cálculo em
-docs/COMO_CALCULAR_ORACULO.md), confirmado pelo autor: soja, convencional, pH 5,1,
+docs/validacao/como-calcular-oraculo.md), confirmado pelo autor: soja, convencional, pH 5,1,
 SMP 5,4, PRNT 100 -> nc_t_ha = 6,8.
 """
 

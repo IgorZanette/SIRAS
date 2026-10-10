@@ -1,0 +1,10 @@
+SIRAS — pacote de artes 3D conceituais
+
+Arquivos PNG em alta resolução para referência visual e prototipagem da interface.
+
+IMPORTANTE:
+- 01 e 02 são renders individuais do perfil de solo com muda e raízes.
+- 03 a 07 são painéis de conceito com múltiplas composições/elementos na mesma imagem; não são sprites recortados individualmente.
+- As imagens são renders 2D com aparência 3D, não modelos 3D manipuláveis (GLB/GLTF), nem animações.
+- Os fundos são escuros e NÃO têm transparência real.
+- Para integração imediata, use os PNGs como imagens estáticas no componente de carregamento. Para um modelo 3D interativo, será necessário criar/exportar um modelo GLB/GLTF e implementar o visualizador.

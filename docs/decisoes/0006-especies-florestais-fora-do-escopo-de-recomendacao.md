@@ -19,7 +19,7 @@ e permanece no escopo.
 Mesmo assim, `dados/comum/mapa_culturas.json` mapeia as seis florestais (acácia-negra,
 araucária, bracatinga, cedro-australiano, eucalipto e pinus) para o critério
 `erva_mate_e_florestais`. O mapeamento não foi acidente: entrou em 2026-09-10 como a
-resolução da divergência **B-4** do `docs/CCAE-v1.1.md`, Apêndice B, onde o caso
+resolução da divergência **B-4** do o caderno v1.1 (tag `criterios-v1.1`), Apêndice B, onde o caso
 `CONF-PT-05` (eucalipto, cenário POTENCIAL) falhava porque, sem a cultura mapeada, a dose
 de calcário não era calculável e o motor não conseguia verificar a exequibilidade da
 correção (CCAE §7.2).

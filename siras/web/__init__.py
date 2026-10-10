@@ -2,7 +2,7 @@
 
 Flask é casca. Nenhuma regra agronômica mora aqui — as rotas montam AnaliseSolo e
 Contexto a partir do formulário, chamam gerar_laudo() e renderizam o resultado
-(docs/ARQUITETURA.md). É por isso que siras/motor/ e siras/dominio/ continuam rodando
+(docs/especificacao/arquitetura.md). É por isso que siras/motor/ e siras/dominio/ continuam rodando
 por linha de comando, sem Flask instalado no caminho.
 
 Fábrica em vez de `app` global: os testes criam a aplicação em modo de teste sem

@@ -8,7 +8,7 @@ tocar em nenhum arquivo `.py`.
 - Codificação UTF-8, indentação de 2 espaços, chaves em `snake_case` sem acento.
 - Todo arquivo tem um bloco `fonte` com manual, tabela, página e datas de transcrição e conferência.
 - Valor ainda não transcrito: `null` ou `"PREENCHER"`. **Nunca** um valor aproximado.
-- Todo arquivo transcrito ganha uma linha em `docs/mapa_manual.md` **no momento da transcrição**.
+- Todo arquivo transcrito ganha uma linha em `docs/especificacao/mapa-do-manual.md` **no momento da transcrição**.
 
 ## Arquivos comuns (`dados/comum/`)
 
@@ -37,8 +37,8 @@ Tabelas compartilhadas por todas as culturas de um grupo (não uma por cultura i
 | `dados/culturas/frutiferas/frutiferas_adubacao.json` | Cap. 6.5, p. 190–231 — N/P/K das 17 frutíferas, em 3 fases | transcrito e conferido |
 | `dados/culturas/erva_mate/erva_mate_adubacao.json` | Seção 6.6.5, p. 239–244 — programas desde o plantio e de recuperação | transcrito e conferido |
 
-Ver `docs/CONFERENCIA_S3.md` e `docs/CONFERENCIA_S4.md` para o roteiro de conferência página a
-página desses arquivos, e `docs/NOTA_EXTRACAO_PDF.md` para o problema de extração do símbolo `≤`
+Ver `docs/especificacao/base-de-conhecimento.md` e `docs/especificacao/base-de-conhecimento.md` para o roteiro de conferência página a
+página desses arquivos, e `docs/especificacao/nota-extracao-pdf.md` para o problema de extração do símbolo `≤`
 que motivou o roteiro. Decisões de modelagem (doses em faixa/teto, variáveis condicionais, classes
 de MO por referência) estão em `docs/decisoes/0004-normalizacao-de-doses-e-variaveis-condicionais.md`.
 

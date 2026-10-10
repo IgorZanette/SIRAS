@@ -1,7 +1,7 @@
 """
 Aptidão edáfica: classificação determinística por fator mínimo (Ramalho Filho e Beek,
 1995, conforme descrito por Höfig, Moura e Giasson, 2015), aplicada aos sete fatores
-químicos e texturais definidos em docs/CCAE-v1.0.md (F1 acidez, F2 fósforo, F3 potássio,
+químicos e texturais definidos em docs/especificacao/ccae.md (F1 acidez, F2 fósforo, F3 potássio,
 F4 cálcio/magnésio, F5 CTC, F6 matéria orgânica, F7 textura).
 
 Reaproveita a base de conhecimento e os motores já existentes em vez de duplicá-los:
@@ -102,7 +102,7 @@ class ResultadoAptidao:
     rebaixamento_aplicado: bool = False
     versao_criterios: str = _VERSAO_CRITERIOS
     #: Valores intermediários que os fatores consomem (V%, m%, classe de argila, classe de
-    #: CTC). Não fazem parte do contrato do CCAE-implementacao.md §6; existem porque a
+    #: CTC). Não fazem parte do contrato do ccae-implementacao.md §6; existem porque a
     #: verificação de conformidade precisa localizar em QUAL etapa uma divergência nasceu —
     #: um V% errado erra F1 e a classe junto, e sem isto os dois casos são indistinguíveis.
     derivados: Dict[str, Any] = field(default_factory=dict)
@@ -139,7 +139,7 @@ def _classificar_faixa_fechada_no_meio(
     Nos dois casos a faixa do meio é fechada nos dois extremos, e as pontas são
     estritamente abertas. Aplicar `<=` aqui erra silenciosamente, e só nos valores de
     fronteira — os casos CONF-FR-21, CONF-FR-23, CAL-13 e ANX-G3-* existem para pegar
-    isso (docs/HANDOFF-aptidao.md §4).
+    isso (docs/especificacao/ccae.md §4).
 
     Os limites em si continuam vindo dos dados transcritos; o que muda é só a comparação.
     Decimal porque a comparação é exatamente sobre o limite, onde float falha.

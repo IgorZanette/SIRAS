@@ -1,7 +1,7 @@
 {
   "descricao": "Equivalencias de NOME entre a Tabela 5.1 (pH de referencia) e o Anexo 2 (grupos de exigencia de P e K) do Manual. A mesma cultura aparece com denominacoes diferentes nas duas fontes; sem este mapa, uma cultura que existe nas duas tabelas fica INDETERMINADA por divergencia de nomenclatura, nao por lacuna de dado.",
   "fonte": {
-    "documento": "docs/HANDOFF-aptidao.md, Sec. 7 (sinonimia declarada pelo autor)",
+    "documento": "docs/decisoes/0005-motor-de-aptidao-edafica.md (sinonimia declarada pelo autor)",
     "manual": "CQFS-RS/SC, 11. ed., 2016, Tabela 5.1 (p. 68) e Anexo 2 (p. 361-366)"
   },
   "nota_normalizacao": "Maiusculas, acentos, hifens, underscores e espacos NAO entram aqui: sao resolvidos por _normalizar_nome_cultura() em siras/motor/aptidao.py, que e normalizacao ortografica pura, sem conteudo agronomico. Este arquivo lista somente equivalencias que exigem julgamento (nomes realmente distintos para a mesma cultura).",

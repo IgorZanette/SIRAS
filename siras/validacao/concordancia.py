@@ -1,7 +1,7 @@
 """
 Concordância entre as saídas do SIRAS e o oráculo calculado à mão pelo autor.
 
-Corresponde à dimensão (i) do protocolo de validação, `docs/VALIDACAO.md`, e é a fonte da
+Corresponde à dimensão (i) do protocolo de validação, `docs/validacao/protocolo.md`, e é a fonte da
 tabela principal da seção de Resultados.
 
 Um caso é **concordante** quando TODAS as saídas que a referência declara coincidem com
@@ -14,7 +14,7 @@ produz a tabela da monografia, e `testes/unidade/test_casos_validados.py` roda o
 casos na suíte. Fosse código separado, o número publicado viria de um caminho que nenhum
 teste exercita — e é justamente o número que sustenta a H1.1.
 
-Intervalo de confiança por **Wilson** (`docs/VALIDACAO.md`): com n pequeno e proporção
+Intervalo de confiança por **Wilson** (`docs/validacao/protocolo.md`): com n pequeno e proporção
 perto de 1, o intervalo normal produz limite superior acima de 1 e limite inferior
 negativo, que não querem dizer nada.
 """
@@ -100,7 +100,7 @@ _ADUBACAO_POR_GRUPO = {
     "erva_mate": (calcular_adubacao_erva_mate, carregar_dados_erva_mate, "dados_erva_mate"),
 }
 
-#: Saídas comparáveis e a casa decimal da política de arredondamento (docs/VALIDACAO.md):
+#: Saídas comparáveis e a casa decimal da política de arredondamento (docs/validacao/protocolo.md):
 #: calcário com uma casa em t/ha, nutrientes inteiros em kg/ha.
 _CASAS = {"nc_t_ha": 1, "n": 0, "p2o5": 0, "k2o": 0}
 
@@ -162,7 +162,7 @@ def wilson(acertos: int, total: int, z: float = 1.959963985) -> Optional[Tuple[f
     """Intervalo de confiança de 95% de Wilson para uma proporção.
 
     `z` é o quantil 0,975 da normal padrão. O método de Wilson é o indicado em
-    `docs/VALIDACAO.md` porque, ao contrário do intervalo normal, nunca sai do [0, 1] e
+    `docs/validacao/protocolo.md` porque, ao contrário do intervalo normal, nunca sai do [0, 1] e
     continua informativo quando a proporção é 1 — que é exatamente o caso aqui.
     """
     if total <= 0:
@@ -257,7 +257,7 @@ def _adubacao_do_caso(
 def _comparar(campo: str, esperado: Any, obtido: Any) -> bool:
     """Compara uma saída com a referência, sob a política de arredondamento.
 
-    `docs/VALIDACAO.md` admite apenas tolerância de arredondamento: calcário com uma casa
+    `docs/validacao/protocolo.md` admite apenas tolerância de arredondamento: calcário com uma casa
     decimal em t/ha, nutrientes inteiros em kg/ha. Comparar float cru faria 2,2999999
     divergir de 2,3 e inventaria uma discordância que não existe.
     """

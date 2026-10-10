@@ -1,6 +1,6 @@
 # CCAE — Especificação de Implementação
 
-Companheiro técnico do `CCAE-v1.0.md`. Este arquivo é o que você entrega ao Claude Code junto com o Caderno.
+Companheiro técnico do Caderno de Critérios (`ccae.md`). Este arquivo é o que você entrega ao Claude Code junto com o Caderno.
 
 **Regra de ouro:** nenhum limiar numérico no código Python. Todos vivem em JSON, versionados. O motor é um interpretador genérico das tabelas.
 
@@ -369,7 +369,7 @@ Testes obrigatórios adicionais:
 | # | Etapa | Saída |
 |---|---|---|
 | 1 | Conferir a pendência A-10 no Manual impresso | Apêndice A atualizado |
-| 2 | Aprovar o CCAE com o orientador | E-mail datado — **concluído:** e-mail do Prof. Dr. Rafael Rieder em 10/09/2026, 14:04, transcrito no Apêndice D do `CCAE-v1.1.md` |
+| 2 | Aprovar o CCAE com o orientador | E-mail datado — **concluído:** e-mail do Prof. Dr. Rafael Rieder em 10/09/2026, 14:04, transcrito no Apêndice D do `ccae.md` |
 | 3 | `git tag criterios-v1.0` | Tag no repositório — **pendente:** a aprovação recaiu sobre a v1.1; a tag a criar é `criterios-v1.1` |
 | 4 | Transcrever tabelas para JSON + conferência manual | `criterios_aptidao.json` |
 | 5 | Preencher `gabarito_conformidade.csv` à mão | 60 casos com data e autor |
@@ -380,4 +380,4 @@ Testes obrigatórios adicionais:
 
 As etapas 1 a 3 acontecem **antes** de qualquer linha de código. É a ordem que sustenta a alegação de não-circularidade.
 
-> **Nota de adaptação:** etapa 1 (A-10) foi resolvida sem necessidade de conferência do impresso — ver a nota na Seção 3 acima e o Apêndice A do CCAE-v1.0.md. Etapas 4-6 foram adaptadas à arquitetura existente conforme as notas desta seção e `docs/decisoes/0005`. Etapa 5 foi cumprida pelo autor em `testes/casos/gabarito_aptidao.csv`.
+> **Nota de adaptação:** etapa 1 (A-10) foi resolvida sem necessidade de conferência do impresso — ver a nota na Seção 3 acima e o Apêndice A do Caderno. Etapas 4-6 foram adaptadas à arquitetura existente conforme as notas desta seção e `docs/decisoes/0005`. Etapa 5 foi cumprida pelo autor em `testes/casos/gabarito_aptidao.csv`.

@@ -1,10 +1,17 @@
 # Caderno de Critérios de Aptidão Edáfica (CCAE)
 
-**Versão:** 1.1
-**Status:** aprovado pelo orientador — e-mail do Prof. Dr. Rafael Rieder em 10/09/2026, 14:04 (transcrito no Apêndice D)
-**Data de congelamento:** 2026-09-10
-**Tag Git prevista:** `criterios-v1.1`
-**Superada pela v1.2** (`docs/CCAE-v1.2.md`), aprovada pelo orientador em reunião de 10/09/2026 e congelada na tag `criterios-v1.2`. A v1.2 clarifica a §7.1, ramo (b), sem alterar limiar nem gabarito — a função de mapeamento entrada → grau é idêntica. Esta v1.1 permanece como registro da versão sob a qual o conjunto de conformidade foi executado.
+**Versão:** 1.3
+**Status:** aprovado e congelado — versão vigente. Sucede a v1.2 (tag `criterios-v1.2`)
+**Data de congelamento:** 2026-09-24
+**Tag Git:** `criterios-v1.3`
+
+> **Versões anteriores.** As v1.0, v1.1 e v1.2 saíram de `docs/` em 10/10/2026, na
+> reorganização da pasta. O Apêndice C abaixo traz o histórico do que mudou entre elas, e
+> o conteúdo exato de cada uma continua recuperável pelas tags que a congelaram:
+> `git show criterios-v1.1:docs/CCAE-v1.1.md` e `git show criterios-v1.2:docs/CCAE-v1.2.md`.
+> A tag é evidência melhor que o arquivo solto: prova a data e o conteúdo, e é o que
+> sustenta a alegação de §9.1 de que o conjunto de conformidade foi executado sob uma
+> versão específica.
 **Sistema:** SIRAS — Sistema de Recomendação e Aptidão do Solo
 
 ---
@@ -148,7 +155,7 @@ Sete fatores. Cada um recebe um grau de 0 a 4.
 
 ### F1 — Acidez e toxidez por alumínio
 
-**Fonte:** Manual RS/SC 2016, Tabela 5.1 (p. 68), texto p. 69, Tabelas 5.3 a 5.7; Sobral et al. (2015), Tabela 4.
+**Fonte:** Manual RS/SC 2016, Tabela 5.1 (p. 68), texto p. 69, Tabelas 5.3 a 5.7 — para o ramo (b), especificamente as Tabelas **5.4** (p. 78), **5.6** (p. 83) e **5.7**; Sobral et al. (2015), Tabela 4.
 
 O Manual estabelece que a toxidez por Al é uma das maiores limitações de solos ácidos e que o Al em forma trocável só ocorre quando o pH em água é menor que 5,5. Para culturas com pH de referência 6,0, a acidez limita pouco a produtividade enquanto o pH cai de 6,0 até 5,5, pois somente abaixo desse valor reaparece o Al trocável.
 
@@ -164,12 +171,33 @@ O Manual estabelece que a toxidez por Al é uma das maiores limitações de solo
 
 **Ramo (b) — culturas SEM pH de referência** (araucária, acácia-negra, bracatinga, cedro-australiano, erva-mate, eucalipto, pinus, pastagem natural — Tabela 5.1):
 
-O Manual estabelece que estas espécies são tolerantes ao Al trocável e não respondem à correção da acidez; a resposta à calagem é atribuída principalmente ao suprimento de Ca e Mg, com critério baseado em `V% < 40%`, exceto se `Ca ≥ 4,0` e `Mg ≥ 1,0 cmolc/dm³` (Tabelas 5.6 e 5.7).
+O Manual estabelece que estas espécies são tolerantes ao Al trocável e não respondem à correção da acidez; a resposta à calagem é atribuída principalmente ao suprimento de Ca e Mg. As três tabelas que cobrem o ramo — 5.4 (campo natural, p. 78), 5.6 (frutíferas e florestais, p. 83) e 5.7 (medicinais e ornamentais) —, conferidas no impresso pelo autor em 2026-09-10, trazem **a mesma regra**:
 
-| Condição | Grau |
-|---|---|
-| `V% ≥ 40` ou (`Ca ≥ 4,0` e `Mg ≥ 1,0`) | `NULO` |
-| `V% < 40` e não satisfaz a exceção Ca/Mg | `MODERADO` |
+- **decisão:** calagem indicada quando `V% ≤ 40`;
+- **dose:** `NC = (40 − V%) / 100 × CTC_pH7,0`;
+- **exceção:** não aplicar se `Ca ≥ 4,0` **e** `Mg ≥ 1,0 cmolc/dm³` — redação da nota (2) da Tab. 5.6.
+  A Tab. 5.4 traz a exceção também para o Campo Natural (nota (6), conferida pelo autor em 2026-09-13), e a Tab. 5.3 a repete na nota (8) com texto idêntico. Nessas duas notas o operador aparece como **igualdade** — "Não aplicar se Ca trocável = 4,0 e Mg trocável = 1,0 cmolc/dm³" —, e o CCAE lê as três como limite mínimo (`≥`). **Essa leitura é decisão declarada do autor, A-11 do Apêndice A**, sustentada pelo artefato de extração de glifos já documentado em `docs/especificacao/nota-extracao-pdf.md` e pelo próprio Anexo 1 do Manual, que aplica a exceção como limiar. Ver A-11 e B-7 para a fundamentação completa.
+
+**Regra de F1 no ramo (b): há limitação de acidez se e somente se a necessidade de calcário for maior que zero.**
+
+| Condição | `NC` | Grau |
+|---|---|---|
+| `V% ≥ 40`, ou exceção Ca/Mg satisfeita | `= 0` | `NULO` |
+| `V% < 40` e exceção não satisfeita | `> 0` | `MODERADO` |
+
+**Por que pela dose e não pelo gatilho.** O gatilho das Tabelas 5.4 e 5.6 inclui o próprio 40 (`V ≤ 40`), e nesse ponto a fórmula devolve `NC = (40 − 40)/100 × CTC = 0`. "Calagem indicada, 0,0 t/ha" e "acidez sem limitação" descrevem o mesmo estado do solo — o Manual não se contradiz. Amarrar F1 ao gatilho faria o módulo de aptidão contradizer o de calagem exatamente em `V% = 40`, que foi o defeito registrado em B-6; amarrá-lo à dose faz os dois derivarem da mesma grandeza. A tabela acima é, por construção, idêntica em resultado à da v1.1 em todo o domínio, inclusive na fronteira — o que muda é de onde a regra deriva, e portanto o que acontece quando um dos lados for alterado no futuro.
+
+**F1 calcula `NC` pela fórmula acima, sem chamar o módulo de calagem.** A alternativa — obter a dose de `motor/calagem.py` — criaria dependência de a cultura estar mapeada em `mapa_culturas.json`, e a pastagem natural deliberadamente não está: seu critério é a Tabela 5.4, e `criterios_calagem.json` declara a calagem de pastagem fora do escopo do SIRAS. Sob essa alternativa o `CONF-RB-04` passaria a `INDETERMINADA`, que é o mecanismo já observado em B-4. Como as três tabelas do ramo usam a mesma fórmula, e `V%` e `CTC_pH7` já são entradas obrigatórias (§5.1), nada se perde ao calcular localmente.
+
+**Isto é duplicação deliberada de fórmula, não descuido**, e o registro aqui é parte da decisão: a mesma expressão `(40 − V%)/100 × CTC_pH7` existe em `motor/aptidao.py` (para decidir F1) e em `motor/calagem.py` (para recomendar a dose). Duplicação consciente e testada é aceitável; duplicação silenciosa é como se chega a um B-6. **Condição de aceitação:** um teste deve comparar as duas implementações nas culturas em que ambas existem — as do ramo (b) mapeadas em `mapa_culturas.json` — e falhar se divergirem. Sem esse teste, a duplicação deixa de ser deliberada e vira o próximo defeito invisível.
+
+**Precisão de `NC` para efeito de F1.** F1 lê `NC` **antes** do arredondamento de apresentação (uma casa decimal, ADR 0002) e antes do teto de exequibilidade (§7.2).
+
+A razão não é estética. Arredondar antes do corte faria a classe de aptidão depender da CTC por um caminho que não é agronômico. Dois solos com `V% = 39,99` e CTC de 4,0 e 30,0 cmolc/dm³ têm o mesmo grau de deficiência de bases, mas doses de 0,0004 e 0,003 t/ha; com CTC suficientemente alta, um deles cruzaria 0,05 e mudaria de classe enquanto o outro não. O limiar efetivo passaria a ser uma função da CTC que nenhuma tabela do Manual especifica e que ninguém decidiu adotar.
+
+Lendo `NC` antes do arredondamento, `NC > 0` é **matematicamente equivalente a `V% < 40`** — o próprio gatilho do Manual, lido do lado da dose. A regra permanece idêntica à original e a fronteira volta a ser um número só.
+
+**`NC` para efeito de F1 é grandeza de decisão, não de recomendação, e nunca deve ser exibida.** O que aparece no laudo é a dose do módulo de calagem, arredondada, com a supressão do `0,0 t/ha`. Manter as duas separadas é o que impede que alguém "unifique" as grandezas mais adiante e reabra B-6 por outro caminho.
 
 Neste ramo o pH **não** é avaliado. F1 nunca ultrapassa `MODERADO`, o que é coerente com a tolerância documentada dessas espécies.
 
@@ -231,7 +259,7 @@ Passo 3 — enquadrar `p_mehlich1` (mg P/dm³):
 | Alto | 4,6 – 9,0 | 6,1 – 12,0 | 9,1 – 18,0 | 15,1 – 30,0 |
 | Muito alto | > 9,0 | > 12,0 | > 18,0 | > 30,0 |
 
-> ⚠ **PENDÊNCIA A-10 RESOLVIDA (ver Apêndice A).** O texto extraído do PDF apresenta a faixa Baixo da coluna Argila 1 como "1,5 – 3,0", aparentemente sobrepondo o limite superior de Muito baixo (≤ 1,5). Isso é artefato do arredondamento a uma casa decimal do Manual, não erro de transcrição nem lacuna real (mesmo raciocínio da Seção 2 do CCAE-implementacao.md). `dados/comum/interpretacao_p.json` (Tabela 6.5, p. 94) já traz esta mesma tabela, transcrita e conferida pelo autor em 2026-08-22, representando cada classe **apenas pelo limite superior**, com comparação `de < valor ≤ ate` em ordem crescente. Sob essa convenção, o valor 1,5 classifica-se em Muito baixo (`1,5 ≤ 1,5`) e Baixo passa a valer, na prática, de 1,5 (exclusive) a 3,0 (inclusive) — sem sobreposição e sem necessidade de mover o limite para 1,6. O motor de aptidão (F2_fosforo) referencia `interpretacao_p.json` diretamente em vez de duplicar esta tabela, eliminando o risco de as duas fontes divergirem.
+> ⚠ **PENDÊNCIA A-10 RESOLVIDA (ver Apêndice A).** O texto extraído do PDF apresenta a faixa Baixo da coluna Argila 1 como "1,5 – 3,0", aparentemente sobrepondo o limite superior de Muito baixo (≤ 1,5). Isso é artefato do arredondamento a uma casa decimal do Manual, não erro de transcrição nem lacuna real (mesmo raciocínio da Seção 2 do ccae-implementacao.md). `dados/comum/interpretacao_p.json` (Tabela 6.5, p. 94) já traz esta mesma tabela, transcrita e conferida pelo autor em 2026-08-22, representando cada classe **apenas pelo limite superior**, com comparação `de < valor ≤ ate` em ordem crescente. Sob essa convenção, o valor 1,5 classifica-se em Muito baixo (`1,5 ≤ 1,5`) e Baixo passa a valer, na prática, de 1,5 (exclusive) a 3,0 (inclusive) — sem sobreposição e sem necessidade de mover o limite para 1,6. O motor de aptidão (F2_fosforo) referencia `interpretacao_p.json` diretamente em vez de duplicar esta tabela, eliminando o risco de as duas fontes divergirem.
 
 Passo 4 — aplicar o mapeamento da Seção 4.1.
 
@@ -402,6 +430,10 @@ A correção da acidez só é considerada realizável se a dose recomendada não
 
 Se a dose exceder o teto, F1 no cenário `POTENCIAL` permanece um grau acima de `NULO` e o laudo registra `correcao_parcelada = true`, indicando necessidade de correção plurianual. Se F1 já era `NULO` ou `LIGEIRO` no cenário `ATUAL` (isto é, a calagem não chega a ser disparada pelo critério da cultura, porque o pH já está acima de 5,5), não há dose a aplicar e F1 permanece inalterado no cenário `POTENCIAL` — não há correção a projetar quando o próprio Manual não recomenda calcário.
 
+**Precisão de `NC` para a exequibilidade (v1.3).** A exequibilidade lê `NC` **antes** do arredondamento de apresentação, pela mesma razão da §7.1: tanto para decidir se há correção a projetar (`NC > 0`) quanto para comparar com o teto. Consequência: quando o critério dispara e a dose real é positiva mas arredonda a `0,0 t/ha` — no ramo (b), `V%` logo abaixo de 40, com `40 − V% < 0,05 × PRNT / CTC` —, F1 no cenário `POTENCIAL` é `NULO`: a correção é exequível, e ínfima. Na v1.2, lida a dose arredondada, F1 permanecia inalterado nessa faixa, e o laudo mostrava calcário `0,0 t/ha` com acidez limitante nos dois cenários. Como na §7.1, a `NC` de decisão nunca é exibida.
+
+> **Decisão do autor (13/09/2026, opção A):** a exequibilidade lê `NC` antes do arredondamento.
+
 > **Decisão do autor (A-7):** o teto de 20 t/ha para aplicação incorporada é escolha do autor. O limite de 5 t/ha para superfície é literal do Manual. Ambos são parâmetros de configuração.
 
 **Consequência de projeto:** no cenário `POTENCIAL`, a classe é determinada exclusivamente por F5, F6 (nível estrutural) e F7. A diferença entre `ATUAL` e `POTENCIAL` **quantifica o ganho atribuível à recomendação que o SIRAS acabou de emitir** — o que integra os dois módulos do sistema e rende discussão substantiva na monografia.
@@ -510,11 +542,11 @@ Divisão obrigatória:
 | Conjunto | N | Uso |
 |---|---|---|
 | Calibração | 14 | Casos `CAL-01` a `CAL-14`; ajustes no CCAE são permitidos e geram nova versão |
-| Conformidade | 62 | Casos restantes válidos; executados ao final. Qualquer ajuste posterior invalida o conjunto |
+| Conformidade | 70 | Casos restantes válidos (62 da v1.1 e 8 conferidos manualmente pelo autor em 2026-09-13); executados ao final. Qualquer ajuste posterior invalida o conjunto |
 
 Estratificação do conjunto de conformidade:
 
-- **Por grupo de cultura:** os seis grupos do escopo, com pelo menos um caso de cada ramo especial (frutíferas em três fases, erva-mate, tabaco Virgínia e Burley).
+- **Por grupo de cultura:** os seis grupos do escopo, com pelo menos um caso do ramo especial da erva-mate. *(v1.3: retirada a exigência de casos de frutíferas em três fases e de tabaco Virgínia e Burley — o módulo de aptidão não usa fase nem tipo de tabaco, e esses estratos não exercitam nenhum ramo do CCAE.)*
 - **Por ramo de F1:** casos com pH de referência 5,5 / 6,0 / 6,5 e casos sem pH de referência (ramo b).
 - **Por fator determinante:** ao menos 4 casos para cada um dos sete fatores como fator determinante isolado.
 - **Casos de fronteira — mínimo 12:** valores exatamente nos limites publicados e a ±0,1 deles. Exemplos: `pH = 5,5` exato; `argila = 20,0` e `20,1`; `P = 6,0` e `6,1` na classe de argila 3, grupo 2; `CTC = 7,5` e `7,6`; `m% = 30,0` e `50,0`; `Ca = 2,0` e `4,0`.
@@ -601,7 +633,8 @@ Toda escolha não determinada pelas fontes. É a lista que vai ao auditor e à b
 | A-7 | Teto de 20 t/ha para calagem incorporada | Plausibilidade operacional | Média | `NC_MAX_INCORPORADO` |
 | A-8 | Uso dos limiares de m% de Sobral et al. (2015) | Manual não gradua m%; fonte é do próprio projeto | Média | tabela `F1_M_PERCENT` |
 | A-9 | Escala de quatro classes | Adaptação da escala Boa/Regular/Restrita/Inapta | Baixa | — |
-| A-10 | Resolvido: sem correção de valor. A aparente sobreposição da Tab. 6.5, coluna argila classe 1 (Muito baixo ≤ 1,5; Baixo "1,5 – 3,0") é artefato de arredondamento do PDF, não erro de transcrição. Sob a convenção de classificação por limite superior (`de < valor ≤ ate`, já em uso em `dados/comum/interpretacao_p.json`, conferido pelo autor em 2026-08-22), 1,5 cai em Muito baixo e Baixo passa a valer, na prática, de 1,5 (exclusive) a 3,0 (inclusive) — sem sobreposição. Não foi necessário adotar 1,6 nem alterar nenhum valor transcrito | Convenção de classificação por limite superior (Seção 2 do CCAE-implementacao.md), já aplicada a todas as tabelas de interpretação do SIRAS | Baixa — resolvido sem alteração de dado | — |
+| A-10 | Resolvido: sem correção de valor. A aparente sobreposição da Tab. 6.5, coluna argila classe 1 (Muito baixo ≤ 1,5; Baixo "1,5 – 3,0") é artefato de arredondamento do PDF, não erro de transcrição. Sob a convenção de classificação por limite superior (`de < valor ≤ ate`, já em uso em `dados/comum/interpretacao_p.json`, conferido pelo autor em 2026-08-22), 1,5 cai em Muito baixo e Baixo passa a valer, na prática, de 1,5 (exclusive) a 3,0 (inclusive) — sem sobreposição. Não foi necessário adotar 1,6 nem alterar nenhum valor transcrito | Convenção de classificação por limite superior (Seção 2 do ccae-implementacao.md), já aplicada a todas as tabelas de interpretação do SIRAS | Baixa — resolvido sem alteração de dado | — |
+| A-11 | Ler como limite mínimo (`≥`) o operador que as notas da exceção Ca/Mg trazem como igualdade (`=`) na camada de texto do Manual: Tab. 5.6, nota (2); Tab. 5.4, nota (6); Tab. 5.3, nota (8). Vale também para a exceção `V ≥ 65%` da nota (1) da Tab. 5.4 | Cinco evidências convergentes, detalhadas em B-7: (i) o artefato de glifo perdido está medido e documentado no próprio projeto (`docs/especificacao/nota-extracao-pdf.md` — o `≤` do PDF não existe na camada de texto e "às vezes some, às vezes vira `=`"); (ii) o `<` da mesma frase sobrevive, o que localiza a perda nos glifos `≥`/`≤`, não na redação; (iii) o artefato aparece também na prosa da p. 77, e não só em célula de tabela; (iv) o Anexo 1 (p. 354) aplica a exceção como limiar, ao dispensar a Gleba 4 por `Ca < 4,0` "embora tenha teor de Mg maior que 1,0"; (v) sob igualdade exata sobre variável contínua a regra praticamente nunca dispararia, e a exceção existe porque o suprimento de Ca e Mg já é suficiente — um teor maior a satisfaz com mais razão | Baixa — leitura já implementada e sem caso dependente no conjunto (`CONF-RB-04`: `Ca = 3,6`) | `F1_acidez.sem_ph_referencia.excecao` em `criterios_aptidao.json` |
 
 ## Apêndice B — Registro de divergências de conformidade
 
@@ -613,9 +646,23 @@ Toda escolha não determinada pelas fontes. É a lista que vai ao auditor e à b
 | B-4 | `CONF-PT-05` (eucalipto, POTENCIAL) | `APTA` / `F5_ctc` (F1 = `NULO`) | `APTA_COM_RESTRICOES` / `F1_acidez` (F1 = `MODERADO`) | O critério de calagem `erva_mate_e_florestais` existe em `criterios_calagem.json`, mas `mapa_culturas.json` mapeia só as 21 culturas de grãos mais erva-mate e macieira. Sem o eucalipto mapeado, a dose não é calculável, o motor não consegue verificar a exequibilidade (§7.2) e mantém F1 — comportamento correto e explícito, sobre base incompleta | **Resolvido em 2026-09-10:** as seis espécies florestais restantes do Anexo 2, seção FLORESTAIS, p. 364 (acácia-negra, araucária, bracatinga, cedro-australiano, eucalipto, pinus) mapeadas em `mapa_culturas.json` para o critério `erva_mate_e_florestais`, que já existia. Todas declaram `grupo: "erva_mate"` porque essa é a chave do grupo desse critério em `criterios_calagem.json` — invariante do carregador, não afirmação agronômica sobre a espécie. Nenhuma alteração de código nem de critério | 2026-09-09 → 2026-09-10 |
 
 | B-5 | `CONF-RB-04` (pastagem natural) | — | — | **Não é divergência de resultado: é atribuição de fonte não verificada, e o teste passa.** A Seção 7.1, ramo (b), inclui a pastagem natural entre as culturas sem pH de referência e atribui o critério `V% < 40` com exceção `Ca ≥ 4,0` e `Mg ≥ 1,0` às **Tabelas 5.6 e 5.7**. A Tab. 5.6 (p. 83) cobre frutíferas e florestais — é a fonte do critério `erva_mate_e_florestais` em `criterios_calagem.json`, e a exceção Ca/Mg é a nota (2) dela. A Tab. 5.7 cobre medicinais e ornamentais. **Pastagem natural não está em nenhuma das duas:** campo natural é da Tabela 5.4 (p. 78), que `criterios_calagem.json`, campo `escopo`, declara fora do escopo do SIRAS. A pertinência ao ramo (b) está correta — `ph_referencia.json` põe `pastagem-natural` no grupo sem pH de referência da Tab. 5.1 —; o que não está sustentado é o critério de grau usado para ela. O caso passa hoje porque V% = 40,0 exatos cai em `NULO` pela regra como escrita, o que torna o defeito invisível para a suíte | **Resolvido em 2026-09-10, quanto à fonte:** autor conferiu a Tabela 5.4 (p. 78) no impresso. Para Campo Natural, a tomada de decisão é `V ≤ 40%` e a quantidade de calcário é `NC = (40 − V%)/100 × CTC pH 7,0` — **numericamente igual** ao critério da Tab. 5.6. A regra aplicada à pastagem natural estava, portanto, correta no valor; errada era só a procedência. Correção documental: o ramo (b) da Seção 7.1 deve citar **Tabelas 5.4, 5.6 e 5.7**, e o campo `_fonte` de `F1_acidez.sem_ph_referencia` em `criterios_aptidao.json` idem. Permanece em aberto se a Tab. 5.4 traz a exceção `Ca ≥ 4,0` e `Mg ≥ 1,0` (nota (2) da Tab. 5.6) também para campo natural — o autor conferiu decisão e dose, não a exceção; no `CONF-RB-04` ela não dispara (Ca = 3,6), então não afeta o caso. Ver também a tensão de escopo: `CAL-12` (alfafa) e `CONF-RB-04` são as duas culturas da Tab. 5.4 no conjunto de conformidade da aptidão, embora `criterios_calagem.json` declare a calagem de pastagem fora de escopo. **A conferência abriu B-6** | 2026-09-10 |
-| B-6 | Todo o ramo (b) de F1; `CONF-RB-04` é o caso que expõe | `F1 = NULO` em `V% = 40,0` | idem (o teste passa) | **Contradição interna do SIRAS na fronteira `V% = 40`.** A conferência da p. 78 registra a decisão como `V ≤ 40%` — e `criterios_calagem.json`, no critério `erva_mate_e_florestais`, já usava `"tipo": "v_menor_igual", "v": 40`. Ou seja, **a calagem dispara em `V = 40` exatos**. Mas a Seção 7.1, ramo (b), e `criterios_aptidao.json` (`F1_acidez.sem_ph_referencia.v_minimo = 40.0`, aplicado como `v_percent >= v_minimo`) tratam `V = 40` como **sem limitação**. Consequência prática: para qualquer cultura do ramo (b) com `V% = 40,0`, o mesmo laudo recomenda calcário e classifica a acidez como `NULO`. Não é problema da pastagem natural — é do ramo (b) inteiro, florestais e erva-mate incluídas, e alcança a exequibilidade do cenário POTENCIAL (§7.2) | **Pendente do autor:** decidir qual dos dois lados cede. Se a especificação se alinhar ao Manual e à calagem (`V > 40` → `NULO`; `V ≤ 40` → `MODERADO`), isto é defeito de **especificação** e gera **CCAE v1.2**. Impacto medido no gabarito: só o `CONF-RB-04` está na fronteira; nele `F1` passa de `NULO` a `MODERADO`, `fator_determinante_esperado` passa de `F2_fosforo` a `F1_acidez` pelo desempate de menor índice, e `classe_esperada` **não muda** (`APTA_COM_RESTRICOES`, porque F2 já era `MODERADO`). **Exige alteração de código**, e é aí que está a causa raiz: o valor `40.0` vive em `criterios_aptidao.json`, mas o **operador** de comparação está embutido em `siras/motor/aptidao.py` (`v_percent >= sem["v_minimo"]`), enquanto o lado da calagem lê o operador da própria base (`"tipo": "v_menor_igual"`). A regra de ouro do `CCAE-implementacao.md` — nenhum limiar numérico no código — foi respeitada para o número e não para a comparação, e foi por essa fresta que os dois lados divergiram sem que nenhum teste percebesse. A correção estrutural é o operador virar dado, como já é na calagem | 2026-09-10 |
+| B-6 | Todo o ramo (b) de F1; `CONF-RB-04` é o caso que expõe | `F1 = NULO` em `V% = 40,0` | idem (o teste passa) | **Contradição interna do SIRAS na fronteira `V% = 40`.** A conferência da p. 78 registra a decisão como `V ≤ 40%` — e `criterios_calagem.json`, no critério `erva_mate_e_florestais`, já usava `"tipo": "v_menor_igual", "v": 40`. Ou seja, **a calagem dispara em `V = 40` exatos**. Mas a Seção 7.1, ramo (b), e `criterios_aptidao.json` (`F1_acidez.sem_ph_referencia.v_minimo = 40.0`, aplicado como `v_percent >= v_minimo`) tratam `V = 40` como **sem limitação**. Consequência prática: para qualquer cultura do ramo (b) com `V% = 40,0`, o mesmo laudo recomenda calcário e classifica a acidez como `NULO`. Não é problema da pastagem natural — é do ramo (b) inteiro, florestais e erva-mate incluídas, e alcança a exequibilidade do cenário POTENCIAL (§7.2) | **Pendente do autor:** decidir qual dos dois lados cede. Se a especificação se alinhar ao Manual e à calagem (`V > 40` → `NULO`; `V ≤ 40` → `MODERADO`), isto é defeito de **especificação** e gera **CCAE v1.2**. Impacto medido no gabarito: só o `CONF-RB-04` está na fronteira; nele `F1` passa de `NULO` a `MODERADO`, `fator_determinante_esperado` passa de `F2_fosforo` a `F1_acidez` pelo desempate de menor índice, e `classe_esperada` **não muda** (`APTA_COM_RESTRICOES`, porque F2 já era `MODERADO`). **Exige alteração de código**, e é aí que está a causa raiz: o valor `40.0` vive em `criterios_aptidao.json`, mas o **operador** de comparação está embutido em `siras/motor/aptidao.py` (`v_percent >= sem["v_minimo"]`), enquanto o lado da calagem lê o operador da própria base (`"tipo": "v_menor_igual"`). A regra de ouro do `ccae-implementacao.md` — nenhum limiar numérico no código — foi respeitada para o número e não para a comparação, e foi por essa fresta que os dois lados divergiram sem que nenhum teste percebesse. A correção estrutural é o operador virar dado, como já é na calagem | **Resolvido nesta v1.2, sem alterar limiar nem gabarito.** Conferência da Tab. 5.6 (p. 83) pelo autor em 2026-09-10: a dose é `NC = (40 − V)/100 × CTC`, a mesma da Tab. 5.4. Logo, em `V% = 40` a dose é **zero**, e "calagem indicada, 0,0 t/ha" e "acidez sem limitação" são o mesmo estado — o Manual não se contradiz, e não há decisão `≥` versus `>` a tomar. O defeito real era outro: os dois módulos derivavam a mesma conclusão de lugares diferentes, um do gatilho e outro de releitura independente do limiar. A §7.1, ramo (b), passa a definir F1 pela dose (`NC > 0`), e as duas leituras coincidem em todo o domínio. **Nenhuma célula do gabarito muda; o `CONF-RB-04` permanece `F1 = NULO`, `F2_fosforo`, `APTA_COM_RESTRICOES`.** Segue pendente, e é independente desta resolução, o refactor que move o operador de comparação do código para a base — ele não altera comportamento, apenas fecha a fresta que impediu qualquer teste de enxergar a divergência | 2026-09-10 |
+| B-7 | Resíduo de B-5: exceção Ca/Mg no campo natural | — | — | A v1.2 aplicava a exceção `Ca ≥ 4,0` e `Mg ≥ 1,0` a todo o ramo (b) com base na nota (2) da Tab. 5.6, sem conferência da Tab. 5.4 quanto à exceção | **Resolvido quanto à existência em 2026-09-13:** o autor confirmou na Tab. 5.4, nota (6), que a exceção também se aplica ao Campo Natural, e que a tabela estabelece decisão em `V = 40%` e `NC = (40 − V%)/100 × CTC pH 7,0`. **Ressalva registrada:** a redação literal da nota (6) usa igualdade (`=`), e não limites mínimos (`≥`); a generalização para `Ca ≥ 4,0` e `Mg ≥ 1,0` não é atribuída diretamente à Tab. 5.4 — sua fonte é a nota (2) da Tab. 5.6. O `_fonte` de `F1_acidez.sem_ph_referencia` passou a declarar isso. **Fechado em 2026-09-24** pela justificativa do autor, registrada como decisão A-11 e transcrita abaixo. Nenhum caso do conjunto depende dela (`CONF-RB-04`: `Ca = 3,6`), e a leitura `≥` já era a implementada — nenhuma alteração de código, de limiar ou de gabarito | 2026-09-10 → 2026-09-24 |
+| B-8 | Ramo (b), cenário `POTENCIAL`, faixa em que a dose arredonda a zero | `F1 = NULO` (correção exequível) | `F1 = MODERADO` | A exequibilidade da §7.2 lia a dose recomendada, já arredondada; com `0,0 t/ha` nenhuma correção era projetada, embora F1 no `ATUAL` já lesse `NC` antes do arredondamento. Achado pela bancada de culturas, não pelo conjunto: nenhum caso cai na faixa | **Resolvido em 2026-09-13** pela decisão A do autor e pela redação da §7.2 desta v1.3; teste em `testes/unidade/test_aptidao.py` | 2026-09-13 |
 
-**Fechamento do Apêndice B (2026-09-10).** Com B-1 a B-4 resolvidos, a conformidade passou de 77/80 para **80/80 = 100%**, tanto em classe quanto em fator determinante. Suíte completa: 1291 testes passando, 1 pulado. **B-5 (fonte) foi resolvido pela conferência da p. 78; B-6 permanece aberto** e não é medido por esse número: é uma contradição da própria especificação na fronteira `V% = 40`, e o caso afetado passa. Não corrigir isso antes da banca significa apresentar 100% de conformidade sobre um critério cuja procedência, para uma das culturas, não foi verificada — o percentual continua verdadeiro, mas a leitura de que "tudo está conferido" não.
+**Fechamento do Apêndice B (2026-09-10).** Com B-1 a B-4 resolvidos, a conformidade passou de 77/80 para **80/80 = 100%**, tanto em classe quanto em fator determinante. Suíte completa: 1291 testes passando, 1 pulado. **B-5 e B-6 foram resolvidos** pelas conferências das p. 78 e p. 83 e pela redação da §7.1 desta v1.2, sem alteração de limiar e sem regabarito. O resíduo estreito que restava de B-5 — a procedência do operador da exceção `Ca ≥ 4,0` e `Mg ≥ 1,0` para as culturas da Tab. 5.4 — **foi fechado em 2026-09-24** pela fundamentação abaixo. Com isso, **nenhum item do Apêndice B permanece aberto**, e o 100% de conformidade não se apoia mais em critério com procedência por verificar.
+
+### B-7 — fundamentação da leitura `≥` (2026-09-24)
+
+O impasse: as notas da exceção Ca/Mg aparecem no texto do Manual com igualdade — "Não aplicar se Ca trocável = 4,0 e Mg trocável = 1,0 cmolc/dm³" (Tab. 5.4, nota (6); Tab. 5.3, nota (8)) —, enquanto o CCAE e o motor as aplicam como limite mínimo. Ou a leitura `≥` se justifica, ou o critério está errado em favor do sistema. Cinco evidências, levantadas pelo autor em 2026-09-24, sustentam que `=` é artefato de extração e não redação:
+
+1. **O artefato está medido e documentado no próprio projeto.** `docs/especificacao/nota-extracao-pdf.md` registra que o `≤` **não existe na camada de texto** do PDF do Manual (11. ed., PageMaker 6.5): é imagem embutida de ~6 × 6 pt, que nenhuma ferramenta de extração recupera, e cujo comportamento é inconsistente — "às vezes o `≤` some, às vezes vira `=`". A tabela daquela nota traz o caso `≤ 40` (abóbora, P, Muito alto, p. 161) devolvido como `=40`. É exatamente a substituição observada aqui, na mesma publicação, já comprovada por rasterização.
+2. **O `<` da mesma frase sobrevive.** Na nota (1) da Tab. 5.4 — "Não aplicar quando V = 65% e saturação por Al na CTC < 10%" — o `<` chega íntegro e só o operador de limite mínimo se perde. Isso localiza o defeito nos glifos `≥`/`≤`, que vêm de fonte de símbolos, e não numa escolha de redação do autor do Manual.
+3. **O artefato aparece também na prosa.** O texto corrido da p. 77 traz "exceto se Ca trocável = 4,0 e Mg trocável = 1,0". Fosse decisão editorial de escrever igualdade, ela estaria confinada às notas de tabela; aparecer no parágrafo corrido é assinatura de perda de glifo ao longo do PDF inteiro.
+4. **O próprio Manual aplica a exceção como limiar.** No exemplo resolvido do Anexo 1 (p. 354), a Gleba 4 recebe calagem porque tem `Ca < 4,0`, "embora tenha teor de Mg maior que 1,0" — isto é, o Manual trata Mg **acima** de 1,0 como condição satisfeita, leitura que só existe sob `≥`. O exemplo é da Tab. 5.6, mas a nota tem redação idêntica à da Tab. 5.4, logo é a mesma regra.
+5. **Argumento agronômico e de domínio.** A exceção existe porque o suprimento de Ca e Mg já é suficiente; um teor maior satisfaz a condição com mais razão. Sobre variáveis contínuas medidas com uma casa decimal, a igualdade exata em 4,0 e 1,0 praticamente nunca ocorreria, e a regra seria letra morta. O mesmo raciocínio vale para o `V = 65%` da nota (1), já implementado como `≥` no critério de plantio direto consolidado sem que isso jamais tenha sido questionado.
+
+**Consequência prática: nenhuma.** A leitura `≥` já era a implementada em `criterios_aptidao.json` e em `criterios_calagem.json`; o que faltava era a justificativa escrita. Nenhum limiar, nenhuma célula de gabarito e nenhuma linha de motor mudaram no fechamento deste item. O que muda é o estatuto da afirmação: de leitura não fundamentada para decisão de julgamento declarada, com fundamentação rastreável — A-11 do Apêndice A.
 
 Registro para a monografia, porque a distinção importa: **nenhum critério do CCAE foi alterado** para chegar a esse resultado. As quatro correções foram uma célula de gabarito gerada errada (B-1) e três lacunas de transcrição da base de conhecimento (B-2 a B-4) — todas preenchidas pelo autor a partir do Anexo 2 do Manual. O motor não recebeu uma linha de código nova em nenhum dos quatro casos, e a especificação verificada é a mesma que já estava congelada. O conjunto de conformidade permanece, portanto, válido pela regra do aviso de procedimento: o que invalidaria o conjunto seria mudar a especificação depois de executá-lo.
 
@@ -625,10 +672,12 @@ Registro para a monografia, porque a distinção importa: **nenhum critério do 
 |---|---|---|---|---|
 | 1.0 | | Versão inicial | — | — |
 | 1.1 | 2026-09-09 | Correção do mapeamento de §8.1 já previsto no texto; IDs canônicos de F1–F7; fechamento de A-10 pela convenção de limite superior; ajuste do protocolo §9 para 14 calibração + 62 conformidade; correção dos casos CONF-PT-03 e CONF-PT-04. | Auditoria de consistência do gabarito v1.0 e correção de casos malformados. | Sim — qualquer gabarito anterior à v1.1 é inválido como evidência de conformidade. |
+| 1.2 | 2026-09-10 | §7.1, ramo (b) de F1: a regra passa a derivar da dose (`NC > 0`) em vez do gatilho (`V% ≥ 40`), com a fórmula explicitada e o cálculo local declarado; fontes do ramo corrigidas para as Tabelas 5.4, 5.6 e 5.7; precisão de `NC` para efeito de F1 definida; fechamento de B-5 e B-6. | A conferência cruzada de fontes revelou que a aptidão e a calagem derivavam a mesma conclusão de lugares diferentes, produzindo leituras opostas em `V% = 40` — ponto em que a dose é zero e, portanto, não há contradição no Manual, só na especificação. | **Não.** A v1.2 altera a **derivação** da regra, não a regra: a função de mapeamento entrada → grau é idêntica à da v1.1 em todo o domínio, inclusive na fronteira `V% = 40`, porque `NC > 0` (lido antes do arredondamento) é equivalente a `V% < 40`. Nenhum limiar foi alterado e nenhum valor esperado do gabarito muda; o conjunto executado sob a v1.1 permanece válido como evidência. **Esta afirmação é verificável por execução:** rodar o conjunto sob as duas versões e obter saídas iguais transforma-a de argumento em resultado medido — a fazer depois do refactor, e é uma execução só. |
+| 1.3 | 2026-09-13, congelada em 2026-09-24 | §7.2: a exequibilidade lê `NC` antes do arredondamento (decisão A); §7.1(b): procedência da exceção Ca/Mg e a leitura `≥` fundamentada como decisão A-11; §9.2: retirada a exigência de casos de frutíferas em três fases e de tabaco Virgínia e Burley; 8 casos de conformidade acrescentados; fechamento de B-7 e B-8. | Conferência manual da Tab. 5.4 e dos casos pelo autor; achado da bancada de culturas na faixa de dose arredondada a zero; e o levantamento de 2026-09-24 que atribuiu o `=` das notas ao artefato de glifo do PDF já documentado em `docs/especificacao/nota-extracao-pdf.md`. | **Não, medido.** A §7.2 só muda o `POTENCIAL` quando a dose real e a arredondada ficam de lados diferentes de zero ou do teto; a suíte de conformidade roda os 92 casos, nos dois cenários, sob a v1.3, com 100% de classe, fator determinante e graus. Os 8 casos novos foram gabaritados sob a v1.2 e não caem nessas faixas. A retirada de estratos da §9.2 não altera critério. |
 
 ## Apêndice D — Registro da aprovação do orientador
 
-Evidência exigida pela §9.1 (congelamento do Caderno) e pela etapa 2 da ordem de trabalho de `docs/CCAE-implementacao.md`.
+Evidência exigida pela §9.1 (congelamento do Caderno) e pela etapa 2 da ordem de trabalho de `docs/especificacao/ccae-implementacao.md`.
 
 | Campo | Valor |
 |---|---|
@@ -666,7 +715,21 @@ Evidência exigida pela §9.1 (congelamento do Caderno) e pela etapa 2 da ordem 
 
 1. **As decisões de julgamento do Apêndice A ficam aprovadas como estão.** A base declarada da aprovação é o conhecimento empírico do autor sobre calagem — experiência prática, observação de campo e tentativa e erro. Isso não altera o princípio P1: os limiares continuam rastreados ao Manual; o que a aprovação cobre é o conjunto de escolhas do autor listadas em A-1 a A-9, que por definição não têm limiar publicado.
 2. **A justificativa dessas escolhas passa a ter status de argumento defensável na monografia e no artigo**, com a origem empírica declarada abertamente em vez de omitida.
-3. **Encaminhamento aberto (do autor):** buscar na literatura autores que tenham adotado parâmetro ou procedimento equivalente, para citar em reforço à justificativa. Não é condição da aprovação — é robustez adicional pedida pelo orientador. Registrado como pendência P4 no `docs/ROADMAP.md`.
+3. **Encaminhamento aberto (do autor):** buscar na literatura autores que tenham adotado parâmetro ou procedimento equivalente, para citar em reforço à justificativa. Não é condição da aprovação — é robustez adicional pedida pelo orientador. Registrado como pendência P4 no `docs/processo/roadmap.md`.
+
+### D.0 Aprovação da v1.2
+
+| Campo | Valor |
+|---|---|
+| Orientador | Prof. Dr. Rafael Rieder (UPF — LABRV, PPGCA, PPGAGRO) |
+| Meio | Reunião de acompanhamento |
+| Data | 10/09/2026 |
+| Objeto | CCAE v1.2 — clarificação da §7.1, ramo (b): F1 derivado da dose (`NC > 0`) em vez do gatilho; fontes do ramo corrigidas para as Tabelas 5.4, 5.6 e 5.7; fechamento de B-5 e B-6 |
+| Resultado | Aprovado. Versão congelada em 10/09/2026, tag `criterios-v1.2` |
+
+A cláusula que estava em aberto no rascunho — precisão de `NC` para efeito de F1 — foi decidida pelo autor **antes** da aprovação, na redação atual da §7.1: leitura antes do arredondamento, pelo argumento de que arredondar antes do corte tornaria o limiar efetivo uma função da CTC que nenhuma tabela do Manual especifica. Não há cláusula pendente nesta versão.
+
+A seção D.1 abaixo transcreve o e-mail de aprovação da **v1.1**, que permanece como registro da aprovação daquela versão.
 
 ### D.3 Cronologia da aprovação
 
@@ -681,8 +744,27 @@ A aprovação dos critérios foi **dada verbalmente pelo orientador em orientaç
 | 5 | Confirmação escrita da aprovação — e-mail transcrito em D.1 | 10/09/2026, 14:04 |
 | 6 | Reunião de acompanhamento sobre o concluído e o andamento do projeto | 10/09/2026, à noite |
 | 7 | Congelamento do Caderno: tag `criterios-v1.1` | 10/09/2026 |
+| 8 | Conferência das Tabelas 5.4 (p. 78) e 5.6 (p. 83) no impresso; fechamento de B-5 e B-6 | 10/09/2026 |
+| 9 | Aprovação da v1.2 em reunião e congelamento: tag `criterios-v1.2` | 10/09/2026 |
+| 10 | Redação do rascunho da v1.3: §7.2 pela `NC` antes do arredondamento, procedência da exceção Ca/Mg, 8 casos novos | 13/09/2026 |
+| 11 | Levantamento do autor que fecha B-7: `=` atribuído ao artefato de glifo do PDF, leitura `≥` fundamentada e registrada como A-11 | 24/09/2026 |
+| 12 | Aprovação da v1.3 em reunião e congelamento: tag `criterios-v1.3` | 24/09/2026, 19:30 |
 
 A alegação de não-circularidade da §9.1 se sustenta sobre o fato de a **especificação ter sido escrita antes do código** e o gabarito ter sido aplicado a partir dela — a data do e-mail é registro do aval, não o momento em que ele foi dado. Nenhum critério foi alterado após a aprovação.
+
+### D.4 Aprovação da v1.3
+
+| Campo | Valor |
+|---|---|
+| Orientador | Prof. Dr. Rafael Rieder (UPF — LABRV, PPGCA, PPGAGRO) |
+| Meio | Reunião de acompanhamento |
+| Data | 24/09/2026, 19:30 |
+| Objeto | CCAE v1.3 — exequibilidade da §7.2 pela `NC` antes do arredondamento; procedência da exceção Ca/Mg; estratos da §9.2; B-7 e B-8 |
+| Resultado | Aprovado. Versão congelada em 24/09/2026, tag `criterios-v1.3` |
+
+B-7, único item que seguia aberto no rascunho, foi fechado pelo autor **no mesmo dia da aprovação**, com a fundamentação transcrita no Apêndice B e registrada como decisão A-11. A leitura `≥` já era a implementada, de modo que o fechamento é documental: nenhum limiar, nenhuma célula de gabarito e nenhuma linha de motor foram alterados. **Nenhuma cláusula fica pendente nesta versão**, e o Apêndice B fecha sem itens abertos.
+
+Na mesma reunião o orientador encaminhou dois pontos que não são condição da aprovação e seguem registrados no `docs/processo/roadmap.md`: concluir a indicação de formulação do adubo no laudo, e o desenho da avaliação de usabilidade — três roteiros de teste com usuários e questionário estruturado pelas dez heurísticas de Nielsen, em lugar do SUS previsto na proposta (ver `docs/usabilidade/protocolo.md`).
 
 ---
 

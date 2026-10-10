@@ -1,7 +1,7 @@
 # Protocolo da avaliação de usabilidade
 
 Corresponde à Seção 4.4, dimensão (iii), da proposta, e substitui a subseção "Usabilidade"
-de [`VALIDACAO.md`](VALIDACAO.md), que passa a remeter para cá.
+de [`protocolo de validação`](../validacao/protocolo.md), que passa a remeter para cá.
 
 **Decidido com o orientador em 24/09/2026 e simplificado em 10/10/2026.** A proposta
 previa o questionário **SUS**. Em seu lugar: três roteiros de teste com usuários do
@@ -71,7 +71,7 @@ gratuita, e justa.
 | Perfil | Agrônomos, técnicos agrícolas e estudantes concluintes de agronomia — o público-alvo declarado na proposta |
 | Critério de inclusão | Ter, na rotina, contato com análise de solo ou recomendação de adubação |
 | Critério de exclusão | Ter participado do desenvolvimento ou já conhecer o SIRAS |
-| Recrutamento | Contato direto do autor; registrado como pendência **P8** no `ROADMAP.md` |
+| Recrutamento | Contato direto do autor; registrado como pendência **P8** no `docs/processo/roadmap.md` |
 | Compensação | Nenhuma |
 
 **Por que 5 a 8.** Nielsen e Landauer (1993) mostram que cerca de cinco participantes
@@ -119,7 +119,7 @@ validade (§9).
 
 ## 6. Instrumentos
 
-**Um instrumento só.** O [questionário](instrumentos/questionario-heuristicas.md), no
+**Um instrumento só.** O [questionário](questionario.md), no
 Google Forms, com a caracterização do participante na Seção 1. Os
 [roteiros](roteiros/) são material do pesquisador para conduzir a sessão, não papel que o
 participante preenche.
@@ -214,7 +214,7 @@ cronograma da proposta.
    vêm de casos já conferidos, e marcam `PREENCHER` os que faltam. Ver a nota de cada
    roteiro sobre por que esses campos não foram preenchidos por antecipação.
 3. **Montar o formulário no Google Forms** a partir de
-   [`instrumentos/questionario-heuristicas.md`](instrumentos/questionario-heuristicas.md)
+   [`questionario.md`](questionario.md)
    **e mandar o link ao orientador para revisão**, que foi o que ele pediu.
 
 ## Referências

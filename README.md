@@ -48,7 +48,7 @@ as bancadas de 61 culturas × 10 perfis de solo.
 pytest                            # camada rápida
 pytest --completa                 # tudo, incluindo as bancadas
 python scripts/valida_base.py     # valida dados/ contra os schemas
-python validar_anexo1.py          # classificações de P e K contra o Anexo 1 do Manual
+python scripts/validar_anexo1.py          # classificações de P e K contra o Anexo 1 do Manual
 python scripts/conferir_contraste.py   # contraste da paleta nos dois temas
 ```
 
@@ -72,40 +72,32 @@ permaneça independente do código.
 | `siras/validacao/` | Apuração da concordância com o oráculo — alimenta a tabela de Resultados |
 | `testes/casos/` | Casos de teste e valores de referência (oráculo da validação) |
 | `scripts/` | Utilitários: tabela de concordância da validação, conferência de schemas e de contraste, geração dos arquivos da marca, consolidação do questionário de usabilidade |
-| `validar_anexo1.py` | Confere as classificações de P e K contra o Anexo 1 do Manual (oráculo externo) |
+| `scripts/validar_anexo1.py` | Confere as classificações de P e K contra o Anexo 1 do Manual (oráculo externo) |
 | `docs/` | Documentação técnica, decisões de projeto e rastreabilidade das fontes |
 
-Documentos principais:
+A documentação está organizada por função, com índice em
+[`docs/README.md`](docs/README.md):
 
-- [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) — visão de arquitetura e fluxo de processamento
-- [`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md) — Caderno de Critérios de Aptidão Edáfica, versão
-  vigente, aprovada pelo orientador em 24/09/2026 (tag `criterios-v1.3`)
-- [`docs/CCAE-implementacao.md`](docs/CCAE-implementacao.md) — do Caderno ao código: estruturas
-  JSON, contrato do motor e ordem de trabalho
-- [`docs/HANDOFF-aptidao.md`](docs/HANDOFF-aptidao.md) — resumo de retomada do módulo de aptidão
-- [`docs/BASE_DE_CONHECIMENTO.md`](docs/BASE_DE_CONHECIMENTO.md) — formato dos arquivos JSON
-- [`docs/VALIDACAO.md`](docs/VALIDACAO.md) — protocolo de validação e hipóteses
-- [`docs/USABILIDADE.md`](docs/USABILIDADE.md) — protocolo do teste de usabilidade, com os
-  [roteiros](docs/roteiros/) e o [questionário das dez heurísticas de Nielsen](docs/instrumentos/questionario-heuristicas.md)
-- [`docs/mapa_manual.md`](docs/mapa_manual.md) — rastreabilidade tabela do Manual → arquivo
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) — cronograma e estado de cada etapa
-- [`docs/decisoes/`](docs/decisoes/) — registros de decisão de arquitetura
-- [`docs/FLUXO_DE_TRABALHO.md`](docs/FLUXO_DE_TRABALHO.md) — convenções de git e como pedir tarefas ao Claude Code
-- [`docs/COMO_CALCULAR_ORACULO.md`](docs/COMO_CALCULAR_ORACULO.md) — procedimento manual para calcular o oráculo de validação
-- [`docs/CONFERENCIA_S3.md`](docs/CONFERENCIA_S3.md) — roteiro de conferência: hortaliças, tubérculos, cana, tabaco
-- [`docs/CONFERENCIA_S4.md`](docs/CONFERENCIA_S4.md) — roteiro de conferência: frutíferas e erva-mate
-- [`docs/NOTA_EXTRACAO_PDF.md`](docs/NOTA_EXTRACAO_PDF.md) — o símbolo `≤` no PDF do Manual e como foi recuperado
+| Pasta | Para quê |
+|---|---|
+| [`docs/artigo_final/`](docs/artigo_final/) | O artigo do TCC |
+| [`docs/proposta/`](docs/proposta/) | A proposta aprovada |
+| [`docs/especificacao/`](docs/especificacao/) | Caderno de Critérios, arquitetura, base de conhecimento e rastreabilidade ao Manual |
+| [`docs/validacao/`](docs/validacao/) | Protocolo, procedimento do oráculo e resultados medidos |
+| [`docs/usabilidade/`](docs/usabilidade/) | Protocolo do teste com usuários, roteiros e questionário |
+| [`docs/decisoes/`](docs/decisoes/) | Registros de decisão de arquitetura |
+| [`docs/processo/`](docs/processo/) | Roadmap e convenções de trabalho |
 
 ## Estado do projeto
 
-Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/roadmap.md`](docs/processo/roadmap.md).
 
 **Pronto** (10/10/2026):
 
 - **Motor** — calagem, adubação e aptidão edáfica para as **61 culturas e grupos de culturas** do
   escopo, com `gerar_laudo()` como ponto de entrada único e uma trilha que registra cada decisão
   com a regra e a tabela do Manual que a produziram.
-- **Aptidão edáfica** — implementada conforme o Caderno de Critérios ([`docs/CCAE-v1.3.md`](docs/CCAE-v1.3.md),
+- **Aptidão edáfica** — implementada conforme o Caderno de Critérios ([`docs/especificacao/ccae.md`](docs/especificacao/ccae.md),
   versão vigente), com os cenários atual e potencial. Conformidade de **100%** sobre os casos
   gabaritados à mão pelo autor, em classe, fator determinante e grau de cada fator.
 - **Aplicação web** — as três telas, leitura ao vivo da interpretação enquanto se digita, vários
@@ -124,7 +116,7 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
 avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em
-[`docs/USABILIDADE.md`](docs/USABILIDADE.md): três roteiros de teste com usuários do público-alvo
+[`docs/usabilidade/protocolo.md`](docs/usabilidade/protocolo.md): três roteiros de teste com usuários do público-alvo
 e questionário pós-teste estruturado pelas dez heurísticas de Nielsen, em lugar do SUS previsto
 na proposta.
 
@@ -141,7 +133,7 @@ usuários e redação do artigo ([`docs/artigo_final/`](docs/artigo_final/)).
 A implementação do código utiliza assistência de IA (Claude Code). Os **dados agronômicos** — todas
 as tabelas do Manual de Calagem e Adubação e os valores de referência dos casos de teste — foram
 transcritos e conferidos manualmente pelo autor a partir da publicação original, conforme registrado
-em [`docs/mapa_manual.md`](docs/mapa_manual.md).
+em [`docs/especificacao/mapa-do-manual.md`](docs/especificacao/mapa-do-manual.md).
 
 ## Aviso
 

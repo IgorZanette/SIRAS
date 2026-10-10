@@ -1,7 +1,7 @@
 {
   "descricao": "Mapeamento de classe de disponibilidade/teor para grau de limitacao (Ramalho Filho e Beek, 1995) e regra de composicao da aptidao edafica. As faixas numericas do Manual NAO sao duplicadas aqui: F2 e F3 usam as classes de interpretacao_p.json/interpretacao_k.json; F4, F5, F6 e F7 usam as classes de interpretacao_geral.json (calcio, magnesio, ctc_ph7, materia_organica, argila). Este arquivo guarda apenas a camada de grau/classe que nao vem diretamente do Manual: e a especificacao do CCAE, aprovada pelo orientador antes da implementacao (tag criterios-v1.0).",
   "fonte": {
-    "documento": "docs/CCAE-v1.0.md, versao 1.0 (Secoes 4, 6 e 8)",
+    "documento": "docs/especificacao/ccae.md (Secoes 4, 6 e 8)",
     "manual": "CQFS-RS/SC, 11. ed., 2016, Cap. 6, p. 89-90 (rendimento relativo por classe de disponibilidade)",
     "outras_fontes": [
       "Ramalho Filho, A.; Beek, K. J. Sistema de avaliacao da aptidao agricola das terras. EMBRAPA-CNPS, 1995, apud Hofig, Moura e Giasson (2015), p. 357",
@@ -100,7 +100,7 @@
     ]
   },
   "faixas_entrada": {
-    "_fonte": "CCAE-v1.1.md Sec. 5.1 (tabela de variaveis obrigatorias) e Sec. 5.4 (valor fora da faixa valida rejeita a entrada, nao trunca)",
+    "_fonte": "docs/especificacao/ccae.md, Sec. 5.1 (tabela de variaveis obrigatorias) e Sec. 5.4 (valor fora da faixa valida rejeita a entrada, nao trunca)",
     "_nota": "Faixas de aceitacao de ENTRADA do modulo de aptidao, transcritas do CCAE, nao do Manual. Sao mais estreitas que a validacao fisica de AnaliseSolo (ex.: pH 3,0-9,0 aqui contra 0-14 la), por isso existem separadamente. CONFERIR com o autor contra o CCAE Sec. 5.1 antes de tratar como definitivo.",
     "ph_agua": {"minimo": 3.0, "maximo": 9.0},
     "indice_smp": {"minimo": 4.0, "maximo": 7.5},

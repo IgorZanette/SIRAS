@@ -464,7 +464,7 @@ def gerar_laudo(
 ) -> Laudo:
     """Gera o laudo completo de uma análise de solo para uma cultura.
 
-    Porta de entrada única do motor (CLAUDE.md, docs/ARQUITETURA.md): a camada web, os
+    Porta de entrada única do motor (CLAUDE.md, docs/especificacao/arquitetura.md): a camada web, os
     testes e os scripts de validação passam por aqui, e não pelas funções de cada módulo.
     Determinística — as mesmas entradas produzem o mesmo Laudo, com a mesma trilha.
 

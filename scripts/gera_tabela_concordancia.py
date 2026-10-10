@@ -1,7 +1,7 @@
 """
 Gera a tabela de concordância da validação — a tabela principal de Resultados.
 
-Prometida em `docs/VALIDACAO.md`: taxa global e por grupo, IC 95% de Wilson, lista de
+Prometida em `docs/validacao/protocolo.md`: taxa global e por grupo, IC 95% de Wilson, lista de
 discordantes com o Trace, e saída em Markdown e CSV.
 
 A apuração vive em `siras/validacao/concordancia.py`, e não aqui, porque o mesmo código
@@ -11,7 +11,7 @@ verificação automática — justamente a que sustenta a H1.1.
 
 Uso:
     python scripts/gera_tabela_concordancia.py
-    python scripts/gera_tabela_concordancia.py --saida docs/figuras/
+    python scripts/gera_tabela_concordancia.py --saida docs/validacao/resultados/
 
 Sem --saida, imprime o relatório na tela. Código de saída 1 se houver discordante, para
 que a geração da tabela possa entrar em verificação automática.
@@ -84,7 +84,7 @@ def relatorio_markdown(recomendacao: Apuracao, aptidao) -> str:
         "# Concordância da validação",
         "",
         "Gerado por `scripts/gera_tabela_concordancia.py`. Protocolo em "
-        "`docs/VALIDACAO.md`.",
+        "`docs/validacao/protocolo.md`.",
         "",
         "## Dimensão 1 — recomendação de calagem e adubação (H1.1)",
         "",

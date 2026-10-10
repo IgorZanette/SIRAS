@@ -1,7 +1,7 @@
 # Roteiro 1 — Demonstração conduzida
 
 **Para o pesquisador.** O participante assiste; não digita.
-Duração prevista: **~10 minutos**. Protocolo completo em [`../USABILIDADE.md`](../USABILIDADE.md).
+Duração prevista: **~10 minutos**. Protocolo completo em [`protocolo`](../protocolo.md).
 
 ---
 
@@ -71,7 +71,7 @@ não é indicada** — que costuma ser a primeira pergunta de quem olha o laudo.
 > antecipação de propósito: teor inventado sai facilmente incoerente com a CTC e a
 > saturação, e um agrônomo percebe isso em dois segundos — o que arruinaria a credibilidade
 > da sessão logo no primeiro contato. **Preencher com um laudo real anonimizado**, que é a
-> mesma fonte que `VALIDACAO.md` já indica para reduzir a circularidade de H1.1.
+> mesma fonte que o protocolo de validação já indica para reduzir a circularidade de H1.1.
 
 **Resultado esperado** (referência conferida do ADU-01, para o pesquisador saber se a tela
 está certa durante a demonstração):

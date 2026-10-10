@@ -9,7 +9,7 @@ de calagem e adubação e estimativa de aptidão edáfica. Trabalho de Conclusã
 Computação (UPF, 2026), autor Igor Zanette.
 
 **Fonte técnica única das recomendações:** Manual de Calagem e Adubação para os estados do RS e SC,
-CQFS-RS/SC, 11ª edição, 2016. Escopo: 61 culturas e grupos de culturas (ver `docs/ROADMAP.md`).
+CQFS-RS/SC, 11ª edição, 2016. Escopo: 61 culturas e grupos de culturas (ver `docs/processo/roadmap.md`).
 
 ---
 
@@ -69,7 +69,7 @@ pare — não corrija.
 
 ## Regras agronômicas já fixadas (não contrarie)
 
-Extraídas e conferidas do Manual. Detalhes em `dados/comum/` e `docs/mapa_manual.md`.
+Extraídas e conferidas do Manual. Detalhes em `dados/comum/` e `docs/especificacao/mapa-do-manual.md`.
 
 - A necessidade de calcário é **preferencialmente** estimada pelo **índice SMP** (Tabela 5.2, p. 70),
   que dá a dose de calcário PRNT 100% para elevar o pH da camada 0–20 cm a 5,5 / 6,0 / 6,5. O método
@@ -98,7 +98,7 @@ Extraídas e conferidas do Manual. Detalhes em `dados/comum/` e `docs/mapa_manua
 3. Ao terminar, rode `pytest` e informe o resultado.
 4. Explique decisões de design não óbvias — o autor precisa entender e defender cada linha na banca.
 5. Não crie arquivos auxiliares, README ou documentação sem pedido.
-6. Ao concluir uma etapa do `docs/ROADMAP.md`, atualize o estado dela no arquivo.
+6. Ao concluir uma etapa do `docs/processo/roadmap.md`, atualize o estado dela no arquivo.
 
 ## Convenções de commit
 

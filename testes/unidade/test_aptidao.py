@@ -1,5 +1,5 @@
 """
-Testes de siras/motor/aptidao.py contra as regras do CCAE (docs/CCAE-v1.3.md).
+Testes de siras/motor/aptidao.py contra as regras do CCAE (docs/especificacao/ccae.md).
 
 Estes são testes de unidade/fronteira escritos pelo desenvolvedor para verificar que o
 código aplica corretamente a especificação — não são o conjunto de conformidade oficial.
@@ -92,7 +92,7 @@ class TestF1AcidezComPhReferencia:
         """CCAE §F1 escreve "m% < 30" / "30 <= m% <= 50" / "m% > 50": o limite 30,0 está
         na faixa do meio, logo é FORTE. Este teste afirmava MODERADO até 2026-09-09,
         aplicando a convenção de limite superior das tabelas de P/K, que não vale aqui
-        (docs/HANDOFF-aptidao.md §4). O gabarito de conformidade CONF-FR-23, construído
+        (docs/especificacao/ccae.md §4). O gabarito de conformidade CONF-FR-23, construído
         com m% = 30,0 exatos por aritmética reversa, é o oráculo desta linha."""
         r = _avaliar(_analise(ph_agua=5.4, saturacao_al=30.0))
         assert _fator(r, "F1_acidez").rotulo == "FORTE"

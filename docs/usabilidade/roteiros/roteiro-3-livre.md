@@ -1,7 +1,7 @@
 # Roteiro 3 — Uso livre
 
 **Para o pesquisador.** Sem ficha e sem gabarito.
-Duração prevista: **~10 minutos**. Protocolo completo em [`../USABILIDADE.md`](../USABILIDADE.md).
+Duração prevista: **~10 minutos**. Protocolo completo em [`protocolo`](../protocolo.md).
 
 ---
 

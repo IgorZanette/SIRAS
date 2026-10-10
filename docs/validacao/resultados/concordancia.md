@@ -1,6 +1,6 @@
 # Concordância da validação
 
-Gerado por `scripts/gera_tabela_concordancia.py`. Protocolo em `docs/VALIDACAO.md`.
+Gerado por `scripts/gera_tabela_concordancia.py`. Protocolo em `docs/validacao/protocolo.md`.
 
 ## Dimensão 1 — recomendação de calagem e adubação (H1.1)
 

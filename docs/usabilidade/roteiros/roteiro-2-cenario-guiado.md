@@ -1,7 +1,7 @@
 # Roteiro 2 — Cenário guiado, executado pelo participante
 
 **Para o pesquisador**, com uma ficha a imprimir e entregar.
-Duração prevista: **~15 minutos**. Protocolo completo em [`../USABILIDADE.md`](../USABILIDADE.md).
+Duração prevista: **~15 minutos**. Protocolo completo em [`protocolo`](../protocolo.md).
 
 ---
 
@@ -105,7 +105,7 @@ Participante: `P___`  ·  Data: ____/____/______  ·  Versão: `congelamento-v1`
 - [ ] Concluída com ajuda — o que travou: ______________________________
 - [ ] Não concluída — onde parou: ______________________________
 
-Tempo total: ______ min *(anotado, não conclusivo — ver `USABILIDADE.md` §7)*
+Tempo total: ______ min *(anotado, não conclusivo — ver o protocolo, §7)*
 
 **Marcos — anote o que aconteceu em cada um**
 

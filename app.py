@@ -1,7 +1,7 @@
 """Ponto de entrada da aplicacao web do SIRAS.
 
 Mantido intencionalmente fino: toda a logica agronomica vive em siras/motor/, que nao
-importa Flask e pode ser executado e testado isoladamente. Ver docs/ARQUITETURA.md.
+importa Flask e pode ser executado e testado isoladamente. Ver docs/especificacao/arquitetura.md.
 
 Uso:
     python app.py          # sobe em http://127.0.0.1:5000

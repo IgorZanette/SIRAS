@@ -4,7 +4,7 @@ Executa os casos de testes/casos/casos_recomendacao.json contra o motor real
 à implementação — não são só exemplos, são a prova de que o motor bate com o Manual.
 
 Escopo: resolução cultura -> critério ainda não passa por resolver_criterio_id() aqui
-(decisão A2, docs/ROADMAP.md — os condicao_area dos casos são atalhos que não batem com
+(decisão A2, docs/processo/roadmap.md — os condicao_area dos casos são atalhos que não batem com
 o texto completo guardado em criterios_calagem.json). Os testes chamam calcular_calagem()
 direto com o criterio_id correspondente, testando o cálculo, não a resolução.
 """

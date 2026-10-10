@@ -44,7 +44,7 @@ autor, o teste mede apenas se a implementação corresponde à transcrição.
   elaborada por profissional habilitado.
 - **H1.2:** risco maior e ainda **não resolvido**. As faixas de aptidão são definidas pelo autor; se
   o oráculo derivar dessas mesmas faixas, a concordância é 100% por construção e o teste não mede
-  nada. Encaminhamento necessário — ver `docs/ROADMAP.md`, pendência P1:
+  nada. Encaminhamento necessário — ver `docs/processo/roadmap.md`, pendência P1:
   1. faixas construídas a partir de fonte **independente** do Manual; e
   2. subconjunto de casos classificado às cegas por um agrônomo.
 
@@ -97,7 +97,7 @@ que o SIRAS oferece e as demais não — em especial a aptidão edáfica integra
 
 ## Usabilidade
 
-**Protocolo completo em [`USABILIDADE.md`](USABILIDADE.md).** Resumo do que mudou e por quê:
+**Protocolo completo em [`protocolo de usabilidade`](../usabilidade/protocolo.md).** Resumo do que mudou e por quê:
 
 Decidido com o orientador em **24/09/2026**: sai o **SUS**, entram **três roteiros de teste com
 usuários do público-alvo** e um **questionário pós-teste estruturado pelas dez heurísticas de
@@ -109,7 +109,7 @@ entregar uma lista priorizada de correções, e é isso que as heurísticas dão
 - **Nomenclatura obrigatória no texto:** *teste de usabilidade com usuários, seguido de
   questionário pós-teste estruturado pelas dez heurísticas de Nielsen* — **nunca** "avaliação
   heurística", que no método de Nielsen e Molich (1990) é inspeção por especialistas em
-  usabilidade, sem usuários e sem tarefas. Ver `USABILIDADE.md` §2.
+  usabilidade, sem usuários e sem tarefas. Ver o protocolo, §2.
 - A escala 0–4 é adaptação declarada: no método original a severidade é atribuída a **problemas**,
   por avaliadores; aqui é atribuída a **heurísticas**, por usuários, e mede percepção de gravidade.
 - Estatística **descritiva**, sem inferência: amostra pequena e por conveniência.

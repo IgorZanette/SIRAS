@@ -11,7 +11,7 @@ em momentos distintos e por caminhos distintos:
    transcrito ao longo de agosto de 2026.
 
 Convergência entre elas é evidência de **correção da transcrição**, não de correção
-agronômica dos critérios — a distinção importa e está registrada em docs/VALIDACAO.md.
+agronômica dos critérios — a distinção importa e está registrada em docs/validacao/protocolo.md.
 
 Estes testes são de leitura: nenhum deles altera dados/.
 """

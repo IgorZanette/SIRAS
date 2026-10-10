@@ -56,7 +56,7 @@ Manual. O arquivo declara isso no próprio campo `aviso`, e
 **2. Cada entrada declara a própria fonte.** O campo `_fonte` é obrigatório no schema. É o
 que separa dado conferido de número digitado de memória, e é o que a banca vai pedir.
 
-**3. O arquivo nasce vazio.** O autor o preenche (pendência P7 do `docs/ROADMAP.md`).
+**3. O arquivo nasce vazio.** O autor o preenche (pendência P7 do `docs/processo/roadmap.md`).
 Nenhuma formulação foi escrita por antecipação, nem como exemplo.
 
 **4. Catálogo vazio não é erro.** `indicar_formulacao()` devolve `indicada = None` com

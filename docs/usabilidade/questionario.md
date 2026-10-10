@@ -3,7 +3,7 @@
 **Para colar no Google Forms.** Cada bloco numerado abaixo é uma **seção** do formulário.
 Texto em citação (`>`) é o que o participante lê; o resto são instruções para o autor.
 
-Protocolo em [`../USABILIDADE.md`](../USABILIDADE.md). O enunciado de cada heurística está
+Protocolo em [`protocolo`](../protocolo.md). O enunciado de cada heurística está
 em linguagem de agrônomo e adaptado ao SIRAS, seguindo a orientação do orientador — não é
 a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue responder sobre
 **este** sistema.
@@ -237,7 +237,7 @@ enunciado da pergunta A.
 Exporte as respostas em CSV pela aba **Respostas** e rode:
 
 ```
-python scripts/consolidar_heuristicas.py respostas.csv --saida docs/figuras/
+python scripts/consolidar_heuristicas.py respostas.csv --saida docs/validacao/resultados/
 ```
 
 O script produz, por heurística, média, mediana, mínimo, máximo e contagem; o ranking de

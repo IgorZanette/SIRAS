@@ -1,7 +1,7 @@
 """
 Cálculo da necessidade de calagem (NC), pelo critério de grupo de cultura.
 
-Cadeia (docs/ARQUITETURA.md, docs/decisoes/0002, docs/decisoes/0003):
+Cadeia (docs/especificacao/arquitetura.md, docs/decisoes/0002, docs/decisoes/0003):
 cultura + sistema de manejo -> critério em criterios_calagem.json (Tab. 5.3/5.5/5.6/5.7)
 -> condição de disparo (± exceção nao_aplicar_se) -> dose (Tabela 5.2 ou saturação por
 bases) -> ajustes (baixo poder tampão, fator_30cm, teto de aplicação superficial) -> PRNT

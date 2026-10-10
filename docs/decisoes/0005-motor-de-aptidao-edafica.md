@@ -2,15 +2,15 @@
 
 - **Status:** aceito
 - **Data:** 2026-09-07
-- **Contexto:** implementação do módulo de aptidão edáfica (docs/CCAE-v1.0.md, depois
+- **Contexto:** implementação do módulo de aptidão edáfica (docs/especificacao/ccae.md, depois
   substituído pela v1.1 — aprovada por escrito pelo orientador em 10/09/2026, ver Apêndice D
-  do `docs/CCAE-v1.1.md`), etapa "c"/"f" do ROADMAP, pendência P1
+  do o caderno v1.1 (tag `criterios-v1.1`)), etapa "c"/"f" do ROADMAP, pendência P1
 - **Substitui/complementa:** 0002 (políticas do motor), 0003 (modelagem de entrada), 0004
   (normalização de doses) — nenhuma revogada; este ADR é específico de `motor/aptidao.py`
 
 ## Contexto
 
-O CCAE-v1.0.md e seu companheiro técnico (`docs/CCAE-implementacao.md`) foram escritos
+A versão 1.0 do Caderno e seu companheiro técnico (`docs/especificacao/ccae-implementacao.md`) foram escritos
 como especificação abstrata, antes de qualquer código de aptidão existir, e descrevem um
 layout de arquivos genérico (`siras/dados/`, `motor/faixas.py`, `catalogo_culturas.json`
 etc.). Quando chegou a hora de implementar, `siras/` já tinha uma arquitetura madura para
@@ -36,7 +36,7 @@ mapeamentos classe→grau de F4/F5/F6/F7 (CCAE F4–F7, decisões A-2 a A-5). Is
 resolveu a pendência A-10 sem tocar em nenhum valor: a Tabela 6.5 já estava correta em
 `interpretacao_p.json`, só usando uma convenção de limite (`de`/`ate`, `de` exclusivo)
 equivalente à do CCAE, mas nunca antes comparada lado a lado — ver o texto atualizado em
-`docs/CCAE-v1.0.md`, Apêndice A.
+`docs/especificacao/ccae.md`, Apêndice A.
 
 ### D5.2 — `classificar_faixa` e `grupo_exigencia` tornam-se públicas em `motor/adubacao.py`
 
@@ -81,7 +81,7 @@ depende, porque só a calagem tem teto operacional declarado no CCAE.
 em que F1 já é `NULO` ou `LIGEIRO` no cenário `ATUAL` — ou seja, o próprio Manual não
 chega a recomendar calcário (critério de disparo não satisfeito, tipicamente pH ≥ 5,5).
 Nesse caso, `_resolver_f1_potencial()` mantém F1 inalterado: não há recomendação real do
-SIRAS ali para projetar como corrigida. O texto de `docs/CCAE-v1.0.md` §7.2 foi
+SIRAS ali para projetar como corrigida. O texto de `docs/especificacao/ccae.md` §7.2 foi
 atualizado com uma frase explícita cobrindo esse caso, para não deixar a lacuna na
 especificação congelada.
 
@@ -178,7 +178,7 @@ meio de uma tarefa já em andamento. Registrado aqui para o autor decidir a conv
 ## Consequências
 
 - `motor/aptidao.py` não tem `motor/faixas.py` nem `catalogo_culturas.json` próprios —
-  ambos descartados em favor do que já existe (D5.1, D5.2). `docs/CCAE-implementacao.md`
+  ambos descartados em favor do que já existe (D5.1, D5.2). `docs/especificacao/ccae-implementacao.md`
   recebeu notas de adaptação apontando cada divergência do layout originalmente descrito.
 - O estilo de erro do motor de aptidão não é uniforme com o dos outros dois motores por
   decisão deliberada (D5.3), não por descuido — quem ler os três módulos em sequência
@@ -194,7 +194,7 @@ meio de uma tarefa já em andamento. Registrado aqui para o autor decidir a conv
 
 ## Adendo — 13/09/2026: operador do F1 na base e grupo de exigência pelo Anexo 2
 
-Dois débitos técnicos do `docs/ROADMAP.md` alcançam decisões desta ADR. O texto acima é o
+Dois débitos técnicos do `docs/processo/roadmap.md` alcançam decisões desta ADR. O texto acima é o
 registro da época e não foi reescrito; o que mudou está aqui.
 
 **Operador de F1, ramo (b), em `criterios_aptidao.json` (débito 1, alcança D5.1).** O limiar

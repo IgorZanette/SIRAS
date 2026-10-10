@@ -34,9 +34,9 @@ estados do Rio Grande do Sul e de Santa Catarina*. 11. ed., 2016. ISBN 978-85-66
 
 O símbolo `≤` não existe na camada de texto do PDF do Manual — é uma imagem embutida,
 recuperada por detecção programática de glifos e conferência visual por amostragem de
-páginas. Ver `docs/NOTA_EXTRACAO_PDF.md` para o procedimento completo e as páginas
-conferidas visualmente. Roteiro de conferência linha a linha em `docs/CONFERENCIA_S3.md`
-(hortaliças, tubérculos, cana, tabaco) e `docs/CONFERENCIA_S4.md` (frutíferas, erva-mate).
+páginas. Ver `docs/especificacao/nota-extracao-pdf.md` para o procedimento completo e as páginas
+conferidas visualmente. Roteiro de conferência linha a linha em `docs/especificacao/base-de-conhecimento.md`
+(hortaliças, tubérculos, cana, tabaco) e `docs/especificacao/base-de-conhecimento.md` (frutíferas, erva-mate).
 
 ## Ponto de atenção da extração (S0–S2)
 

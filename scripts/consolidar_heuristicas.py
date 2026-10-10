@@ -5,8 +5,8 @@ Lê o CSV exportado pela aba "Respostas" do Google Forms e produz, num comando, 
 que vai à monografia: severidade por heurística, ranking de prioridade e todos os relatos
 agrupados, identificados pelo código do participante.
 
-O protocolo está em docs/USABILIDADE.md; o instrumento, em
-docs/instrumentos/questionario-heuristicas.md.
+O protocolo está em docs/usabilidade/protocolo.md; o instrumento, em
+docs/usabilidade/questionario.md.
 
 Duas escolhas que o relatório declara, e que valem explicar aqui:
 
@@ -17,7 +17,7 @@ Duas escolhas que o relatório declara, e que valem explicar aqui:
 
 Uso:
     python scripts/consolidar_heuristicas.py respostas.csv
-    python scripts/consolidar_heuristicas.py respostas.csv --saida docs/figuras/
+    python scripts/consolidar_heuristicas.py respostas.csv --saida docs/validacao/resultados/
 
 Sem --saida, imprime o relatório em Markdown na tela.
 """
@@ -86,7 +86,7 @@ def _colunas_por_heuristica(cabecalho: List[str]) -> Dict[int, Dict[str, str]]:
         raise ErroConsolidacao(
             f"esperava {len(HEURISTICAS)} colunas de severidade (uma por heurística) e "
             f"encontrei {len(severidade)}. Confira se o formulário exportado é o de "
-            f"docs/instrumentos/questionario-heuristicas.md e se todas as seções foram "
+            f"docs/usabilidade/questionario.md e se todas as seções foram "
             f"respondidas ao menos uma vez"
         )
 
@@ -203,7 +203,7 @@ def relatorio_markdown(dados: Dict[str, Any]) -> str:
         "> Estatística **descritiva**. A amostra é pequena e por conveniência: não há "
         "inferência, intervalo de confiança nem teste de hipótese. A escala de Nielsen é "
         "atribuída aqui a heurísticas, por usuários, e não a problemas, por especialistas "
-        "— o que ela mede é percepção de gravidade. Ver `docs/USABILIDADE.md`, §2 e §3.",
+        "— o que ela mede é percepção de gravidade. Ver `docs/usabilidade/protocolo.md`, §2 e §3.",
         "",
         "## Severidade por heurística",
         "",

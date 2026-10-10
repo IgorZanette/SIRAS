@@ -68,32 +68,27 @@ plt.rcParams.update({
 })
 
 
+# --- utilitários de layout -----------------------------------------------------------
+#
+# A primeira versão destas figuras posicionava tudo por coordenadas escolhidas no olho, e
+# o resultado foi texto sobre texto em três das quatro. O que segue é o conserto: uma
+# grade com margem declarada, posições calculadas, e nenhuma prosa dentro do PNG — a
+# explicação vai na legenda do LaTeX, que é onde o leitor a procura.
+
+#: Margem interna de toda figura, em fração da área. Nada é desenhado fora dela.
+MARGEM = 0.03
+
+
 def _gravar(fig, nome: str) -> None:
     SAIDA.mkdir(parents=True, exist_ok=True)
     caminho = SAIDA / f"{nome}.png"
-    fig.savefig(caminho, dpi=DPI, bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(caminho, dpi=DPI, bbox_inches="tight", pad_inches=0.1)
     plt.close(fig)
     print(f"  gravada: {caminho.relative_to(Path(__file__).parent.parent)}")
 
 
-def _caixa(ax, x, y, largura, altura, texto, *, fundo="white", borda=TINTA,
-           peso="normal", tamanho=9, traco="-"):
-    ax.add_patch(FancyBboxPatch(
-        (x, y), largura, altura, boxstyle="round,pad=0.012,rounding_size=0.02",
-        facecolor=fundo, edgecolor=borda, linewidth=1.1, linestyle=traco,
-    ))
-    ax.text(x + largura / 2, y + altura / 2, texto, ha="center", va="center",
-            fontsize=tamanho, fontweight=peso, color=TINTA, linespacing=1.35)
-
-
-def _seta(ax, inicio, fim, *, estilo="-|>", cor=TINTA, traco="-"):
-    ax.add_patch(FancyArrowPatch(
-        inicio, fim, arrowstyle=estilo, mutation_scale=11,
-        color=cor, linewidth=1.1, linestyle=traco, shrinkA=1, shrinkB=1,
-    ))
-
-
 def _tela(largura_pol, altura_pol):
+    """Eixo em coordenadas 0-1, com a margem já reservada."""
     fig, ax = plt.subplots(figsize=(largura_pol, altura_pol))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -101,43 +96,99 @@ def _tela(largura_pol, altura_pol):
     return fig, ax
 
 
+def _linhas_em_faixas(fracoes, topo=1.0, base=0.0, respiro=0.035):
+    """Divide a altura disponível em faixas proporcionais, com respiro entre elas.
+
+    Devolve uma lista de (y_base, altura). É o que substitui as coordenadas digitadas:
+    acrescentar uma faixa reacomoda todas as outras sozinho.
+    """
+    total = sum(fracoes)
+    vaos = respiro * (len(fracoes) - 1)
+    util = (topo - base) - vaos
+    faixas, y = [], topo
+    for fracao in fracoes:
+        altura = util * fracao / total
+        y -= altura
+        faixas.append((y, altura))
+        y -= respiro
+    return faixas
+
+
+def _caixa(ax, x, y, largura, altura, *, fundo="white", borda=TINTA, traco="-",
+           espessura=1.1):
+    ax.add_patch(FancyBboxPatch(
+        (x, y), largura, altura, boxstyle="round,pad=0.008,rounding_size=0.015",
+        facecolor=fundo, edgecolor=borda, linewidth=espessura, linestyle=traco,
+        zorder=2,
+    ))
+
+
+def _titulo_e_apoio(ax, x, y, altura, titulo, apoio=None, *, tamanho=9.2):
+    """Título em negrito e, abaixo, a linha de apoio em cinza. Centrados na faixa."""
+    if apoio:
+        ax.text(x, y + altura * 0.62, titulo, fontsize=tamanho, fontweight="bold",
+                va="center", zorder=3)
+        ax.text(x, y + altura * 0.28, apoio, fontsize=tamanho - 1.4, color=CINZA,
+                va="center", zorder=3, linespacing=1.3)
+    else:
+        ax.text(x, y + altura / 2, titulo, fontsize=tamanho, fontweight="bold",
+                va="center", zorder=3)
+
+
+def _seta(ax, inicio, fim, *, estilo="-|>", cor=TINTA, traco="-"):
+    ax.add_patch(FancyArrowPatch(
+        inicio, fim, arrowstyle=estilo, mutation_scale=10,
+        color=cor, linewidth=1.0, linestyle=traco, shrinkA=0, shrinkB=0, zorder=4,
+    ))
+
+
 # --- F1: arquitetura em camadas ------------------------------------------------------
 
 def f1_arquitetura() -> None:
-    """Por que o núcleo roda sem Flask e é testável isolado."""
-    fig, ax = _tela(LARGURA, 3.5)
+    """Camadas e a fronteira do Flask. A explicação vai na legenda, não na figura."""
+    fig, ax = _tela(LARGURA, 3.2)
 
     camadas = [
-        (0.78, "siras/web/", "Flask: rotas, formulário, templates", CLARO),
-        (0.60, "siras/relatorio/", "Laudo para a tela e para o papel", CLARO),
-        (0.42, "siras/motor/", "Regras SE-ENTÃO: calagem, adubação,\nformulação, aptidão", "white"),
-        (0.24, "siras/conhecimento/", "Carregamento e validação da base", "white"),
-        (0.06, "siras/dominio/", "Entidades: análise, contexto, laudo", "white"),
+        ("siras/web/", "rotas, formulário e templates", CLARO),
+        ("siras/relatorio/", "laudo para a tela e para o papel", CLARO),
+        ("siras/motor/", "as regras SE-ENTÃO dos quatro módulos", "white"),
+        ("siras/conhecimento/", "carregamento e validação da base", "white"),
+        ("siras/dominio/", "entidades: análise, contexto, laudo", "white"),
     ]
-    for y, nome, descricao, fundo in camadas:
-        _caixa(ax, 0.04, y, 0.56, 0.13, "", fundo=fundo)
-        ax.text(0.07, y + 0.085, nome, fontsize=9.5, fontweight="bold", va="center")
-        ax.text(0.07, y + 0.040, descricao, fontsize=8, color=CINZA, va="center",
-                linespacing=1.3)
+    coluna_x, coluna_largura = MARGEM, 0.58
+    faixas = _linhas_em_faixas([1] * 5, topo=1 - MARGEM, base=MARGEM, respiro=0.045)
 
-    for y in (0.78, 0.60, 0.42, 0.24):
-        _seta(ax, (0.32, y), (0.32, y - 0.05))
+    for (y, altura), (nome, apoio, fundo) in zip(faixas, camadas):
+        _caixa(ax, coluna_x, y, coluna_largura, altura, fundo=fundo)
+        _titulo_e_apoio(ax, coluna_x + 0.025, y, altura, nome, apoio)
 
-    # A fronteira que o trabalho declara.
-    ax.plot([0.02, 0.70], [0.565, 0.565], color=VERDE, linewidth=1.6, linestyle=(0, (5, 3)))
-    ax.text(0.705, 0.565, "acima: depende de Flask\nabaixo: Python puro,\nroda por linha de comando",
-            fontsize=8, va="center", color=TINTA, linespacing=1.4)
+    # A seta que cruza a fronteira sai do centro para que a linha tracejada passe
+    # limpa por ela; as demais ficam centradas.
+    for i, ((y, _altura), _) in enumerate(zip(faixas[:-1], camadas[:-1])):
+        x = coluna_x + coluna_largura * (0.25 if i == 1 else 0.5)
+        _seta(ax, (x, y), (x, y - 0.045))
 
-    _caixa(ax, 0.66, 0.06, 0.30, 0.31,
-           "dados/\n\ncomum/ — Manual\nculturas/ — Manual\nmercado/ — não é Manual",
-           fundo="white", traco=(0, (4, 2)), tamanho=8)
-    _seta(ax, (0.655, 0.30), (0.605, 0.30), estilo="<|-")
+    # A fronteira: entre relatorio (índice 1) e motor (índice 2).
+    corte = (faixas[1][0] + faixas[2][0] + faixas[2][1]) / 2
+    ax.plot([MARGEM - 0.015, coluna_x + coluna_largura + 0.015], [corte, corte],
+            color=VERDE, linewidth=1.8, linestyle=(0, (6, 3)), zorder=5)
+    ax.text(coluna_x + coluna_largura + 0.03, corte,
+            "acima, depende de Flask\nabaixo, Python puro",
+            fontsize=8.2, va="center", linespacing=1.45, zorder=3)
 
-    ax.text(0.02, 0.97,
-            "O motor e o domínio não importam Flask. É o que permite rodar as 5.167\n"
-            "verificações sem subir servidor, e o que mantém a regra agronômica\n"
-            "independente da interface.",
-            fontsize=8.5, va="top", color=CINZA, linespacing=1.45)
+    # A base de conhecimento, à direita, alinhada às duas camadas que a consomem.
+    base_y = faixas[4][0]
+    base_altura = faixas[3][0] + faixas[3][1] - base_y
+    dados_x = coluna_x + coluna_largura + 0.045
+    _caixa(ax, dados_x, base_y, 1 - MARGEM - dados_x, base_altura, traco=(0, (4, 2)))
+    ax.text(dados_x + 0.02, base_y + base_altura * 0.78, "dados/",
+            fontsize=9, fontweight="bold", va="center", zorder=3)
+    for i, linha in enumerate(("comum/ — Manual", "culturas/ — Manual",
+                               "mercado/ — não é Manual")):
+        ax.text(dados_x + 0.02, base_y + base_altura * (0.52 - i * 0.2), linha,
+                fontsize=7.8, color=CINZA, va="center", zorder=3)
+    _seta(ax, (dados_x, base_y + base_altura * 0.78),
+          (coluna_x + coluna_largura, faixas[3][0] + faixas[3][1] / 2), estilo="<|-")
 
     _gravar(fig, "f1-arquitetura")
 
@@ -145,45 +196,76 @@ def f1_arquitetura() -> None:
 # --- F2: da análise ao laudo ---------------------------------------------------------
 
 def f2_fluxo() -> None:
-    """O ponto de entrada único, e por que os dois cenários de aptidão saem juntos."""
-    fig, ax = _tela(LARGURA, 3.2)
+    """O ponto de entrada único e os quatro módulos, em quatro faixas."""
+    fig, ax = _tela(LARGURA, 3.4)
 
-    _caixa(ax, 0.02, 0.76, 0.22, 0.15,
-           "Análise de solo\n+ cultura\n+ contexto", fundo=CLARO, tamanho=8.5)
-    _caixa(ax, 0.30, 0.76, 0.40, 0.15, "gerar_laudo()\nfunção pura e determinística",
-           peso="bold", tamanho=9)
-    _seta(ax, (0.245, 0.835), (0.295, 0.835))
+    faixas = _linhas_em_faixas([0.85, 1.25, 1.15], topo=1 - MARGEM, base=MARGEM,
+                               respiro=0.075)
+    (y_topo, h_topo), (y_meio, h_meio), (y_base, h_base) = faixas
+    direita = 1 - MARGEM
 
+    # Entrada e ponto de entrada.
+    _caixa(ax, MARGEM, y_topo, 0.26, h_topo, fundo=CLARO)
+    ax.text(MARGEM + 0.13, y_topo + h_topo / 2,
+            "análise de solo\n+ cultura\n+ contexto",
+            ha="center", va="center", fontsize=8.3, linespacing=1.4, zorder=3)
+
+    entrada_fim = MARGEM + 0.26
+    _caixa(ax, entrada_fim + 0.055, y_topo, direita - entrada_fim - 0.055, h_topo,
+           espessura=1.6)
+    centro_x = (entrada_fim + 0.055 + direita) / 2
+    ax.text(centro_x, y_topo + h_topo * 0.62, "gerar_laudo()", ha="center",
+            va="center", fontsize=10, fontweight="bold", family="DejaVu Sans Mono",
+            zorder=3)
+    ax.text(centro_x, y_topo + h_topo * 0.26, "ponto de entrada único · determinística",
+            ha="center", va="center", fontsize=8, color=CINZA, zorder=3)
+    _seta(ax, (entrada_fim, y_topo + h_topo / 2), (entrada_fim + 0.055, y_topo + h_topo / 2))
+
+    # Os quatro módulos. Subtítulos curtos, em até três linhas: na largura de um quarto
+    # da figura, frase de uma linha só invadia a caixa vizinha.
     etapas = [
-        (0.02, "1. Calagem", "critério do grupo →\níndice SMP → PRNT"),
-        (0.26, "2. Adubação", "classe de teor →\ncorreção + manutenção"),
-        (0.50, "3. Formulação", "três caminhos\n(ADR 0009)"),
-        (0.74, "4. Aptidão", "sete fatores,\nfator mínimo"),
+        ("1. Calagem", "critério\ndo grupo\nSMP e PRNT"),
+        ("2. Adubação", "classe\nde teor\ncorreção e\nmanutenção"),
+        ("3. Formulação", "três\ncaminhos\n(ADR 0009)"),
+        ("4. Aptidão", "sete\nfatores\nfator mínimo"),
     ]
-    for x, titulo, detalhe in etapas:
-        _caixa(ax, x, 0.42, 0.22, 0.20, "", fundo="white")
-        ax.text(x + 0.11, 0.565, titulo, ha="center", fontsize=9, fontweight="bold")
-        ax.text(x + 0.11, 0.487, detalhe, ha="center", fontsize=7.8, color=CINZA,
-                linespacing=1.35)
+    vao = 0.022
+    largura_etapa = (direita - MARGEM - vao * 3) / 4
+    for i, (titulo, apoio) in enumerate(etapas):
+        x = MARGEM + i * (largura_etapa + vao)
+        _caixa(ax, x, y_meio, largura_etapa, h_meio)
+        ax.text(x + largura_etapa / 2, y_meio + h_meio * 0.72, titulo, ha="center",
+                va="center", fontsize=8.8, fontweight="bold", zorder=3)
+        ax.text(x + largura_etapa / 2, y_meio + h_meio * 0.34, apoio, ha="center",
+                va="center", fontsize=7.2, color=CINZA, linespacing=1.5, zorder=3)
+        if i:
+            _seta(ax, (x - vao, y_meio + h_meio / 2), (x, y_meio + h_meio / 2))
+    _seta(ax, (centro_x, y_topo), (centro_x, y_meio + h_meio))
 
-    _seta(ax, (0.50, 0.755), (0.50, 0.63))
-    for x in (0.24, 0.48, 0.72):
-        _seta(ax, (x, 0.52), (x + 0.02, 0.52))
+    # Saída: laudo à esquerda, dois cenários à direita.
+    largura_laudo = 0.56
+    _caixa(ax, MARGEM, y_base, largura_laudo, h_base)
+    ax.text(MARGEM + 0.02, y_base + h_base * 0.78, "Laudo", fontsize=9,
+            fontweight="bold", va="center", zorder=3)
+    ax.text(MARGEM + 0.02, y_base + h_base * 0.34,
+            "quatro doses · interpretação\nqual adubo comprar · como aplicar\n"
+            "trilha com tabela e página",
+            fontsize=7.4, color=CINZA, va="center", linespacing=1.5, zorder=3)
+    _seta(ax, (MARGEM + largura_laudo / 2, y_meio), (MARGEM + largura_laudo / 2,
+                                                     y_base + h_base))
 
-    _caixa(ax, 0.74, 0.17, 0.11, 0.18, "atual", fundo=CLARO, tamanho=8)
-    _caixa(ax, 0.86, 0.17, 0.11, 0.18, "potencial", fundo=MEDIO, tamanho=8)
-    _seta(ax, (0.85, 0.42), (0.85, 0.36))
-    ax.text(0.855, 0.09, "a diferença entre os dois é o ganho\natribuível à recomendação acima",
-            ha="center", fontsize=7.8, color=CINZA, linespacing=1.35)
-
-    _caixa(ax, 0.02, 0.17, 0.66, 0.18,
-           "Laudo:  quatro doses  ·  interpretação  ·  qual adubo comprar  ·  como aplicar\n"
-           "+ trilha com a regra, a tabela e a página de cada número",
-           fundo="white", tamanho=8.3)
-    _seta(ax, (0.35, 0.41), (0.35, 0.36))
-
-    ax.text(0.02, 0.985, "Uma passagem só. As mesmas entradas produzem sempre o mesmo laudo "
-            "e a mesma trilha.", fontsize=8.5, va="top", color=CINZA)
+    cenarios_x = MARGEM + largura_laudo + 0.045
+    largura_cenario = (direita - cenarios_x - 0.018) / 2
+    for i, (nome, fundo) in enumerate((("atual", CLARO), ("potencial", MEDIO))):
+        x = cenarios_x + i * (largura_cenario + 0.018)
+        _caixa(ax, x, y_base + h_base * 0.42, largura_cenario, h_base * 0.58, fundo=fundo)
+        ax.text(x + largura_cenario / 2, y_base + h_base * 0.71, nome, ha="center",
+                va="center", fontsize=8.2, zorder=3)
+    ax.text(cenarios_x + (direita - cenarios_x) / 2, y_base + h_base * 0.18,
+            "a diferença é o ganho\natribuível à recomendação", ha="center", va="center",
+            fontsize=7.4, color=CINZA, linespacing=1.45, zorder=3)
+    _seta(ax, (cenarios_x + (direita - cenarios_x) / 2, y_meio),
+          (cenarios_x + (direita - cenarios_x) / 2, y_base + h_base))
 
     _gravar(fig, "f2-fluxo")
 
@@ -191,53 +273,65 @@ def f2_fluxo() -> None:
 # --- F3: como a dose de calcário é decidida -------------------------------------------
 
 def f3_calagem() -> None:
-    """O diferencial de rastreabilidade, visualmente: cada caixa cita tabela e página."""
-    fig, ax = _tela(LARGURA, 4.0)
+    """Seis passos, cada um com a tabela e a página que o sustentam."""
+    fig, ax = _tela(LARGURA, 3.9)
 
     passos = [
-        (0.80, "Cultura + sistema de manejo", "Tabela 5.1 e critério do grupo"),
-        (0.64, "Qual é o critério deste grupo?", "Tabelas 5.3 a 5.7 — disparo e pH alvo"),
-        (0.48, "O pH dispara a calagem?", "o pH de referência NÃO é o gatilho"),
-        (0.32, "Quanto de calcário PRNT 100%?", "Tabela 5.2 — índice SMP × pH alvo"),
-        (0.16, "Ajuste de manejo e profundidade", "Tab. 5.3 nota (1) · Tab. 5.6 nota (5)"),
-        (0.00, "Correção pelo corretivo real", "Cap. 8, p. 298 — dose × 100 / PRNT"),
+        ("Cultura + sistema de manejo", "Tabela 5.1 e critério do grupo"),
+        ("Qual o critério deste grupo?", "Tabelas 5.3 a 5.7 — disparo e pH alvo"),
+        ("O pH dispara a calagem?", "o pH de referência NÃO é o gatilho"),
+        ("Quanto de calcário PRNT 100%?", "Tabela 5.2 — índice SMP × pH alvo"),
+        ("Ajuste de manejo e profundidade", "Tab. 5.3 nota (1) · Tab. 5.6 nota (5)"),
+        ("Correção pelo corretivo real", "Cap. 8, p. 298 — dose × 100 / PRNT"),
     ]
-    for y, titulo, fonte in passos:
-        _caixa(ax, 0.06, y, 0.60, 0.115, "", fundo="white")
-        ax.text(0.09, y + 0.072, titulo, fontsize=9, fontweight="bold", va="center")
-        ax.text(0.09, y + 0.032, fonte, fontsize=7.6, color=CINZA, va="center",
-                style="italic")
-        if y > 0:
-            _seta(ax, (0.36, y), (0.36, y - 0.045))
+    coluna_largura = 0.56
+    faixas = _linhas_em_faixas([1] * 6, topo=1 - MARGEM, base=MARGEM, respiro=0.032)
 
-    ax.annotate("não dispara →\ncalcário 0,0 t/ha,\ncom o motivo escrito",
-                xy=(0.665, 0.538), xytext=(0.70, 0.60),
-                fontsize=7.8, color=CINZA, linespacing=1.35,
+    for i, ((y, altura), (titulo, fonte)) in enumerate(zip(faixas, passos)):
+        _caixa(ax, MARGEM, y, coluna_largura, altura)
+        ax.text(MARGEM + 0.022, y + altura * 0.66, titulo, fontsize=8.8,
+                fontweight="bold", va="center", zorder=3)
+        ax.text(MARGEM + 0.022, y + altura * 0.28, fonte, fontsize=7.3, color=CINZA,
+                va="center", style="italic", zorder=3)
+        if i < len(passos) - 1:
+            meio = MARGEM + coluna_largura / 2
+            _seta(ax, (meio, y), (meio, y - 0.032))
+
+    # Saída lateral do passo 3.
+    y3, h3 = faixas[2]
+    ax.annotate("não dispara:\ncalcário 0,0 t/ha,\ncom o motivo escrito",
+                xy=(MARGEM + coluna_largura, y3 + h3 / 2),
+                xytext=(MARGEM + coluna_largura + 0.06, y3 + h3 / 2),
+                fontsize=7.6, va="center", color=TINTA, linespacing=1.4,
                 arrowprops=dict(arrowstyle="-|>", color=CINZA, linewidth=1))
 
-    ax.text(0.70, 0.33,
-            "Casos especiais que\nentram aqui:\n\n"
-            "· plantio direto\n  consolidado: ¼ da\n  dose, teto de 5 t/ha\n\n"
-            "· SMP > 6,3: equações\n  polinomiais, não a\n  tabela\n\n"
-            "· sem pH de referência:\n  decide por V%",
-            fontsize=7.6, va="top", color=TINTA, linespacing=1.5)
-
-    ax.text(0.02, 0.985,
-            "Cada passo registra regra, entrada, saída e fonte na trilha do laudo. "
-            "É o que torna\na recomendação conferível por um terceiro sem acesso ao código.",
-            fontsize=8.5, va="top", color=CINZA, linespacing=1.45)
+    # Casos especiais, alinhados ao bloco de baixo.
+    painel_x = MARGEM + coluna_largura + 0.05
+    painel_y = faixas[5][0]
+    painel_altura = faixas[3][0] - painel_y
+    ax.text(painel_x, painel_y + painel_altura, "Casos especiais", fontsize=8.4,
+            fontweight="bold", va="top", zorder=3)
+    especiais = [
+        "plantio direto consolidado:\num quarto da dose, teto\nde 5 t/ha",
+        "SMP acima de 6,3: equações\npolinomiais, não a tabela",
+        "sem pH de referência:\ndecide pela saturação\npor bases",
+    ]
+    y = painel_y + painel_altura - 0.055
+    for texto in especiais:
+        ax.text(painel_x, y, "· " + texto, fontsize=7.4, va="top", color=TINTA,
+                linespacing=1.45, zorder=3)
+        y -= 0.055 * (texto.count("\n") + 1) + 0.028
 
     _gravar(fig, "f3-calagem")
 
 
 # --- F4: os três caminhos da formulação -----------------------------------------------
 
-#: Nome de leitura dos fertilizantes simples. O id é identificador de arquivo; numa
-#: figura de artigo vai o nome por extenso, acentuado.
+#: Nome de leitura dos fertilizantes simples, para caber na coluna.
 _NOME_DO_SIMPLES = {
     "ureia": "ureia",
-    "superfosfato_triplo": "sup. triplo",
-    "cloreto_de_potassio": "cloreto de K",
+    "superfosfato_triplo": "superfosfato triplo",
+    "cloreto_de_potassio": "cloreto de potássio",
 }
 
 
@@ -251,40 +345,43 @@ def f4_formulacao() -> None:
                                classe_p="muito_baixo", classe_k="medio")
     r = recomendar_formulacao(rec, carregar_formulas_npk(), n_plantio=10)
 
-    fig, ax = _tela(LARGURA, 3.9)
+    fig, ax = _tela(LARGURA, 3.15)
+    direita = 1 - MARGEM
 
-    _caixa(ax, 0.02, 0.86, 0.96, 0.11,
-           "Recomendação:  N 60  ·  P₂O₅ 120  ·  K₂O 80  kg/ha      "
-           "(N de plantio informado: 10)",
-           fundo=CLARO, peso="bold", tamanho=8.6)
+    (y_cab, h_cab), (y_col, h_col) = _linhas_em_faixas(
+        [0.34, 1.0], topo=1 - MARGEM, base=MARGEM, respiro=0.07
+    )
+
+    _caixa(ax, MARGEM, y_cab, direita - MARGEM, h_cab, fundo=CLARO)
+    ax.text((MARGEM + direita) / 2, y_cab + h_cab * 0.64,
+            "Recomendação:  N 60   ·   P₂O₅ 120   ·   K₂O 80   kg/ha",
+            ha="center", va="center", fontsize=9.4, fontweight="bold", zorder=3)
+    ax.text((MARGEM + direita) / 2, y_cab + h_cab * 0.24,
+            "com 10 kg/ha de N informados para a semeadura",
+            ha="center", va="center", fontsize=7.8, color=CINZA, zorder=3)
 
     colunas = [
-        (0.02, "A. Fórmula ideal", "para encomendar",
-         [f"{o.formula_id} — {o.dose_kg_ha:.0f} kg/ha" for o in r.ideais]),
-        (0.35, "B. Do catálogo", "para comprar pronto",
-         [f"{o.formula_id} — {o.dose_kg_ha:.0f} kg/ha" for o in r.catalogo]),
-        (0.68, "C. Simples", "sempre exata",
-         [f"{_NOME_DO_SIMPLES.get(c.produto, c.produto)} — {c.dose_kg_ha:.0f} kg/ha"
+        ("A. Fórmula ideal", "para encomendar",
+         [f"{o.formula_id}  —  {o.dose_kg_ha:.0f} kg/ha" for o in r.ideais]),
+        ("B. Do catálogo", "para comprar pronto",
+         [f"{o.formula_id}  —  {o.dose_kg_ha:.0f} kg/ha" for o in r.catalogo]),
+        ("C. Adubos simples", "sempre exata",
+         [f"{_NOME_DO_SIMPLES.get(c.produto, c.produto)}\n      {c.dose_kg_ha:.0f} kg/ha"
           for c in (r.mistura.complementos if r.mistura else [])]),
     ]
-    for x, titulo, sub, linhas in colunas:
-        _caixa(ax, x, 0.30, 0.30, 0.46, "", fundo="white")
-        ax.text(x + 0.15, 0.715, titulo, ha="center", fontsize=9, fontweight="bold")
-        ax.text(x + 0.15, 0.672, sub, ha="center", fontsize=7.8, color=CINZA,
-                style="italic")
-        for i, linha in enumerate(linhas[:4]):
-            ax.text(x + 0.015, 0.615 - i * 0.055, "· " + linha, fontsize=7.3, va="center")
-        _seta(ax, (x + 0.15, 0.855), (x + 0.15, 0.77))
-
-    ax.text(0.02, 0.21,
-            "As três fórmulas da coluna A são exatamente as que o Manual publica no exemplo\n"
-            "da p. 311, com as doses que ele calcula — oráculo externo, não escrito por nós.",
-            fontsize=8.2, va="top", linespacing=1.45)
-    ax.text(0.02, 0.085,
-            "A coluna B encontra ainda uma fórmula real de mercado, de mesma proporção, que o\n"
-            "Manual não cita. O método sozinho não a apontaria; o catálogo sozinho não saberia\n"
-            "qual escolher.",
-            fontsize=8.2, va="top", color=CINZA, linespacing=1.45)
+    vao = 0.025
+    largura = (direita - MARGEM - vao * 2) / 3
+    for i, (titulo, sub, linhas) in enumerate(colunas):
+        x = MARGEM + i * (largura + vao)
+        _caixa(ax, x, y_col, largura, h_col)
+        ax.text(x + largura / 2, y_col + h_col * 0.86, titulo, ha="center",
+                va="center", fontsize=8.8, fontweight="bold", zorder=3)
+        ax.text(x + largura / 2, y_col + h_col * 0.72, sub, ha="center", va="center",
+                fontsize=7.4, color=CINZA, style="italic", zorder=3)
+        for j, linha in enumerate(linhas[:3]):
+            ax.text(x + 0.018, y_col + h_col * (0.52 - j * 0.19), linha, fontsize=7.6,
+                    va="center", linespacing=1.6, zorder=3)
+        _seta(ax, (x + largura / 2, y_cab), (x + largura / 2, y_col + h_col))
 
     _gravar(fig, "f4-formulacao")
 

@@ -41,9 +41,18 @@ _SIMPLES = [
 ]
 
 
-def _f(id_, n, p, k):
+def _f(id_, n, p, k, evidencia="nenhuma"):
     return {"id": id_, "n": n, "p2o5": p, "k2o": k, "uso": ["plantio"],
-            "fontes": ["teste"], "origem": "composicao_ilustrativa"}
+            "fontes": ["teste"], "evidencia_comercial": evidencia}
+
+
+_EVIDENCIA = {
+    "forte": "fabricante identificado ou compra pública",
+    "media": "citada por fonte técnica",
+    "fraca": "só anúncio de revenda",
+    "nenhuma": "exemplo de cálculo, sem prova de venda",
+    "regra": "o nível é o mais alto entre as fontes da fórmula",
+}
 
 
 def _catalogo(*formulas):
@@ -51,7 +60,7 @@ def _catalogo(*formulas):
         "schema": "formulas_npk_v1",
         "fontes": {"teste": "fórmula fictícia de teste"},
         "fertilizantes_simples": {"_fonte": "teste", "itens": _SIMPLES},
-        "formulas": {"itens": list(formulas)},
+        "formulas": {"_evidencia": _EVIDENCIA, "itens": list(formulas)},
     }
 
 
@@ -276,6 +285,59 @@ def test_o_catalogo_de_formulas_carrega_e_tem_as_tres_fontes_de_complemento():
 
     assert {"superfosfato_triplo", "cloreto_de_potassio", "ureia"} <= ids
     assert catalogo["formulas"]["itens"], "catálogo semente não pode estar vazio"
+
+
+def test_toda_formula_diz_quao_forte_e_a_prova_de_que_e_vendida():
+    """O campo que responde "de onde saiu este catálogo?" com critério, não com lista.
+
+    Os quatro níveis estão descritos no próprio arquivo, no bloco `_evidencia`, e o
+    carregador recusa nível que não esteja lá.
+    """
+    catalogo = Carregador().carregar_formulas_npk()
+    descritos = set(catalogo["formulas"]["_evidencia"]) - {"regra"}
+
+    assert descritos == {"forte", "media", "fraca", "nenhuma"}
+    for f in catalogo["formulas"]["itens"]:
+        assert f["evidencia_comercial"] in descritos, f["id"]
+
+
+def test_o_catalogo_mantem_cobertura_de_mercado():
+    """O piso existe para que uma edição futura não derrube a cobertura sem perceber.
+
+    Fórmulas de nível `nenhuma` — exemplos de cálculo do Manual e composições
+    ilustrativas do IAC — ficam no arquivo porque o método precisa delas, mas NÃO
+    contam: o que sustenta o argumento é a prova de que o produto é vendido.
+    """
+    itens = Carregador().carregar_formulas_npk()["formulas"]["itens"]
+    com_prova = [f for f in itens if f["evidencia_comercial"] != "nenhuma"]
+
+    assert len(com_prova) >= Carregador.MINIMO_COM_EVIDENCIA_COMERCIAL
+    # E o argumento mais forte não depende dos anúncios de revenda: mesmo descartando
+    # os de evidência fraca, resta a maior parte do catálogo.
+    robustas = [f for f in com_prova if f["evidencia_comercial"] in ("forte", "media")]
+    assert len(robustas) >= 35
+
+
+def test_nivel_de_evidencia_fora_do_bloco_descrito_e_recusado():
+    orfa = _f("05-20-20", 5, 20, 20)
+    orfa["evidencia_comercial"] = "altissima"
+    with pytest.raises(ErroCarregamento, match="não está descrita"):
+        Carregador().validar_formulas_npk(_catalogo(orfa))
+
+
+def test_o_catalogo_tem_formula_com_evidencia_no_rio_grande_do_sul():
+    """O trabalho é para o RS, e a pergunta "isso se compra aqui?" é legítima.
+
+    Não se exige um número: exige-se que exista evidência regional, para que a seção de
+    limitações possa dizer quanta, em vez de silenciar sobre o assunto.
+    """
+    catalogo = Carregador().carregar_formulas_npk()
+    do_rs = [
+        f for f in catalogo["formulas"]["itens"]
+        if "RS" in (f.get("regiao") or "") and f["evidencia_comercial"] != "nenhuma"
+    ]
+
+    assert do_rs, "nenhuma fórmula com evidência de ser comercializada no RS"
 
 
 def test_id_da_formula_tem_de_bater_com_as_garantias():

@@ -41,16 +41,27 @@ _SIMPLES = [
 _MAPA_SIMPLES = {s["id"]: s for s in _SIMPLES}
 
 
-def formula(id_, n, p, k, uso=("plantio",)):
+def formula(id_, n, p, k, uso=("plantio",), evidencia="nenhuma"):
     return {"id": id_, "n": n, "p2o5": p, "k2o": k, "uso": list(uso),
-            "fontes": ["teste"], "origem": "composicao_ilustrativa"}
+            "fontes": ["teste"], "evidencia_comercial": evidencia}
+
+
+#: Os quatro níveis, como o catálogo real os descreve. O carregador exige que todo
+#: nível usado esteja descrito aqui.
+_EVIDENCIA = {
+    "forte": "fabricante identificado ou compra pública",
+    "media": "citada por fonte técnica",
+    "fraca": "só anúncio de revenda",
+    "nenhuma": "exemplo de cálculo, sem prova de venda",
+    "regra": "o nível é o mais alto entre as fontes da fórmula",
+}
 
 
 def catalogo(*formulas):
     return {
         "fontes": {"teste": "fórmula fictícia de teste"},
         "fertilizantes_simples": {"_fonte": "teste", "itens": _SIMPLES},
-        "formulas": {"itens": list(formulas)},
+        "formulas": {"_evidencia": _EVIDENCIA, "itens": list(formulas)},
     }
 
 
@@ -407,11 +418,26 @@ class TestCatalogoReal:
             rec(**_MANUAL), carregar_formulas_npk(), n_plantio=_N_PLANTIO_DO_MANUAL
         )
 
-        # As quatro de custo zero existem no catálogo; o top 3 mostra três delas.
+        # Cinco fórmulas do catálogo têm a proporção 3:2 e zeram o custo; o top 3
+        # mostra três delas. Três são do exemplo do Manual; as outras duas são de
+        # mercado — a 08-30-20, citada por produtores do Sul, e a 10-30-20, de um
+        # pregão do IF Farroupilha com entregas no RS. Que o método encontre produto
+        # real com a proporção exata do exemplo publicado é o argumento do catálogo.
         assert all(o.custo == pytest.approx(0.0) for o in r.catalogo)
         assert {o.formula_id for o in r.catalogo} <= {
-            "02-18-12", "02-24-16", "03-30-20", "08-30-20"
+            "02-18-12", "02-24-16", "03-30-20", "08-30-20", "10-30-20"
         }
+
+    def test_entre_as_exatas_vence_a_que_exige_menos_massa_total(self):
+        # Todas custam zero, e o desempate de D9 decide: a 10-30-20 traz mais N, precisa
+        # de menos ureia em cobertura, e por isso desce menos produto do caminhão.
+        r = recomendar_formulacao(
+            rec(**_MANUAL), carregar_formulas_npk(), n_plantio=_N_PLANTIO_DO_MANUAL
+        )
+
+        assert r.catalogo[0].formula_id == "10-30-20"
+        massas = [o.massa_total_kg_ha for o in r.catalogo]
+        assert massas == sorted(massas)
 
     def test_a_ideal_e_a_mistura_funcionam_com_o_catalogo_real(self):
         r = recomendar_formulacao(rec(n=40, p2o5=80, k2o=50), carregar_formulas_npk())

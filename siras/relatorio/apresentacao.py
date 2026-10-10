@@ -784,7 +784,7 @@ def _opcao_adubacao(opcao: Any) -> Dict[str, Any]:
         "tem_excesso": any(v > 0.5 for v in opcao.excesso.values()),
         "massa_total": formatar_numero(opcao.massa_total_kg_ha, 0),
         "complementos": [_complemento_legivel(c) for c in opcao.complementos],
-        "origem": opcao.origem,
+        "evidencia": opcao.evidencia,
         "fontes": opcao.fontes,
         "do_usuario": opcao.tipo == "usuario",
     }

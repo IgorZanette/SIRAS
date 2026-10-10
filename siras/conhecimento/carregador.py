@@ -906,6 +906,8 @@ class Carregador:
                     f"existe no bloco 'fontes' da raiz — entrada sem procedência rastreável"
                 )
 
+        self._validar_evidencia_comercial(dados)
+
         ids_simples = set()
         for i, s in enumerate((dados.get("fertilizantes_simples") or {}).get("itens") or []):
             if s["id"] in ids_simples:
@@ -925,6 +927,42 @@ class Carregador:
                     f"fertilizantes_simples: falta '{exigida}', que o motor usa para "
                     f"complementar o que a fórmula não entrega (siras/motor/formulacao.py)"
                 )
+
+    #: Quantas fórmulas o catálogo precisa ter com prova de que são vendidas. Não é
+    #: limiar agronômico: é o piso de cobertura que o levantamento do autor atingiu em
+    #: 10/10/2026, e que uma edição futura não deve derrubar sem perceber.
+    MINIMO_COM_EVIDENCIA_COMERCIAL = 50
+
+    def _validar_evidencia_comercial(self, dados: Dict) -> int:
+        """Confere o nível de evidência de cada fórmula e devolve quantas têm prova.
+
+        O nível responde à pergunta inevitável da banca, "de onde saiu este catálogo?",
+        com critério explícito em vez de lista solta.
+
+        Fórmula de nível `nenhuma` é exemplo de cálculo do Manual ou composição
+        ilustrativa: continua no arquivo, porque o método precisa delas, mas não conta
+        como evidência de mercado.
+
+        O PISO de cobertura não é checado aqui, e sim em `carregar_formulas_npk`: ele é
+        propriedade do arquivo real, não de qualquer catálogo. Checá-lo nesta função
+        impediria os testes de montarem catálogos pequenos para exercitar as demais
+        invariantes — e foi o que aconteceu quando eu o pus no lugar errado.
+        """
+        bloco = dados.get("formulas") or {}
+        niveis = set((bloco.get("_evidencia") or {}).keys()) - {"regra"}
+
+        com_evidencia = 0
+        for i, f in enumerate(bloco.get("itens") or []):
+            nivel = f.get("evidencia_comercial")
+            if nivel not in niveis:
+                raise ErroCarregamento(
+                    f"formulas.itens[{i}] (id '{f.get('id')}'): evidencia_comercial "
+                    f"'{nivel}' não está descrita no bloco _evidencia "
+                    f"({', '.join(sorted(niveis))})"
+                )
+            if nivel != "nenhuma":
+                com_evidencia += 1
+        return com_evidencia
 
     def validar_corretivos(self, dados: Dict) -> None:
         """Invariantes do arquivo de corretivos.
@@ -978,10 +1016,25 @@ class Carregador:
             anterior_max = faixa.get("prnt_max_inclusivo")
 
     def carregar_formulas_npk(self) -> Dict[str, Any]:
-        """Carrega e valida dados/mercado/formulas_npk.json."""
-        return self._carregar_de_mercado(
+        """Carrega e valida dados/mercado/formulas_npk.json.
+
+        Além das invariantes estruturais, confere aqui o PISO de cobertura de mercado:
+        é propriedade deste arquivo, e não de um catálogo qualquer.
+        """
+        dados = self._carregar_de_mercado(
             "formulas_npk.json", "formulas_npk_v1", self.validar_formulas_npk
         )
+        com_evidencia = sum(
+            1 for f in (dados.get("formulas") or {}).get("itens") or []
+            if f.get("evidencia_comercial") != "nenhuma"
+        )
+        if com_evidencia < self.MINIMO_COM_EVIDENCIA_COMERCIAL:
+            raise ErroCarregamento(
+                f"formulas_npk.json: {com_evidencia} fórmulas com prova de que são "
+                f"vendidas, e o piso é {self.MINIMO_COM_EVIDENCIA_COMERCIAL}. Abaixo "
+                f"disso o argumento de cobertura de mercado deixa de se sustentar"
+            )
+        return dados
 
     def carregar_corretivos(self) -> Dict[str, Any]:
         """Carrega e valida dados/mercado/corretivos.json."""

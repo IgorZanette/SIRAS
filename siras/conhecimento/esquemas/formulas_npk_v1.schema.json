@@ -39,9 +39,14 @@
     },
     "formulas": {
       "type": "object",
-      "required": ["itens"],
+      "required": ["itens", "_evidencia"],
       "properties": {
         "_status": {"type": "string"},
+        "_evidencia": {
+          "type": "object",
+          "required": ["forte", "media", "fraca", "nenhuma", "regra"],
+          "description": "O criterio de cada nivel de evidencia, escrito. Exigido pelo schema para que o catalogo nunca classifique sem dizer por que."
+        },
         "itens": {"type": "array", "items": {"$ref": "#/$defs/formula"}}
       }
     },
@@ -69,7 +74,7 @@
     },
     "formula": {
       "type": "object",
-      "required": ["id", "n", "p2o5", "k2o", "uso", "fontes", "origem"],
+      "required": ["id", "n", "p2o5", "k2o", "uso", "fontes", "evidencia_comercial"],
       "properties": {
         "id": {
           "type": "string",
@@ -90,18 +95,15 @@
           "items": {"type": "string", "minLength": 1},
           "description": "Chaves do bloco 'fontes' da raiz. O carregador confere que existem."
         },
-        "origem": {
-          "enum": [
-            "exemplo_manual",
-            "citada_por_produtores",
-            "produto_de_fabricante",
-            "comercio",
-            "composicao_ilustrativa"
-          ]
+        "evidencia_comercial": {
+          "enum": ["forte", "media", "fraca", "nenhuma"],
+          "description": "Quao forte e a prova de que a formula e vendida. O criterio de cada nivel esta no bloco _evidencia do catalogo. E o campo que responde a pergunta 'de onde saiu este catalogo?' com criterio explicito em vez de lista solta."
         },
         "regiao": {"type": "string"},
         "extras": {"type": "object", "additionalProperties": {"type": "number"}},
-        "_nota_uso": {"type": "string"}
+        "_nota": {"type": "string"},
+        "_nota_uso": {"type": "string"},
+        "_nota_extras": {"type": "string"}
       }
     }
   }

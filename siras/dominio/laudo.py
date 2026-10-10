@@ -118,7 +118,8 @@ class OpcaoAdubacao:
     teores: Dict[str, float] = field(default_factory=dict)
     #: de onde veio a entrada do catálogo. Vazio nos demais tipos
     fontes: List[str] = field(default_factory=list)
-    origem: str = ""
+    #: quão forte é a prova de que a fórmula é vendida: forte, media, fraca ou nenhuma
+    evidencia: str = ""
     #: ponto de quebra -> (dose, custo). É o que a trilha mostra para justificar a
     #: escolha: as duas doses possíveis e o que cada uma custaria.
     candidatos: Dict[str, Any] = field(default_factory=dict)

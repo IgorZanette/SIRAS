@@ -165,7 +165,7 @@ def interpretar_formula_do_usuario(texto: str) -> Dict[str, Any]:
         "id": f"{n:02d}-{p:02d}-{k:02d}",
         "n": float(n), "p2o5": float(p), "k2o": float(k),
         "uso": [USO_PADRAO],
-        "fontes": [], "origem": "informada_pelo_usuario",
+        "fontes": [], "evidencia_comercial": "informada_pelo_usuario",
         "_avisos": avisos,
     }
 
@@ -263,7 +263,8 @@ def _montar_opcao(
         fornecido=melhor["fornecido"], excesso=melhor["excesso"], falta=melhor["falta"],
         complementos=melhor["complementos"], custo=melhor["custo"],
         massa_total_kg_ha=melhor["massa"], teores=teores,
-        fontes=list(formula.get("fontes") or []), origem=formula.get("origem", ""),
+        fontes=list(formula.get("fontes") or []),
+        evidencia=formula.get("evidencia_comercial", ""),
         candidatos=melhor["candidatos"],
     )
 

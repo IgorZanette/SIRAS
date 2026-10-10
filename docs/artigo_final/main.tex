@@ -1,0 +1,96 @@
+% Artigo final de Trabalho de Conclusão de Curso
+% Curso de Ciência da Computação — Universidade de Passo Fundo
+% Autor: Igor Zanette — Matrícula: 198862
+% Orientador: Prof. Rafael Rieder
+%
+% ESTRUTURA definida pelo orientador em 10/10/2026:
+%   Introdução .................. máx. 1 página
+%   Revisão de Literatura ....... máx. 2 páginas
+%   Materiais e Métodos ......... com subseção do aplicativo desenvolvido
+%   Resultados e Discussão ...... seção principal
+%   Conclusão ................... 3 a 4 parágrafos
+%
+% SOBRE A CLASSE: `upf-ccc` é a mesma da proposta (docs/proposta/), por decisão do
+% autor em 10/10/2026. Ela é classe de MONOGRAFIA — 12 pt, uma coluna —, então os
+% limites de página acima não correspondem ao que corresponderiam num modelo de artigo
+% em duas colunas. Os alvos foram convertidos para contagem de PALAVRAS, anotada no
+% cabeçalho de cada arquivo de seção. Se o orientador indicar outro template, o conteúdo
+% migra sem reescrita: cada seção é um arquivo isolado.
+
+\documentclass[alpha-refs,brazilian,oneside]{upf-ccc}
+
+%----------------------------------------------------------------
+% Pacotes adicionais
+%----------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{nicefrac}
+\usepackage{epstopdf}
+\usepackage{chngcntr}
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+\counterwithout{footnote}{chapter}
+\usepackage{notoccite}
+\usepackage{adjustbox}
+\usepackage{enumitem}
+\usepackage{threeparttable}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+%----------------------------------------------------------------
+% Marcador de pendência
+%----------------------------------------------------------------
+% Dado que ainda NÃO existe aparece assim, em vermelho e impossível de confundir com
+% texto pronto. A regra do trabalho é que nenhum resultado seja escrito antes de ser
+% medido: onde falta dado, fica o marcador dizendo o que falta e de onde virá.
+% Antes de entregar: compilar e conferir que não sobrou nenhum.
+\newcommand{\pendente}[1]{%
+  \textcolor{red}{\textbf{[PENDENTE: #1]}}%
+}
+
+%----------------------------------------------------------------
+% Ajuste de quebra de linha
+%----------------------------------------------------------------
+\tolerance=1000
+\emergencystretch=3em
+\hyphenpenalty=200
+\hyphenation{
+  apti-dão edá-fica frutí-feras macieira maracu-jazeiro
+  mirti-leiro nogueira-pecã quivi-zeiro espe-cia-lista
+  con-cor-dân-cia infe-rência reco-men-dação inter-pre-tação
+  Embra-pa Comis-são fer-tili-dade adu-bação cala-gem
+  pro-pri-edades microba-cias heu-rís-ticas usa-bili-dade}
+
+%----------------------------------------------------------------
+% Dados do trabalho (OBRIGATÓRIO)
+%----------------------------------------------------------------
+\author{Igor Zanette}
+
+\title{SIRAS: Sistema de Interpretação e Recomendação Agronômica de Solo}
+      {SIRAS: a Soil Interpretation and Agronomic Recommendation System}
+
+\tipotrabalho{\monografia}
+
+\orientador{Rafael Rieder}
+
+%----------------------------------------------------------------
+\begin{document}
+
+\tableofcontents
+
+\include{0_Resumo}
+\include{1_Introducao}
+\include{2_Revisao}
+\include{3_Materiais_Metodos}
+\include{4_Resultados}
+\include{5_Conclusao}
+
+%----------------------------------------------------------------
+% Referências bibliográficas
+%----------------------------------------------------------------
+\renewcommand*{\bibname}{\capbib}
+\clearpage\phantomsection\addcontentsline{toc}{chapter}{\MakeUppercase{\capbib}}
+\bibliography{referencias}
+
+\end{document}

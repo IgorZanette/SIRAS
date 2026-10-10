@@ -1,0 +1,53 @@
+% Conclusão — alvo: 3 a 4 parágrafos (orientador, 10/10/2026).
+% Retoma o objetivo, diz em que medida foi alcançado, destaca a contribuição principal,
+% os resultados e as limitações mais relevantes, e fecha com trabalhos futuros.
+%
+% ESTADO: rascunho. Os parágrafos 1, 3 e 4 estão escritos sobre o que já foi medido; o
+% parágrafo 2 depende da usabilidade e da comparação, e por isso está marcado. Reescrever
+% o conjunto depois que o capítulo 4 fechar — a conclusão é a última coisa a ser redigida.
+
+\chapter{Conclusão}\label{chap:conclusao}
+
+Este trabalho teve por objetivo desenvolver e avaliar o SIRAS, um sistema especialista
+baseado em regras para interpretação de análises de solo, recomendação de calagem e
+adubação e estimativa de aptidão edáfica, segundo os critérios do Manual de Calagem e
+Adubação para os estados do RS e de SC. O objetivo foi alcançado no que diz respeito à
+construção e à verificação do artefato: o sistema cobre as 61 culturas e grupos de
+culturas do escopo, emite recomendação e estimativa de aptidão a partir de uma única
+análise, e cada número do laudo é acompanhado da regra, da tabela e da página que o
+produziram. Nos casos com oráculo calculado manualmente, a concordância foi integral; na
+conformidade do módulo de aptidão frente à especificação aprovada antes da
+implementação, também.
+
+A contribuição principal não está em automatizar a recomendação --- isso ferramentas
+existentes já fazem, e bem ---, mas em \textbf{integrar}, a partir de uma análise
+individual de solo, a recomendação de manejo e a estimativa de aptidão da cultura
+escolhida, emitindo os dois cenários de solo, o atual e o projetado após as correções
+recomendadas, de modo que a diferença entre eles quantifique o ganho atribuível à
+própria recomendação. Soma-se a isso a rastreabilidade integral das saídas e a separação
+explícita, no próprio sistema, entre o que é norma, o que é legislação, o que é convenção
+comercial e o que é dado de fabricante --- distinção que, no domínio tratado, costuma se
+perder.
+
+\pendente{parágrafo sobre o que o teste de usabilidade e a comparação com a ferramenta
+existente mostraram --- escrever depois das seções 4.4 e 4.5}
+
+As limitações mais relevantes são de três ordens. A validação apoia-se em um conjunto de
+casos menor do que o planejado e cuja referência foi calculada pelo mesmo autor que
+implementou o sistema, de modo que ela mede a fidelidade da implementação aos critérios
+transcritos, e não a adequação agronômica desses critérios; o intervalo de confiança
+obtido reflete esse tamanho de amostra. A estimativa de aptidão é exclusivamente
+edáfica, sem relevo, clima nem drenagem, e por isso não substitui uma avaliação de
+aptidão agrícola das terras. E a indicação de adubo formulado ordena as alternativas por
+adequação nutricional, não por custo, porque o sistema não dispõe de preços.
+
+Como trabalhos futuros, três encaminhamentos se destacam. O primeiro é ampliar o
+conjunto de casos de validação com \textbf{laudos reais anonimizados}, cuja recomendação
+tenha sido elaborada por profissional habilitado --- o que substituiria o oráculo do
+próprio autor por referência independente e romperia a circularidade parcial que hoje
+limita a força da evidência. O segundo é incorporar à estimativa de aptidão os fatores
+de ambiente que ela hoje não considera, aproximando-a do sistema de avaliação de aptidão
+agrícola sem abandonar a escala individual da propriedade. O terceiro é a implantação em
+servidor remoto, com persistência do histórico de análises por propriedade, o que
+permitiria acompanhar a evolução da fertilidade ao longo das safras --- informação que
+uma análise isolada não oferece e que é central ao planejamento de longo prazo.

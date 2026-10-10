@@ -1,0 +1,79 @@
+% Introdução — alvo: máx. 1 página do template (~750 palavras)
+% Compilado de docs/proposta/2_Motivacao_e_objetivos.tex, reorganizado para o artigo:
+% contextualização -> problema -> justificativa -> objetivo -> contribuição.
+% O que saiu da proposta: a lista de objetivos específicos (cabe em Materiais e Métodos)
+% e o bloco formal de hipóteses H0/H1 (vai para a validação).
+
+\chapter{Introdução}\label{chap:introducao}
+
+A interpretação de análises químicas e físicas de solo é etapa essencial do
+planejamento da fertilidade e do manejo das culturas agrícolas. O processo exige
+conhecimento técnico e atenção rigorosa: erros de interpretação acarretam prejuízo
+financeiro ao produtor, seja pelo uso desnecessário de insumos, seja pela perda de
+produtividade decorrente de correção insuficiente.
+
+A complexidade advém da multiplicidade de variáveis envolvidas --- pH, teores de
+macronutrientes e micronutrientes, capacidade de troca de cátions (CTC), saturação por
+bases, textura do solo, entre outras \citep{Embrapa2011, ManualCalagem2016} --- e da
+necessidade de correlacioná-las com as exigências de cada cultura. No Rio Grande do Sul
+e em Santa Catarina, os critérios dessa correlação estão consolidados no Manual de
+Calagem e Adubação da Comissão de Química e Fertilidade do Solo
+\citep{ManualCalagem2016}, cuja aplicação manual é trabalhosa e sujeita a erro: cada
+recomendação exige localizar a tabela da cultura, classificar o teor na faixa correta
+segundo o teor de argila ou a CTC, e compor correção com manutenção.
+
+Ferramentas que automatizam esse processo existem e demonstram sua viabilidade. O
+FertFacil, desenvolvido para RS, SC, MS e Paraguai, cobre mais de cem cultivos e é
+utilizado em mais de 480 municípios gaúchos \citep{Tiecher2016}; o AdubaTec, da Embrapa
+Mandioca e Fruticultura, adota arquitetura parametrizável para fruteiras tropicais
+\citep{AdubaTec2021}. Ambos, porém, concentram-se na geração da recomendação de correção
+e adubação, e não estimam a aptidão da cultura escolhida frente às condições do solo da
+área. Em escala mais ampla, o Sistema de Avaliação da Aptidão Agrícola das Terras
+\citep{EmbrapaAptidao2025} classifica o potencial produtivo com base em levantamento
+pedológico regional --- abordagem inadequada à avaliação individualizada de uma área a
+partir de um laudo de análise, como apontam \cite{Hofig2015}, que registram ainda a
+ausência de indicação de práticas de manejo por tipo de utilização.
+
+Constata-se, portanto, uma lacuna: há sistemas que recomendam a correção do solo e há
+métodos que avaliam aptidão em escala regional, mas não há, entre as ferramentas
+acessíveis ao produtor e ao técnico do RS, uma solução que integre as duas perspectivas
+a partir de uma única análise de solo. É essa lacuna que o presente trabalho endereça.
+
+A motivação é também prática. O autor acumulou experiência na assistência técnica a
+produtores rurais, com contato direto com laudos e recomendações, e no atendimento
+bancário a carteiras de crédito rural. Nessa última atividade observa-se que projetos
+agrícolas submetidos às instituições financeiras podem apresentar inconsistências nas
+recomendações técnicas, o que evidencia a necessidade de instrumentos que apoiem a
+verificação dessas informações de maneira objetiva e rastreável.
+
+Este artigo apresenta o \textbf{SIRAS} --- \textbf{S}istema de \textbf{I}nterpretação e
+\textbf{R}ecomendação \textbf{A}gronômica de \textbf{S}olo ---, um sistema especialista
+baseado em regras que, a partir dos dados de uma análise de solo e de uma cultura alvo,
+(i)~interpreta os atributos informados segundo as faixas do Manual; (ii)~calcula a
+necessidade de calcário e as doses de nitrogênio, fósforo e potássio; (iii)~indica o
+adubo formulado que atende à recomendação; e (iv)~estima a \textbf{aptidão edáfica} da
+cultura em dois cenários, o estado atual do solo e o estado projetado após as correções
+que o próprio sistema recomendou.
+
+O objetivo geral do trabalho foi desenvolver e avaliar o SIRAS, cobrindo as 61 culturas
+e grupos de culturas para os quais o Manual publica tabelas completas de adubação.
+Adota-se deliberadamente o termo \emph{aptidão edáfica}, e não \emph{aptidão agrícola}:
+a estimativa restringe-se aos atributos químicos e físicos informados na análise, sem
+relevo, clima, drenagem ou suscetibilidade à erosão, e empregar o termo consagrado
+sugeriria equivalência com o sistema de \cite{EmbrapaAptidao2025} que não existe.
+
+Três características distinguem a solução. A primeira é a \textbf{integração} entre
+recomendação de manejo e estimativa de aptidão a partir de uma análise individual ---
+o diferencial frente às ferramentas levantadas. A segunda é a \textbf{rastreabilidade}:
+cada número do laudo é acompanhado da regra que o produziu e da tabela e página do
+Manual de onde ela vem, o que torna o documento conferível por terceiros, requisito
+relevante no contexto de análise de crédito rural. A terceira é a \textbf{separação
+explícita entre norma e dado de mercado}: o que é transcrição do Manual, o que é
+legislação, o que é convenção comercial e o que é ficha de fabricante ficam declarados
+no próprio sistema, e não se confundem na saída.
+
+O restante do artigo está organizado como segue. O \cref{chap:revisao} sintetiza os
+conceitos e os trabalhos relacionados necessários à compreensão da solução. O
+\cref{chap:metodologia} descreve os materiais, o método e a arquitetura do sistema
+desenvolvido. O \cref{chap:resultados} apresenta e discute a avaliação realizada, e o
+\cref{chap:conclusao} retoma o objetivo, as contribuições e as limitações.

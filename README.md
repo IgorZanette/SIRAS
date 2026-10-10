@@ -50,6 +50,8 @@ pytest --completa                 # tudo, incluindo as bancadas
 python scripts/valida_base.py     # valida dados/ contra os schemas
 python scripts/validar_anexo1.py          # classificações de P e K contra o Anexo 1 do Manual
 python scripts/conferir_contraste.py   # contraste da paleta nos dois temas
+python scripts/gera_tabela_concordancia.py   # tabela de concordância da validação
+python scripts/gerar_figuras_artigo.py       # figuras do artigo, em PNG
 ```
 
 A conformidade do módulo de aptidão contra o Caderno de Critérios roda junto da camada
@@ -112,7 +114,7 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
   de Wilson, a partir de `siras/validacao/concordancia.py`, que a suíte também exercita. Medido em
   10/10/2026: recomendação **15/15 = 100%** (IC [79,6%; 100,0%]) e aptidão **88/88 = 100%**
   (IC [95,8%; 100,0%]).
-- **Suíte** — 4951 testes passando (camada completa, 4 min 32 s).
+- **Suíte** — 5167 testes passando (camada completa, 4 min 50 s).
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
 avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em

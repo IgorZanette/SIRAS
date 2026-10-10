@@ -1,5 +1,5 @@
 {
-  "descricao": "Parametros de decisao do autor para o motor de aptidao edafica (Apendice A do CCAE-v1.0.md). Cada chave e o parametro configuravel de uma decisao registrada la; mudar um valor aqui e reportado na analise de sensibilidade (CCAE Sec. 9.4), nunca no codigo do motor.",
+  "descricao": "Parametros de decisao do autor para o motor de aptidao edafica (Apendice A do CCAE). Cada chave e o parametro configuravel de uma decisao registrada la; mudar um valor aqui e reportado na analise de sensibilidade (CCAE Sec. 9.4), nunca no codigo do motor.",
   "fonte": {
     "documento": "docs/especificacao/ccae.md, Apendice A"
   },

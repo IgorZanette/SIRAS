@@ -84,11 +84,21 @@ conflitos cujo comportamento precisaria ser, ele próprio, verificado, enquanto 
 motor \textbf{não importam Flask}, de modo que o núcleo é executável e testável por
 linha de comando, independentemente da interface.
 
+A \cref{fig:arquitetura} resume as camadas e a fronteira entre elas.
+
 A arquitetura separa quatro camadas: \texttt{dominio}, com as entidades;
 \texttt{conhecimento}, com o carregamento e a validação da base; \texttt{motor}, com as
 regras; e \texttt{relatorio} e \texttt{web}, com a apresentação. O motor expõe um
 \textbf{ponto de entrada único}, a função \texttt{gerar\_laudo}, pura e determinística:
 as mesmas entradas produzem sempre o mesmo laudo e a mesma trilha.
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\textwidth]{fig/f1-arquitetura}
+\caption{Camadas do SIRAS e a fronteira do Flask. O motor e o domínio não dependem da camada web, o que permite executá-los e testá-los por linha de comando, independentemente da interface.}
+\label{fig:arquitetura}
+\end{figure}
 
 \subsection{Separação entre norma e dado de mercado}
 
@@ -120,6 +130,14 @@ A análise pode cobrir \textbf{vários talhões} num documento único, repetindo
 de solo por talhão e compartilhando cultura, manejo e corretivo. A área é opcional; se
 informada para todos os talhões, o laudo acrescenta a quantidade total a comprar.
 
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\textwidth]{fig/f2-fluxo}
+\caption{Da análise de solo ao laudo, em uma passagem. A função \texttt{gerar\_laudo} é o ponto de entrada único e é determinística; os dois cenários de aptidão saem sempre juntos, porque é a diferença entre eles que quantifica o ganho atribuível à recomendação emitida.}
+\label{fig:fluxo}
+\end{figure}
+
 \subsection{Módulos de recomendação}
 
 O \textbf{módulo de calagem} resolve o critério aplicável à cultura e ao sistema de
@@ -129,6 +147,14 @@ consolidado, em que a dose é um quarto da indicada para pH 6,0, aplicada em sup
 limitada a 5~t/ha; solos de baixo poder tampão, em que equações polinomiais substituem a
 tabela; e as culturas sem pH de referência, cuja calagem se decide por saturação por
 bases.
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.88\textwidth]{fig/f3-calagem}
+\caption{Decisão da dose de calcário, com a fonte de cada passo. A distinção entre o pH de referência e o critério de disparo é o ponto em que a aplicação manual do Manual mais erra.}
+\label{fig:calagem}
+\end{figure}
 
 O \textbf{módulo de adubação} classifica o fósforo pela classe de teor de argila e o
 potássio pela CTC a pH 7,0, segundo o grupo de exigência da cultura, e compõe as doses
@@ -146,6 +172,21 @@ desvio relativo frente à recomendação, com desempate pela mais concentrada. O
 de fórmulas é dado de mercado, declarado como tal no laudo, e o ranking é
 \textbf{nutricional}: o Manual recomenda escolher pelo menor custo por unidade de NPK, e
 o sistema não dispõe de preços.
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\textwidth]{fig/f4-formulacao}
+\caption{Os três caminhos da formulação, resolvidos pelo próprio sistema sobre o exemplo publicado no Manual (§8.3, p.~311). A coluna A reproduz as três fórmulas e as doses que o Manual calcula; a coluna B encontra ainda uma fórmula de mercado, de mesma proporção, que o Manual não cita.}
+\label{fig:formulacao}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\textwidth]{fig/f5-pontos-de-quebra}
+\caption{Custo em função da dose, para uma fórmula. Como o mínimo de uma função linear por partes convexa está em um ponto de quebra, basta avaliar as duas doses que atendem exatamente o P\textsubscript{2}O\textsubscript{5} e o K\textsubscript{2}O. A regra do Manual corresponde a um desses pontos.}
+\label{fig:pontos-de-quebra}
+\end{figure}
 
 \subsection{Módulo de aptidão edáfica}
 
@@ -166,6 +207,14 @@ A saída traz \textbf{dois cenários}: o estado atual do solo e o estado projeta
 correções que o próprio sistema acabou de recomendar. A diferença entre eles quantifica
 o ganho atribuível à recomendação, e é o que integra os módulos --- emitir apenas um dos
 dois perderia justamente a integração que distingue a solução.
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\textwidth]{fig/f6-aptidao}
+\caption{Grau de limitação dos sete fatores, nos dois cenários, para uma análise real. A classe resulta do fator mais limitante, e não da média. Os fatores que a calagem e a adubação corrigem caem a zero no cenário projetado; CTC e textura permanecem, por serem limitações não corrigíveis em uma safra.}
+\label{fig:aptidao}
+\end{figure}
 
 \subsection{Trilha de inferência}
 

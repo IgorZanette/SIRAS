@@ -1,3 +1,8 @@
 flask>=3.0
 jsonschema>=4.0
 pytest>=8.0
+
+# Só para gerar as figuras do artigo
+# (scripts/gerar_figuras_artigo.py). O sistema não depende dela:
+# nada em siras/ importa matplotlib.
+matplotlib>=3.8

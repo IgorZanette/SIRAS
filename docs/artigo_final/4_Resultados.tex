@@ -66,6 +66,14 @@ Erva-mate    &  2 &  2 & 100,0\% & [34,2\%; 100,0\%] \\
 \end{tabular}
 \end{table}
 
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\textwidth]{fig/f7-concordancia}
+\caption{Concordância com o oráculo, por grupo e global, com intervalo de confiança de 95\% de Wilson. Todas as taxas pontuais são de 100\%; o que o intervalo mostra é o efeito do tamanho da amostra, e o limite inferior do intervalo global da recomendação fica abaixo do limiar de 80\% que a hipótese estabelece.}
+\label{fig:concordancia}
+\end{figure}
+
 Não houve caso discordante. Toda necessidade de calcário e toda dose de nitrogênio,
 fósforo e potássio coincidiram com o valor calculado à mão, dentro da tolerância de
 arredondamento declarada.
@@ -139,7 +147,10 @@ priorizada pela severidade; e a síntese das respostas abertas.
 
 \pendente{perfil da amostra}
 \pendente{conclusão das tarefas por roteiro}
-\pendente{tabela de severidade por heurística}
+\pendente{figura de severidade por heurística --- rodar
+\texttt{scripts/consolidar\_heuristicas.py} sobre o CSV do formulário e depois
+\texttt{scripts/gerar\_figuras\_artigo.py}, que só então produz
+\texttt{fig/f8-usabilidade.png}. Inserir aqui com \texttt{label=fig:usabilidade}}
 \pendente{lista priorizada de problemas, e quais foram corrigidos antes da entrega}
 \pendente{síntese das quatro perguntas abertas, separando o juízo sobre a ferramenta do
 juízo sobre a recomendação agronômica}

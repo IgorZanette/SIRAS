@@ -174,6 +174,48 @@ def test_a_folha_impressa_nao_tem_uma_gota_de_verde():
     assert not verde, f"verde remanescente na folha impressa: {verde}"
 
 
+def test_nenhuma_classe_do_documento_fica_verde_na_impressao(cliente):
+    """Guarda a CAUSA, e não o sintoma.
+
+    O teste acima inspeciona a folha de impressão e só pega verde escrito nela. Mas o
+    verde que chega ao papel vem de `siras-telas.css`, que aquele teste não lê — foi
+    assim que os três blocos da formulação do adubo saíram impressos em cor, em
+    11/10/2026, com a suíte inteira passando.
+
+    Aqui se cruzam as três fontes: as classes que `siras-telas.css` pinta de verde, as
+    classes que o documento IMPRESSO realmente usa, e as que `siras-impressa.css`
+    neutraliza. A interseção das duas primeiras precisa estar na terceira.
+    """
+    html = cliente.post(
+        "/analise/laudo", data=dict(_ANALISE, formato="impressa")
+    ).get_data(as_text=True)
+    assert "siras-impressa.css" in html, "não veio a versão impressa"
+
+    usadas = set(re.findall(r'class="([^"]+)"', html))
+    no_documento = {
+        classe for grupo in usadas for classe in grupo.split()
+        if classe.startswith(("formulacao__", "sec", "orientacao", "trilha__", "cenarios",
+                              "aptidao__", "limitante__", "dose", "talhao", "total",
+                              "doc__", "campo__", "atributo", "linha__"))
+    }
+
+    sem_comentario = re.sub(r"/\*.*?\*/", "", _TELAS_CSS, flags=re.S)
+    pinta_de_verde = set()
+    for seletores, corpo in re.findall(r"([^{}]+)\{([^{}]*)\}", sem_comentario):
+        if not re.search(r"var\(--v-\d+\)|#8CE23F|#4E9A2A|rgba\(140,\s*226,\s*63|"
+                         r"rgba\(78,\s*154,\s*42", corpo):
+            continue
+        pinta_de_verde |= set(re.findall(r"\.([A-Za-z0-9_-]+)", seletores))
+
+    neutralizadas = set(re.findall(r"\.([A-Za-z0-9_-]+)", _IMPRESSA_CSS))
+    descobertas = sorted((no_documento & pinta_de_verde) - neutralizadas)
+
+    assert not descobertas, (
+        f"classes do documento que siras-telas.css pinta de verde e a folha impressa "
+        f"não neutraliza: {descobertas}"
+    )
+
+
 def test_a_folha_impressa_vence_o_tema_claro():
     """O tema claro pinta com ':root[data-tema=claro] .classe', que pesa mais que
     'body.impressa .classe'. Foi assim que o botão Imprimir saiu com texto escuro sobre

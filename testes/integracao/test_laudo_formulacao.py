@@ -230,10 +230,22 @@ def test_sem_catalogo_a_tela_ainda_traz_a_secao(com_catalogo):
 def test_o_formulario_oferece_os_campos_do_adubo():
     cliente = criar_app({"TESTING": True}).test_client()
 
-    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+    html = cliente.get("/analise/dados?cultura_id=milho").get_data(as_text=True)
 
     assert 'name="n_plantio"' in html
-    assert 'name="formula_usuario"' in html
+    assert html.count('name="formula_usuario"') == 3
+
+
+def test_leguminosa_nao_pergunta_quanto_de_n_vai_na_semeadura():
+    """Soja não recebe adubação nitrogenada — fixação biológica. Perguntar quanto do N
+    vai no plantio a quem não aplica N nenhum é pergunta sem resposta possível."""
+    cliente = criar_app({"TESTING": True}).test_client()
+
+    html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    assert 'name="n_plantio"' not in html
+    # As fórmulas continuam: a soja compra adubo formulado como qualquer outra.
+    assert html.count('name="formula_usuario"') == 3
 
 
 def test_formula_do_usuario_invalida_e_recusada_com_explicacao():

@@ -111,43 +111,48 @@
        nenhum deles é dado de análise de solo: são informação sobre o que a pessoa vai
        comprar e como vai parcelar. Misturá-los com pH e teores confundiria a origem.
 
-       O N de semeadura não vem da base de propósito: o Manual separa semeadura de
-       cobertura, mas a base guarda o total, e as hortaliças trazem o parcelamento só em
-       prosa. Derivar um número dali seria inferência agronômica do sistema. #}
+       O campo de nitrogênio SOME nas leguminosas. Soja, ervilhaca e tremoço não recebem
+       adubação nitrogenada (fixação biológica), e perguntar quanto do N vai na semeadura
+       a quem não aplica N nenhum é pergunta sem resposta possível — foi o que a revisão
+       da tela em 11/10/2026 apontou. #}
     <div class="painel bloco">
       <div class="bloco__cab">
         {{ i.ico("comerciais") }}
-        <h3>Adubo disponível <small class="bloco__opcional">opcional</small></h3>
+        <h3>Adubo que você vai comprar <small class="bloco__opcional">opcional</small></h3>
       </div>
       <p class="t-aux bloco__intro">
-        Nada aqui é obrigatório. Preenchendo, o laudo fica mais perto do que tu encontras
-        na revenda — e sem preencher ele sai completo do mesmo jeito.
+        Nada aqui é obrigatório, e o laudo sai completo sem nada disso. Preenchendo, as
+        sugestões de adubo ficam mais perto do que você encontra na sua revenda.
       </p>
+      {% if recebe_nitrogenio %}
       <div class="grade">
-        {{ c.campo("n_plantio", "N na semeadura", "kg/ha",
-                   "Quanto do nitrogênio total vai no plantio",
-                   False, "1", "ex.: 10",
+        {{ c.campo("n_plantio", "Nitrogênio na semeadura", "kg/ha",
+                   "Em branco, o laudo manda todo o nitrogênio para cobertura",
+                   False, "1", "deixe em branco se não souber",
                    leitura.valores.get("n_plantio"),
                    "n_plantio" in leitura.campos_com_erro, none,
-                   "Preenchendo, a fórmula ideal sai completa, com nitrogênio. Em branco, ela sai só com P e K e todo o N vai para cobertura") }}
+                   "O nitrogênio costuma ser dividido: uma parte vai junto com a semente e o resto em cobertura, semanas depois. Se você já sabe quanto quer aplicar no plantio, escreva aqui — a sugestão de fórmula sai com esse nitrogênio dentro. Se não souber, deixe em branco: nada se perde, e o laudo indica o nitrogênio todo em cobertura.") }}
       </div>
+      {% endif %}
       <fieldset class="formulas-usuario">
-        <legend>Fórmulas que a tua revenda tem</legend>
+        <legend>Fórmulas que a sua revenda tem</legend>
         <p class="t-aux">
-          Até três, como no rótulo (N-P<sub>2</sub>O<sub>5</sub>-K<sub>2</sub>O). Elas
-          entram na comparação ao lado das do catálogo do SIRAS — que não é lista oficial,
-          porque lista oficial de fórmulas comercializadas não existe.
+          Até três, copiadas do rótulo — os três números do saco, como
+          <b>05-20-20</b>. Elas entram na comparação ao lado das do catálogo do SIRAS,
+          que não é lista oficial: lista oficial de fórmulas comercializadas não existe.
         </p>
         <div class="grade">
+          {% set informadas = leitura.valores.get("formula_usuario") or [] %}
           {% for n in range(3) %}
-          <label class="campo">
-            <span class="campo__label">Fórmula {{ n + 1 }}</span>
-            <input type="text" name="formula_usuario" autocomplete="off"
-                   class="campo__entrada{% if 'formula_usuario' in leitura.campos_com_erro %} campo__entrada--erro{% endif %}"
-                   placeholder="ex.: 05-20-20"
-                   aria-label="Fórmula disponível {{ n + 1 }}, como no rótulo"
-                   value="{{ (leitura.valores.get('formula_usuario') or [])[n] if (leitura.valores.get('formula_usuario') or [])|length > n else '' }}">
-          </label>
+          {# Sem o selo "opcional" em cada um: o bloco inteiro já se declara opcional no
+             título, e três selos iguais em fila viram ruído em vez de informação. #}
+          {{ c.campo_texto("formula_usuario_" ~ (n + 1), "Fórmula " ~ (n + 1),
+                           none,
+                           informadas[n] if informadas|length > n else none,
+                           "05-20-20", none,
+                           "formula_usuario",
+                           "formula_usuario" in leitura.campos_com_erro,
+                           false, false) }}
           {% endfor %}
         </div>
       </fieldset>

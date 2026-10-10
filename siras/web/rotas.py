@@ -83,6 +83,9 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
         "exige_antecedente": (
             grupo == "graos" and formulario.exige_antecedente(dados_graos, cultura_id)
         ),
+        # Leguminosa não recebe N: o campo de nitrogênio na semeadura some em vez de
+        # perguntar o que não tem resposta (ADR 0009, D10).
+        "recebe_nitrogenio": formulario.recebe_nitrogenio(dados_graos, cultura_id, grupo),
         "variaveis": formulario.variaveis_condicionais(
             cultura_id, grupo, dados_do_grupo(grupo)
         ),

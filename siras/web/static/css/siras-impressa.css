@@ -184,6 +184,37 @@
 :root body.impressa .orientacao--restricao { border-left-color: #000000; }
 :root body.impressa .campo__label b { color: #000000; }
 
+/* Formulacao do adubo (ADR 0009). Tres blocos novos que o preto e branco nao
+   alcancava: a tarja verde de cada caminho, o rotulo da melhor opcao e o selo
+   que a marca. A revisao da folha em 11/10/2026 achou os tres impressos em
+   cor — numa laser monocromatica eles viram cinza medio sem significado. */
+:root body.impressa .formulacao__caminho {
+  background: #FFFFFF;
+  border: 1px solid #C4C4C4;
+  border-left: 2.5pt solid #000000;
+}
+:root body.impressa .formulacao__caminho-tit { color: #000000; }
+:root body.impressa .formulacao__caminho-tit small { color: #3A3A3A; }
+:root body.impressa .formulacao__opcao { border-top-color: #C4C4C4; }
+:root body.impressa .formulacao__opcao--melhor .formulacao__rotulo { color: #000000; }
+:root body.impressa .formulacao__rotulo,
+:root body.impressa .formulacao__dose { color: #000000; }
+:root body.impressa .formulacao__marca,
+:root body.impressa .formulacao__marca--melhor {
+  background: #E2E2E2;
+  color: #1F1F1F;
+}
+:root body.impressa .formulacao__avisos { border-top-color: #C4C4C4; }
+:root body.impressa .formulacao__tab th,
+:root body.impressa .formulacao__tab td { border-bottom-color: #C4C4C4; }
+:root body.impressa .formulacao__tab thead th,
+:root body.impressa .formulacao__tab tbody th { color: #000000; }
+
+/* O valor de cada atributo na interpretacao. Vazava verde desde que a linha de
+   destaque existe, e nenhum teste via: o que inspecionava preto e branco lia so
+   ESTA folha, e a cor vinha da de tela. Achado pelo teste novo em 11/10/2026. */
+:root body.impressa .linha--destaque .linha__val { color: #000000; }
+
 /* --- Barra de acoes desta tela ------------------------------------------ */
 /* Existe so na tela: e o que permite conferir a paginacao antes de gastar papel. */
 .acoes-impressa {

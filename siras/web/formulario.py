@@ -651,6 +651,24 @@ def exige_antecedente(dados_graos: Dict[str, Any], cultura_id: str) -> bool:
     return entrada.get("modelo") == "mo_x_antecedente"
 
 
+def recebe_nitrogenio(dados_graos: Dict[str, Any], cultura_id: str, grupo: str) -> bool:
+    """A cultura recebe adubação nitrogenada?
+
+    Soja, ervilhaca, tremoço e amendoim não recebem — fixação biológica, e a base declara
+    isso no modelo 'nao_aplica'. Perguntar a quem não aplica N quanto do N vai na
+    semeadura é pergunta sem resposta possível, e foi o que a revisão da tela de
+    11/10/2026 apontou: o campo some em vez de ficar lá confundindo.
+
+    Fora dos grãos devolve True: os outros grupos publicam a dose de N sem um campo
+    equivalente de "não se aplica", e esconder o campo com base em suposição seria pior
+    do que mostrá-lo.
+    """
+    if grupo != "graos":
+        return True
+    entrada = dados_graos["adubacao_n"]["culturas"].get(cultura_id, {})
+    return entrada.get("modelo") != "nao_aplica"
+
+
 #: Sufixo dos campos de um talhão adicional: "ph_agua__2", "talhao__3".
 #:
 #: O PRIMEIRO talhão mantém os nomes de campo originais, sem sufixo. Não é detalhe de

@@ -15,11 +15,12 @@ franze a testa, o que ela pergunta, o que ela comenta sem ser perguntada.
 
 ## Antes de começar
 
-- [ ] TCLE lido e assinado
-- [ ] Ficha do participante preenchida
-- [ ] Código do participante entregue: `P___`
-- [ ] SIRAS rodando em `localhost`, versão `usabilidade-v1`, navegador em janela limpa
-- [ ] Gravação de tela iniciada, **se** consentida no TCLE
+- [ ] Código do participante dito em voz alta: `P___`
+- [ ] SIRAS rodando em `localhost`, versão `congelamento-v1`, navegador em janela limpa
+- [ ] Gravação de tela iniciada, **se** o participante concordar quando perguntado
+
+> Sem termo assinado e sem ficha de papel: decisão do orientador em 10/10/2026. A
+> caracterização do participante é a Seção 1 do próprio formulário.
 
 ## Texto de abertura — ler, não improvisar
 
@@ -104,9 +105,11 @@ está mostrando.
    quê: preço é negócio de quem compra, e o laudo é peça técnica.
 7. **Versão impressa.** Abra e feche, só para mostrar que existe.
 
-## Folha de observação
+## O que anotar
 
-Participante: `P___`  ·  Data: ____/____/______  ·  Versão: `usabilidade-v1`
+> Não é formulário a preencher: é o que o pesquisador registra enquanto observa.
+
+Participante: `P___`  ·  Data: ____/____/______  ·  Versão: `congelamento-v1`
 
 | # | O que observar | Anotação |
 |---|---|---|

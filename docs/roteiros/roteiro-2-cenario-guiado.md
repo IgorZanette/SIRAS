@@ -93,9 +93,11 @@ da nota (1) exige V ≥ 65 % **e** Al < 10 %; com V = 50 % ela não se aplica. T
 As doses de adubação dependerão dos teores de P e K que forem preenchidos na ficha, e não
 têm referência calculada — **não cobre acerto nelas.**
 
-## Folha de observação
+## O que anotar
 
-Participante: `P___`  ·  Data: ____/____/______  ·  Versão: `usabilidade-v1`
+> Não é formulário a preencher: é o que o pesquisador registra enquanto observa.
+
+Participante: `P___`  ·  Data: ____/____/______  ·  Versão: `congelamento-v1`
 
 **Conclusão da tarefa**
 

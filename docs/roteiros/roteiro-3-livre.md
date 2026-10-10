@@ -43,9 +43,11 @@ dele para onde você quer, e é justamente isso que este roteiro evita.
   número?"
 - Se o sistema **recusou** alguma combinação: "o que tu entendeste dessa mensagem?"
 
-## Folha de observação
+## O que anotar
 
-Participante: `P___`  ·  Data: ____/____/______  ·  Versão: `usabilidade-v1`
+> Não é formulário a preencher: é o que o pesquisador registra enquanto observa.
+
+Participante: `P___`  ·  Data: ____/____/______  ·  Versão: `congelamento-v1`
 
 **O que escolheu**
 

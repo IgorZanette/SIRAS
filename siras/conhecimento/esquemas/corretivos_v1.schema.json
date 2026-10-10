@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "corretivos_v1",
+  "title": "Corretivos de acidez: garantias legais, faixas comerciais e produtos de referencia",
+  "description": "Arquivo de origem MISTA, e e por isso que cada bloco carrega _status: o que e lei vigente, o que e convencao herdada de norma revogada, o que e orientacao do Manual e o que e dado de fabricante. O schema exige _fonte e _status em todo bloco, para que a distincao nao possa se perder numa edicao futura.",
+  "type": "object",
+  "required": [
+    "schema", "descricao", "fonte",
+    "dose_pelo_prnt", "legislacao_vigente", "classificacao_mgo",
+    "faixas_prnt_comerciais", "orientacoes_manual_rs_sc"
+  ],
+  "properties": {
+    "schema": {"const": "corretivos_v1"},
+    "descricao": {"type": "string", "minLength": 1},
+    "fonte": {
+      "type": "object",
+      "required": ["transcrito_em", "conferido_por_autor_em"],
+      "properties": {
+        "transcrito_em": {"type": "string"},
+        "conferido_por_autor_em": {"type": ["string", "null"]},
+        "nota": {"type": "string"}
+      }
+    },
+    "dose_pelo_prnt": {
+      "allOf": [{"$ref": "#/$defs/bloco_com_fonte"}],
+      "required": ["_fonte", "_status", "formula"],
+      "properties": {
+        "_fonte": {"type": "string"},
+        "_status": {"$ref": "#/$defs/status"},
+        "formula": {"type": "string", "minLength": 1},
+        "exemplo_manual": {"type": "object"},
+        "exemplo_reatividade_manual": {"type": "object"}
+      }
+    },
+    "legislacao_vigente": {
+      "allOf": [{"$ref": "#/$defs/bloco_com_fonte"}],
+      "required": ["_fonte", "_status", "garantias_minimas", "reatividade_por_fracao"],
+      "properties": {
+        "garantias_minimas": {
+          "type": "object",
+          "minProperties": 2,
+          "additionalProperties": {"$ref": "#/$defs/garantia_ou_unidades"}
+        },
+        "granulometria_minima": {"type": "object"},
+        "reatividade_por_fracao": {"type": "object"},
+        "tolerancias": {"type": "object"}
+      }
+    },
+    "classificacao_mgo": {
+      "allOf": [{"$ref": "#/$defs/bloco_com_fonte"}],
+      "required": ["_fonte", "_status", "classes"],
+      "properties": {
+        "classes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "mgo_min", "mgo_max_exclusivo"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[a-z]+$"},
+              "mgo_min": {"type": "number", "minimum": 0},
+              "mgo_max_exclusivo": {"type": ["number", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "faixas_prnt_comerciais": {
+      "allOf": [{"$ref": "#/$defs/bloco_com_fonte"}],
+      "required": ["_fonte", "_status", "faixas"],
+      "properties": {
+        "faixas": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {"type": "string"},
+              "prnt_min_inclusivo": {"type": "number"},
+              "prnt_min_exclusivo": {"type": "number"},
+              "prnt_max_inclusivo": {"type": ["number", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "orientacoes_manual_rs_sc": {
+      "allOf": [{"$ref": "#/$defs/bloco_com_fonte"}],
+      "required": ["_fonte", "_status", "itens"],
+      "properties": {
+        "itens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "pagina", "texto"],
+            "properties": {
+              "id": {"type": "string"},
+              "pagina": {"type": "integer"},
+              "texto": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "produtos_referencia_mercado": {
+      "allOf": [{"$ref": "#/$defs/bloco_com_fonte"}],
+      "required": ["_fonte", "_status", "produtos"],
+      "properties": {
+        "produtos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "fabrica", "cao", "mgo", "pn", "prnt"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+              "fabrica": {"type": "string"},
+              "tipo_declarado": {"type": "string"},
+              "granulometria": {"type": ["string", "null"]},
+              "cao": {"type": "number", "minimum": 0, "maximum": 100},
+              "mgo": {"type": "number", "minimum": 0, "maximum": 100},
+              "pn": {"type": "number", "minimum": 0},
+              "prnt": {"type": "number", "minimum": 0},
+              "inconsistencias": {"type": "array", "items": {"type": "string"}},
+              "_nota_pn": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "fontes_avaliadas_sem_dado_utilizavel": {"type": "array"}
+  },
+  "$defs": {
+    "status": {
+      "enum": [
+        "manual_rs_sc",
+        "lei_vigente",
+        "lei_vigente_confirmar_sislegis",
+        "convencao_tecnica_sem_base_legal_vigente",
+        "convencao_comercial_historica",
+        "dado_de_fabricante_ilustrativo"
+      ],
+      "description": "Status juridico do bloco. E o campo que impede o arquivo de virar 'tudo igual' numa edicao futura."
+    },
+    "bloco_com_fonte": {
+      "type": "object",
+      "required": ["_fonte", "_status"],
+      "properties": {
+        "_fonte": {"type": ["string", "array"]},
+        "_status": {"$ref": "#/$defs/status"}
+      }
+    },
+    "garantia_ou_unidades": {
+      "type": "object"
+    }
+  }
+}

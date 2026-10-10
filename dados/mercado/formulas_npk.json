@@ -1,0 +1,798 @@
+{
+  "schema": "formulas_npk_v1",
+  "descricao": "Catalogo de formulacoes NPK e fertilizantes simples para converter a recomendacao do laudo (kg/ha de N, P2O5, K2O) em produto comercial. Catalogo SEMENTE: o mercado real e muito maior e inclui formulas sob encomenda; o SIRAS deve permitir que o usuario acrescente a formula que tem disponivel.",
+  "fonte": {
+    "transcrito_em": "2026-10-10",
+    "conferido_por_autor_em": null
+  },
+  "fontes": {
+    "manual_rs_sc": "CQFS-RS/SC. Manual de calagem e adubacao para os estados do RS e de SC. 11. ed., 2016. Cap. 8, sec. 8.3, p. 310-311; Tabela 8.4, p. 304",
+    "in39_2018": "MAPA. Instrucao Normativa n. 39, de 8 ago. 2018 (DOU 10/08/2018). Fertilizantes minerais. Art. 9. Alterada pela IN MAPA n. 29/2025 (art. 6, nao o art. 9)",
+    "iac_bt208": "TRANI, P. E.; TRANI, A. L. Fertilizantes: calculo de formulas comerciais. Campinas: IAC, 2011. (Boletim Tecnico IAC, 208)",
+    "embrapa_trigo_painel": "DE MORI, C. et al. Sistemas de cultivo de trigo nos estados do Rio Grande do Sul, Parana e Mato Grosso do Sul. Embrapa Trigo. Paineis regionais out-dez 2011",
+    "embrapa_para_2020": "VELOSO, C. A. C.; BOTELHO, S. M.; RODRIGUES, J. E. L. F. Mistura de fertilizantes: calculo e formulacao. In: Embrapa, Recomendacoes de calagem e adubacao (Para), 2020, cap. 9, p. 115-122",
+    "fertilizantes_npk_avare": "Fertilizantes NPK (Avare/SP e Barra Bonita/SP). Catalogo de produtos. https://www.fertilizantesnpk.com/produtos. Acesso em 10 out. 2026. Garantias lidas do nome comercial do produto (ex.: 'NPK 04-14-08').",
+    "agroadvance_2024": "SEBIM, J. P. M. Adubo NPK. Agroadvance, 8 nov. 2024 (atual. 12 nov. 2024). https://agroadvance.com.br/blog-adubo-npk/. Fonte SECUNDARIA: as listas de plantio e cobertura repetem iac_bt208; a Tabela 2 cita NPCT como fonte primaria."
+  },
+  "legislacao_vigente": {
+    "_fonte": "in39_2018",
+    "_status": "lei_vigente",
+    "_nota": "Fontes mais antigas trazem outros minimos para a soma NPK: 24% (embrapa_para_2020, citando legislacao anterior) e 21% (iac_bt208). Ambos superados pela IN 39/2018. Na monografia, citar a IN 39/2018. agroadvance_2024 tambem traz 21% e cita a IN 46/2016, revogada pela IN 39/2018.",
+    "soma_minima_npk_via_solo_pct": {
+      "ternario": 18,
+      "binario": 15
+    },
+    "minimo_secundario_declarado_pct": {
+      "ca": 1,
+      "mg": 1,
+      "s": 1
+    },
+    "minimo_micronutriente_em_npk_pct": {
+      "_artigo": "Art. 9, III, b (mononutrientes, binarios ou ternarios com micronutrientes)",
+      "b": 0.01,
+      "cu": 0.02,
+      "fe": 0.02,
+      "mn": 0.02,
+      "mo": 0.005,
+      "zn": 0.1,
+      "co": 0.005,
+      "ni": 0.005
+    }
+  },
+  "metodo_escolha_manual": {
+    "_fonte": "manual_rs_sc, p. 310-311",
+    "_status": "manual_rs_sc",
+    "passos": [
+      "Calcular a proporcao basica da recomendacao de plantio dividindo pelo menor valor (ex.: 10-120-80 -> 1:12:8).",
+      "Formulas adequadas sao multiplos da proporcao basica (ex.: 2-18-12 a 667 kg/ha; 2-24-16 a 500 kg/ha; 3-30-20 a 400 kg/ha).",
+      "O saldo de N e aplicado em cobertura.",
+      "Sem formula exata, ajustar a dose para o nutriente mais deficiente no solo.",
+      "Entre formulas adequadas, preferir a de menor custo por unidade de NPK, incluindo transporte e aplicacao.",
+      "Formulas mais concentradas tendem a ter menos S; verificar o teor e a forma do S (sulfato ou elementar)."
+    ],
+    "exemplo": {
+      "recomendacao_plantio": {
+        "n": 10,
+        "p2o5": 120,
+        "k2o": 80
+      },
+      "formulas_adequadas": [
+        {
+          "formula": "02-18-12",
+          "dose_kg_ha": 667
+        },
+        {
+          "formula": "02-24-16",
+          "dose_kg_ha": 500
+        },
+        {
+          "formula": "03-30-20",
+          "dose_kg_ha": 400
+        }
+      ]
+    }
+  },
+  "fertilizantes_simples": {
+    "_fonte": "manual_rs_sc, Tabela 8.4, p. 304 (Fonte do Manual: Brasil, 2007)",
+    "_status": "garantia_minima_legal_2007",
+    "_nota": "Usados para complementar o nutriente que a formula nao cobre e para N em cobertura. A IN 39/2018 (Anexo I) atualizou garantias; MAP (9% N, 48% P2O5) e DAP (17% N, 45% P2O5) conferem. Para KCl a extracao da IN 39/2018 indicou valor diferente do Manual (58%): CONFERIR no Anexo I oficial.",
+    "itens": [
+      {
+        "id": "ureia",
+        "n": 45,
+        "p2o5": 0,
+        "k2o": 0,
+        "uso": [
+          "cobertura_n"
+        ]
+      },
+      {
+        "id": "sulfato_de_amonio",
+        "n": 20,
+        "p2o5": 0,
+        "k2o": 0,
+        "s": 22,
+        "uso": [
+          "cobertura_n"
+        ]
+      },
+      {
+        "id": "nitrato_de_amonio",
+        "n": 32,
+        "p2o5": 0,
+        "k2o": 0,
+        "uso": [
+          "cobertura_n"
+        ]
+      },
+      {
+        "id": "nitrato_de_calcio",
+        "n": 14,
+        "p2o5": 0,
+        "k2o": 0,
+        "uso": [
+          "cobertura_n"
+        ]
+      },
+      {
+        "id": "superfosfato_simples",
+        "n": 0,
+        "p2o5": 18,
+        "k2o": 0,
+        "s": 8,
+        "uso": [
+          "complemento_p"
+        ],
+        "_nota_s": "Manual: 8 a 12% de S; usado o minimo."
+      },
+      {
+        "id": "superfosfato_triplo",
+        "n": 0,
+        "p2o5": 41,
+        "k2o": 0,
+        "uso": [
+          "complemento_p"
+        ]
+      },
+      {
+        "id": "map",
+        "n": 9,
+        "p2o5": 48,
+        "k2o": 0,
+        "uso": [
+          "complemento_p"
+        ]
+      },
+      {
+        "id": "dap",
+        "n": 17,
+        "p2o5": 45,
+        "k2o": 0,
+        "uso": [
+          "complemento_p"
+        ]
+      },
+      {
+        "id": "cloreto_de_potassio",
+        "n": 0,
+        "p2o5": 0,
+        "k2o": 58,
+        "uso": [
+          "complemento_k"
+        ]
+      },
+      {
+        "id": "sulfato_de_potassio",
+        "n": 0,
+        "p2o5": 0,
+        "k2o": 48,
+        "s": 15,
+        "uso": [
+          "complemento_k"
+        ]
+      }
+    ],
+    "_nota_teor_comercial": "Os valores da tabela sao GARANTIAS MINIMAS legais. Produtos vendidos costumam declarar mais (fertilizantes_npk_avare: ureia 46% N, MAP 11-52-00, KCl 60% K2O, sulfato de amonio 21% N, SSP 18% P2O5). O motor deve usar o teor declarado pelo produto do usuario quando informado; o minimo legal e so o padrao."
+  },
+  "formulas": {
+    "_status": "catalogo_semente",
+    "_nota": "Cada formula declara em 'fontes' onde foi encontrada. 'regiao' indica o contexto da fonte, nao exclusividade de mercado. Formulas com origem apenas em 'exemplo_manual' sao multiplos ilustrativos, sem prova de que sejam vendidas como produto de prateleira.",
+    "_campos": "id = N-P2O5-K2O com dois digitos; n, p2o5, k2o em %; uso: plantio | cobertura; extras: nutrientes declarados alem de NPK (em %).",
+    "itens": [
+      {
+        "id": "02-18-12",
+        "n": 2,
+        "p2o5": 18,
+        "k2o": 12,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "manual_rs_sc"
+        ],
+        "origem": "exemplo_manual",
+        "regiao": "RS/SC"
+      },
+      {
+        "id": "02-24-16",
+        "n": 2,
+        "p2o5": 24,
+        "k2o": 16,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "manual_rs_sc"
+        ],
+        "origem": "exemplo_manual",
+        "regiao": "RS/SC"
+      },
+      {
+        "id": "03-30-20",
+        "n": 3,
+        "p2o5": 30,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "manual_rs_sc"
+        ],
+        "origem": "exemplo_manual",
+        "regiao": "RS/SC"
+      },
+      {
+        "id": "05-20-20",
+        "n": 5,
+        "p2o5": 20,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "08-16-16",
+        "n": 8,
+        "p2o5": 16,
+        "k2o": 16,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "08-20-20",
+        "n": 8,
+        "p2o5": 20,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "08-25-20",
+        "n": 8,
+        "p2o5": 25,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "08-30-20",
+        "n": 8,
+        "p2o5": 30,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "10-15-15",
+        "n": 10,
+        "p2o5": 15,
+        "k2o": 15,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "10-20-20",
+        "n": 10,
+        "p2o5": 20,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "10-25-25",
+        "n": 10,
+        "p2o5": 25,
+        "k2o": 25,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_trigo_painel"
+        ],
+        "origem": "citada_por_produtores",
+        "regiao": "RS/PR/MS"
+      },
+      {
+        "id": "04-14-08",
+        "n": 4,
+        "p2o5": 14,
+        "k2o": 8,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "fertilizantes_npk_avare",
+          "agroadvance_2024"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP"
+      },
+      {
+        "id": "08-28-16",
+        "n": 8,
+        "p2o5": 28,
+        "k2o": 16,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "fertilizantes_npk_avare",
+          "agroadvance_2024"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP"
+      },
+      {
+        "id": "05-30-10",
+        "n": 5,
+        "p2o5": 30,
+        "k2o": 10,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP"
+      },
+      {
+        "id": "05-30-15",
+        "n": 5,
+        "p2o5": 30,
+        "k2o": 15,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP"
+      },
+      {
+        "id": "04-20-20",
+        "n": 4,
+        "p2o5": 20,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "embrapa_para_2020",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP/PA"
+      },
+      {
+        "id": "05-25-25",
+        "n": 5,
+        "p2o5": 25,
+        "k2o": 25,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "fertilizantes_npk_avare",
+          "agroadvance_2024"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP"
+      },
+      {
+        "id": "06-35-12",
+        "n": 6,
+        "p2o5": 35,
+        "k2o": 12,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208"
+        ],
+        "origem": "composicao_ilustrativa",
+        "regiao": "SP"
+      },
+      {
+        "id": "05-25-20",
+        "n": 5,
+        "p2o5": 25,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "iac_bt208"
+        ],
+        "origem": "composicao_ilustrativa",
+        "regiao": "SP",
+        "extras": {
+          "b": 0.1,
+          "zn": 0.6,
+          "mo": 0.04,
+          "co": 0.02
+        }
+      },
+      {
+        "id": "20-05-20",
+        "n": 20,
+        "p2o5": 5,
+        "k2o": 20,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "embrapa_para_2020",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP/PA"
+      },
+      {
+        "id": "20-00-20",
+        "n": 20,
+        "p2o5": 0,
+        "k2o": 20,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "fertilizantes_npk_avare",
+          "agroadvance_2024"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP"
+      },
+      {
+        "id": "20-05-15",
+        "n": 20,
+        "p2o5": 5,
+        "k2o": 15,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP"
+      },
+      {
+        "id": "14-07-28",
+        "n": 14,
+        "p2o5": 7,
+        "k2o": 28,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP"
+      },
+      {
+        "id": "12-06-12",
+        "n": 12,
+        "p2o5": 6,
+        "k2o": 12,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP"
+      },
+      {
+        "id": "10-10-10",
+        "n": 10,
+        "p2o5": 10,
+        "k2o": 10,
+        "uso": [
+          "plantio",
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "embrapa_para_2020",
+          "fertilizantes_npk_avare",
+          "agroadvance_2024"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP/PA"
+      },
+      {
+        "id": "15-15-15",
+        "n": 15,
+        "p2o5": 15,
+        "k2o": 15,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208",
+          "agroadvance_2024"
+        ],
+        "origem": "comercio",
+        "regiao": "SP"
+      },
+      {
+        "id": "10-05-20",
+        "n": 10,
+        "p2o5": 5,
+        "k2o": 20,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208"
+        ],
+        "origem": "composicao_ilustrativa",
+        "regiao": "SP"
+      },
+      {
+        "id": "23-07-23",
+        "n": 23,
+        "p2o5": 7,
+        "k2o": 23,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "iac_bt208"
+        ],
+        "origem": "composicao_ilustrativa",
+        "regiao": "SP"
+      },
+      {
+        "id": "10-20-05",
+        "n": 10,
+        "p2o5": 20,
+        "k2o": 5,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_para_2020"
+        ],
+        "origem": "comercio",
+        "regiao": "PA"
+      },
+      {
+        "id": "04-16-08",
+        "n": 4,
+        "p2o5": 16,
+        "k2o": 8,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_para_2020"
+        ],
+        "origem": "comercio",
+        "regiao": "PA"
+      },
+      {
+        "id": "18-18-18",
+        "n": 18,
+        "p2o5": 18,
+        "k2o": 18,
+        "uso": [
+          "plantio",
+          "cobertura"
+        ],
+        "fontes": [
+          "embrapa_para_2020"
+        ],
+        "origem": "comercio",
+        "regiao": "PA"
+      },
+      {
+        "id": "10-28-20",
+        "n": 10,
+        "p2o5": 28,
+        "k2o": 20,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "embrapa_para_2020"
+        ],
+        "origem": "comercio",
+        "regiao": "PA"
+      },
+      {
+        "id": "04-30-10",
+        "n": 4,
+        "p2o5": 30,
+        "k2o": 10,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "fertilizantes_npk_avare"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP",
+        "_nota_uso": "Fabricante nao informa uso; classificado pelo perfil (P alto = plantio; N e K altos, P baixo = cobertura). Decisao do autor."
+      },
+      {
+        "id": "10-20-10",
+        "n": 10,
+        "p2o5": 20,
+        "k2o": 10,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "fertilizantes_npk_avare"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP",
+        "_nota_uso": "Fabricante nao informa uso; classificado pelo perfil (P alto = plantio; N e K altos, P baixo = cobertura). Decisao do autor."
+      },
+      {
+        "id": "10-30-10",
+        "n": 10,
+        "p2o5": 30,
+        "k2o": 10,
+        "uso": [
+          "plantio"
+        ],
+        "fontes": [
+          "fertilizantes_npk_avare"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP",
+        "_nota_uso": "Fabricante nao informa uso; classificado pelo perfil (P alto = plantio; N e K altos, P baixo = cobertura). Decisao do autor."
+      },
+      {
+        "id": "23-06-23",
+        "n": 23,
+        "p2o5": 6,
+        "k2o": 23,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "fertilizantes_npk_avare"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP",
+        "_nota_uso": "Fabricante nao informa uso; classificado pelo perfil (P alto = plantio; N e K altos, P baixo = cobertura). Decisao do autor."
+      },
+      {
+        "id": "25-00-25",
+        "n": 25,
+        "p2o5": 0,
+        "k2o": 25,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "fertilizantes_npk_avare"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP",
+        "_nota_uso": "Fabricante nao informa uso; classificado pelo perfil (P alto = plantio; N e K altos, P baixo = cobertura). Decisao do autor."
+      },
+      {
+        "id": "30-00-12",
+        "n": 30,
+        "p2o5": 0,
+        "k2o": 12,
+        "uso": [
+          "cobertura"
+        ],
+        "fontes": [
+          "fertilizantes_npk_avare"
+        ],
+        "origem": "produto_de_fabricante",
+        "regiao": "SP",
+        "_nota_uso": "Fabricante nao informa uso; classificado pelo perfil (P alto = plantio; N e K altos, P baixo = cobertura). Decisao do autor."
+      }
+    ],
+    "_nota_omitidas": "NAO incluidas: (1) 20-05-30 da fertilizantes_npk_avare - o titulo diz 20-05-30 e o link do produto diz 20-05-20; ambiguo. (2) 10-28-10, 32-00-10, 20-10-10, 14-00-14, 00-18-06, 00-20-10 de agroadvance_2024 - sao exemplos de calculo ou de rotulo no texto, sem evidencia de produto comercial."
+  },
+  "fontes_avaliadas_sem_dado_utilizavel": [
+    {
+      "url": "https://boasafrafertilizantes.com.br/produtos/formulas-npk/",
+      "motivo": "Pagina nao lista nenhuma formula com garantias; apenas materias-primas e formulario de cotacao (formulas sob encomenda)."
+    },
+    {
+      "url": "https://www.yarabrasil.com.br/nutricao-de-plantas/produtos/yaramila/",
+      "motivo": "Nem a pagina da linha nem a do YaraMila Complex publicam garantias N-P2O5-K2O; apenas descricao comercial."
+    },
+    {
+      "url": "https://www.embrapa.br/en/web/agencia-de-informacao-tecnologica/cultivos/pimenta/pre-producao/insumos/adubos-e-fertilizantes",
+      "motivo": "Pagina Ageitec (pimenta): o corpo do artigo nao e entregue na leitura automatica, nas versoes /en e pt-BR; so navegacao. Consultar manualmente se for citar."
+    }
+  ],
+  "estatisticas_mercado": {
+    "_fonte": "agroadvance_2024, Tabela 2, citando NPCT (fonte primaria NAO consultada)",
+    "_status": "estatistica_secundaria",
+    "_uso": "Contexto para a monografia: o Sul usa formulas com P e K proximos e N relevante. NAO e produto comercial; nao entra no ranking.",
+    "formula_media_npk_por_regiao": {
+      "sul": {
+        "2011": "13-15-15",
+        "2014": "13-16-16",
+        "2017": "13-16-17"
+      },
+      "sudeste": {
+        "2011": "16-10-15",
+        "2014": "16-11-15",
+        "2017": "17-10-15"
+      },
+      "centro_oeste": {
+        "2011": "08-16-17",
+        "2014": "09-17-18",
+        "2017": "10-16-18"
+      },
+      "norte_nordeste": {
+        "2011": "09-14-15",
+        "2014": "09-14-17",
+        "2017": "10-14-17"
+      },
+      "brasil": {
+        "2011": "12-14-16",
+        "2014": "12-15-17",
+        "2017": "12-15-17"
+      }
+    }
+  }
+}

@@ -1,8 +1,0 @@
-{
-  "descricao": "Catalogo de formulacoes NPK comerciais. Alimenta a indicacao de adubo formulado do laudo: dada a recomendacao de N, P2O5 e K2O, o SIRAS escolhe a formulacao que atende P e K com o menor excesso e informa a dose do produto.",
-  "aviso": "ESTE ARQUIVO NAO E TRANSCRICAO DO MANUAL. Ao contrario de tudo o que esta em dados/comum/ e dados/culturas/, o conteudo aqui e dado de mercado: formulacoes que a industria oferece e a revenda vende. O Manual nao publica lista de formulacoes comerciais. Cada entrada declara sua propria fonte em _fonte, e a monografia precisa dizer que esta lista nao vem do Manual. Nenhum valor deste arquivo pode ser preenchido por estimativa: a garantia de N, P2O5 e K2O esta no rotulo do produto.",
-  "unidade": "porcentagem em massa (garantia do rotulo)",
-  "criterio_de_escolha": "Menor excesso total de P2O5 + K2O entregue acima da recomendacao; desempate pela menor falta de N. Decisao do autor registrada em docs/decisoes/0007-indicacao-de-formulacao-do-adubo.md.",
-  "atualizado_em": null,
-  "formulacoes": []
-}

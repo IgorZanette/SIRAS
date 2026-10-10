@@ -14,11 +14,16 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 
 | Ajuste | Valor | Por quê |
 |---|---|---|
-| Coletar endereços de e-mail | **Desligado** | O TCLE já foi assinado em papel, e o código do participante identifica a resposta. Guardar e-mail acumularia dado pessoal sem necessidade |
+| Coletar endereços de e-mail | **Desligado** | Não há termo nem cadastro: a Seção 1 já caracteriza quem respondeu, e e-mail seria dado pessoal guardado sem necessidade |
 | Permitir edição de resposta | **Ligado** | São dez seções; a pessoa precisa poder pausar e retomar |
 | Limitar a uma resposta | **Desligado** | Exigiria login e, com ele, a conta Google do participante |
 | Ordem embaralhada | **Desligado** | As heurísticas têm ordem canônica e devem sair na mesma ordem para todos |
 | Barra de progresso | **Ligada** | Dez seções sem barra parecem não acabar, e a taxa de abandono sobe |
+
+> **Sem termo de consentimento.** Decisão do orientador em 10/10/2026: a avaliação não
+> requer submissão ao CEP (pendência P2) e **não exige termo assinado** — basta o
+> participante responder ao formulário. O rascunho de TCLE que existia foi removido do
+> repositório; o histórico do Git o preserva, caso a banca pergunte.
 
 ---
 
@@ -32,13 +37,14 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 > usabilidade, e quatro perguntas abertas no final. Leva cerca de quinze minutos, e tu
 > podes pausar e retomar depois — a resposta fica salva.
 >
-> Responde pensando **no que tu viveste** durante a sessão: a demonstração, o cenário que
-> tu preencheste sozinho e o laudo que tu geraste livremente.
+> Responde pensando **no que tu viveste** ao usar o sistema: a demonstração, o cenário
+> que tu preencheste sozinho e o laudo que tu geraste livremente.
 >
 > **O que me serve é a crítica.** Nota baixa não me magoa; nota alta que esconde um
 > problema me faz entregar um sistema pior. Se alguma coisa te irritou, escreve.
 >
-> Tu não precisas te identificar. Usa o código que eu te entreguei na sessão.
+> Tu não precisas te identificar: nenhuma resposta será publicada com teu nome. As
+> primeiras perguntas servem só para descrever o perfil do grupo que avaliou.
 >
 > ---
 >
@@ -50,9 +56,15 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 > - **3** — Problema grave: atrapalha muito e atrasa o trabalho.
 > - **4** — Catástrofe: impede de usar, ou faz sair informação errada.
 
+> **Caracterização do participante.** As cinco perguntas abaixo estavam numa ficha de
+> papel à parte e foram trazidas para dentro do formulário em 10/10/2026, por orientação
+> do orientador: um instrumento só, sem burocracia em volta. São elas que permitem ler
+> as notas com contexto — severidade alta vinda de quem usa ferramenta digital todo dia
+> significa coisa diferente da mesma nota vinda de quem nunca usou.
+
 **Pergunta 1.1** — *Resposta curta, obrigatória*
 
-> Teu código de participante (está na folha que eu te entreguei — P1, P2, ...)
+> Código do participante (eu te passo na hora do teste — P1, P2, ...)
 
 **Pergunta 1.2** — *Múltipla escolha, obrigatória*
 
@@ -65,7 +77,37 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 
 **Pergunta 1.3** — *Múltipla escolha, obrigatória*
 
-> Como tu usaste o sistema na sessão?
+> Há quanto tempo tu trabalhas com análise de solo ou recomendação de adubação?
+
+- Ainda não atuo
+- Menos de 2 anos
+- 2 a 5 anos
+- 6 a 10 anos
+- Mais de 10 anos
+
+**Pergunta 1.4** — *Múltipla escolha, obrigatória*
+
+> Como tu fazes a recomendação hoje?
+
+- À mão, com o Manual
+- Planilha própria
+- Software de cooperativa ou revenda
+- Sistema do laboratório
+- Não faço recomendação
+
+**Pergunta 1.5** — *Múltipla escolha, obrigatória*
+
+> Qual o teu conforto com ferramentas digitais no trabalho?
+
+- Muito confortável
+- Confortável
+- Neutro
+- Pouco confortável
+- Desconfortável
+
+**Pergunta 1.6** — *Múltipla escolha, obrigatória*
+
+> Como tu usaste o sistema?
 
 - Presencialmente, no computador do pesquisador
 - Remotamente, com controle da tela

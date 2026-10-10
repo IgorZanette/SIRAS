@@ -1,6 +1,6 @@
 # 0007 — Indicação de formulação do adubo a partir de catálogo de mercado
 
-- **Status:** aceito
+- **Status:** aceito, com os itens 5 e 6 **revogados** pela [ADR 0008](0008-escolha-de-formula-pelo-metodo-do-manual.md) em 10/10/2026
 - **Data:** 2026-09-24
 - **Contexto:** pedido do orientador na reunião de acompanhamento de 24/09/2026, 19:30 —
   "finalizar indicação de formulação do adubo correta"
@@ -64,13 +64,16 @@ Nenhuma formulação foi escrita por antecipação, nem como exemplo.
 comportamento anterior, com as três vagas em branco. O laudo segue completo. O sistema não
 pode ficar refém de um dado que depende de terceiros.
 
-**5. Critério de dose** (já em uso na calculadora desde 13/09/2026): a dose da formulação é
-a **maior** entre a quantidade que cobre o P₂O₅ e a que cobre o K₂O. Assim nenhum dos dois
-fica devendo, e o excesso do outro aparece declarado.
+**5. Critério de dose** ~~(já em uso na calculadora desde 13/09/2026): a dose da formulação
+é a **maior** entre a quantidade que cobre o P₂O₅ e a que cobre o K₂O.~~ **REVOGADO pela
+ADR 0008.** O levantamento de 10/10/2026 localizou o procedimento publicado no Manual
+(§8.3, p. 311): a dose se ancora no nutriente **mais deficiente no solo**. A regra deixou
+de ser escolha do autor e passou a ser transcrição de método.
 
-**6. Critério de escolha** (decisão do autor, 24/09/2026): entre as formulações que atendem
-P e K, vence a de **menor excesso total de P₂O₅ + K₂O** entregue acima da recomendação;
-empate se desfaz pela **menor falta de N**.
+**6. Critério de escolha** ~~(decisão do autor, 24/09/2026): vence a de menor excesso total
+de P₂O₅ + K₂O; empate pela menor falta de N.~~ **REVOGADO pela ADR 0008:** vence a de menor
+**desvio relativo** (faltas + excessos sobre o alvo), com desempate pela fórmula mais
+concentrada — como o Manual observa na p. 310.
 
 *Por que o excesso, e não o custo:* o custo depende de preço, que é do comprador e não do
 sistema — e escolher por preço faria a indicação mudar conforme o que a pessoa digitasse.

@@ -860,21 +860,33 @@ class Carregador:
                 f"— algum valor em 'culturas' foi alterado sem atualizar o checksum"
             )
 
-    def validar_formulacoes(self, dados: Dict) -> None:
-        """Invariantes do catálogo de formulações NPK.
+    def validar_formulas_npk(self, dados: Dict) -> None:
+        """Invariantes do catálogo de fórmulas NPK.
 
-        Não há invariante agronômica a checar aqui — o catálogo não é do Manual. O que se
-        checa é o que um erro de digitação quebraria: id repetido, soma de garantias acima
-        de 100% (são porcentagens em massa de um mesmo produto) e formulação sem nenhum
-        nutriente, que não teria como entrar em conta nenhuma.
+        Não há invariante agronômica a checar — o catálogo não é do Manual. O que se checa
+        é o que um erro de digitação quebraria: id repetido, id que não bate com as
+        garantias que ele anuncia, soma acima de 100% (são porcentagens em massa do mesmo
+        produto), fórmula sem nutriente nenhum e fonte citada que não existe no bloco
+        `fontes`. Essa última é a que mais importa: uma entrada sem procedência rastreável
+        é exatamente o que a monografia não pode ter.
         """
+        chaves_de_fonte = set(dados.get("fontes") or {})
+
         vistos = set()
-        for i, f in enumerate(dados.get("formulacoes", [])):
-            contexto = f"formulacoes[{i}] (id '{f.get('id')}')"
+        for i, f in enumerate((dados.get("formulas") or {}).get("itens") or []):
+            contexto = f"formulas.itens[{i}] (id '{f.get('id')}')"
 
             if f["id"] in vistos:
                 raise ErroCarregamento(f"{contexto}: id repetido no catálogo")
             vistos.add(f["id"])
+
+            # O id É a garantia, escrita como no rótulo. Se os dois discordarem, um
+            # deles está errado e não há como saber qual — melhor estourar.
+            declarado = "-".join(f"{int(f[c]):02d}" for c in ("n", "p2o5", "k2o"))
+            if declarado != f["id"]:
+                raise ErroCarregamento(
+                    f"{contexto}: o id diz '{f['id']}' e as garantias dizem '{declarado}'"
+                )
 
             soma = f["n"] + f["p2o5"] + f["k2o"]
             if soma > 100:
@@ -884,26 +896,118 @@ class Carregador:
                 )
             if soma <= 0:
                 raise ErroCarregamento(
-                    f"{contexto}: formulação sem N, P2O5 nem K2O — não entrega nutriente algum"
+                    f"{contexto}: fórmula sem N, P2O5 nem K2O — não entrega nutriente algum"
                 )
 
-    def carregar_formulacoes(self) -> Dict[str, Any]:
-        """Carrega e valida dados/mercado/formulacoes.json.
+            orfas = [chave for chave in f["fontes"] if chave not in chaves_de_fonte]
+            if orfas:
+                raise ErroCarregamento(
+                    f"{contexto}: cita {', '.join(orfas)} em 'fontes', e essa chave não "
+                    f"existe no bloco 'fontes' da raiz — entrada sem procedência rastreável"
+                )
 
-        Fora de dados/comum/ de propósito: aquele diretório é transcrição conferida do
-        Manual, e este arquivo é dado de mercado. Misturar os dois apagaria a distinção
-        que a monografia precisa declarar.
+        ids_simples = set()
+        for i, s in enumerate((dados.get("fertilizantes_simples") or {}).get("itens") or []):
+            if s["id"] in ids_simples:
+                raise ErroCarregamento(f"fertilizantes_simples.itens[{i}]: id repetido")
+            ids_simples.add(s["id"])
+            if s["n"] + s["p2o5"] + s["k2o"] <= 0:
+                raise ErroCarregamento(
+                    f"fertilizantes_simples.itens[{i}] (id '{s['id']}'): não entrega "
+                    f"N, P2O5 nem K2O"
+                )
+
+        # O motor completa o que a fórmula não cobre com estas três fontes. Faltando uma,
+        # o complemento sumiria do laudo em silêncio.
+        for exigida in ("superfosfato_triplo", "cloreto_de_potassio", "ureia"):
+            if exigida not in ids_simples:
+                raise ErroCarregamento(
+                    f"fertilizantes_simples: falta '{exigida}', que o motor usa para "
+                    f"complementar o que a fórmula não entrega (siras/motor/formulacao.py)"
+                )
+
+    def validar_corretivos(self, dados: Dict) -> None:
+        """Invariantes do arquivo de corretivos.
+
+        Duas checagens de física, e uma de contiguidade:
+
+        - **PRNT não passa do PN.** PRNT = PN x RE/100, e a reatividade é no máximo 100%.
+          Produto que viole isso está marcado em `inconsistencias`, e a marcação é o que
+          separa erro de fonte conferido de erro de transcrição nosso.
+        - **PN coerente com os óxidos.** PN estequiométrico = CaO x 1,783 + MgO x 2,481 —
+          as massas molares do CaCO3 (100,09) sobre as do CaO (56,08) e do MgO (40,30).
+          PN acima de 100% NÃO é erro: um dolomito puro passa de 100 justamente porque o
+          Mg é mais leve e neutraliza mais por unidade de massa.
+        - **As faixas comerciais de PRNT não deixam lacuna nem se sobrepõem.**
+        """
+        for i, p in enumerate((dados.get("produtos_referencia_mercado") or {}).get("produtos") or []):
+            contexto = f"produtos_referencia_mercado.produtos[{i}] (id '{p.get('id')}')"
+            marcadas = set(p.get("inconsistencias") or [])
+
+            if p["prnt"] > p["pn"] and "prnt_maior_que_pn" not in marcadas:
+                raise ErroCarregamento(
+                    f"{contexto}: PRNT {p['prnt']} maior que o PN {p['pn']}, o que é "
+                    f"impossível (PRNT = PN x RE/100, RE <= 100). Se o erro é da ficha do "
+                    f"fabricante, declare 'prnt_maior_que_pn' em inconsistencias"
+                )
+
+            pn_estequiometrico = p["cao"] * 1.783 + p["mgo"] * 2.481
+            divergencia = abs(p["pn"] - pn_estequiometrico)
+            if divergencia > 5.0 and "pn_diverge_dos_oxidos" not in marcadas:
+                raise ErroCarregamento(
+                    f"{contexto}: PN declarado {p['pn']} e os óxidos sustentam "
+                    f"{pn_estequiometrico:.1f} (CaO x 1,783 + MgO x 2,481). Se a divergência "
+                    f"é da fonte, declare 'pn_diverge_dos_oxidos' em inconsistencias"
+                )
+
+        faixas = (dados.get("faixas_prnt_comerciais") or {}).get("faixas") or []
+        anterior_max = None
+        for i, faixa in enumerate(faixas):
+            inicio = faixa.get("prnt_min_inclusivo", faixa.get("prnt_min_exclusivo"))
+            if inicio is None:
+                raise ErroCarregamento(
+                    f"faixas_prnt_comerciais.faixas[{i}] (id '{faixa.get('id')}'): sem "
+                    f"limite inferior"
+                )
+            if anterior_max is not None and inicio != anterior_max:
+                raise ErroCarregamento(
+                    f"faixas_prnt_comerciais.faixas[{i}] (id '{faixa.get('id')}'): começa "
+                    f"em {inicio} e a faixa anterior termina em {anterior_max} — as faixas "
+                    f"precisam ser contíguas, sem lacuna nem sobreposição"
+                )
+            anterior_max = faixa.get("prnt_max_inclusivo")
+
+    def carregar_formulas_npk(self) -> Dict[str, Any]:
+        """Carrega e valida dados/mercado/formulas_npk.json."""
+        return self._carregar_de_mercado(
+            "formulas_npk.json", "formulas_npk_v1", self.validar_formulas_npk
+        )
+
+    def carregar_corretivos(self) -> Dict[str, Any]:
+        """Carrega e valida dados/mercado/corretivos.json."""
+        return self._carregar_de_mercado(
+            "corretivos.json", "corretivos_v1", self.validar_corretivos
+        )
+
+    def _carregar_de_mercado(self, nome_arquivo: str, nome_schema: str, validar) -> Dict[str, Any]:
+        """Carrega um arquivo de dados/mercado/.
+
+        Esse diretório existe separado de dados/comum/ de propósito: aquele é transcrição
+        conferida do Manual, e estes arquivos têm origem mista — legislação, convenção
+        comercial, ficha de fabricante e, sim, trechos do Manual. A distinção vive no
+        campo `_status` de cada bloco, que o schema exige; o diretório só impede que ela
+        se perca de vista.
         """
         base_dir = Path(__file__).parent.parent.parent
-        caminho = base_dir / "dados" / "mercado" / "formulacoes.json"
+        caminho = base_dir / "dados" / "mercado" / nome_arquivo
 
         try:
             dados = self._carregar_json(caminho)
-            self._validar_schema_json("formulacoes.json", "formulacoes_v1", dados)
-            self.validar_formulacoes(dados)
+            self._validar_schema_json(nome_arquivo, nome_schema, dados)
+            validar(dados)
             return dados
         except ErroCarregamento as e:
-            raise ErroCarregamento(f"formulacoes.json: {e}")
+            raise ErroCarregamento(f"{nome_arquivo}: {e}")
 
     def carregar_dados_comum(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -1205,9 +1309,17 @@ def carregar_dados_erva_mate() -> Dict[str, Dict[str, Any]]:
     return _carregador_global.carregar_dados_erva_mate()
 
 
-def carregar_formulacoes() -> Dict[str, Any]:
-    """Carrega o catálogo de formulações NPK comerciais com cache global."""
+def carregar_formulas_npk() -> Dict[str, Any]:
+    """Carrega o catálogo de fórmulas NPK e fertilizantes simples com cache global."""
     global _carregador_global
     if _carregador_global is None:
         _carregador_global = Carregador()
-    return _carregador_global.carregar_formulacoes()
+    return _carregador_global.carregar_formulas_npk()
+
+
+def carregar_corretivos() -> Dict[str, Any]:
+    """Carrega o arquivo de corretivos de acidez com cache global."""
+    global _carregador_global
+    if _carregador_global is None:
+        _carregador_global = Carregador()
+    return _carregador_global.carregar_corretivos()

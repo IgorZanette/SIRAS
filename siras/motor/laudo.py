@@ -30,7 +30,7 @@ from siras.conhecimento.carregador import (
     carregar_dados_hortalicas,
     carregar_dados_outras,
     carregar_dados_tuberculos,
-    carregar_formulacoes,
+    carregar_formulas_npk,
 )
 from siras.dominio.analise import AnaliseSolo, Contexto
 from siras.dominio.laudo import Laudo, RecomendacaoAdubacao, RecomendacaoCalagem
@@ -500,10 +500,11 @@ def gerar_laudo(
     calagem = _calagem(analise, cultura_id, contexto, trace, dados)
     adubacao = _ADUBACAO_POR_GRUPO[grupo](analise, cultura_id, contexto, trace, dados)
 
-    # Depois da adubação, e a partir dela: a formulação não é uma recomendação nova, é a
-    # tradução da que acabou de sair para o produto que se compra. O catálogo é dado de
-    # mercado; vazio, a indicação sai None e o laudo segue completo.
-    formulacao = indicar_formulacao(adubacao, carregar_formulacoes(), trace)
+    # Depois da adubação, e a partir dela: a formulação não é recomendação nova, é a
+    # tradução da que acabou de sair para o produto que se compra, pelo método do
+    # Manual §8.3, p. 311. O catálogo de fórmulas é dado de mercado; vazio, a indicação
+    # sai None e o laudo segue completo.
+    formulacao = indicar_formulacao(adubacao, carregar_formulas_npk(), trace)
 
     # CCAE §7: os dois cenários saem sempre juntos — a diferença entre eles é o ganho
     # atribuível à recomendação emitida acima, e é o que integra os dois módulos.

@@ -724,32 +724,64 @@ def _orientacoes(laudo: Laudo) -> List[Dict[str, Any]]:
     return [item for item in itens if item["texto"]]
 
 
-def _opcao_formulada(opcao: Any) -> Dict[str, Any]:
-    """Uma formulação avaliada, no formato que o template imprime.
+#: Nome de leitura dos fertilizantes simples. O id da base é identificador; "ureia" com
+#: inicial maiúscula e "cloreto de potássio" por extenso é o que vai num laudo assinado.
+_NOME_DO_SIMPLES = {
+    "ureia": "ureia",
+    "superfosfato_triplo": "superfosfato triplo",
+    "superfosfato_simples": "superfosfato simples",
+    "cloreto_de_potassio": "cloreto de potássio",
+    "sulfato_de_potassio": "sulfato de potássio",
+    "sulfato_de_amonio": "sulfato de amônio",
+    "nitrato_de_amonio": "nitrato de amônio",
+    "nitrato_de_calcio": "nitrato de cálcio",
+    "map": "MAP",
+    "dap": "DAP",
+}
 
-    Como no resto do módulo, o arredondamento aqui é de exibição: o motor devolve a dose
-    cheia e a escolha entre formulações roda sobre o valor cheio (motor/formulacao.py).
-    Sobra e falta saem em kg/ha inteiros, como as doses de nutriente do resto do laudo.
+_NOME_DO_NUTRIENTE = {
+    "n": "N", "p2o5": "P<sub>2</sub>O<sub>5</sub>", "k2o": "K<sub>2</sub>O",
+}
+
+
+def _complemento_legivel(complemento: Any) -> Dict[str, Any]:
+    return {
+        "produto": _NOME_DO_SIMPLES.get(complemento.produto, complemento.produto),
+        "dose": formatar_numero(complemento.dose_kg_ha, 0),
+        "nutriente": _NOME_DO_NUTRIENTE.get(complemento.nutriente, complemento.nutriente),
+        "momento": complemento.momento,
+    }
+
+
+def _opcao_formulada(opcao: Any) -> Dict[str, Any]:
+    """Uma fórmula avaliada, no formato que o template imprime.
+
+    Como no resto do módulo, o arredondamento aqui é de exibição: o motor devolve as doses
+    cheias e a escolha entre fórmulas roda sobre o valor cheio (motor/formulacao.py).
+    Falta e sobra saem em kg/ha inteiros, como as doses de nutriente do resto do laudo.
     """
     return {
-        "rotulo": opcao.rotulo,
-        "teores": (
-            f"{formatar_enxuto(opcao.n)}-{formatar_enxuto(opcao.p2o5)}-"
-            f"{formatar_enxuto(opcao.k2o)}"
-        ),
-        "atende": opcao.atende,
-        "motivo_nao_atende": opcao.motivo_nao_atende,
-        "dose": formatar_numero(opcao.dose_kg_ha, 0) if opcao.atende else "—",
-        "entrega_n": formatar_numero(opcao.entrega_n, 0) if opcao.atende else "—",
-        "entrega_p2o5": formatar_numero(opcao.entrega_p2o5, 0) if opcao.atende else "—",
-        "entrega_k2o": formatar_numero(opcao.entrega_k2o, 0) if opcao.atende else "—",
-        "excesso_p2o5": formatar_numero(opcao.excesso_p2o5, 0) if opcao.atende else "—",
-        "excesso_k2o": formatar_numero(opcao.excesso_k2o, 0) if opcao.atende else "—",
-        # None quando o Manual não publica a dose de N como número: dizer "falta 0" ali
-        # afirmaria que o N está coberto, e o que se sabe é que não há com o que comparar.
-        "falta_n": None if opcao.falta_n is None else formatar_numero(opcao.falta_n, 0),
-        "excesso_n": None if opcao.excesso_n is None else formatar_numero(opcao.excesso_n, 0),
-        "fonte": opcao.fonte,
+        "id": opcao.id,
+        "dose": formatar_numero(opcao.dose_kg_ha, 0),
+        "ancora": _NOME_DO_NUTRIENTE.get(opcao.ancora, opcao.ancora),
+        "ancora_por_fallback": opcao.ancora_por_fallback,
+        "entrega_n": formatar_numero(opcao.entrega_n, 0),
+        "entrega_p2o5": formatar_numero(opcao.entrega_p2o5, 0),
+        "entrega_k2o": formatar_numero(opcao.entrega_k2o, 0),
+        "falta_p2o5": formatar_numero(opcao.falta_p2o5, 0),
+        "falta_k2o": formatar_numero(opcao.falta_k2o, 0),
+        "excesso_p2o5": formatar_numero(opcao.excesso_p2o5, 0),
+        "excesso_k2o": formatar_numero(opcao.excesso_k2o, 0),
+        "excesso_n": formatar_numero(opcao.excesso_n, 0),
+        "n_cobertura": formatar_numero(opcao.n_cobertura, 0),
+        # Zero não é "—": zero aqui é afirmação — a fórmula cobriu o nutriente na medida.
+        "tem_falta": opcao.falta_p2o5 > 0.5 or opcao.falta_k2o > 0.5,
+        "tem_excesso_n": opcao.excesso_n > 0.5,
+        "tem_cobertura": opcao.n_cobertura > 0.5,
+        "desvio": formatar_numero(opcao.desvio_relativo * 100, 1),
+        "complementos": [_complemento_legivel(c) for c in opcao.complementos],
+        "origem": opcao.origem,
+        "fontes": opcao.fontes,
     }
 
 
@@ -774,7 +806,10 @@ def _formulacao(laudo: Laudo) -> Dict[str, Any]:
         "motivo": None,
         "criterio": indicacao.criterio,
         "indicada": _opcao_formulada(indicacao.indicada),
-        "alternativas": [_opcao_formulada(o) for o in indicacao.ranking[1:]],
+        # Três alternativas, e não o catálogo inteiro: a lista existe para a pessoa ter
+        # para onde ir se a revenda não tiver a indicada, não para percorrer 38 opções
+        # dentro de um laudo impresso.
+        "alternativas": [_opcao_formulada(o) for o in indicacao.ranking[1:4]],
     }
 
 
@@ -861,12 +896,12 @@ def _formulacoes_sugeridas(blocos: Sequence[Any]) -> List[Dict[str, Any]]:
     vistos: set = set()
 
     def acrescentar(opcao: Any) -> None:
-        if not opcao.atende or opcao.id in vistos or len(sugeridas) >= 3:
+        if opcao.id in vistos or len(sugeridas) >= 3:
             return
         vistos.add(opcao.id)
         sugeridas.append({
             "id": opcao.id,
-            "rotulo": opcao.rotulo,
+            "rotulo": opcao.id,
             "formula": (
                 f"{formatar_enxuto(opcao.n)}-{formatar_enxuto(opcao.p2o5)}-"
                 f"{formatar_enxuto(opcao.k2o)}"

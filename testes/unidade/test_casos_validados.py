@@ -17,24 +17,12 @@ import pytest
 from siras.dominio.analise import AnaliseSolo, Camada, Contexto
 from siras.motor.adubacao import calcular_adubacao_frutiferas, calcular_fosforo_potassio, calcular_nitrogenio
 from siras.motor.calagem import calcular_calagem
+from siras.validacao.concordancia import CRITERIO_POR_CASO
 from siras.motor.trace import Trace
 
 _CAMINHO_CASOS = Path(__file__).parent.parent / "casos" / "casos_recomendacao.json"
 
-_CRITERIO_POR_CASO = {
-    "CAL-01": "graos_convencional",
-    "CAL-02": "graos_pd_consolidado",
-    "CAL-03": "graos_convencional",
-    "CAL-04": "graos_pd_consolidado",
-    "CAL-05": "graos_convencional",
-    "CAL-06": "graos_convencional",
-    "CAL-07": "macieira_oliveira",
-    "CAL-08": "erva_mate_e_florestais",
-    "CAL-09": "erva_mate_e_florestais",
-    "CAL-10": "graos_pd_com_restricoes",
-    "CAL-11": "graos_pd_com_restricoes",
-    "ADU-01": "graos_convencional",
-}
+_CRITERIO_POR_CASO = CRITERIO_POR_CASO
 
 _CAMPOS_ANALISE_PADRAO = dict(
     ph_agua=7.0, indice_smp=6.0, argila=0.0, mo=0.0, p=0.0, k=0.0, ctc_ph7=0.0,

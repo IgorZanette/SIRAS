@@ -79,7 +79,15 @@ Casos discordantes são analisados individualmente, com o `Trace` de cada um, di
 implementação de divergências de interpretação dos critérios.
 
 `scripts/gera_tabela_concordancia.py` produz, em um comando: taxa global e por grupo, IC 95%, lista
-de discordantes com o trace, e saída em Markdown e CSV para a monografia.
+de discordantes com o trace, e saída em Markdown e CSV para a monografia. A apuração vive em
+`siras/validacao/concordancia.py` e é exercitada por `testes/unidade/test_concordancia.py` — o
+número publicado sai do mesmo código que a suíte roda.
+
+**Medido em 10/10/2026, e é um problema de tamanho de amostra, não de acerto:** 15/15 casos
+concordantes, 100%, com IC 95% de Wilson **[79,6%; 100,0%]**. O limite inferior fica **abaixo dos
+80%** que a H1.1 declara. Não é o motor que falha — é o n. Com 16 casos e o mesmo acerto o limite
+sobe para 80,6%, e com 20 para 83,9%. **Um caso a mais já sustenta a hipótese pelo critério
+declarado.** A conformidade da aptidão não tem esse problema: 88 casos, 100%, IC [95,8%; 100,0%].
 
 ## Comparação com ferramenta existente
 
@@ -105,14 +113,15 @@ entregar uma lista priorizada de correções, e é isso que as heurísticas dão
 - A escala 0–4 é adaptação declarada: no método original a severidade é atribuída a **problemas**,
   por avaliadores; aqui é atribuída a **heurísticas**, por usuários, e mede percepção de gravidade.
 - Estatística **descritiva**, sem inferência: amostra pequena e por conveniência.
-- Confirmado com o orientador (Rafael Rieder) que a avaliação de usabilidade não requer submissão
-  ao comitê de ética (CEP). É aplicado TCLE aos participantes ([`instrumentos/tcle.md`](instrumentos/tcle.md)).
-- A interface é congelada na tag `usabilidade-v1` antes da primeira sessão e não muda até a última.
+- Confirmado com o orientador (Rafael Rieder) que a avaliação **não requer submissão ao CEP** e,
+  em 10/10/2026, que **não exige termo assinado**: o participante usa o sistema e responde ao
+  formulário. Um instrumento só, com a caracterização do participante na Seção 1 dele.
+- A interface é congelada na tag `congelamento-v1` antes da primeira sessão e não muda até a última.
 
 Consolidação por `scripts/consolidar_heuristicas.py`, análogo ao
 `gera_tabela_concordancia.py` da dimensão de correção.
 
-**A proposta ainda descreve o SUS** (§4.4.3 e a linha (i) do cronograma) e precisa ser corrigida —
-pendência P3 do [`ROADMAP.md`](ROADMAP.md). Enquanto o texto do SUS estava lá, valia também a
-correção de atribuição: a referência de 68 como média é de **Bangor, Kortum & Miller (2008)** e
-**Sauro (2011)**, não de Brooke (1996).
+**A proposta foi corrigida em 24/09/2026** (§4.4.3, etapa (i) do método e linha (i) do
+cronograma). Com o SUS fora do texto, deixou de existir também a atribuição errada do limiar de 68 —
+que é de **Bangor, Kortum & Miller (2008)** e **Sauro (2011)**, e não de Brooke (1996). Seguem
+pendentes na P3 o método de calagem (SMP) e a referência Ramalho Filho & Beek.

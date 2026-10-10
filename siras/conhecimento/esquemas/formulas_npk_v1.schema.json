@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "formulas_npk_v1",
+  "title": "Catalogo de formulacoes NPK e fertilizantes simples",
+  "description": "O METODO de escolha e do Manual (sec. 8.3, p. 311) e as garantias dos simples sao da Tab. 8.4, p. 304. O CATALOGO de formulas nao e do Manual: e dado de mercado, e cada entrada declara suas fontes.",
+  "type": "object",
+  "required": ["schema", "descricao", "fonte", "fontes", "fertilizantes_simples", "formulas"],
+  "properties": {
+    "schema": {"const": "formulas_npk_v1"},
+    "descricao": {"type": "string", "minLength": 1},
+    "fonte": {
+      "type": "object",
+      "required": ["transcrito_em", "conferido_por_autor_em"],
+      "properties": {
+        "transcrito_em": {"type": "string"},
+        "conferido_por_autor_em": {"type": ["string", "null"]}
+      }
+    },
+    "fontes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string", "minLength": 1},
+      "description": "Chave -> citacao completa. As formulas referenciam estas chaves."
+    },
+    "legislacao_vigente": {"type": "object"},
+    "metodo_escolha_manual": {"type": "object"},
+    "fertilizantes_simples": {
+      "type": "object",
+      "required": ["_fonte", "itens"],
+      "properties": {
+        "_fonte": {"type": "string", "minLength": 1},
+        "_status": {"type": "string"},
+        "itens": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/simples"}
+        }
+      }
+    },
+    "formulas": {
+      "type": "object",
+      "required": ["itens"],
+      "properties": {
+        "_status": {"type": "string"},
+        "itens": {"type": "array", "items": {"$ref": "#/$defs/formula"}}
+      }
+    },
+    "fontes_avaliadas_sem_dado_utilizavel": {"type": "array"},
+    "estatisticas_mercado": {"type": "object"}
+  },
+  "$defs": {
+    "garantias": {
+      "n": {"type": "number", "minimum": 0, "maximum": 100},
+      "p2o5": {"type": "number", "minimum": 0, "maximum": 100},
+      "k2o": {"type": "number", "minimum": 0, "maximum": 100}
+    },
+    "simples": {
+      "type": "object",
+      "required": ["id", "n", "p2o5", "k2o", "uso"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+        "n": {"type": "number", "minimum": 0, "maximum": 100},
+        "p2o5": {"type": "number", "minimum": 0, "maximum": 100},
+        "k2o": {"type": "number", "minimum": 0, "maximum": 100},
+        "s": {"type": "number", "minimum": 0, "maximum": 100},
+        "uso": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "_nota_s": {"type": "string"}
+      }
+    },
+    "formula": {
+      "type": "object",
+      "required": ["id", "n", "p2o5", "k2o", "uso", "fontes", "origem"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9]{2}-[0-9]{2}-[0-9]{2}$",
+          "description": "N-P2O5-K2O com dois digitos, como no rotulo"
+        },
+        "n": {"type": "number", "minimum": 0, "maximum": 100},
+        "p2o5": {"type": "number", "minimum": 0, "maximum": 100},
+        "k2o": {"type": "number", "minimum": 0, "maximum": 100},
+        "uso": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"enum": ["plantio", "cobertura"]}
+        },
+        "fontes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1},
+          "description": "Chaves do bloco 'fontes' da raiz. O carregador confere que existem."
+        },
+        "origem": {
+          "enum": [
+            "exemplo_manual",
+            "citada_por_produtores",
+            "produto_de_fabricante",
+            "comercio",
+            "composicao_ilustrativa"
+          ]
+        },
+        "regiao": {"type": "string"},
+        "extras": {"type": "object", "additionalProperties": {"type": "number"}},
+        "_nota_uso": {"type": "string"}
+      }
+    }
+  }
+}

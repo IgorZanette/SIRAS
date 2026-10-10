@@ -3,11 +3,17 @@
 Corresponde à Seção 4.4, dimensão (iii), da proposta, e substitui a subseção "Usabilidade"
 de [`VALIDACAO.md`](VALIDACAO.md), que passa a remeter para cá.
 
-**Decidido com o orientador na reunião de 24/09/2026, 19:30.** A proposta previa o
-questionário **SUS**. Em seu lugar: três roteiros de teste com usuários do público-alvo e
-um questionário pós-teste estruturado pelas **dez heurísticas de Nielsen**, com perguntas
-abertas ao final. A proposta precisa ser corrigida nesse ponto — ver a pendência P3 do
-[`ROADMAP.md`](ROADMAP.md).
+**Decidido com o orientador em 24/09/2026 e simplificado em 10/10/2026.** A proposta
+previa o questionário **SUS**. Em seu lugar: três roteiros de teste com usuários do
+público-alvo e um questionário pós-teste estruturado pelas **dez heurísticas de
+Nielsen**, com perguntas abertas ao final. A proposta foi corrigida nesse ponto.
+
+**A simplificação de 10/10/2026, por orientação do orientador:** nada de termo assinado,
+nada de ficha de papel. O participante usa o sistema e responde ao formulário — e é só
+isso. O rascunho de TCLE e a ficha do participante foram removidos do repositório (o
+histórico do Git os preserva); a caracterização do participante passou a ser a Seção 1 do
+próprio formulário. As folhas de observação dos roteiros viraram anotação livre do
+pesquisador, e não instrumento a preencher.
 
 ---
 
@@ -107,28 +113,28 @@ validade (§9).
 - SIRAS rodando em `localhost`, na máquina do pesquisador, na versão congelada da §8.
 - Presencial quando possível; remoto por videochamada com **controle remoto** cedido ao
   participante, nunca só compartilhamento de tela — em R2 e R3 é o participante que digita.
-- Gravação de tela **apenas com consentimento expresso** no TCLE, e sem áudio ou imagem do
-  participante. Serve para reconstruir o que aconteceu, não para análise de expressão.
+- Gravação de tela **só se o participante concordar**, perguntado de viva voz, e sem
+  áudio nem imagem dele. Serve para o pesquisador reconstruir o que aconteceu.
 - Navegador em janela limpa, sem histórico de sessões anteriores.
 
 ## 6. Instrumentos
 
-| Arquivo | Para quem | Quando |
-|---|---|---|
-| [`instrumentos/tcle.md`](instrumentos/tcle.md) | Participante | Antes de tudo, assinado |
-| [`instrumentos/ficha-participante.md`](instrumentos/ficha-participante.md) | Participante | Início da sessão |
-| [`roteiros/`](roteiros/) | Pesquisador (condução e observação) | Durante a sessão |
-| [`instrumentos/questionario-heuristicas.md`](instrumentos/questionario-heuristicas.md) | Participante, via Google Forms | Depois da sessão |
+**Um instrumento só.** O [questionário](instrumentos/questionario-heuristicas.md), no
+Google Forms, com a caracterização do participante na Seção 1. Os
+[roteiros](roteiros/) são material do pesquisador para conduzir a sessão, não papel que o
+participante preenche.
 
-**Identificação.** Cada participante recebe um **código** (`P1` a `P8`) entregue na sessão,
-e é por ele que o formulário identifica a resposta. O Google Forms fica com a coleta de
-e-mail **desligada**: com TCLE assinado em papel, guardar e-mail no formulário acumularia
-dado pessoal sem necessidade, e o código já permite cruzar a resposta com a folha de
-observação.
+**Identificação.** Cada participante recebe um **código** (`P1` a `P8`) dito na hora do
+teste, e é por ele que o formulário identifica a resposta. A coleta de e-mail fica
+**desligada**: sem termo e sem cadastro, guardar e-mail seria dado pessoal sem
+finalidade.
+
+**Antes de aplicar:** o orientador pediu para revisar o formulário montado. Mandar o link
+a ele antes da primeira sessão.
 
 ## 7. O que se coleta
 
-**Na sessão (folha de observação de cada roteiro):**
+**Na sessão (anotação livre do pesquisador, sem formulário a preencher):**
 
 - se a tarefa foi concluída, concluída com ajuda, ou não concluída;
 - em que passo a pessoa hesitou, se voltou atrás, e o que disse enquanto fazia;
@@ -148,12 +154,14 @@ tela em que ocorrem; sugestões de melhoria; e quatro perguntas abertas finais.
 problema no meio da coleta faria os participantes avaliarem sistemas diferentes, e as
 médias por heurística deixariam de somar.
 
-- A versão avaliada recebe a tag Git `usabilidade-v1`, e o commit fica registrado no
+- A versão avaliada recebe a tag Git `congelamento-v1`, e o commit fica registrado no
   relatório.
 - Problema encontrado durante a coleta é **anotado**, não corrigido.
 - Exceção única: defeito que **impeça** a conclusão de um roteiro para todos os
   participantes seguintes. Nesse caso a correção é feita, a tag avança, e o relatório
   declara quais participantes usaram qual versão.
+- O orientador fixou isso de forma independente: **a partir de segunda, 12/10/2026, o
+  aplicativo não recebe mais alteração.** O foco passa a ser teste com usuários e artigo.
 
 ## 9. Ameaças à validade
 
@@ -161,7 +169,7 @@ Declaradas aqui para irem ao texto, e não descobertas na arguição.
 
 | # | Ameaça | Mitigação |
 |---|---|---|
-| 1 | **O pesquisador é o autor do sistema.** O participante tende a poupar a crítica de quem está do lado dele | Questionário respondido fora da sessão e sem o pesquisador; o TCLE diz, com todas as letras, que a crítica é o resultado útil |
+| 1 | **O pesquisador é o autor do sistema.** O participante tende a poupar a crítica de quem está do lado dele | Questionário respondido fora da sessão e sem o pesquisador; a abertura do formulário diz, com todas as letras, que a crítica é o resultado útil |
 | 2 | **R1 treina o participante** antes de R2 e R3 | Declarada como escolha de desenho: mede-se adoção assistida, não descoberta autônoma |
 | 3 | **Severidade por heurística, respondida por usuário**, não é a severidade de Nielsen | Adaptação declarada na §2; resultados apresentados como percepção, não como índice |
 | 4 | **Amostra pequena e por conveniência** | Sem inferência estatística; resultados descritivos e qualitativos |
@@ -190,8 +198,8 @@ que for corrigido antes da entrega é registrado com a heurística que originou 
 
 | Etapa | Janela | Depende de |
 |---|---|---|
-| Congelamento da interface, tag `usabilidade-v1` | 06/10/2026 | suíte completa passando |
-| Piloto com 1 participante, fora da amostra | 13–17/10/2026 | roteiros prontos |
+| Congelamento da interface, tag `congelamento-v1` | 12/10/2026 | suíte completa passando |
+| Piloto com 1 participante, fora da amostra | 13–17/10/2026 | formulário montado e revisado pelo orientador |
 | Coleta com 5 a 8 participantes | 20/10 a 14/11/2026 | recrutamento (P8) |
 | Consolidação e redação da seção | 17–28/11/2026 | — |
 
@@ -206,8 +214,8 @@ cronograma da proposta.
    vêm de casos já conferidos, e marcam `PREENCHER` os que faltam. Ver a nota de cada
    roteiro sobre por que esses campos não foram preenchidos por antecipação.
 3. **Montar o formulário no Google Forms** a partir de
-   [`instrumentos/questionario-heuristicas.md`](instrumentos/questionario-heuristicas.md).
-4. **Revisar e assinar o TCLE.**
+   [`instrumentos/questionario-heuristicas.md`](instrumentos/questionario-heuristicas.md)
+   **e mandar o link ao orientador para revisão**, que foi o que ele pediu.
 
 ## Referências
 

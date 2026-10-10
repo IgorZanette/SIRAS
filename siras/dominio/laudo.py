@@ -70,33 +70,59 @@ class RecomendacaoAdubacao:
 
 
 @dataclass(frozen=True)
+class Complemento:
+    """Fertilizante simples que cobre o que a fórmula não entregou.
+
+    `momento` é "cobertura" só para o N que sobra do total recomendado; os complementos
+    de P e K vão junto da fórmula, no plantio.
+    """
+
+    produto: str
+    dose_kg_ha: float
+    nutriente: str
+    momento: str = "plantio"
+
+
+@dataclass(frozen=True)
 class OpcaoFormulacao:
     """Uma formulação NPK do catálogo, avaliada contra a recomendação desta análise.
 
-    As quantidades vêm em kg/ha e SEM arredondamento — quem arredonda é a apresentação.
-    Os campos opcionais são None quando não há como calculá-los: `dose_kg_ha` e as
-    entregas quando a formulação não atende, e `falta_n`/`excesso_n` quando o Manual não
-    publica a dose de N como número (teto, intervalo ou lacuna declarada).
+    Quantidades em kg/ha e SEM arredondamento — quem arredonda é a apresentação.
+
+    A dose é ancorada no nutriente mais deficiente no solo (Manual, §8.3, p. 311), que
+    por isso é atendido exatamente. O outro falta ou sobra, e as duas coisas ficam
+    declaradas: falta exige uma operação a mais, sobra é adubo pago e não aproveitado.
     """
 
     id: str
-    rotulo: str
     #: garantias do rótulo, em % de massa
     n: float
     p2o5: float
     k2o: float
-    dose_kg_ha: Optional[float]
-    entrega_n: Optional[float]
-    entrega_p2o5: Optional[float]
-    entrega_k2o: Optional[float]
-    excesso_p2o5: Optional[float]
-    excesso_k2o: Optional[float]
-    falta_n: Optional[float]
-    excesso_n: Optional[float]
-    atende: bool
-    motivo_nao_atende: Optional[str]
+    dose_kg_ha: float
+    #: kg/ha de cada nutriente que esta dose entrega
+    entrega_n: float
+    entrega_p2o5: float
+    entrega_k2o: float
+    #: kg/ha que ainda faltam depois da fórmula (nunca negativos)
+    falta_p2o5: float
+    falta_k2o: float
+    #: kg/ha aplicados além do recomendado (nunca negativos)
+    excesso_p2o5: float
+    excesso_k2o: float
+    excesso_n: float
+    #: N do total recomendado que a fórmula não entregou, e vai para cobertura
+    n_cobertura: float
+    #: métrica de ordenação: (faltas + excessos) / (P2O5 + K2O recomendados). Menor é melhor
+    desvio_relativo: float
+    #: 'p2o5' ou 'k2o' — o nutriente que definiu a dose
+    ancora: str
+    #: True quando a âncora foi escolhida pela maior dose por falta de classe de teor
+    ancora_por_fallback: bool = False
+    complementos: List[Complemento] = field(default_factory=list)
     #: de onde veio a entrada do catálogo. Dado de mercado, não do Manual.
-    fonte: str = ""
+    fontes: List[str] = field(default_factory=list)
+    origem: str = ""
 
 
 @dataclass(frozen=True)
@@ -109,7 +135,7 @@ class IndicacaoFormulacao:
     """
 
     indicada: Optional[OpcaoFormulacao]
-    #: todas as avaliadas, as que atendem primeiro e em ordem de preferência
+    #: todas as avaliadas, em ordem de preferência
     ranking: List[OpcaoFormulacao] = field(default_factory=list)
     motivo_sem_indicacao: Optional[str] = None
     criterio: str = ""
@@ -141,6 +167,7 @@ class Laudo:
 
 
 __all__ = [
+    "Complemento",
     "IndicacaoFormulacao",
     "Laudo",
     "OpcaoFormulacao",

@@ -68,9 +68,10 @@ permaneça independente do código.
 | `siras/web/` | Camada web (Flask) |
 | `dados/comum/` | Tabelas gerais do Manual (SMP, pH de referência, critérios de calagem, interpretação de P/K) |
 | `dados/culturas/<grupo>/` | Tabelas de adubação compartilhadas por grupo de cultura (grãos, hortaliças, tubérculos, outras comerciais, frutíferas, erva-mate) |
-| `dados/mercado/` | **Dado de mercado, não do Manual:** catálogo de formulações NPK comerciais, com fonte declarada por entrada (ver `docs/decisoes/0007`) |
+| `dados/mercado/` | **Origem mista, declarada bloco a bloco:** catálogo de fórmulas NPK e arquivo de corretivos de acidez. Cada bloco traz `_fonte` e `_status` — o que é lei vigente, o que é convenção comercial herdada e o que é ficha de fabricante (ver `docs/decisoes/0007` e `0008`) |
+| `siras/validacao/` | Apuração da concordância com o oráculo — alimenta a tabela de Resultados |
 | `testes/casos/` | Casos de teste e valores de referência (oráculo da validação) |
-| `scripts/` | Utilitários: conferência de schemas e de contraste, geração dos arquivos da marca, consolidação do questionário de usabilidade |
+| `scripts/` | Utilitários: tabela de concordância da validação, conferência de schemas e de contraste, geração dos arquivos da marca, consolidação do questionário de usabilidade |
 | `validar_anexo1.py` | Confere as classificações de P e K contra o Anexo 1 do Manual (oráculo externo) |
 | `docs/` | Documentação técnica, decisões de projeto e rastreabilidade das fontes |
 
@@ -85,8 +86,7 @@ Documentos principais:
 - [`docs/BASE_DE_CONHECIMENTO.md`](docs/BASE_DE_CONHECIMENTO.md) — formato dos arquivos JSON
 - [`docs/VALIDACAO.md`](docs/VALIDACAO.md) — protocolo de validação e hipóteses
 - [`docs/USABILIDADE.md`](docs/USABILIDADE.md) — protocolo do teste de usabilidade, com os
-  [roteiros](docs/roteiros/) e os [instrumentos](docs/instrumentos/) (questionário das dez
-  heurísticas de Nielsen, TCLE e ficha do participante)
+  [roteiros](docs/roteiros/) e o [questionário das dez heurísticas de Nielsen](docs/instrumentos/questionario-heuristicas.md)
 - [`docs/mapa_manual.md`](docs/mapa_manual.md) — rastreabilidade tabela do Manual → arquivo
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — cronograma e estado de cada etapa
 - [`docs/decisoes/`](docs/decisoes/) — registros de decisão de arquitetura
@@ -100,7 +100,7 @@ Documentos principais:
 
 Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-**Pronto** (24/09/2026):
+**Pronto** (10/10/2026):
 
 - **Motor** — calagem, adubação e aptidão edáfica para as **61 culturas e grupos de culturas** do
   escopo, com `gerar_laudo()` como ponto de entrada único e uma trilha que registra cada decisão
@@ -111,10 +111,16 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/ROADMAP.md`
 - **Aplicação web** — as três telas, leitura ao vivo da interpretação enquanto se digita, vários
   talhões num laudo, versão impressa em A4, temas claro e escuro, e calculadora que compara
   fórmulas NPK com os preços que o usuário informar.
-- **Indicação de formulação** — o laudo diz qual adubo formulado atende a recomendação e em que
-  dose, a partir de um catálogo de mercado com fonte declarada por entrada — que **não** é do
-  Manual, e cuja ausência não impede o laudo de sair completo ([ADR 0007](docs/decisoes/0007-indicacao-de-formulacao-do-adubo.md)).
-- **Suíte** — 4919 testes passando (camada completa, 4 min 19 s).
+- **Indicação de formulação** — o laudo diz qual adubo formulado comprar e em que dose, pelo
+  **método do próprio Manual** (§8.3, p. 311): a dose se ancora no nutriente mais deficiente no
+  solo, o que falta do outro vira complemento com fertilizante simples e o N restante vai para
+  cobertura. O catálogo de fórmulas é dado de mercado, com fonte por entrada, e o laudo declara
+  as duas procedências ([ADR 0008](docs/decisoes/0008-escolha-de-formula-pelo-metodo-do-manual.md)).
+- **Validação** — `scripts/gera_tabela_concordancia.py` produz a tabela de concordância com IC 95%
+  de Wilson, a partir de `siras/validacao/concordancia.py`, que a suíte também exercita. Medido em
+  10/10/2026: recomendação **15/15 = 100%** (IC [79,6%; 100,0%]) e aptidão **88/88 = 100%**
+  (IC [95,8%; 100,0%]).
+- **Suíte** — 4951 testes passando (camada completa, 4 min 32 s).
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
 avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em
@@ -122,8 +128,13 @@ avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está
 e questionário pós-teste estruturado pelas dez heurísticas de Nielsen, em lugar do SUS previsto
 na proposta.
 
-**Pendente de terceiros:** recrutamento dos participantes da avaliação de usabilidade, o catálogo
-de formulações comerciais e a busca na literatura pedida pelo orientador (P4, P7 e P8 no roadmap).
+**Pendente de terceiros:** recrutamento dos participantes da avaliação de usabilidade e a busca na
+literatura pedida pelo orientador (P4 e P8 no roadmap). Pendente do autor: **ao menos um caso de
+recomendação a mais** (P9) — com 15 casos o limite inferior do IC fica em 79,6%, abaixo dos 80% que
+a H1.1 declara; com 16 passa a 80,6%.
+
+**A implementação encerra em 12/10/2026**, por definição do orientador. Daí em diante, só testes com
+usuários e redação do artigo ([`docs/artigo_final/`](docs/artigo_final/)).
 
 ## Ferramentas de desenvolvimento
 

@@ -55,6 +55,15 @@ _PADRAO_FALHA = re.compile(r"deu errado|descreve", re.IGNORECASE)
 _PADRAO_SUGESTAO = re.compile(r"diferente", re.IGNORECASE)
 _PADRAO_CODIGO = re.compile(r"c[óo]digo", re.IGNORECASE)
 
+#: As perguntas de caracterizacao entraram no formulario em 10/10/2026, quando a ficha
+#: de papel foi dissolvida nele. Sao detectadas pelo enunciado para irem ao perfil da
+#: amostra, e precisam ficar FORA da varredura das heuristicas: "Como tu fazes a
+#: recomendacao hoje?" nao e nota de severidade nem relato de falha.
+_PADRAO_PERFIL = re.compile(
+    r"forma[çc][ãa]o|h[áa] quanto tempo|recomenda[çc][ãa]o hoje|conforto|como tu usaste",
+    re.IGNORECASE,
+)
+
 
 class ErroConsolidacao(Exception):
     """CSV que não tem a forma que o instrumento produz."""
@@ -68,9 +77,10 @@ def _colunas_por_heuristica(cabecalho: List[str]) -> Dict[int, Dict[str, str]]:
     instrumento não numera as perguntas — e pedir que numere para agradar ao script seria
     deixar a ferramenta mandar no método.
     """
-    severidade = [c for c in cabecalho if _PADRAO_SEVERIDADE.search(c)]
-    falha = [c for c in cabecalho if _PADRAO_FALHA.search(c)]
-    sugestao = [c for c in cabecalho if _PADRAO_SUGESTAO.search(c)]
+    heuristicas = [c for c in cabecalho if not _PADRAO_PERFIL.search(c)]
+    severidade = [c for c in heuristicas if _PADRAO_SEVERIDADE.search(c)]
+    falha = [c for c in heuristicas if _PADRAO_FALHA.search(c)]
+    sugestao = [c for c in heuristicas if _PADRAO_SUGESTAO.search(c)]
 
     if len(severidade) != len(HEURISTICAS):
         raise ErroConsolidacao(
@@ -88,6 +98,17 @@ def _colunas_por_heuristica(cabecalho: List[str]) -> Dict[int, Dict[str, str]]:
             "sugestao": sugestao[i] if i < len(sugestao) else "",
         }
     return mapa
+
+
+def colunas_de_perfil(cabecalho: List[str]) -> List[str]:
+    """As perguntas de caracterizacao do participante (Secao 1 do formulario).
+
+    Entraram no formulario quando a ficha de papel foi dissolvida nele, em 10/10/2026.
+    Servem para descrever a amostra na monografia: severidade alta vinda de quem usa
+    ferramenta digital todo dia significa coisa diferente da mesma nota vinda de quem
+    nunca usou.
+    """
+    return [c for c in cabecalho if _PADRAO_PERFIL.search(c)]
 
 
 def _coluna_do_codigo(cabecalho: List[str]) -> Optional[str]:

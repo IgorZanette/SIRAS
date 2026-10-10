@@ -1,0 +1,133 @@
+{
+  "schema": "corretivos_v1",
+  "descricao": "Corretivos de acidez: garantias minimas legais, fatores de reatividade, faixas comerciais de PRNT, classificacao por MgO e produtos de referencia de mercado. O SIRAS recebe o PRNT digitado pelo usuario; este arquivo serve para validar/rotular esse valor e para fundamentar o texto do laudo.",
+  "fonte": {
+    "transcrito_em": "2026-10-10",
+    "conferido_por_autor_em": null,
+    "nota": "Cada bloco declara sua propria fonte em _fonte e seu status juridico em _status. Nao misturar: o que e lei vigente, o que e convencao herdada e o que e dado de fabricante."
+  },
+
+  "dose_pelo_prnt": {
+    "_fonte": "Manual CQFS-RS/SC 2016, Cap. 8, sec. 8.1.1 c, p. 298",
+    "_status": "manual_rs_sc",
+    "formula": "dose_produto_t_ha = nc_prnt100_t_ha * 100 / prnt",
+    "exemplo_manual": { "nc_prnt100_t_ha": 3.0, "prnt": 68.8, "dose_produto_t_ha": 4.4 },
+    "exemplo_reatividade_manual": {
+      "passante_abnt50": 60, "abnt20_retido50": 20, "abnt10_retido20": 18, "retido_abnt10": 2,
+      "re": 75.6, "pn": 91, "prnt": 68.8
+    }
+  },
+
+  "legislacao_vigente": {
+    "_fonte": "MAPA, Instrucao Normativa SDA n. 35, de 4 jul. 2006 (DOU 12/07/2006, Secao 1, p. 32), Anexo, arts. 2, 3 e 8",
+    "_status": "lei_vigente_confirmar_sislegis",
+    "_nota": "FAOLEX registra como vigente; o Manual 2016 (p. 299) cita os mesmos minimos como 'Brasil, 2016'. Confirmar no SISLEGIS/MAPA se houve norma posterior antes da defesa.",
+
+    "garantias_minimas": {
+      "_unidades": { "pn": "% E CaCO3", "soma_oxidos": "% CaO + % MgO", "prnt": "%" },
+      "calcario_agricola":         { "pn": 67,  "soma_oxidos": 38, "prnt": 45 },
+      "calcario_calcinado_agricola": { "pn": 80,  "soma_oxidos": 43, "prnt": 54 },
+      "cal_hidratada_agricola":    { "pn": 94,  "soma_oxidos": 50, "prnt": 90 },
+      "cal_virgem_agricola":       { "pn": 125, "soma_oxidos": 68, "prnt": 120 },
+      "outros_corretivos_acidez":  { "pn": 67,  "soma_oxidos": 38, "prnt": 45 }
+    },
+
+    "granulometria_minima": {
+      "_artigo": "Anexo, art. 2",
+      "passante_min_pct": { "abnt10_2mm": 100, "abnt20_0_84mm": 70, "abnt50_0_3mm": 50 },
+      "ultrafino_filler": { "passante_min_pct": { "abnt50_0_3mm": 100 } }
+    },
+
+    "reatividade_por_fracao": {
+      "_artigo": "Anexo, art. 3, par. 2, II",
+      "_uso": "re = soma(fracao_pct * fator)",
+      "retido_abnt10":            0.0,
+      "passa_abnt10_retido_abnt20": 0.2,
+      "passa_abnt20_retido_abnt50": 0.6,
+      "passa_abnt50":             1.0
+    },
+
+    "tolerancias": {
+      "_artigo": "Anexo, art. 8",
+      "deficiencia_granulometria_pct_por_peneira": 5,
+      "deficiencia_componente_ate_5pct": 20,
+      "deficiencia_componente_acima_5pct": 10,
+      "excesso_prnt_pct_do_declarado": 40
+    }
+  },
+
+  "classificacao_mgo": {
+    "_fonte": "Portaria MA n. 3, de 12 jun. 1986 (revogada), conforme reproduzida em CPRM, Estudo do mercado de calcario para fins agricolas no Estado de Pernambuco",
+    "_status": "convencao_tecnica_sem_base_legal_vigente",
+    "_nota": "A IN 35/2006 exige que CaO e MgO sejam garantidos no registro, mas NAO classifica o produto por teor de MgO. A divisao abaixo continua em uso tecnico e comercial. Fronteiras: limite inferior inclusivo.",
+    "unidade": "% MgO",
+    "classes": [
+      { "id": "calcitico",   "mgo_min": 0,  "mgo_max_exclusivo": 5 },
+      { "id": "magnesiano",  "mgo_min": 5,  "mgo_max_exclusivo": 12 },
+      { "id": "dolomitico",  "mgo_min": 12, "mgo_max_exclusivo": null }
+    ]
+  },
+
+  "faixas_prnt_comerciais": {
+    "_fonte": [
+      "Portaria MA n. 3, de 12 jun. 1986 (origem; revogada) - citada por Epagri, Agropecuaria Catarinense",
+      "Parahyba, R. E. R. Calcario agricola. In: DNPM, Sumario Mineral Brasileiro 2008",
+      "Embrapa, Comunicado Tecnico 47 (divergencia no limite da faixa D, ver _nota_fronteiras)"
+    ],
+    "_status": "convencao_comercial_historica",
+    "_nota": "O Sumario Mineral 2008 afirma que o MAPA 'estabelece' as faixas, mas a IN 35/2006 (norma vigente na epoca e hoje) nao as contem. Citar na monografia como classificacao comercial de origem na Portaria 3/1986, nao como exigencia legal atual.",
+    "_nota_fronteiras": "As fontes escrevem os limites com uma casa decimal (60,0 / 60,1), o que deixa lacunas para valores como 60,05. Aqui as faixas foram normalizadas para intervalos semiabertos (lim_inf exclusivo, lim_sup inclusivo), sem lacuna. Embrapa COT 47 escreve a faixa D como '>90,1'; DNPM e Epagri escrevem '>90'. Adotado >90.",
+    "unidade": "% PRNT",
+    "faixas": [
+      { "id": "A", "prnt_min_inclusivo": 45, "prnt_max_inclusivo": 60 },
+      { "id": "B", "prnt_min_exclusivo": 60, "prnt_max_inclusivo": 75 },
+      { "id": "C", "prnt_min_exclusivo": 75, "prnt_max_inclusivo": 90 },
+      { "id": "D", "prnt_min_exclusivo": 90, "prnt_max_inclusivo": null }
+    ]
+  },
+
+  "orientacoes_manual_rs_sc": {
+    "_fonte": "Manual CQFS-RS/SC 2016, Cap. 8, p. 298-301",
+    "_status": "manual_rs_sc",
+    "itens": [
+      { "id": "custo_por_prnt", "pagina": 298, "texto": "Comparar produtos pelo custo por unidade de PRNT somado a frete e aplicacao, nao pelo preco por tonelada." },
+      { "id": "preferir_mg",    "pagina": 298, "texto": "Em solos acidos do RS e SC o Mg costuma estar em teor menor que o Ca; orientacao geral e preferir corretivos com mais Mg." },
+      { "id": "filler_uso",     "pagina": 299, "texto": "Produto finamente moido (particulas predominantemente < 0,15 mm) para aplicacao na linha de semeadura ou correcao rapida." },
+      { "id": "grosso_uso",     "pagina": 299, "texto": "Particulas maiores (mas < 2,0 mm) aceitaveis quando nao havera novo revolvimento (implantacao do PD, correcao 0-30 cm pre-pomar), corrigindo a dose pelo PRNT; efeito residual mais longo." },
+      { "id": "calcitico_mg_baixo", "pagina": 299, "texto": "Calcarios calciticos e conchas moidas nao sao recomendados para solos com Mg baixo." },
+      { "id": "macieira_ca_mg", "pagina": 299, "texto": "Macieira: corretivo com Mg alto pode inibir absorcao de Ca e prejudicar qualidade e conservacao dos frutos." },
+      { "id": "gesso_reduz_prnt", "pagina": 301, "texto": "Gesso adicionado ao corretivo reduz o PRNT da mistura; o gesso praticamente nao neutraliza acidez." }
+    ]
+  },
+
+  "produtos_referencia_mercado": {
+    "_fonte": "Viter (Votorantim Cimentos). Ficha Tecnica Calcario ITAU, atualizada em 18 jun. 2024. https://viteragro.com.br/wp-content/uploads/2022/12/Ficha-Tecnica-Calcario-Itau-2.pdf",
+    "_status": "dado_de_fabricante_ilustrativo",
+    "_nota": "Valores pontuais de laudo do fabricante. Usar apenas como exemplos e casos de teste. Nenhuma unidade fabril e do RS. A pagina do produto (viteragro.com.br/produtos/calcario-itau) traz FAIXAS diferentes para as mesmas fabricas e as rotula 'garantias minimas'; a ficha datada foi preferida.",
+    "_campos_derivados": "classe_mgo e faixa_prnt NAO sao armazenados: sao calculados pelo codigo a partir de mgo e prnt, para nao haver duas verdades.",
+    "produtos": [
+      { "id": "itau_itapeva",            "fabrica": "Itapeva/SP",          "tipo_declarado": "dolomitico", "granulometria": "po",               "cao": 30.0, "mgo": 20.0, "pn": 103.0,  "prnt": 75.0 },
+      { "id": "itau_itapeva_micro",      "fabrica": "Itapeva/SP",          "tipo_declarado": "dolomitico", "granulometria": "micropulverizado", "cao": 29.6, "mgo": 19.6, "pn": 101.59, "prnt": 100.16 },
+      { "id": "itau_itau_de_minas",      "fabrica": "Itau de Minas/MG",    "tipo_declarado": "dolomitico", "granulometria": null,               "cao": 42.0, "mgo": 5.5,  "pn": 88.5,   "prnt": 84.0,
+        "inconsistencias": ["tipo_declarado_diverge_da_classe_mgo"] },
+      { "id": "itau_nobres",             "fabrica": "Nobres/MT",           "tipo_declarado": "dolomitico", "granulometria": "po",               "cao": 28.8, "mgo": 14.5, "pn": 87.5,   "prnt": 70.0 },
+      { "id": "itau_nobres_micro",       "fabrica": "Nobres/MT",           "tipo_declarado": "dolomitico", "granulometria": "micropulverizado", "cao": 28.8, "mgo": 14.5, "pn": 87.5,   "prnt": 85.0 },
+      { "id": "itau_rio_branco",         "fabrica": "Rio Branco do Sul/PR","tipo_declarado": "calcitico",  "granulometria": null,               "cao": 42.0, "mgo": 3.6,  "pn": 82.59,  "prnt": 84.11,
+        "inconsistencias": ["prnt_maior_que_pn"] },
+      { "id": "itau_itaperucu",          "fabrica": "Itaperucu/PR",        "tipo_declarado": "dolomitico", "granulometria": null,               "cao": 28.0, "mgo": 18.0, "pn": 94.7,   "prnt": 93.8 },
+      { "id": "itau_salto",              "fabrica": "Salto de Pirapora/SP","tipo_declarado": "dolomitico", "granulometria": null,               "cao": 28.8, "mgo": 15.0, "pn": 88.5,   "prnt": 70.0 },
+      { "id": "itau_sobradinho",         "fabrica": "Sobradinho/DF",       "tipo_declarado": "calcitico",  "granulometria": null,               "cao": 41.0, "mgo": 0.5,  "pn": 74.6,   "prnt": 72.5 },
+      { "id": "itau_xambioa_calcitico",  "fabrica": "Xambioa/TO",          "tipo_declarado": "calcitico",  "granulometria": null,               "cao": 47.5, "mgo": 3.0,  "pn": 92.3,   "prnt": 83.0 },
+      { "id": "itau_xambioa_dolomitico", "fabrica": "Xambioa/TO",          "tipo_declarado": "dolomitico", "granulometria": null,               "cao": 32.0, "mgo": 11.0, "pn": 94.0,   "prnt": 77.0,
+        "inconsistencias": ["tipo_declarado_diverge_da_classe_mgo", "pn_diverge_dos_oxidos"],
+        "_nota_pn": "CaO*1,783 + MgO*2,481 = 84,3; declarado 94,0. Pode ser PN medido por titulacao (inclui outras bases) ou erro de digitacao na ficha. Nao resolvido." }
+    ]
+  },
+
+  "fontes_avaliadas_sem_dado_utilizavel": [
+    { "url": "https://calpar.com.br/", "empresa": "Calpar Comercio de Calcario Ltda. (Castro/PR)",
+      "motivo": "Declara apenas PN de 100% para o dolomitico; nao informa PRNT, CaO, MgO nem granulometria." },
+    { "url": "https://calcarioparaiso.com.br/calcario-a-granel/", "empresa": "Calpar Italva Mineracao Ltda. (Calcario Paraiso, RJ) - empresa DIFERENTE da Calpar de Castro/PR",
+      "motivo": "Nao informa garantias de produto. Reproduz PRNT minimo de 45% e fatores de RE atribuindo-os ao Decreto 4.954/2004; a fonte primaria desses valores e a IN SDA 35/2006. Citar a IN, nao o site." }
+  ]
+}

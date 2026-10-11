@@ -1,0 +1,202 @@
+{# O ESSENCIAL de um talhão: as quatro doses, a interpretação dos teores e a aptidão
+   edáfica. É o que o laudo responde, e é o que a primeira folha entrega.
+
+   O QUE SAIU DAQUI em 11/10/2026, e foi para `laudo_anexo.html`: "Qual adubo comprar",
+   "Como aplicar" e "De onde vem cada número". Nenhuma delas é a recomendação — são o
+   caminho até ela e o que fazer depois —, e juntas eram 74% do texto do documento,
+   repetidas por talhão. Seis áreas davam 27 páginas A4, uma área dava cinco. A medição
+   e o raciocínio estão em apresentacao.py, seção "Consolidação entre talhões".
+
+   A APTIDÃO FICA, e fica aqui: é uma das propostas centrais do trabalho, e mandá-la para
+   o anexo a trataria como nota de rodapé. O que ela ganhou foi densidade — os dois
+   cenários lado a lado em vez de empilhados, e os fatores sem limitação numa linha só.
+
+   Recebe `laudo` pelo contexto do include. #}
+{% import "_macros/ico.html" as i %}
+{% import "_macros/ficha.html" as f %}
+{% import "_macros/regua.html" as r %}
+
+      {# ——— 1. Veredito: os quatro números que o usuário veio buscar ——— #}
+      <section class="veredito">
+        {% for dose in laudo.veredito %}
+        <div class="dose{% if not dose.sigla %} dose--neutra{% endif %}"
+             {% if dose.sigla %}style="--cor:var(--d-{{ dose.sigla }})"{% endif %}>
+          <div class="dose__nome">{{ dose.nome|safe }}</div>
+          <div class="dose__val">
+            <span class="numero{% if not dose.destaque %} numero--sec{% endif %}">{{ dose.valor }}</span>
+            <span class="numero__un">{{ dose.unidade }}</span>
+          </div>
+          <p class="dose__obs">{{ dose.observacao }}</p>
+        </div>
+        {% endfor %}
+      </section>
+
+      {# ——— 2. Interpretação dos atributos ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("regua") }}<h3>Interpretação dos atributos</h3></div>
+        <div class="atributos">
+          {% for teor in laudo.teores %}
+          <div class="atributo">
+            <div class="linha__topo">
+              <span class="linha__nome">{{ teor.nome }}</span>
+              <span class="linha__val">{{ teor.valor }} {{ teor.unidade|safe }}</span>
+            </div>
+            <div style="margin:.4rem 0 .6rem">{{ f.ficha(teor.sigla, teor.rotulo) }}</div>
+            {{ r.regua(teor.indice, teor.posicao, teor.faixas, teor.unidade) }}
+            <p class="t-aux" style="margin-top:.5rem">{{ teor.nota }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      {# ——— 5. Aptidão edáfica ——— #}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("aptidao") }}<h3>Aptidão edáfica</h3></div>
+        {# Os dois cenários lado a lado, e não um deles em prosa: pelo CCAE §7, a
+           diferença entre eles é o que quantifica o ganho atribuível à recomendação
+           emitida acima. É o que integra os dois módulos do sistema. #}
+        <div class="cenarios">
+          <div class="cenario">
+            {# A marca de atenção acompanha "Apta com restrições": a ressalva pede
+               cuidado sem desmentir a aptidão que o rótulo afirma, então ela é um
+               sinal pequeno no canto, e não a cor do selo inteiro. Decorativa para
+               o leitor de tela — o rótulo textual já diz o que ela marca. #}
+            <div class="aptidao__selo{% if laudo.aptidao.atual.atencao %} aptidao__selo--atencao{% endif %}"
+                 style="--cor:{{ laudo.aptidao.atual.cor }};--cor-atencao:{{ laudo.aptidao.atual.cor_atencao }}">
+              {{ i.ico(laudo.aptidao.atual.icone, "ico ico--lg") }}
+              <div class="aptidao__grau">{{ laudo.aptidao.atual.rotulo }}</div>
+              {% if laudo.aptidao.atual.atencao %}
+              <span class="aptidao__atencao" aria-hidden="true">
+                {{ i.ico("alerta", "ico ico--sm") }}
+              </span>
+              {% endif %}
+            </div>
+            <div class="cenario__rotulo">Hoje</div>
+            <p class="cenario__nota">
+              Sobre os valores do laudo, sem intervenção.
+              {%- if laudo.aptidao.atual.fator_determinante %}
+              Fator determinante: <b>{{ laudo.aptidao.atual.fator_determinante }}</b>.
+              {%- endif %}
+            </p>
+          </div>
+
+          <div class="cenarios__seta" aria-hidden="true">
+            {{ i.ico("avanca", "ico ico--lg") }}
+            <span>aplicando este laudo</span>
+          </div>
+
+          <div class="cenario">
+            {# A marca de atenção acompanha "Apta com restrições": a ressalva pede
+               cuidado sem desmentir a aptidão que o rótulo afirma, então ela é um
+               sinal pequeno no canto, e não a cor do selo inteiro. Decorativa para
+               o leitor de tela — o rótulo textual já diz o que ela marca. #}
+            <div class="aptidao__selo{% if laudo.aptidao.potencial.atencao %} aptidao__selo--atencao{% endif %}"
+                 style="--cor:{{ laudo.aptidao.potencial.cor }};--cor-atencao:{{ laudo.aptidao.potencial.cor_atencao }}">
+              {{ i.ico(laudo.aptidao.potencial.icone, "ico ico--lg") }}
+              <div class="aptidao__grau">{{ laudo.aptidao.potencial.rotulo }}</div>
+              {% if laudo.aptidao.potencial.atencao %}
+              <span class="aptidao__atencao" aria-hidden="true">
+                {{ i.ico("alerta", "ico ico--sm") }}
+              </span>
+              {% endif %}
+            </div>
+            <div class="cenario__rotulo">Após a correção</div>
+            <p class="cenario__nota">
+              Com a calagem e a adubação acima aplicadas integralmente.
+              {%- if laudo.aptidao.potencial.fator_determinante %}
+              Fator determinante: <b>{{ laudo.aptidao.potencial.fator_determinante }}</b>.
+              {%- endif %}
+            </p>
+          </div>
+        </div>
+
+        <p class="aptidao__leitura">
+          {% if laudo.aptidao.houve_ganho %}
+          A recomendação deste laudo leva a área de
+          <b>{{ laudo.aptidao.atual.rotulo }}</b> para
+          <b>{{ laudo.aptidao.potencial.rotulo }}</b> —
+          essa diferença é o ganho atribuível a ela.
+          {% else %}
+          A aptidão permanece <b>{{ laudo.aptidao.potencial.rotulo }}</b> mesmo com as
+          recomendações aplicadas: o que limita esta área não é corrigível por calagem
+          nem por adubação.
+          {% endif %}
+        </p>
+
+        {# OS SETE FATORES NUMA TABELA SÓ, com os dois cenários em colunas.
+
+           Eram duas listas: "fatores de limitação na situação atual" e "o que permanece
+           depois da correção". O mesmo fator aparecia nas duas, com o mesmo nome e a
+           mesma evidência — e num laudo de seis talhões isso eram doze listas. Lado a
+           lado, a tabela mostra o que a prosa não mostrava: QUAL fator a recomendação
+           resolve e qual permanece, que é a pergunta que os dois cenários existem para
+           responder (CCAE §7).
+
+           Nenhum fator foi omitido. Os que não limitam nem hoje nem depois ficam numa
+           linha de resumo ao pé: sete linhas dizendo "Nula → Nula" ocupavam espaço para
+           informar que não há o que informar. #}
+        {% set com_limitacao = laudo.aptidao.atual.fatores
+             |rejectattr("grau", "equalto", 0)|list %}
+        {% set sem_limitacao = laudo.aptidao.atual.fatores
+             |selectattr("grau", "equalto", 0)|list %}
+        {% set depois_por_id = {} %}
+        {% for fator in laudo.aptidao.potencial.fatores %}
+        {% set _ = depois_por_id.update({fator.id: fator}) %}
+        {% endfor %}
+
+        <h4 class="t-rotulo aptidao__titulo">Fatores de limitação</h4>
+        <div class="tabela-rolagem">
+          <table class="tabela-doc tabela-doc--fatores">
+            <thead>
+              <tr>
+                <th scope="col">Fator</th>
+                <th scope="col">Hoje</th>
+                <th scope="col">Após a correção</th>
+                <th scope="col">Evidência</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for fator in com_limitacao %}
+              {% set depois = depois_por_id.get(fator.id) %}
+              <tr>
+                <th scope="row">{{ fator.nome }}</th>
+                <td>
+                  <span class="limitante__barra"><i style="width:{{ fator.peso }}%"></i></span>
+                  {{ fator.rotulo }}
+                </td>
+                <td>
+                  {% if depois %}
+                  <span class="limitante__barra"><i style="width:{{ depois.peso }}%"></i></span>
+                  {{ depois.rotulo }}{% if depois.grau < fator.grau %}
+                    <span class="tabela-doc__ganho" title="limitação reduzida pela recomendação">↓</span>{% endif %}
+                  {% else %}—{% endif %}
+                </td>
+                <td class="tabela-doc__evidencia">{{ fator.evidencia }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" class="tabela-doc__vazio">
+                  Nenhum atributo limitante identificado nesta amostra.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if sem_limitacao %}
+        <p class="t-aux aptidao__sem-limitacao">
+          Sem limitação:
+          {% for fator in sem_limitacao %}{{ fator.nome }}{% if not loop.last %}, {% endif %}{% endfor %}.
+        </p>
+        {% endif %}
+
+        {% if laudo.aptidao.atual.rebaixamento_aplicado %}
+        <p class="t-aux aptidao__ressalva">
+          Classe rebaixada por acúmulo de fatores com limitação moderada ou maior.
+        </p>
+        {% endif %}
+        {% for alerta in laudo.aptidao.atual.alertas %}
+        <p class="t-aux aptidao__ressalva">{{ alerta }}</p>
+        {% endfor %}
+      </section>
+

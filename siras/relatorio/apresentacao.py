@@ -451,6 +451,47 @@ def _aptidao(laudo: Laudo) -> Dict[str, Any]:
     }
 
 
+def _resumo_do_passo(passo: Any) -> str:
+    """A saída de um passo do Trace em poucas palavras, para caber numa célula.
+
+    A trilha por extenso continua existindo: este resumo é só para a matriz que compara
+    talhões, onde a evidência inteira de seis áreas lado a lado não caberia na folha e
+    repetiria o que a seção de aptidão de cada uma já imprime.
+
+    Nada é arredondado nem reinterpretado aqui: o que sai são os mesmos valores que o
+    passo registrou, com as palavras que o resto do laudo usa.
+    """
+    saida = passo.saida or {}
+    if "rotulo" in saida and "grau" in saida:          # fator de aptidão
+        return f"limitação {_ROTULO_POR_GRAU.get(saida['rotulo'], saida['rotulo']).lower()}"
+    if "classe" in saida and "fator_determinante" in saida:   # composição da aptidão
+        fator = _NOME_POR_FATOR.get(saida["fator_determinante"], saida["fator_determinante"])
+        return f"{_ROTULO_POR_CLASSE_APTIDAO.get(saida['classe'], saida['classe'])} (por {fator})"
+    if "nc_t_ha" in saida:
+        if saida.get("motivo"):
+            return "sem calagem"
+        return f"{formatar_numero(saida['nc_t_ha'], 1)} t/ha"
+    if "classe_p" in saida:
+        # Há fases de adubação que não dosam por classe de teor — frutífera em
+        # crescimento, por exemplo —, e aí a classe vem None. Travessão, que é o que o
+        # resto do laudo usa para "não se aplica".
+        def classe(valor):
+            return rotulo_da_classe(valor).lower() if valor else "—"
+
+        return f"P {classe(saida['classe_p'])}, K {classe(saida.get('classe_k'))}"
+    if "n" in saida and "faixa_mo" in saida:
+        return "sem N" if saida.get("motivo") else f"{formatar_dose(saida['n'])} kg/ha de N"
+    if "p2o5" in saida and "k2o" in saida:
+        return (f"{formatar_dose(saida['p2o5'])} de P₂O₅, "
+                f"{formatar_dose(saida['k2o'])} de K₂O")
+    if "dose_kg_ha" in saida:
+        return f"{formatar_numero(saida['dose_kg_ha'], 0)} kg/ha"
+    if "catalogo" in saida:
+        melhor = (saida.get("catalogo") or ["—"])[0]
+        return f"{melhor}"
+    return "—"
+
+
 def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
     """A trilha inteira, na ordem em que o motor decidiu, com módulo e fonte.
 
@@ -507,6 +548,11 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
             "fonte": passo.fonte,
             "entradas": passo.entradas,
             "saida": passo.saida,
+            # O que a regra DECIDIU, em poucas palavras. Serve à matriz de comparação
+            # entre talhões: a evidência inteira ("pH 5,0 < 5,5; saturação por Al = 26,3
+            # → limitação moderada") não cabe numa célula ao lado de outras cinco, e já
+            # está impressa por extenso na seção de aptidão de cada área.
+            "resumo": _resumo_do_passo(passo),
             "vezes": 1,
         }
         vistos[chave] = item
@@ -977,6 +1023,172 @@ def consolidar_por_area(blocos: Sequence[Any]) -> Optional[Dict[str, Any]]:
     }
 
 
+# ---------------------------------------------------------------------------------
+# Consolidação entre talhões
+#
+# Até 11/10/2026 o laudo repetia o documento INTEIRO por talhão: seis áreas davam 27
+# páginas A4, e a de uma área só dava cinco. A medição que motivou a reorganização, num
+# laudo de um talhão: "De onde vem cada número" era 38% do texto e "Qual adubo comprar"
+# 33% — 71% em duas seções que são complemento, não a recomendação. Em seis talhões,
+# "Como aplicar" saía seis vezes IDÊNTICA, porque depende do critério de calagem, que é
+# o mesmo para todas as áreas.
+#
+# As três funções abaixo existem para que o anexo fale UMA vez do que é do documento e
+# use tabela onde hoje havia repetição. Nada é omitido: o que era parágrafo repetido
+# vira linha de tabela, e o que era igual em todos os talhões aparece uma vez.
+# ---------------------------------------------------------------------------------
+
+def quadro_de_talhoes(blocos: Sequence[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """As quatro doses, as duas classes e a aptidão de cada talhão, lado a lado.
+
+    Só existe a partir de duas áreas. Com uma, a tabela repetiria em linha o que os
+    cartões de dose logo abaixo já dizem em destaque.
+
+    É a peça que faltava para COMPARAR: quem tem seis áreas quer saber qual pede mais
+    calcário e qual já está corrigida, e isso era impossível sem folhear seis blocos
+    iguais. Os valores são os mesmos dos cartões — a tabela não recalcula nada.
+    """
+    if len(blocos) < 2:
+        return None
+
+    linhas = []
+    for bloco in blocos:
+        laudo = bloco["laudo"]
+        # O veredito já vem formatado e na ordem canônica (calcário, N, P2O5, K2O): ler
+        # dele, em vez de reformatar a partir do motor, garante que a tabela e o cartão
+        # nunca divirjam no arredondamento.
+        doses = [
+            {"valor": item["valor"], "unidade": item["unidade"]}
+            for item in laudo["veredito"]
+        ]
+        aptidao = laudo["aptidao"]
+        linhas.append({
+            "rotulo": bloco["rotulo"],
+            "area": bloco["area"],
+            "doses": doses,
+            "classe_p": _classe_do_teor(laudo, "Fósforo"),
+            "classe_k": _classe_do_teor(laudo, "Potássio"),
+            "aptidao_atual": aptidao["atual"]["rotulo"],
+            "aptidao_potencial": aptidao["potencial"]["rotulo"],
+            "atencao": aptidao["atual"]["atencao"] or aptidao["potencial"]["atencao"],
+            "fator": aptidao["atual"]["fator_determinante"],
+        })
+
+    return {
+        "colunas": [item["nome"] for item in blocos[0]["laudo"]["veredito"]],
+        "unidades": [item["unidade"] for item in blocos[0]["laudo"]["veredito"]],
+        "linhas": linhas,
+    }
+
+
+def _classe_do_teor(laudo: Dict[str, Any], nutriente: str) -> str:
+    """O rótulo da classe de P ou de K, lido da mesma lista que desenha a régua.
+
+    Há fases de adubação que não dosam por classe de teor — frutífera em crescimento,
+    por exemplo —, e aí a lista de teores vem vazia. A coluna recebe um travessão, que é
+    o que o resto do laudo usa para "não se aplica".
+    """
+    for teor in laudo["teores"]:
+        if teor["nome"] == nutriente:
+            return teor["rotulo"]
+    return "—"
+
+
+def formulacao_comparada(blocos: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Os três caminhos do adubo de cada talhão, numa linha por área.
+
+    A explicação do que é cada caminho (ADR 0009) não entra aqui: ela é a mesma para
+    todos e o anexo a imprime uma vez. O que varia — a fórmula, a dose e o que falta
+    completar — é o que a tabela carrega.
+    """
+    linhas = []
+    for bloco in blocos:
+        formulacao = bloco["laudo"]["formulacao"]
+        if not formulacao["tem"]:
+            linhas.append({
+                "rotulo": bloco["rotulo"], "motivo": formulacao["motivo"],
+                "ideal": None, "catalogo": None, "mistura": None, "avisos": [],
+            })
+            continue
+        linhas.append({
+            "rotulo": bloco["rotulo"],
+            "motivo": None,
+            # A primeira de cada caminho é a melhor: as listas já chegam ordenadas.
+            "ideal": formulacao["ideais"][0] if formulacao["ideais"] else None,
+            "catalogo": formulacao["catalogo"][0] if formulacao["catalogo"] else None,
+            "outras": formulacao["catalogo"][1:],
+            "mistura": formulacao["mistura"],
+            "avisos": formulacao["avisos"],
+        })
+    return linhas
+
+
+def trilha_consolidada(blocos: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    """A trilha separada no que é REGRA e no que é VALOR.
+
+    A regra e a fonte no Manual são as mesmas em todos os talhões — o que muda é a
+    saída. Repetir a trilha inteira por área multiplicava a maior seção do documento
+    sem acrescentar rastreabilidade nenhuma.
+
+    Devolve duas coisas:
+
+    - `regras`: cada regra uma vez, com o módulo e a fonte. É a lista que responde
+      "de onde vem este número" e cabe numa página;
+    - `saidas`: por regra, o que saiu em cada talhão, quando isso varia. Regra cuja
+      saída é igual em todas as áreas não entra na matriz, porque uma linha repetindo
+      o mesmo valor seis vezes informa menos que a ausência dela.
+
+    Com um talhão só a matriz não é montada: a saída de cada regra já está na própria
+    lista de regras, na coluna da direita.
+    """
+    ordem: List[tuple] = []
+    regras: Dict[tuple, Dict[str, Any]] = {}
+    for indice, bloco in enumerate(blocos):
+        for passo in bloco["laudo"]["trilha"]:
+            chave = (passo["modulo"], passo["rotulo"], passo["fonte"])
+            if chave not in regras:
+                ordem.append(chave)
+                regras[chave] = {
+                    "modulo": passo["modulo"], "rotulo": passo["rotulo"],
+                    "fonte": passo["fonte"], "vezes": passo["vezes"],
+                    "saidas": [None] * len(blocos),
+                    "resumos": [None] * len(blocos),
+                }
+            regras[chave]["saidas"][indice] = passo["regra"]
+            regras[chave]["resumos"][indice] = passo["resumo"]
+
+    lista, matriz = [], []
+    for chave in ordem:
+        regra = regras[chave]
+        # O RESUMO, e não a evidência por extenso. A evidência ("pH 5,0 < 5,5; saturação
+        # por Al = 26,3 → limitação moderada") está impressa na tabela de fatores da
+        # aptidão e na régua de interpretação, que é onde ela pertence; repeti-la aqui
+        # fazia da trilha 45% do laudo de um talhão sem acrescentar rastro nenhum.
+        #
+        # O que a trilha tem de responder continua inteiro: QUAL regra, O QUE ela
+        # decidiu e EM QUE tabela do Manual isso está escrito.
+        presentes = [s for s in regra["resumos"] if s]
+        # Saída igual em todas as áreas é propriedade da REGRA, e fica com ela. Só o que
+        # diverge justifica uma linha na matriz de comparação.
+        unica = presentes[0] if len(set(presentes)) == 1 else None
+        lista.append({
+            "modulo": regra["modulo"], "rotulo": regra["rotulo"],
+            "fonte": regra["fonte"], "vezes": regra["vezes"], "saida": unica,
+        })
+        if unica is None:
+            matriz.append({
+                "modulo": regra["modulo"], "rotulo": regra["rotulo"],
+                "saidas": regra["resumos"],
+            })
+
+    return {
+        "regras": lista,
+        "modulos": _modulos_da_trilha(lista),
+        "saidas": matriz if len(blocos) > 1 else [],
+        "talhoes": [bloco["rotulo"] for bloco in blocos],
+    }
+
+
 def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
     """Monta o modelo de exibição do laudo. O template só itera sobre o que sai daqui."""
     trilha = _trilha(laudo)
@@ -1004,6 +1216,7 @@ __all__ = [
     "CLASSES_TEOR",
     "apresentar_laudo",
     "consolidar_por_area",
+    "formulacao_comparada",
     "formatar_dose",
     "formatar_enxuto",
     "formatar_numero",
@@ -1011,6 +1224,8 @@ __all__ = [
     "indice_da_classe",
     "nome_de_exibicao",
     "posicao_na_regua",
+    "quadro_de_talhoes",
     "rotulo_da_classe",
     "sigla_da_classe",
+    "trilha_consolidada",
 ]

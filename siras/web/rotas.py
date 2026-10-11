@@ -39,8 +39,11 @@ from siras.relatorio.apresentacao import (
     apresentar_leitura,
     consolidar_por_area,
     formatar_numero,
+    formulacao_comparada,
     insumos_para_custo,
     nome_de_exibicao,
+    quadro_de_talhoes,
+    trilha_consolidada,
 )
 from siras.web import exemplo as exemplo_de_formulario
 from siras.web import formulario
@@ -93,7 +96,14 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
         "campos_acidez": formulario.CAMPOS_ACIDEZ,
         "campos_fertilidade": formulario.CAMPOS_FERTILIDADE,
         "campos_subsuperficie": formulario.CAMPOS_SUBSUPERFICIE,
-        "campos_contexto": formulario.CAMPOS_CONTEXTO,
+        # A expectativa de rendimento sai da lista nos grupos cujo motor não a lê (cana,
+        # frutíferas e erva-mate dosam por campo próprio). Filtrar aqui, e não no
+        # template, mantém o template percorrendo uma lista só.
+        "campos_contexto": tuple(
+            campo for campo in formulario.CAMPOS_CONTEXTO
+            if campo[0] != "expectativa_rendimento"
+            or formulario.usa_expectativa_rendimento(grupo)
+        ),
         "campos_responsavel": formulario.CAMPOS_RESPONSAVEL,
         "campos_da_area": formulario.CAMPOS_DA_AREA,
         "motivos": formulario.MOTIVO_DE_PREENCHER,
@@ -103,22 +113,27 @@ def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
 
 
 def _tela_de_dados(cultura_id: str, leitura=None, erro_do_motor: str = None,
-                   com_exemplo: str = ""):
+                   exemplo=None):
+    """Monta a tela de dados. `exemplo` já vem RESOLVIDO, e não como o texto pedido na
+    URL: quem pede "unico" recebe um sorteio, e sortear de novo aqui daria uma cultura de
+    um exemplo com os valores de outro."""
     opcoes = _opcoes_do_formulario(cultura_id)
-    opcoes["cenarios"] = exemplo_de_formulario.CENARIOS
-    opcoes["cenario_ativo"] = com_exemplo
+    opcoes["exemplo_ativo"] = exemplo
     leitura = leitura or formulario.LeituraFormulario()
-    # Os talhões adicionais que vieram no envio voltam desenhados pelo servidor: a tela
-    # tem de se reconstruir sozinha depois de um erro de validação, sem depender do
-    # JavaScript que os criou.
-    opcoes["talhoes_extras"] = formulario.indices_de_talhoes(leitura.valores)
-    if com_exemplo and not leitura.valores:
+
+    if exemplo is not None and not leitura.valores:
         leitura.valores = exemplo_de_formulario.montar(
             cultura_id, opcoes["grupo"], opcoes["dados"],
             opcoes["manejos"], opcoes["variaveis"],
             dados_do_grupo(opcoes["grupo"]),
-            cenario=com_exemplo,
+            exemplo=exemplo,
         )
+
+    # Os talhões adicionais voltam desenhados pelo servidor: a tela tem de se reconstruir
+    # sozinha depois de um erro de validação, sem depender do JavaScript que os criou — e
+    # um exemplo de várias áreas tem de chegar com as áreas já na tela, pelo mesmo motivo.
+    # Depois de montar o exemplo, e não antes: é o exemplo que cria esses índices.
+    opcoes["talhoes_extras"] = formulario.indices_de_talhoes(leitura.valores)
     return render_template(
         "dados.html",
         leitura=leitura,
@@ -159,7 +174,12 @@ def cultura():
     """Etapa 1. A cultura precede a análise porque define o critério de calagem, o grupo
     de exigência em P e K e quais campos condicionais existem (PLANO-FRONTEND §9.1)."""
     return render_template(
-        "cultura.html", grupos=formulario.grupos_com_culturas(carregar_dados_comum())
+        "cultura.html",
+        grupos=formulario.grupos_com_culturas(carregar_dados_comum()),
+        # A escolha do exemplo mora AQUI, e não na tela seguinte: o exemplo traz a própria
+        # cultura, e oferecê-lo depois de a pessoa ter escolhido uma obrigaria a descartar
+        # a escolha dela ou a servir qualquer cultura com os mesmos valores.
+        tipos_de_exemplo=exemplo_de_formulario.TIPOS,
     )
 
 
@@ -176,10 +196,22 @@ def dados():
     entre requisições (CLAUDE.md — sem banco, sem autenticação), e essa restrição
     continua valendo aqui.
     """
+    exemplo = None
     if request.method == "POST":
         cultura_id = (request.form.get("cultura_id") or "").strip()
     else:
         cultura_id = (request.args.get("cultura_id") or "").strip()
+        pedido = (request.args.get("exemplo") or "").strip()
+        if pedido:
+            # O pedido é por NATUREZA ("unico"/"multiplo") e o exemplo é sorteado entre os
+            # daquela natureza; passar o id de um exemplo fixa aquele, que é o que serve a
+            # uma apresentação em que se quer sempre o mesmo caso na tela.
+            exemplo = exemplo_de_formulario.escolher(pedido)
+            # Chegar com exemplo e sem cultura é o caminho normal: o botão vive na tela da
+            # cultura, e é o exemplo que diz qual demonstrar. Com as duas coisas, manda a
+            # cultura pedida — é como as bancadas percorrem as 61 com a mesma análise.
+            cultura_id = cultura_id or exemplo["cultura"]
+
     dados_comuns = carregar_dados_comum()
     if (
         not cultura_id
@@ -194,11 +226,16 @@ def dados():
         # Sem validar: os valores voltam como foram digitados, inclusive os que o motor
         # recusou. Quem chega aqui vem corrigir, e apagar o que estava errado esconderia
         # justamente o que precisa ser corrigido.
-        return _tela_de_dados(
-            cultura_id, formulario.LeituraFormulario(valores=dict(request.form))
-        )
+        #
+        # `formula_usuario` sai como LISTA, e não pelo `dict(request.form)` que devolveria
+        # só a primeira das três. A tela lê essa chave por posição, então uma string no
+        # lugar da lista fazia as três caixas voltarem com um caractere cada ("0", "5",
+        # "-") ao editar a análise. Achado em 11/10/2026.
+        valores = dict(request.form)
+        valores["formula_usuario"] = request.form.getlist("formula_usuario")
+        return _tela_de_dados(cultura_id, formulario.LeituraFormulario(valores=valores))
 
-    return _tela_de_dados(cultura_id, com_exemplo=(request.args.get("exemplo") or "").strip())
+    return _tela_de_dados(cultura_id, exemplo=exemplo)
 
 
 @bp.get("/analise/laudo")
@@ -308,6 +345,11 @@ def laudo():
     return render_template(
         "laudo.html",
         blocos=blocos,
+        # As três consolidações que permitiram tirar os complementos de dentro do laço
+        # por talhão (ADR 0011). O quadro só existe a partir de duas áreas.
+        quadro=quadro_de_talhoes(blocos),
+        formulacoes=formulacao_comparada(blocos),
+        trilha=trilha_consolidada(blocos),
         # O total só faz sentido a partir de duas áreas, e só quando todas as informaram.
         total=consolidar_por_area(resolvidos) if len(resolvidos) > 1 else None,
         # Doses para a calculadora de custo, que multiplica pelos preços que a pessoa

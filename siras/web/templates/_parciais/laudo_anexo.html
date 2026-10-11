@@ -1,0 +1,240 @@
+{# ANEXO do laudo: o que é complemento, e não a recomendação.
+
+   Abre em FOLHA PRÓPRIA (regra `.anexo` em siras-impressa.css), por decisão do autor em
+   11/10/2026: assim a primeira folha fecha sozinha como laudo entregável, e quem só quer
+   a recomendação não precisa do resto.
+
+   O QUE É DO DOCUMENTO APARECE UMA VEZ. Num laudo de seis talhões, "Como aplicar" saía
+   seis vezes idêntica, porque depende do critério de calagem — que é o mesmo para todas
+   as áreas. A explicação dos três caminhos do adubo e a lista de regras da trilha têm a
+   mesma natureza. O que varia por talhão virou tabela, que é onde ele pode ser comparado
+   em vez de folheado.
+
+   Recebe `blocos`, `formulacoes`, `trilha` e `laudo` (o primeiro bloco, de onde saem as
+   orientações, que são compartilhadas). #}
+{% import "_macros/ico.html" as i %}
+
+<div class="anexo">
+  <div class="anexo__cab">
+    <span class="anexo__rotulo">Anexo</span>
+    <p class="t-aux">
+      O caminho até os números acima e o que fazer com eles. A recomendação está na
+      primeira parte; aqui ficam a escolha do adubo, o modo de aplicar e a rastreabilidade
+      de cada valor até a tabela do Manual que o gerou.
+    </p>
+  </div>
+
+  {# ——— Qual adubo comprar ———
+     Fica DENTRO do laudo, ao contrário dos preços: dizer qual fonte de nutriente aplicar
+     é recomendação técnica, e o documento é assinado por quem responde por ela.
+
+     TRÊS CAMINHOS, e não um (ADR 0009). Não existe catálogo oficial de fórmulas
+     comercializadas no Brasil — boa parte é feita sob encomenda —, então indicar uma só
+     seria fingir uma certeza que o mercado não tem.
+
+     A explicação dos três caminhos é a mesma para todos os talhões e aparece uma vez; o
+     que cada área recebe vai na tabela. Nenhum caminho saiu: os três continuam, em
+     coluna, e o detalhe da melhor opção de cada talhão segue abaixo da tabela. #}
+  {% if formulacoes %}
+  <section class="sec">
+    <div class="sec__cab">{{ i.ico("adubo") }}<h3>Qual adubo comprar</h3></div>
+    <p class="sec__intro">
+      A recomendação está em nutriente; a revenda vende adubo. São três formas de chegar
+      lá, e a escolha é de quem compra:
+      <b>a fórmula ideal</b> é a proporção exata da recomendação, para encomendar;
+      <b>a do catálogo</b> é o que se acha pronto, com o excesso e a falta declarados;
+      <b>a mistura de simples</b> é exata e sempre disponível, e serve de régua para as
+      outras duas.
+    </p>
+
+    <div class="tabela-rolagem">
+      <table class="tabela-doc tabela-doc--adubo">
+        <caption class="t-aux">Doses em kg/ha. A fórmula do catálogo é a de menor custo
+          entre os pontos de quebra (ADR 0009).</caption>
+        <thead>
+          <tr>
+            {% if blocos|length > 1 %}<th scope="col">Talhão</th>{% endif %}
+            <th scope="col">Fórmula ideal</th>
+            <th scope="col">Melhor do catálogo</th>
+            <th scope="col">Mistura de simples</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for linha in formulacoes %}
+          <tr>
+            {% if blocos|length > 1 %}<th scope="row">{{ linha.rotulo }}</th>{% endif %}
+            {% if linha.motivo %}
+            <td colspan="3" class="tabela-doc__vazio">{{ linha.motivo }}</td>
+            {% else %}
+            <td>
+              {% if linha.ideal %}<b>{{ linha.ideal.id }}</b><br>{{ linha.ideal.dose }} kg/ha
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if linha.catalogo %}
+              <b>{{ linha.catalogo.id }}</b>{% if linha.catalogo.do_usuario %}
+                <span class="formulacao__marca">sua</span>{% endif %}<br>
+              {{ linha.catalogo.dose }} kg/ha
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if linha.mistura %}
+              {% for c in linha.mistura.complementos %}
+              {{ c.dose }} kg/ha de {{ c.produto }}{% if not loop.last %}<br>{% endif %}
+              {% endfor %}
+              {% else %}—{% endif %}
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {# O detalhe — excesso, falta e complementos — só da opção do catálogo, que é a que
+       alguém vai de fato comprar. A ideal não tem excesso por construção, e a mistura
+       fecha exata: detalhar as três repetiria "0 kg/ha de excesso" duas vezes por área. #}
+    <div class="detalhe-adubo">
+      {% for linha in formulacoes %}
+      {% if linha.catalogo %}
+      <div class="detalhe-adubo__item">
+        <div class="detalhe-adubo__tit">
+          {% if blocos|length > 1 %}{{ linha.rotulo }} · {% endif %}{{ linha.catalogo.id }},
+          {{ linha.catalogo.dose }} kg/ha
+        </div>
+        <p class="t-aux">
+          Entrega {{ linha.catalogo.entrega_n }} de N, {{ linha.catalogo.entrega_p2o5 }} de
+          P<sub>2</sub>O<sub>5</sub> e {{ linha.catalogo.entrega_k2o }} de K<sub>2</sub>O.
+          {% if linha.catalogo.tem_excesso %}Excede
+            {{ linha.catalogo.excesso_p2o5 }} de P<sub>2</sub>O<sub>5</sub>,
+            {{ linha.catalogo.excesso_k2o }} de K<sub>2</sub>O e
+            {{ linha.catalogo.excesso_n }} de N.{% endif %}
+          {% if linha.catalogo.complementos %}
+          Completar com
+          {% for c in linha.catalogo.complementos %}
+          {{ c.dose }} kg/ha de {{ c.produto }}
+          {%- if c.momento == "cobertura" %} em cobertura{% else %} junto da fórmula{% endif %}
+          {%- if not loop.last %}; {% else %}.{% endif %}
+          {% endfor %}
+          {% endif %}
+        </p>
+        {% if linha.outras %}
+        <p class="t-aux detalhe-adubo__outras">
+          Outras do catálogo:
+          {% for op in linha.outras %}{{ op.id }} ({{ op.dose }} kg/ha){% if not loop.last %}, {% endif %}{% endfor %}.
+        </p>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    {# Os avisos de cada talhão, sem repetir o que é igual: `unique` porque "a fórmula
+       excede o P recomendado" sai idêntica em áreas de mesma classe de teor.
+
+       A DECLARAÇÃO DE PROCEDÊNCIA fecha a seção e é a parte que não pode sair: separa o
+       que é método do Manual do que é lista de mercado mantida aqui. Um laudo que
+       sugere uma fórmula comercial sem dizer que o Manual não publica essa lista estaria
+       emprestando ao catálogo uma autoridade que ele não tem. #}
+    <div class="formulacao__avisos">
+      {% set avisos = formulacoes|map(attribute="avisos")|sum(start=[])|unique|list %}
+      {% for aviso in avisos %}
+      <p class="t-aux">{{ aviso }}</p>
+      {% endfor %}
+      <p class="t-aux">
+        <b>Critério:</b> {{ laudo.formulacao.criterio }}.
+        O <b>método</b> é do Manual de Calagem e Adubação, §8.3, p. 311, e as garantias
+        dos adubos simples são da Tab. 8.4, p. 304. O <b>catálogo</b> de fórmulas é uma
+        lista de mercado mantida no SIRAS, e <b>não</b> do Manual,
+        que não publica lista de adubos comerciais.
+        Confira a garantia no rótulo antes de comprar.
+      </p>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ——— Como aplicar ———
+     UMA vez, e não por talhão: as orientações saem do critério de calagem e da cultura,
+     que são compartilhados por todas as áreas do documento. Num laudo de seis talhões
+     eram seis cópias com o mesmo texto. #}
+  {% if laudo.orientacoes %}
+  <section class="sec">
+    <div class="sec__cab">{{ i.ico("aplicar") }}<h3>Como aplicar</h3></div>
+    <p class="sec__intro">
+      Depois de saber quanto, a pergunta seguinte é como. O que segue é o que o Manual
+      publica junto das doses para esta cultura, e vale para
+      {% if blocos|length > 1 %}todos os talhões{% else %}esta área{% endif %}.
+    </p>
+    <div class="orientacoes">
+      {% for item in laudo.orientacoes %}
+      <div class="orientacao orientacao--{{ item.tipo }}">
+        <div class="orientacao__titulo">{{ item.titulo }}</div>
+        <p class="orientacao__txt">{{ item.texto }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# ——— De onde vem cada número ———
+     É a seção que dá ao laudo valor em análise de crédito rural, e era também a mais
+     longa: 38% do texto num laudo de uma área, multiplicada por talhão nas demais.
+
+     Separada em duas: a REGRA com a fonte no Manual, que é a mesma em todas as áreas, e
+     a SAÍDA, que é o que varia. Regra cuja saída é igual em todos os talhões traz a
+     saída na própria linha; o que diverge vai para a matriz, que é onde se compara.
+     Nenhum passo foi filtrado — o que havia de repetido virou coluna. #}
+  <section class="sec sec--nota">
+    <div class="sec__cab sec__cab--nota">
+      {{ i.ico("rastro", "ico ico--sm") }}
+      <h3>De onde vem cada número</h3>
+      <span class="t-aux">Cada saída rastreada até a regra e a tabela do Manual</span>
+      <a href="{{ url_for('siras.tabelas') }}" class="nao-imprime trilha__link">
+        Ver as tabelas transcritas
+      </a>
+    </div>
+
+    <dl class="trilha">
+      {% for modulo in trilha.modulos %}
+      {% set regras = trilha.regras|selectattr("modulo", "equalto", modulo)|list %}
+      {% if regras %}
+      <dt class="trilha__modulo">{{ modulo }}</dt>
+      {% for regra in regras %}
+      <dd class="trilha__passo">
+        <b class="trilha__ref">{{ regra.rotulo }}{% if regra.vezes > 1 %}<span
+          class="trilha__vezes" title="regra aplicada nos dois cenários de aptidão">{{ regra.vezes }}×</span>{% endif %}</b>
+        <span class="trilha__txt">{% if regra.saida %}{{ regra.saida }}{% else %}<i
+          >varia por talhão — ver o quadro abaixo</i>{% endif %}<span
+          class="trilha__fonte">{{ regra.fonte }}</span></span>
+      </dd>
+      {% endfor %}
+      {% endif %}
+      {% endfor %}
+    </dl>
+
+    {% if trilha.saidas %}
+    <div class="tabela-rolagem">
+      <table class="tabela-doc tabela-doc--trilha">
+        <caption class="t-aux">O que cada regra decidiu em cada talhão. As regras e as
+          fontes são as da lista acima.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Regra</th>
+            {% for rotulo in trilha.talhoes %}<th scope="col">{{ rotulo }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for linha in trilha.saidas %}
+          <tr>
+            <th scope="row">{{ linha.rotulo }}</th>
+            {% for saida in linha.saidas %}
+            <td>{{ saida if saida else "—" }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </section>
+</div>

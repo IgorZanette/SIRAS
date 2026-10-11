@@ -651,6 +651,30 @@ def exige_antecedente(dados_graos: Dict[str, Any], cultura_id: str) -> bool:
     return entrada.get("modelo") == "mo_x_antecedente"
 
 
+#: Grupos cujo caminho de adubação realmente LÊ `expectativa_rendimento`.
+#:
+#: Grãos somam o adicional por tonelada acima do rendimento de referência (ADR 0010);
+#: hortaliças e tubérculos somam o `ajuste_expectativa_rendimento` da própria cultura. Os
+#: outros três grupos não leem esse campo em lugar nenhum: cana e tabaco dosam por
+#: `produtividade_t_ha`, frutíferas por `produtividade_estimada`, e a erva-mate pela massa
+#: verde colhida — cada um com campo próprio, vindo de `variavel_adicional`.
+_GRUPOS_COM_EXPECTATIVA = frozenset({"graos", "hortalicas", "tuberculos"})
+
+
+def usa_expectativa_rendimento(grupo: str) -> bool:
+    """O grupo lê `expectativa_rendimento`?
+
+    Existe porque o campo era mostrado para os seis grupos, e em três deles o motor o
+    ignora por completo. Na cana chegava a aparecer ao lado de `produtividade_t_ha`: dois
+    campos pedindo o mesmo tipo de número, um deles sem efeito nenhum sobre a dose. Um
+    campo que não muda o resultado é pior que um campo ausente — ensina a preencher o
+    que não serve, e no laudo não deixa rastro de ter sido ignorado.
+
+    Mesma regra de `recebe_nitrogenio`: o campo some, em vez de ficar lá confundindo.
+    """
+    return grupo in _GRUPOS_COM_EXPECTATIVA
+
+
 def recebe_nitrogenio(dados_graos: Dict[str, Any], cultura_id: str, grupo: str) -> bool:
     """A cultura recebe adubação nitrogenada?
 

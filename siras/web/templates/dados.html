@@ -30,21 +30,32 @@
     <a href="{{ url_for('siras.cultura') }}" style="color:var(--v-400)">Trocar de cultura</a>.
   </p>
 
-  {# Um laudo de demonstracao ja preenchido. Serve a quem quer conhecer o sistema sem
-     transcrever dezessete campos, e ao roteiro do teste de usabilidade, onde essa
-     transcricao consome o tempo da tarefa sem medir nada. #}
-  {# Três laudos de demonstração, e não um: cada um exercita um caminho diferente do
-     motor, e é isso que faz o exemplo valer mais que um formulário preenchido ao acaso. #}
-  <div class="cenarios-exemplo nao-imprime">
-    <span class="t-aux">Preencher com um exemplo:</span>
-    {% for cenario in cenarios %}
-    <a class="btn btn--contorno btn--pequeno{% if cenario_ativo == cenario.id %} is-ativo{% endif %}"
-       href="{{ url_for('siras.dados', cultura_id=cultura_id, exemplo=cenario.id) }}"
-       title="{{ cenario.resumo }}">
-      {{ i.ico("exemplo", "ico ico--sm") }} {{ cenario.nome }}
-    </a>
-    {% endfor %}
+  {# A ESCOLHA do exemplo nao fica aqui: fica na tela da cultura, porque cada exemplo traz
+     a propria cultura (siras/web/exemplo.py). O que aparece aqui e o aviso de que a tela
+     chegou preenchida, com o nome do caso que caiu — e o link que repete exatamente ele,
+     para quem for apresentar e quiser o mesmo caso na tela duas vezes. #}
+  {# A mesma estrutura do macro de aviso: o .aviso e flex, e filhos soltos viram COLUNAS
+     lado a lado. O icone fica fora, e todo o resto dentro de um <div> so. #}
+  {% if exemplo_ativo %}
+  <div class="aviso aviso--info exemplo-ativo nao-imprime">
+    {{ i.ico("exemplo") }}
+    <div>
+      <strong>Exemplo carregado: {{ exemplo_ativo.nome }}</strong>
+      <p>
+        {{ exemplo_ativo.resumo }} Todos os campos vieram preenchidos, inclusive os
+        opcionais — dá para clicar em <b>Gerar laudo</b> sem digitar nada, ou trocar
+        qualquer valor antes.
+      </p>
+      {# Um botao so: recarregar o MESMO exemplo nao muda nada na tela, e o par de links
+         em sequencia dava duas formas de parecer que algo acontece. E botao, e nao link
+         solto, porque link azul do navegador nao pertence a paleta do sistema. #}
+      <a class="btn btn--contorno btn--pequeno exemplo-ativo__trocar"
+         href="{{ url_for('siras.dados', exemplo=exemplo_ativo.tipo) }}">
+        {{ i.ico("exemplo", "ico ico--sm") }} Sortear outro exemplo
+      </a>
+    </div>
   </div>
+  {% endif %}
 
   {% if leitura.faltando or leitura.invalidos %}
   <div style="margin-top:var(--e-5)">
@@ -117,7 +128,7 @@
        da tela em 11/10/2026 apontou. #}
     <div class="painel bloco">
       <div class="bloco__cab">
-        {{ i.ico("comerciais") }}
+        {{ i.ico("adubo") }}
         <h3>Adubo que você vai comprar <small class="bloco__opcional">opcional</small></h3>
       </div>
       <p class="t-aux bloco__intro">
@@ -248,7 +259,10 @@
        camada, e é ele que decide por ela (Tab. 5.3, notas 6-7). Fica recolhida para não
        cobrar de quem planta em sistema convencional sete campos que não lhe dizem
        respeito. Abrir sozinha quando o manejo a exige é a etapa 5. #}
-    <details class="painel bloco">
+    {# Abre sozinha quando um exemplo foi carregado: o exemplo preenche esta camada, e um
+       bloco fechado sobre campos preenchidos faz o recurso passar despercebido —
+       justamente o contrário do que o exemplo existe para fazer. #}
+    <details class="painel bloco"{% if exemplo_ativo %} open{% endif %}>
       <summary class="bloco__cab" style="cursor:pointer;list-style:none">
         {{ i.ico("subsolo") }}
         <h3>Subsuperfície, 10–20 cm</h3>

@@ -121,8 +121,57 @@
 
     <div class="doc__corpo">
 
-      {# Um bloco por talhão. Com uma área só, o laço roda uma vez e o documento é
-         exatamente o que sempre foi — nenhum cabeçalho de talhão aparece. #}
+      {# ——— Quadro comparativo ———
+         Só a partir de duas áreas. Com uma, repetiria em linha o que os cartões de dose
+         logo abaixo já dizem em destaque.
+
+         É a peça que faltava para COMPARAR. Quem tem seis talhões quer saber qual pede
+         mais calcário e qual já está corrigido, e antes disso era preciso folhear seis
+         blocos idênticos — 27 páginas A4 num laudo de seis áreas. Os valores são os
+         mesmos dos cartões: a tabela lê do veredito já formatado, e não recalcula nada. #}
+      {% if quadro %}
+      <section class="sec">
+        <div class="sec__cab">{{ i.ico("talhoes") }}<h3>Os talhões lado a lado</h3>
+          <span class="t-aux">{{ blocos|length }} áreas · doses por hectare</span>
+        </div>
+        <div class="tabela-rolagem">
+          <table class="tabela-doc tabela-doc--quadro">
+            <thead>
+              <tr>
+                <th scope="col">Talhão</th>
+                <th scope="col">Área</th>
+                {% for coluna in quadro.colunas %}
+                <th scope="col">{{ coluna|safe }}<small>{{ quadro.unidades[loop.index0] }}</small></th>
+                {% endfor %}
+                <th scope="col">Classe P</th>
+                <th scope="col">Classe K</th>
+                <th scope="col">Aptidão atual → potencial</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for linha in quadro.linhas %}
+              <tr>
+                <th scope="row">{{ linha.rotulo }}</th>
+                <td>{% if linha.area %}{{ linha.area }} ha{% else %}—{% endif %}</td>
+                {% for dose in linha.doses %}
+                <td class="tabela-doc__num">{{ dose.valor }}</td>
+                {% endfor %}
+                <td>{{ linha.classe_p }}</td>
+                <td>{{ linha.classe_k }}</td>
+                <td>
+                  {{ linha.aptidao_atual }} → {{ linha.aptidao_potencial }}
+                  {% if linha.fator %}<small>limita: {{ linha.fator }}</small>{% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endif %}
+
+      {# Um bloco por talhão, com o ESSENCIAL: doses, interpretação e aptidão. Os
+         complementos saíram do laço e foram para o anexo, uma vez por documento. #}
       {% for bloco in blocos %}
       {% if blocos|length > 1 %}
       <header class="talhao">
@@ -132,9 +181,18 @@
       </header>
       {% endif %}
       {% with laudo = bloco.laudo %}
-      {% include "_parciais/laudo_corpo.html" %}
+      {% include "_parciais/laudo_essencial.html" %}
       {% endwith %}
       {% endfor %}
+
+      {# A ressalva de escopo da aptidão, UMA vez. É propriedade do método — o que o CCAE
+         avalia e o que ele não avalia —, e não da área analisada: saía repetida em cada
+         talhão dizendo exatamente a mesma coisa. #}
+      <p class="t-aux aptidao__escopo">
+        A aptidão edáfica considera exclusivamente os atributos químicos e físicos
+        informados. Relevo, clima, deficiência hídrica e suscetibilidade à erosão estão
+        fora do escopo{% if blocos|length > 1 %}, em todos os talhões{% endif %}.
+      </p>
 
       {# ——— Quantidade a comprar ———
          Só existe quando TODOS os talhões informaram área: somar sobre um conjunto
@@ -166,6 +224,10 @@
         {% endif %}
       </section>
       {% endif %}
+
+      {# O anexo fecha o documento, depois do total a comprar e antes da assinatura: é
+         complemento do que foi recomendado, e a assinatura cobre o documento inteiro. #}
+      {% include "_parciais/laudo_anexo.html" %}
 
       {# Espaço de assinatura. O SIRAS é ferramenta de apoio à decisão: a recomendação
          oficial é do profissional habilitado, e o documento precisa carregar de quem

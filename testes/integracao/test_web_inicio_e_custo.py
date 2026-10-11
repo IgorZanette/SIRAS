@@ -113,7 +113,7 @@ def test_as_perguntas_frequentes_abrem_sem_javascript(cliente):
 
 def test_o_exemplo_abre_o_formulario_preenchido(cliente):
     html = _inicio(cliente)
-    link = re.search(r'href="([^"]*exemplo=argiloso[^"]*)"', html).group(1).replace("&amp;", "&")
+    link = re.search(r'href="([^"]*exemplo=unico[^"]*)"', html).group(1).replace("&amp;", "&")
 
     resposta = cliente.get(link)
 

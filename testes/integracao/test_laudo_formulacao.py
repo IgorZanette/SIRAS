@@ -215,9 +215,11 @@ def test_a_tela_mostra_os_tres_caminhos_e_separa_metodo_de_catalogo(com_catalogo
     html = cliente.post("/analise/laudo", data=_DADOS_DO_TALHAO).get_data(as_text=True)
 
     assert "Qual adubo comprar" in html
-    assert "Fórmula ideal para esta recomendação" in html
-    assert "Melhores opções prontas" in html
-    assert "Mistura de adubos simples" in html
+    # Os três caminhos, agora em colunas da tabela do anexo: desde 11/10/2026 a
+    # explicação de cada um sai uma vez e o que cada talhão recebe vai na linha.
+    assert "Fórmula ideal" in html
+    assert "Melhor do catálogo" in html
+    assert "Mistura de simples" in html
     # As duas procedências, cada uma dita por inteiro.
     assert "§8.3, p. 311" in html
     assert "não publica lista de adubos comerciais" in html
@@ -232,7 +234,7 @@ def test_sem_catalogo_a_tela_ainda_traz_a_secao(com_catalogo):
     html = cliente.post("/analise/laudo", data=_DADOS_DO_TALHAO).get_data(as_text=True)
 
     assert "Qual adubo comprar" in html
-    assert "Mistura de adubos simples" in html
+    assert "Mistura de simples" in html
     assert "Melhores opções prontas" not in html
 
 

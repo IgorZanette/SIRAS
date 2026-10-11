@@ -213,6 +213,78 @@ def tabela_interpretacao_geral(dados: Dict[str, Any]) -> Tabela:
     )
 
 
+def tabela_ph_referencia(dados: Dict[str, Any]) -> Tabela:
+    """Tabela 5.1, p. 68 — e o aviso de que ela NÃO decide a calagem.
+
+    Estava transcrita e não aparecia em lugar nenhum da interface, e é justamente a que
+    mais se presta a ser lida errado: é natural supor que o pH de referência seja o
+    gatilho da calagem, e não é. Grãos têm referência 6,0 e só recebem calcário abaixo de
+    5,5. Exibi-la ao lado dos critérios, com a advertência que a própria base transcreve,
+    vale mais do que escondê-la.
+    """
+    bloco = dados["ph_referencia"]
+    linhas = []
+    for grupo in bloco["grupos"]:
+        linhas.append([
+            formatar_numero(grupo["ph_referencia"], 1),
+            str(len(grupo["culturas"])),
+            ", ".join(grupo["culturas"]),
+        ])
+    rotacao = bloco.get("rotacao_de_culturas")
+    notas = [rotacao] if isinstance(rotacao, str) else []
+    return Tabela(
+        titulo="pH de referência das culturas",
+        fonte=_fonte(bloco),
+        descricao=bloco.get("descricao", ""),
+        colunas=["pH de referência", "Culturas", "Quais"],
+        linhas=linhas,
+        notas=notas,
+        aviso=bloco.get("nota_importante"),
+    )
+
+
+def tabela_grupos_de_exigencia(dados: Dict[str, Any]) -> Tabela:
+    """Anexo 2, p. 361-365 — o grupo de exigência de P e de K de cada cultura.
+
+    As tabelas de interpretação de P e de K já exibidas são indexadas POR GRUPO, e até
+    agora não havia onde descobrir em que grupo uma cultura cai: quem quisesse conferir
+    uma dose parava no primeiro passo. Os dois eixos são independentes — a mandioca é
+    grupo 3 em fósforo e grupo 2 em potássio —, e é por isso que a tabela traz as duas
+    colunas lado a lado em vez de um grupo só.
+    """
+    bloco = dados["catalogo_anexo2"]
+    linhas = [
+        [
+            entrada.get("nome_exibicao") or entrada.get("nome_anexo2") or chave,
+            entrada.get("nome_cientifico") or "—",
+            _rotulo_de_classe(entrada.get("categoria", "—")),
+            f"Grupo {entrada['grupo_p']}",
+            f"Grupo {entrada['grupo_k']}",
+        ]
+        for chave, entrada in sorted(
+            bloco["culturas"].items(),
+            key=lambda par: (par[1].get("nome_exibicao") or par[0]).lower(),
+        )
+    ]
+    notas = list(bloco.get("lacunas_conhecidas") or [])
+    nao_fornece = bloco.get("o_que_o_anexo_2_nao_fornece")
+    if nao_fornece:
+        notas.insert(0, nao_fornece)
+    return Tabela(
+        titulo="Grupos de exigência de fósforo e potássio",
+        fonte=bloco.get("fonte", "—"),
+        descricao=bloco.get("descricao", ""),
+        colunas=["Cultura", "Nome científico", "Categoria", "Exigência em P", "Exigência em K"],
+        linhas=linhas,
+        notas=notas,
+        aviso=(
+            "É esta tabela que diz em qual coluna das duas anteriores a cultura cai. Os "
+            "dois grupos são independentes: a mandioca é grupo 3 em fósforo e grupo 2 em "
+            "potássio, e um não se deriva do outro."
+        ),
+    )
+
+
 def _fonte(bloco: Dict[str, Any]) -> str:
     fonte = bloco.get("fonte")
     if isinstance(fonte, str):
@@ -247,18 +319,32 @@ CATALOGO: List[Dict[str, Any]] = [
         "construtor": tabela_criterios_calagem,
     },
     {
+        "id": "ph-referencia",
+        "titulo": "pH de referência das culturas",
+        "icone": "ph",
+        "resumo": "O pH ideal de cada cultura — que NÃO é o que dispara a calagem.",
+        "construtor": tabela_ph_referencia,
+    },
+    {
         "id": "interpretacao-p",
         "titulo": "Interpretação do fósforo",
-        "icone": "analise",
+        "icone": "fosforo",
         "resumo": "Em que classe cai o teor de P, por classe de argila.",
         "construtor": tabela_interpretacao_p,
     },
     {
         "id": "interpretacao-k",
         "titulo": "Interpretação do potássio",
-        "icone": "analise",
+        "icone": "potassio",
         "resumo": "Em que classe cai o teor de K, por faixa de CTC.",
         "construtor": tabela_interpretacao_k,
+    },
+    {
+        "id": "grupos-de-exigencia",
+        "titulo": "Grupos de exigência de P e K",
+        "icone": "exigencia",
+        "resumo": "Em qual coluna das duas tabelas acima cada uma das 141 culturas cai.",
+        "construtor": tabela_grupos_de_exigencia,
     },
     {
         "id": "interpretacao-geral",

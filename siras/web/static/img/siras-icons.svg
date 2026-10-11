@@ -324,4 +324,72 @@
   <path d="M16.9 5.7h3.4"/>
 </symbol>
 
+<!-- Saco de adubo formulado: a boca costurada no topo, o corpo cheio e os tres granulos
+     do N-P-K na base. Nasceu porque "Adubo que voce vai comprar" tomava emprestado o
+     i-comerciais, que e o simbolo das culturas comerciais (cana e tabaco) — dois assuntos
+     diferentes com o mesmo desenho. A onda de horizonte atravessa o corpo do saco. -->
+<symbol id="i-adubo" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M8.6 5.4 12 3.2l3.4 2.2"/>
+  <path d="M8.6 5.4C7.4 8 6.6 11 6.6 13.8v4.4a1.6 1.6 0 0 0 1.6 1.6h7.6a1.6 1.6 0 0 0 1.6-1.6v-4.4c0-2.8-.8-5.8-2-8.4"/>
+  <path d="M6.8 11.6c1.3-1 2.4 1 3.7 0s2.4 1 3.7 0 1.3.5 2 0"/>
+  <circle cx="9.8" cy="16.4" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="12" cy="16.4" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="14.2" cy="16.4" r="1" fill="currentColor" stroke="none"/>
+</symbol>
+
+<!-- ——— Tela de tabelas: um simbolo por tabela ———————————————————————————
+     Tres tabelas dividiam o desenho de outras duas: "Interpretacao do fosforo" e
+     "do potassio" usavam o mesmo i-analise, e "pH de referencia" tomava o i-alvo
+     dos criterios de calagem. Dois simbolos iguais em telas vizinhas deixam de
+     identificar qualquer coisa.
+
+     Os dois nutrientes partem da MESMA raiz visual — a regua de cinco faixas, que
+     e como o Manual os classifica — e se distinguem pela letra, que e o que o
+     laudo ja usa (P e K). -->
+
+<symbol id="i-fosforo" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M8 4.2v8.6"/>
+  <path d="M8 4.2h3.6a2.3 2.3 0 0 1 0 4.6H8"/>
+  <path d="M3.4 17c2-1.4 3.6 1.4 5.6 0s3.6 1.4 5.6 0 3.4 1.2 4.8 0"/>
+  <path d="M3.4 20.6h17.2"/>
+</symbol>
+
+<symbol id="i-potassio" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M8 4.2v8.6"/>
+  <path d="M13.4 4.2 8 9.2l5.4 3.6"/>
+  <path d="M3.4 17c2-1.4 3.6 1.4 5.6 0s3.6 1.4 5.6 0 3.4 1.2 4.8 0"/>
+  <path d="M3.4 20.6h17.2"/>
+</symbol>
+
+<!-- pH de referencia: a escala com o ponto de referencia marcado. O alvo (i-alvo)
+     fica com os criterios de calagem, que e onde ha de fato um disparo e um alvo —
+     e o pH de referencia nao e nenhum dos dois, que e o ponto da tabela. -->
+<symbol id="i-ph" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4.6 5.4v6.8"/>
+  <path d="M4.6 5.4h2.8a1.9 1.9 0 0 1 0 3.8H4.6"/>
+  <path d="M11.8 5.4v6.8M16.4 5.4v6.8M11.8 8.8h4.6"/>
+  <path d="M3.4 16.6c2-1.4 3.6 1.4 5.6 0s3.6 1.4 5.6 0 3.4 1.2 4.8 0"/>
+  <path d="M12 19.2v2.2"/>
+  <circle cx="12" cy="16.1" r="1.1" fill="currentColor" stroke="none"/>
+</symbol>
+
+<!-- Grupos de exigencia (Anexo 2): a cultura e os DOIS niveis que o Anexo lhe
+     atribui, um de fosforo e um de potassio, em alturas diferentes porque os dois
+     eixos sao independentes — a mandioca e grupo 3 em P e grupo 2 em K.
+     Tomava emprestado o i-broto, que e o simbolo de "Cultura e manejo". -->
+<symbol id="i-exigencia" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6.2 13.4V7.2"/>
+  <path d="M6.2 9.6C4 9.6 2.8 8.2 2.8 6.2c2.2 0 3.4 1.4 3.4 3.4z"/>
+  <path d="M6.2 8.4c2 0 3.2-1.3 3.2-3.4C7.2 5 6.2 6.3 6.2 8.4z"/>
+  <path d="M14.2 13.4V5.6"/>
+  <path d="M19 13.4V9"/>
+  <path d="M3.4 17.2c2-1.4 3.6 1.4 5.6 0s3.6 1.4 5.6 0 3.4 1.2 4.8 0"/>
+  <path d="M3.4 20.8h17.2"/>
+</symbol>
+
 </svg>

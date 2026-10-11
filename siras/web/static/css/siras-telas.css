@@ -791,8 +791,9 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 .formulacao__indicada { padding: var(--e-4); border-radius: var(--r-doc);
                         background: #FAFCFA; border: 1px solid #E3EAE5;
                         border-left: 3px solid var(--v-600); }
-.formulas-usuario { margin: var(--e-4) 0 0; padding: var(--e-4) 0 0; border: 0;
-                    border-top: 1px dashed var(--n-300); }
+/* Sem regra separando do campo de nitrogenio: o titulo do bloco e o <legend> ja dizem
+   onde um assunto termina e o outro comeca, e o tracejado so acrescentava ruido. */
+.formulas-usuario { margin: var(--e-4) 0 0; padding: var(--e-3) 0 0; border: 0; }
 .formulas-usuario legend { padding: 0; font-size: var(--fs-2xs); font-weight: 800;
                            text-transform: uppercase; letter-spacing: .04em; }
 .bloco__opcional { font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase;
@@ -938,9 +939,14 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
                        color: #7A8C82; }
 @media print { .assinatura { margin-top: 22mm; } }
 
-/* Escolha do cenario de exemplo. */
+/* Escolha do exemplo: uma area ou varias. Mora na tela da cultura, porque o exemplo
+   traz a propria cultura. */
 .cenarios-exemplo { display: flex; flex-wrap: wrap; align-items: center;
-                    gap: var(--e-2); margin-top: var(--e-4); }
+                    gap: var(--e-2); margin-top: var(--e-2); }
+.exemplo-ativo { margin-top: var(--e-5); }
+.exemplo-ativo p { margin: 0; }
+.exemplo-ativo p + p { margin-top: var(--e-2); }
+.exemplo-ativo__trocar { margin-top: var(--e-3); }
 .btn--pequeno { min-height: 38px; padding: 0 .8rem; font-size: var(--fs-xs); }
 .btn--contorno.is-ativo { border-color: var(--v-400); color: var(--v-300);
                           background: rgba(140,226,63,.1); }
@@ -1895,3 +1901,53 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 :root[data-tema="claro"] .formula__selo { background: var(--v-700); color: #FFFFFF; }
 :root[data-tema="claro"] .formula__falta,
 :root[data-tema="claro"] .formula__nao { color: #8A5A00; }
+
+/* --- Tabelas DENTRO do documento ----------------------------------------------
+   Classe propria, e nao a .comparativo da landing: aquela e tema escuro, 640px de
+   largura minima e serve a uma comparacao de produtos. Estas vivem no papel branco
+   do laudo e precisam caber numa A4.
+
+   Entraram em 11/10/2026, quando os complementos sairam do laco por talhao: o que
+   era paragrafo repetido seis vezes virou linha de tabela, que e onde um talhao
+   pode ser comparado com outro em vez de folheado. */
+.tabela-rolagem { overflow-x: auto; }
+.tabela-doc { width: 100%; border-collapse: collapse; font-size: var(--fs-sm);
+              color: #405146; }
+.tabela-doc caption { caption-side: bottom; text-align: left; margin-top: var(--e-2); }
+.tabela-doc th, .tabela-doc td { padding: var(--e-2) var(--e-3); text-align: left;
+                                 border-bottom: 1px solid #EAF0EC; vertical-align: top; }
+.tabela-doc thead th { font-size: var(--fs-3xs); font-weight: 800; letter-spacing: .06em;
+                       text-transform: uppercase; color: #5C6F64;
+                       border-bottom: 1px solid #D8E2DB; white-space: nowrap; }
+.tabela-doc thead th small { display: block; font-size: var(--fs-3xs); font-weight: 600;
+                             letter-spacing: 0; text-transform: none; color: #7A8C82; }
+.tabela-doc tbody th { font-weight: 700; color: #0D1410; white-space: nowrap; }
+.tabela-doc tbody tr:last-child > * { border-bottom: 0; }
+.tabela-doc td small { display: block; font-size: var(--fs-3xs); color: #7A8C82; }
+.tabela-doc__num { font-variant-numeric: tabular-nums; }
+.tabela-doc__vazio { color: #7A8C82; font-style: italic; }
+.tabela-doc__evidencia { font-size: var(--fs-xs); color: #5C6F64; }
+/* A seta de ganho e redundante com os dois rotulos ao lado: marca o que MUDOU para
+   quem percorre a coluna de olho, sem ser a unica forma de saber (WCAG 1.4.1). */
+.tabela-doc__ganho { color: var(--v-600); font-weight: 800; }
+.tabela-doc--fatores .limitante__barra { display: inline-block; width: 40px;
+                                         vertical-align: middle; margin-right: .4rem; }
+.tabela-doc--trilha td { font-size: var(--fs-xs); }
+
+.detalhe-adubo { display: grid; gap: var(--e-3); margin-top: var(--e-4); }
+.detalhe-adubo__item { padding: var(--e-3); border-radius: var(--r-doc);
+                       background: #FAFCFA; border: 1px solid #E3EAE5; }
+.detalhe-adubo__tit { font-weight: 800; color: #0D1410; margin-bottom: 2px; }
+.detalhe-adubo__outras { margin-top: .35rem; }
+
+.aptidao__sem-limitacao { margin-top: var(--e-2); }
+.aptidao__escopo { margin-top: var(--e-5); }
+
+/* O anexo: mesmo documento, outra natureza. A regra separa, o rotulo nomeia. */
+.anexo { margin-top: var(--e-8); padding-top: var(--e-6);
+         border-top: 2px solid #D8E2DB; }
+.anexo__cab { margin-bottom: var(--e-5); }
+.anexo__rotulo { display: inline-block; font-size: var(--fs-3xs); font-weight: 800;
+                 letter-spacing: .1em; text-transform: uppercase; color: #5C6F64;
+                 padding: 2px 8px; border: 1px solid #D8E2DB; border-radius: 999px;
+                 margin-bottom: var(--e-2); }

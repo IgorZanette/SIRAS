@@ -129,7 +129,8 @@ def test_laudo_traz_os_dois_cenarios_de_aptidao(cliente):
     html = cliente.post("/analise/laudo", data=_formulario_do_caso(caso)).get_data(as_text=True)
 
     assert "Aptidão edáfica" in html
-    assert "situação atual" in html
+    # Os dois cenários são as duas colunas da tabela de fatores desde 11/10/2026.
+    assert "Hoje" in html and "Após a correção" in html
     assert "ganho atribuível" in html or "permanece" in html
 
 

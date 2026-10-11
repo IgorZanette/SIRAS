@@ -43,7 +43,7 @@
           {# O exemplo abre o formulário já preenchido com um laudo de laboratório de
              demonstração (siras/web/exemplo.py): quem só quer conhecer vê o resultado
              sem digitar dezessete campos, e o laudo sai do motor de verdade. #}
-          <a class="btn btn--contorno" href="{{ url_for('siras.dados', cultura_id='soja', exemplo='argiloso') }}">
+          <a class="btn btn--contorno" href="{{ url_for('siras.dados', cultura_id='soja', exemplo='unico') }}">
             {{ i.ico("exemplo", "ico ico--sm") }} Ver um laudo de exemplo
           </a>
         </div>
@@ -292,7 +292,7 @@
               <p>Com as áreas e os preços que você informar. Os preços ficam só na sua tela.</p></div>
           </li>
         </ul>
-        <a class="btn btn--contorno" href="{{ url_for('siras.dados', cultura_id='soja', exemplo='argiloso') }}">
+        <a class="btn btn--contorno" href="{{ url_for('siras.dados', cultura_id='soja', exemplo='unico') }}">
           {{ i.ico("exemplo", "ico ico--sm") }} Abrir o exemplo
         </a>
       </div>

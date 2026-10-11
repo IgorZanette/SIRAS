@@ -387,10 +387,20 @@ def test_a_recusa_por_campo_dependente_nomeia_o_campo(
     cliente, telas, cultura, seletor, valor
 ):
     """A fase escolhida exige um dado que só ela exige. Recusar está certo; recusar sem
-    dizer qual campo falta deixaria o usuário adivinhando entre vinte."""
+    dizer qual campo falta deixaria o usuário adivinhando entre vinte.
+
+    Os campos dependentes são apagados de propósito. Até 11/10/2026 o teste contava com
+    o exemplo deixá-los em branco, e era contar com o defeito: quando o exemplo passou a
+    preencher tudo — que é o que ele promete —, nada mais faltava e a recusa, que é o
+    comportamento sob teste, deixou de acontecer. O que se mede aqui é a MENSAGEM da
+    recusa, e isso exige provocar a falta em vez de torcer por ela.
+    """
     html = _tela(cliente, telas, cultura)
     campos = _montar(html, cultura, 1)
     campos[seletor] = valor
+    for dependente in ("ano", "produtividade_estimada", "manejo_galho_grosso",
+                       "massa_verde_t_ha", "momento"):
+        campos.pop(dependente, None)
 
     motivo = _motivo(cliente.post("/analise/laudo", data=campos))
 

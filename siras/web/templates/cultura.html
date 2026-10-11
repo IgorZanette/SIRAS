@@ -24,6 +24,38 @@
     quais informações de manejo o Manual pede adiante.
   </p>
 
+  {# Um laudo de demonstracao ja preenchido, do primeiro campo ao ultimo opcional.
+
+     Fica AQUI, antes da escolha da cultura, e nao na tela de dados: cada exemplo traz a
+     propria cultura, e so assim da para garantir que nao sobra campo em branco — campo
+     condicional que so uma cultura exige, como a massa verde da erva-mate, nao tem valor
+     unico que sirva para as 61. Quem clica cai na tela de dados com tudo preenchido e so
+     precisa clicar em "Gerar laudo".
+
+     Duas escolhas so, e nao uma lista de solos: a pergunta que o usuario sabe responder
+     e "uma area ou varias", nao "argiloso ou arenoso". Qual dos dez exemplos cai e
+     sorteado entre os da natureza pedida — quem demonstra o sistema duas vezes ve dois
+     casos diferentes. #}
+  <div class="painel bloco cenarios-exemplo-bloco" style="margin-top:var(--e-5)">
+    <div class="bloco__cab">
+      {{ i.ico("exemplo") }}
+      <h3>Só quer ver como funciona?</h3>
+      <span class="t-aux">Abre um laudo de demonstração com tudo preenchido</span>
+    </div>
+    <p class="t-aux bloco__intro">
+      O exemplo escolhe a cultura, a análise de solo e o manejo por você, do primeiro
+      campo ao último opcional. Na tela seguinte basta clicar em <b>Gerar laudo</b>.
+    </p>
+    <div class="cenarios-exemplo">
+      {% for tipo in tipos_de_exemplo %}
+      <a class="btn btn--contorno btn--pequeno"
+         href="{{ url_for('siras.dados', exemplo=tipo.id) }}" title="{{ tipo.resumo }}">
+        {{ i.ico("exemplo", "ico ico--sm") }} {{ tipo.nome }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
   {# Seleção por reconhecimento, não por recordação (heurística 6 de Nielsen): as 61
      culturas ficam visíveis, agrupadas como o Capítulo 6 do Manual as organiza, em vez
      de escondidas atrás de um campo de busca que exige saber o nome exato.

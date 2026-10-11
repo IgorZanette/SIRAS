@@ -36,7 +36,7 @@ _ICONES_ESPERADOS = {
     "alerta", "confere", "avanca", "volta", "imprime", "edita", "baixa", "info",
     "sol", "lua", "lupa",
     "manejo", "aplicar", "area", "subsolo", "talhao", "talhoes", "assina", "soma",
-    "adiciona", "exemplo",
+    "adiciona", "exemplo", "adubo", "fosforo", "potassio", "ph", "exigencia",
     "marca",
 }
 

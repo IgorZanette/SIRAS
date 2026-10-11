@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from siras.web import criar_app
+from siras.web import exemplo as exemplo_de_formulario
 
 _ESTATICOS = Path(__file__).parent.parent.parent / "siras" / "web" / "static"
 _TELAS_CSS = (_ESTATICOS / "css" / "siras-telas.css").read_text(encoding="utf-8")
@@ -153,15 +154,25 @@ def test_o_laudo_mostra_as_duas_aptidoes_lado_a_lado(cliente):
     # O delimitador depois de "selo": o selo ganha o modificador --atencao quando a
     # classe é "Apta com restrições".
     assert len(re.findall(r'class="aptidao__selo[ "]', html)) == 2
-    assert "Fatores de limitação, na situação atual" in html
+    assert "Fatores de limitação" in html
 
 
 def test_o_laudo_separa_os_fatores_que_permanecem(cliente):
     """O que a calagem e a adubação não corrigem é a informação de manejo mais útil do
-    laudo — e é o que o cenário POTENCIAL isola."""
+    laudo — e é o que o cenário POTENCIAL isola.
+
+    Eram duas listas em sequência, "na situação atual" e "o que permanece depois da
+    correção", e o mesmo fator aparecia nas duas com a mesma evidência. Desde 11/10/2026
+    são duas COLUNAS da mesma tabela, que é o que deixa ver, por fator, o que a
+    recomendação resolve e o que permanece. A separação não sumiu: mudou de eixo."""
     html = cliente.post("/analise/laudo", data=_ANALISE_COMPLETA).get_data(as_text=True)
 
-    assert "O que permanece depois da correção" in html
+    tabela = re.search(r'<table class="tabela-doc tabela-doc--fatores".*?</table>', html, re.S)
+    assert tabela, "a tabela de fatores não foi renderizada"
+    cabecalho = re.findall(r"<th scope=\"col\">([^<]+)</th>", tabela.group(0))
+    assert cabecalho == ["Fator", "Hoje", "Após a correção", "Evidência"]
+    # Cada fator com limitação aparece UMA vez, com os dois cenários na mesma linha.
+    assert tabela.group(0).count("<tr>") - 1 >= 1
 
 
 # --- variáveis condicionais ---------------------------------------------------
@@ -557,41 +568,218 @@ def test_o_clique_tem_resposta_propria():
 
 # --- exemplos por cenario -----------------------------------------------------
 
-def test_ha_tres_cenarios_de_exemplo(cliente):
-    """Um exemplo só nunca exercita o laudo SEM calagem, que é metade do que o sistema
-    faz. Os três percorrem caminhos diferentes do motor."""
-    from siras.web.exemplo import CENARIOS
+def test_a_escolha_do_exemplo_fica_na_tela_da_cultura(cliente):
+    """A escolha é entre uma área e várias, e não entre tipos de solo: é a pergunta que
+    quem abre a tela sabe responder. Qual dos dez exemplos cai é sorteado.
 
+    E fica na tela da CULTURA, antes da escolha: cada exemplo traz a própria cultura, e
+    oferecê-lo depois obrigaria a descartar a escolha de quem já escolheu."""
+    from siras.web.exemplo import TIPOS
+
+    html = cliente.get("/analise").get_data(as_text=True)
+
+    assert len(TIPOS) == 2
+    for tipo in TIPOS:
+        assert tipo["nome"] in html
+        assert f"exemplo={tipo['id']}" in html
+
+
+def test_a_tela_de_dados_nao_repete_a_escolha_do_exemplo(cliente):
+    """Regressão: enquanto o botão vivia aqui, o exemplo tinha de servir às 61 culturas e
+    deixava campo condicional em branco."""
     html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
 
-    assert len(CENARIOS) == 3
-    for cenario in CENARIOS:
-        assert cenario["nome"] in html
-        assert f"exemplo={cenario['id']}" in html
+    assert "exemplo=unico" not in html
+    assert "exemplo=multiplo" not in html
 
 
-@pytest.mark.parametrize("cenario", ["argiloso", "arenoso", "corrigido"])
-def test_cada_cenario_preenche_valores_proprios(cliente, cenario):
-    html = cliente.get(f"/analise/dados?cultura_id=soja&exemplo={cenario}").get_data(as_text=True)
+def test_a_tela_avisa_qual_exemplo_caiu(cliente):
+    """Quem vai apresentar precisa saber que caso está na tela, e poder trocar sem voltar
+    uma etapa. O botão sorteia dentro da MESMA natureza: quem pediu vários talhões não
+    quer receber um talhão só ao trocar."""
+    html = cliente.get(
+        "/analise/dados?exemplo=unico-teor-muito-alto"
+    ).get_data(as_text=True)
 
-    argila = re.search(r'id="argila"[^>]*value="([^"]*)"', html).group(1)
-    assert argila, f"{cenario} não preencheu a argila"
+    assert "Trigo em 2º cultivo, teores muito altos" in html
+    assert "Sortear outro exemplo" in html
+    assert "exemplo=unico" in html and "exemplo=multiplo" not in html
 
 
-def test_os_cenarios_percorrem_caminhos_diferentes(cliente):
+def _formulario_sem_molde(html):
+    """O <form> sem o <template> do cartão de talhão. O conteúdo de um <template> é um
+    fragmento inerte: o navegador não o valida nem o envia, e contá-lo faria o teste
+    acusar campos vazios que não existem para quem está na tela."""
+    form = re.search(r"<form[^>]*data-formulario-analise.*?</form>", html, re.S).group(0)
+    return re.sub(r"<template\b.*?</template>", "", form, flags=re.S)
+
+
+def _como_o_navegador_envia(html):
+    """Exatamente o que o <form> manda ao clicar em Gerar laudo: o value de cada input e
+    a option efetiva de cada select — a marcada, ou a primeira, que é a que o navegador
+    escolhe sozinho."""
+    form = _formulario_sem_molde(html)
+    pares = []
+    for tag in re.findall(r"<input\b[^>]*>", form):
+        nome = re.search(r'name="([^"]+)"', tag)
+        valor = re.search(r'value="([^"]*)"', tag)
+        if nome:
+            pares.append((nome.group(1), valor.group(1) if valor else ""))
+    for nome, opcoes in re.findall(r'<select\b[^>]*name="([^"]+)"[^>]*>(.*?)</select>',
+                                   form, re.S):
+        marcada = re.search(r'<option[^>]*value="([^"]*)"[^>]*selected', opcoes)
+        primeira = re.search(r'<option[^>]*value="([^"]*)"', opcoes)
+        efetiva = marcada or primeira
+        pares.append((nome, efetiva.group(1) if efetiva else ""))
+    return pares
+
+
+#: A gramática de "valid floating-point number" do HTML, que é o que um
+#: `<input type="number">` aceita no atributo `value`. Vírgula não entra.
+_NUMERO_VALIDO_EM_HTML = re.compile(r"^-?\d+(\.\d+)?([eE][-+]?\d+)?$")
+
+
+@pytest.mark.parametrize("exemplo", [e["id"] for e in exemplo_de_formulario.EXEMPLOS])
+def test_todo_campo_numerico_do_exemplo_e_aceito_pelo_navegador(cliente, exemplo):
+    """O defeito que esvaziava o exemplo inteiro, e que uma conferência pelo HTML do
+    servidor não pega.
+
+    O exemplo escrevia `value="5,0"`. A vírgula não pertence à gramática de número do
+    HTML, então o navegador sanitiza o campo para vazio sem avisar: no HTML servido o
+    valor estava lá, na tela o campo aparecia em branco, e o envio era barrado por nove
+    campos obrigatórios não preenchidos. Este teste olha para a mesma coisa que o
+    navegador olha.
+    """
+    html = cliente.get(f"/analise/dados?exemplo={exemplo}").get_data(as_text=True)
+
+    recusados = []
+    for tag in re.findall(r"<input\b[^>]*>", _formulario_sem_molde(html)):
+        if 'type="number"' not in tag:
+            continue
+        valor = re.search(r'value="([^"]*)"', tag)
+        if valor and not _NUMERO_VALIDO_EM_HTML.match(valor.group(1)):
+            recusados.append((re.search(r'name="([^"]+)"', tag).group(1), valor.group(1)))
+    assert recusados == [], (
+        f"{exemplo}: o navegador descartaria estes valores, deixando os campos em "
+        f"branco — {recusados}"
+    )
+
+
+@pytest.mark.parametrize("exemplo", [e["id"] for e in exemplo_de_formulario.EXEMPLOS])
+def test_cada_exemplo_preenche_todos_os_campos(cliente, exemplo):
+    """"Todos" é literal, inclusive os opcionais: o exemplo existe para mostrar o que o
+    sistema entrega quando tem tudo em mãos, e um campo vazio é um recurso que nunca
+    aparece na demonstração.
+
+    Sem `cultura_id` na URL: é o exemplo que traz a cultura, e é esse o caminho que o
+    botão da tela anterior usa."""
+    html = cliente.get(f"/analise/dados?exemplo={exemplo}").get_data(as_text=True)
+
+    vazios = sorted(nome for nome, valor in _como_o_navegador_envia(html) if not valor)
+    assert vazios == [], f"{exemplo} deixou campos em branco: {vazios}"
+
+
+@pytest.mark.parametrize("exemplo", [e["id"] for e in exemplo_de_formulario.EXEMPLOS])
+def test_cada_exemplo_gera_laudo_sem_digitar_nada(cliente, exemplo):
+    """O que o exemplo promete: carregar e clicar em Gerar laudo, sem tocar em campo
+    nenhum. Se um obrigatório ficar vazio, o JavaScript barra o envio antes de chegar ao
+    servidor — por isso o teste manda exatamente o que o formulário manda."""
+    from werkzeug.datastructures import MultiDict
+
+    tela = cliente.get(f"/analise/dados?exemplo={exemplo}").get_data(as_text=True)
+    resposta = cliente.post("/analise/laudo", data=MultiDict(_como_o_navegador_envia(tela)))
+
+    assert resposta.status_code == 200, (
+        f"{exemplo}: {re.sub(r'  +', ' ', re.sub(r'<[^>]+>', ' ', resposta.get_data(as_text=True)))[:300]}"
+    )
+
+
+@pytest.mark.parametrize("exemplo,talhoes", [
+    ("unico-argiloso-acido", 1), ("multi-2-talhoes", 2),
+    ("multi-4-talhoes", 4), ("multi-6-talhoes", 6),
+])
+def test_o_laudo_do_exemplo_traz_uma_recomendacao_por_talhao(cliente, exemplo, talhoes):
+    from werkzeug.datastructures import MultiDict
+
+    tela = cliente.get(f"/analise/dados?exemplo={exemplo}").get_data(as_text=True)
+    html = cliente.post(
+        "/analise/laudo", data=MultiDict(_como_o_navegador_envia(tela))
+    ).get_data(as_text=True)
+
+    # Quatro cartões de dose por área: calcário, N, P2O5 e K2O.
+    assert len(re.findall(r'class="dose[ "]', html)) == 4 * talhoes
+
+
+def test_as_tres_formulas_da_revenda_chegam_preenchidas(cliente):
+    """Regressão de 11/10/2026: as três caixas compartilham o name `formula_usuario` e a
+    tela as lê por posição de uma LISTA. O exemplo escrevia `formula_usuario_1`, que
+    ninguém lê, e as três saíam em branco."""
+    html = cliente.get("/analise/dados?exemplo=unico-argiloso-acido").get_data(as_text=True)
+
+    valores = [
+        (re.search(r'value="([^"]*)"', tag) or [None, ""])[1]
+        for tag in re.findall(r'<input[^>]*id="formula_usuario_\d"[^>]*>', html)
+    ]
+    assert valores == ["05-20-20", "10-30-10", "02-18-18"]
+
+
+def test_editar_a_analise_devolve_as_tres_formulas_inteiras(cliente):
+    """Mesmo defeito pelo outro lado: `dict(request.form)` colapsa a chave multivalorada
+    numa string só, e a tela, lendo por posição, devolvia "0", "5" e "-"."""
+    from werkzeug.datastructures import MultiDict
+
+    enviado = MultiDict(
+        list(_ANALISE_COMPLETA.items())
+        + [("formula_usuario", "05-20-20"), ("formula_usuario", "10-30-10"),
+           ("formula_usuario", "02-18-18")]
+    )
+    html = cliente.post("/analise/dados", data=enviado).get_data(as_text=True)
+
+    valores = [
+        (re.search(r'value="([^"]*)"', tag) or [None, ""])[1]
+        for tag in re.findall(r'<input[^>]*id="formula_usuario_\d"[^>]*>', html)
+    ]
+    assert valores == ["05-20-20", "10-30-10", "02-18-18"]
+
+
+def test_a_expectativa_de_rendimento_some_onde_o_motor_a_ignora(cliente):
+    """Cana dosa por `produtividade_t_ha`; mostrar também a expectativa de rendimento
+    punha dois campos pedindo o mesmo número, um deles sem efeito sobre a dose."""
+    graos = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+    cana = cliente.get("/analise/dados?cultura_id=cana_de_acucar").get_data(as_text=True)
+
+    assert 'name="expectativa_rendimento"' in graos
+    assert 'name="expectativa_rendimento"' not in cana
+    assert 'name="produtividade_t_ha"' in cana
+
+
+def test_o_sorteio_respeita_a_natureza_pedida(cliente):
+    from siras.web.exemplo import EXEMPLOS, escolher
+
+    for _ in range(40):
+        assert escolher("unico")["tipo"] == "unico"
+        assert escolher("multiplo")["tipo"] == "multiplo"
+
+    # Sete e três: o enunciado do conjunto, e o que sustenta a cobertura declarada no
+    # módulo. Se alguém acrescentar um exemplo, a conta aqui é o lembrete de atualizá-la.
+    assert sum(1 for e in EXEMPLOS if e["tipo"] == "unico") == 7
+    assert sum(1 for e in EXEMPLOS if e["tipo"] == "multiplo") == 3
+
+
+def test_os_exemplos_percorrem_caminhos_diferentes(cliente):
     """O solo corrigido tem pH acima do gatilho: o laudo dele sai SEM calagem indicada,
-    e o argiloso ácido sai com dose."""
-    def nc(cenario):
+    e o argiloso ácido sai com dose. Um exemplo só nunca exercita os dois."""
+    def dispensa_calagem(exemplo):
         campos = dict(re.findall(
             r'<input[^>]*id="(\w+)"[^>]*value="([^"]*)"',
-            cliente.get(f"/analise/dados?cultura_id=soja&exemplo={cenario}").get_data(as_text=True),
+            cliente.get(f"/analise/dados?cultura_id=soja&exemplo={exemplo}").get_data(as_text=True),
         ))
         campos.update({"cultura_id": "soja", "criterio_id": "graos_convencional"})
         html = cliente.post("/analise/laudo", data=campos).get_data(as_text=True)
         return "Calagem não indicada" in html
 
-    assert nc("corrigido") is True, "o cenário corrigido deveria dispensar a calagem"
-    assert nc("argiloso") is False, "o cenário argiloso ácido deveria pedir calcário"
+    assert dispensa_calagem("unico-corrigido") is True
+    assert dispensa_calagem("unico-argiloso-acido") is False
 
 
 # --- identificação do documento -----------------------------------------------
@@ -1066,3 +1254,117 @@ def test_a_mascara_do_campo_e_carregada_na_tela_de_dados(cliente):
     assert "js/documento.js" in cliente.get(
         "/analise/dados?cultura_id=soja"
     ).get_data(as_text=True)
+
+
+# --- laudo: o que e do documento aparece uma vez (ADR 0011) -------------------
+
+def _laudo_do_exemplo(cliente, exemplo):
+    tela = cliente.get(f"/analise/dados?exemplo={exemplo}").get_data(as_text=True)
+    from werkzeug.datastructures import MultiDict
+    resposta = cliente.post("/analise/laudo",
+                            data=MultiDict(_como_o_navegador_envia(tela)))
+    assert resposta.status_code == 200, exemplo
+    return resposta.get_data(as_text=True)
+
+
+@pytest.mark.parametrize("exemplo,talhoes", [
+    ("unico-argiloso-acido", 1), ("multi-2-talhoes", 2), ("multi-6-talhoes", 6),
+])
+def test_como_aplicar_sai_uma_vez_por_documento(cliente, exemplo, talhoes):
+    """As orientações saem do critério de calagem e da cultura, que são compartilhados
+    por todas as áreas. Num laudo de seis talhões eram seis cópias com o mesmo texto —
+    o achado que motivou a reorganização de 11/10/2026."""
+    html = _laudo_do_exemplo(cliente, exemplo)
+
+    assert html.count("<h3>Como aplicar</h3>") == 1
+
+
+@pytest.mark.parametrize("exemplo,talhoes", [
+    ("unico-argiloso-acido", 1), ("multi-2-talhoes", 2), ("multi-6-talhoes", 6),
+])
+def test_os_complementos_nao_se_repetem_por_talhao(cliente, exemplo, talhoes):
+    """O que motivou tudo: o laudo repetia o documento INTEIRO por área. As três seções
+    de complemento passam a aparecer uma vez, qualquer que seja o número de talhões."""
+    html = _laudo_do_exemplo(cliente, exemplo)
+
+    assert html.count("<h3>Qual adubo comprar</h3>") == 1
+    assert html.count("<h3>De onde vem cada número</h3>") == 1
+    # A aptidão continua POR TALHÃO: é uma das propostas centrais do trabalho, e
+    # consolidá-la numa tabela só a trataria como complemento, que ela não é.
+    assert html.count("<h3>Aptidão edáfica</h3>") == talhoes
+
+
+def test_o_quadro_comparativo_so_existe_com_mais_de_um_talhao(cliente):
+    """Com uma área, a tabela repetiria em linha o que os cartões de dose já dizem."""
+    um = _laudo_do_exemplo(cliente, "unico-argiloso-acido")
+    varios = _laudo_do_exemplo(cliente, "multi-4-talhoes")
+
+    assert "Os talhões lado a lado" not in um
+    assert "Os talhões lado a lado" in varios
+    quadro = re.search(r'<table class="tabela-doc tabela-doc--quadro".*?</table>',
+                       varios, re.S).group(0)
+    assert quadro.count("<tr>") - 1 == 4, "uma linha por talhão"
+
+
+def test_a_ressalva_de_escopo_da_aptidao_sai_uma_vez(cliente):
+    """É propriedade do método — o que o CCAE avalia e o que não avalia —, e não da área
+    analisada: saía repetida em cada talhão dizendo exatamente a mesma coisa."""
+    html = _laudo_do_exemplo(cliente, "multi-6-talhoes")
+
+    assert html.count("Relevo, clima, deficiência hídrica") == 1
+
+
+def test_a_trilha_nao_repete_regra_e_fonte(cliente):
+    """A regra e a fonte no Manual são as mesmas em todas as áreas; o que muda é a saída,
+    e é ela que vai para a matriz de comparação.
+
+    O par (regra, fonte) é que tem de ser único, e não o rótulo sozinho: o mesmo critério
+    citado por fontes DIFERENTES são duas decisões diferentes, e as duas têm de aparecer.
+    No laudo de seis talhões isso acontece de verdade — `graos_pd_com_restricoes` sai uma
+    vez citando a Tab. 5.2 (onde houve dose) e outra citando só a Tab. 5.3 (onde não
+    houve). Colapsar as duas esconderia um caminho que o motor percorreu."""
+    html = _laudo_do_exemplo(cliente, "multi-6-talhoes")
+
+    trilha = re.search(r'<dl class="trilha">.*?</dl>', html, re.S).group(0)
+    passos = []
+    for bloco in re.findall(r'<dd class="trilha__passo">.*?</dd>', trilha, re.S):
+        ref = re.search(r'class="trilha__ref">([^<]+)', bloco)
+        fonte = re.search(r'class="trilha__fonte">([^<]*)', bloco)
+        passos.append((ref.group(1).strip(), fonte.group(1).strip() if fonte else ""))
+    assert passos, "a trilha não listou regra nenhuma"
+    assert len(passos) == len(set(passos)), "regra repetida com a MESMA fonte"
+
+
+def test_a_trilha_de_seis_talhoes_nao_e_seis_trilhas(cliente):
+    """O ganho concreto: a trilha era a maior seção do laudo e era multiplicada por área.
+    Com seis talhões ela cresce pouco sobre a de um — o que entra a mais são as decisões
+    que de fato divergiram entre as áreas."""
+    um = _laudo_do_exemplo(cliente, "unico-argiloso-acido")
+    seis = _laudo_do_exemplo(cliente, "multi-6-talhoes")
+
+    def passos(html):
+        trilha = re.search(r'<dl class="trilha">.*?</dl>', html, re.S).group(0)
+        return len(re.findall(r'class="trilha__ref"', trilha))
+
+    assert passos(seis) < 2 * passos(um), (
+        f"{passos(seis)} passos para seis talhões contra {passos(um)} para um: "
+        f"a trilha voltou a ser multiplicada por área"
+    )
+
+
+def test_o_anexo_abre_em_folha_propria_na_versao_impressa():
+    """Decisão do autor em 11/10/2026: a primeira parte fecha sozinha como laudo
+    entregável, e quem só quer a recomendação não precisa do resto."""
+    impressa = (_ESTATICOS / "css" / "siras-impressa.css").read_text(encoding="utf-8")
+
+    assert re.search(r"\.anexo \{[^}]*break-before:\s*page", impressa)
+
+
+def test_o_laudo_impresso_nao_parte_cartao_ao_meio():
+    """Meia régua numa página e meia na outra não se lê."""
+    impressa = (_ESTATICOS / "css" / "siras-impressa.css").read_text(encoding="utf-8")
+    regra = re.search(r"((?:[^{}]*\.dose,)[^{]*)\{[^}]*break-inside:\s*avoid", impressa)
+
+    assert regra, "nenhuma regra de break-inside na folha impressa"
+    for seletor in (".dose", ".cenario", ".trilha__passo", ".tabela-doc tr"):
+        assert seletor in regra.group(1), f"{seletor} pode ser partido entre folhas"

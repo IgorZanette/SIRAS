@@ -1,16 +1,22 @@
 {#
-  Cena 3D no formulário da análise (opcional). Fica AO LADO dos campos,
-  como painel, nunca atrás deles (contraste e foco no preenchimento).
+  Cena 3D do formulário — CABEÇALHO do painel de leitura ao vivo (ADR 0012, adenda da
+  D12.2; ADR 0013 para o inventário).
 
-  Uso: no template do formulário, dentro de um contêiner com data-cena-escopo,
-  e marque cada campo com o atributo que ele representa:
-     <input name="ph_agua" data-cena-atributo="ph" ...>
-     <input name="p_mehlich" data-cena-atributo="fosforo" ...>
-  Vários campos podem apontar para o mesmo atributo (basta um preenchido).
+  Ela e a leitura ao vivo respondem perguntas diferentes, em sequência:
+  a cena diz O QUE JÁ FOI INFORMADO, as linhas abaixo dizem O QUE AQUILO SIGNIFICA.
 
-  data-cena-campos: seletor do <form>. AJUSTAR ao markup real.
-  A cena mostra só "lido" (preenchido) ou "ausente" (vazio): nenhuma
-  interpretação acontece aqui; ela é do motor agronômico, no servidor.
+  O INVENTÁRIO ABAIXO DA CENA é o que faz a cena ser legível. Até 11/10/2026 havia só
+  os pontos no monólito: eles acendiam e pulsavam, e não diziam QUAL atributo tinha
+  entrado — um ponto aceso sem nome não informa nada, e o movimento sozinho vira ruído.
+  Os marcadores da cena são sprites 3D sem texto (soilScene.js, layoutMarkers), e pôr
+  rótulo flutuante sobre cada um quebra em tela estreita, que é metade do público. O
+  nome vive aqui embaixo, em HTML, onde ele se lê em qualquer largura e um leitor de
+  tela o alcança.
+
+  A contagem responde a pergunta que a cena sozinha não responde: quanto falta.
+
+  A cena mostra só "lido" (preenchido) ou "ausente" (vazio): nenhuma interpretação
+  acontece aqui; ela é do motor agronômico, no servidor.
 #}
 <div class="cena-solo cena-solo--painel nao-imprime" data-cena-solo="formulario" aria-hidden="true"
      data-cena-campos="form[data-cena-formulario]"
@@ -18,3 +24,29 @@
   <img class="cena-solo__fallback" alt="" width="761" height="708" decoding="async"
        src="{{ url_for('static', filename='img/cena-solo/fallback-estagio-1.webp') }}">
 </div>
+
+{# `hidden` até a cena subir: sem WebGL não há pontos para nomear, e a leitura ao vivo
+   abaixo já diz tudo o que importa. O adaptador tira o `hidden`. #}
+<figure class="cena-solo-legenda cena-solo-legenda--inventario nao-imprime"
+        data-cena-legenda hidden>
+  <figcaption>
+    <span data-cena-contagem>0 de 7</span> atributos informados
+  </figcaption>
+  <ul>
+    {% for a in [
+      ("ph", "pH"),
+      ("fosforo", "Fósforo"),
+      ("potassio", "Potássio"),
+      ("calcio-magnesio", "Cálcio e magnésio"),
+      ("materia-organica", "Matéria orgânica"),
+      ("ctc", "CTC"),
+      ("textura", "Textura"),
+    ] %}
+    <li data-atributo="{{ a[0] }}" data-limitacao="" data-estado="ausente">
+      <span class="cena-solo-legenda__icone" aria-hidden="true"></span>
+      <span class="cena-solo-legenda__atributo">{{ a[1] }}</span>
+      <span data-cena-estado-texto>não informado</span>
+    </li>
+    {% endfor %}
+  </ul>
+</figure>

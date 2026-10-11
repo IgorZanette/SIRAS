@@ -1,16 +1,19 @@
 {#
-  Cena 3D da hero. Incluir DENTRO da <section> da hero, DEPOIS do conteúdo
-  (título, descrição, botões), e marcar a section com data-cena-escopo:
+  Cena 3D da hero. Vai DENTRO do contêiner (`.env`), na coluna direita da
+  `.hero__grade`, dentro de `.hero__coluna`, e a section leva data-cena-escopo.
 
-    <section class="hero" data-cena-escopo>
-      ...conteúdo existente, sem mudanças...
-      {% include "_parciais/cena_solo_hero.html" %}
-    </section>
+  ATÉ 11/10/2026 ELA ERA FUNDO: ficava fora do `.env`, `position: absolute` sobre a
+  hero inteira e `z-index: -1`. Três coisas davam errado ao mesmo tempo — o canvas
+  cobria toda a largura e o monólito passava por cima do cartão da régua; os controles
+  e a legenda, que NÃO são absolutos, caíam colados na borda do viewport, sem a margem
+  do contêiner; e a legenda esticava numa tira de sete colunas no pé da página.
 
-  Sem JS ou sem WebGL, só a imagem estática aparece; controles e legenda
-  ficam ocultos (hidden) porque não fariam sentido sem a cena.
+  Agora é uma peça com lugar e tamanho, e tudo que a explica fica junto dela.
+
+  Sem JS ou sem WebGL, só a imagem estática aparece; controles e legenda ficam ocultos
+  (hidden) porque não fariam sentido sem a cena.
 #}
-<div class="cena-solo nao-imprime" data-cena-solo="inicio" aria-hidden="true"
+<div class="cena-solo cena-solo--vitrine nao-imprime" data-cena-solo="inicio" aria-hidden="true"
      data-cena-motor="{{ url_for('static', filename='js/cena-solo/soilScene.js') }}">
   <img class="cena-solo__fallback" alt="" width="761" height="711" decoding="async"
        src="{{ url_for('static', filename='img/cena-solo/fallback-estagio-3.webp') }}">

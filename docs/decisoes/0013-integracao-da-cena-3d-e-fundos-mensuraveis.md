@@ -1,0 +1,172 @@
+# 0013 — Integração real da cena 3D, e fundos que medir decidiu
+
+- **Status:** aceito
+- **Data:** 2026-10-11
+- **Contexto:** o autor abriu a interface nova e encontrou quatro defeitos de uma vez —
+  landing com elementos sobrepostos e colados na borda, fundos invisíveis, cena do
+  formulário duplicada e sem dizer o que lia, e a tela de espera ainda mostrando a
+  animação 2D antiga. Sucede e corrige a [ADR 0012](0012-cena-3d-e-acabamento-da-interface.md)
+- **Afeta:** `siras/web/templates/` (início, parciais da cena, gerando),
+  `siras/web/static/css/` (telas, cena-solo), `siras/web/static/js/cena-solo.js`
+- **Não afeta:** o motor, a base de conhecimento, o laudo em tela e impresso
+
+---
+
+## A causa comum dos quatro defeitos
+
+Nenhum deles era um bug isolado. **Os parciais da v7 foram colados no projeto e nunca
+integrados** — eles ainda traziam os comentários `AJUSTAR` do kit e liam variáveis que
+nenhuma rota fornece (`formulacao_npk`, `atributos_cena`, `cultura_selecionada`).
+
+Um parcial colado funciona o suficiente para parecer pronto: a cena sobe, o canvas
+pinta, a suíte passa. O que ele não faz é ocupar lugar — e é aí que os quatro defeitos
+nascem, todos da mesma raiz de "a peça está na página, mas não tem endereço nela".
+
+A suíte não pegou nada disso, e não poderia: ela verificava que o parcial existia, que
+tinha `aria-hidden`, que o motor estava vendorizado. **Nenhum teste podia ver que dois
+elementos ocupavam o mesmo espaço**, e é por isso que este ciclo, como os três do laudo
+impresso na ADR 0011, só começou quando alguém olhou a tela. Vale repetir o padrão: em
+trabalho de interface, a captura de tela é instrumento de medição, não ilustração.
+
+---
+
+## D13.1 — A cena da hero era fundo; virou peça
+
+Ela estava **fora do contêiner**, como último filho da `<section class="hero">`, com
+`position: absolute; inset: 0; z-index: -1`. Três coisas davam errado ao mesmo tempo:
+
+| sintoma | causa |
+|---|---|
+| o monólito cobria o cartão da régua | o canvas tinha a largura inteira da hero, e a cena desenha no centro dele |
+| controles e legenda colados na borda da tela | eles **não** são absolutos: caíam no fluxo, fora da margem do `.env` |
+| a legenda esticada numa tira no pé da página | sete colunas de `auto-fill` na largura total |
+| o parágrafo dos limites espremido na direita | ele virou item da fileira *flex* dos controles |
+
+Agora a cena é a peça de cima da coluna direita, dentro de `.hero__coluna`, e o cartão
+da régua desceu para baixo dela. Tudo que explica a cena — controles, legenda, limites —
+mora junto dela.
+
+A caixa usa `aspect-ratio: 761/711`, a proporção do próprio fallback, e não altura fixa:
+o monólito é um objeto 3D enquadrado pela câmera, e uma caixa que muda de proporção com
+a largura da coluna ou o corta, ou o deixa nadando no vazio.
+
+## D13.2 — A duplicação do painel era uma linha de cascata
+
+Na tela de dados apareciam **dois** blocos de solo, um por cima do outro: a imagem
+estática e o canvas vivo.
+
+```css
+.cena-solo--ativa  .cena-solo__fallback { display: none; }   /* linha 39 */
+.cena-solo--painel .cena-solo__fallback { display: block; }  /* linha 89 */
+```
+
+Mesma especificidade — 0-2-0 — e a segunda vem depois no arquivo, então vence. O
+`cena-solo--ativa` que o adaptador acrescenta quando o canvas sobe não desligava mais
+nada. A correção é `:not(.cena-solo--ativa)` no seletor do painel: não muda a
+especificidade, só tira a regra do caminho quando a cena está viva.
+
+É o tipo de defeito que não aparece em revisão de código — as duas regras estão certas
+isoladamente — e que salta aos olhos na primeira captura de tela.
+
+## D13.3 — Um ponto aceso sem nome não informa nada
+
+A cena do formulário acendia e pulsava o marcador do atributo preenchido, e não dizia
+**qual**. Os marcadores são sprites 3D sem texto (`soilScene.js`, `layoutMarkers`), e
+pôr rótulo flutuante sobre cada um quebra em tela estreita — metade do público usa
+tablet em campo.
+
+O nome passa a viver em HTML abaixo da cena, num inventário de sete linhas com o estado
+de cada atributo, mais a contagem (*"4 de 7 atributos informados"*), que responde a
+pergunta que a cena sozinha não respondia: **quanto falta**.
+
+O ponto cheio contra o círculo tracejado distingue informado de ausente por
+preenchimento, e não só por cor, para funcionar em daltonismo e em tela sob sol.
+
+O inventário continua sem interpretar nada: ele diz "informado" ou "não informado". A
+classe de teor é do motor, no servidor, e aparece na leitura ao vivo logo abaixo.
+
+## D13.4 — A tela de espera mostrava as duas ilustrações
+
+O SVG 2D de 109 linhas **nunca foi removido** quando a cena 3D entrou. E a cena 3D
+herdara o `z-index: -1` do uso como fundo da hero, o que dentro desta tela a punha
+atrás do véu opaco: **ela rodava, invisível, enquanto o desenho antigo aparecia por
+cima.** Os textos soltos no topo do véu eram o chrome de exemplo do kit, renderizando
+vazio.
+
+O SVG saiu, e com ele as cerca de 150 linhas de CSS que o animavam e dez tokens de cor.
+CSS órfão de um elemento que não existe mais é a forma mais silenciosa de uma folha de
+estilo apodrecer — e foi exatamente assim que as duas ilustrações chegaram a coexistir
+sem ninguém notar.
+
+**O que se perdeu, e o que não:** o broto que crescia com o progresso não tem
+equivalente na cena 3D. Não faz falta, e há um argumento para que não volte: um perfil
+que fica mais vivo a cada passo diz, sem número nenhum, que o laudo melhora a lavoura
+enquanto é calculado. `test_a_cena_nao_melhora_o_solo_enquanto_calcula` passa a guardar
+isso. A etiqueta do capítulo consultado também saiu; o que o passo consulta continua no
+`<small>` dele — e aí melhorou, porque a etiqueta vivia dentro de um SVG `aria-hidden`
+e quem não enxergava nunca a teve.
+
+Quem desliga o movimento também mudou de lugar. No SVG era CSS, `animation: none` em
+cada peça. Num canvas não há peça a desligar, há um laço de render: quem para é o motor,
+por `reducedMotion`, que o adaptador lê da aplicação e reaplica quando o usuário troca a
+preferência.
+
+## D13.5 — Os fundos: medir mudou o desenho, não só o número
+
+A primeira tentativa (ADR 0012, D12.6) pôs as artes como textura sobre a seção inteira,
+a 16% de opacidade. Elas sumiram. Medir explicou por quê, e a explicação mudou o
+desenho duas vezes.
+
+**Primeiro: sobre fundo escuro, misturar não funciona.** Arte escura sobre fundo escuro
+em composição normal a 16% move o fundo em **7 de 255** — nada. O que faz uma arte
+escura aparecer sobre fundo escuro é `screen`, que só clareia: a 55%, o mesmo par move
+31. Era operação errada, e não opacidade baixa.
+
+| | normal 16% | screen 55% |
+|---|---|---|
+| sobre `#0A0F0C` | delta 7 | delta **31** |
+| sobre `#F6F8F5` | delta 34 | delta 0,3 |
+
+**Segundo, e decisivo: ela não pode ficar atrás de texto, em opacidade nenhuma.** O teto
+de luminância de fundo que sustenta o `--n-400` (texto terciário, `.t-aux`) a 4,5:1 é
+**0,027**. A região mais clara da `op-3` em screen cheio chega a **0,57** — vinte vezes
+o teto. Não há dosagem que resolva: ou a arte aparece, ou o texto secundário se lê.
+
+A saída não foi dosar, foi **mudar de lugar**. A arte vai onde não há texto nenhum:
+
+- **atrás do monólito**, dentro da vitrine da cena, em força total — é o único lugar da
+  página sem nada escrito por cima, e é o que a arte foi feita para fazer;
+- **nas calhas**, as faixas vazias fora da coluna de 1200px. Eram exatamente o "fundo
+  chapado" de que o autor reclamou, e agora são o único lugar da página onde a paisagem
+  cabe sem disputar com nada.
+
+A máscara horizontal é `calc(50% - 600px)`: abaixo de 1200px não há calha, a máscara
+fecha sozinha e a textura desaparece. **Em telefone não sobra nada atrás de texto, sem
+media query** — a regra se degrada pela própria geometria.
+
+As faixas alternadas recebem a textura pela própria classe, e não uma a uma no template:
+a regra é "as faixas escuras carregam a paisagem nas calhas". Aplicar caso a caso daria
+uma página onde a textura aparece e some sem motivo visível ao rolar.
+
+No tema claro `screen` não faz nada — clarear o que já é quase branco move 0,3 de 255. A
+operação que marca ali é a inversa, `multiply`, bem fraca, e nas mesmas calhas.
+
+**E 8,6 MB continuavam sendo servidos** como PNG para pintar isso: `scripts/gerar_fundos.py`
+converte para WebP e os originais ficam em `docs/fundos/`. 8,6 MB → 175 KB, sem
+diferença visível.
+
+---
+
+## O que isto não resolve
+
+As duas verificações que só a tela dá, e que a suíte não substitui:
+
+1. **A opacidade das calhas e da vitrine é escolha visual.** Os números acima garantem
+   que o texto se lê; não garantem que fique bonito. É uma linha de CSS por lugar, e as
+   cinco artes estão geradas para trocar.
+2. **A cena da espera monta com o véu `hidden`**, logo com caixa 0×0. O `ResizeObserver`
+   de `soilScene.js` deve reenquadrá-la quando a tela aparece, e `resize()` protege o
+   caso com `Math.max(1, …)`. Está certo no papel; falta ver rodando.
+
+E continua valendo o aviso da ADR 0012: estas escolhas de interface foram feitas antes
+de haver dado de usuário, e a lista das dez heurísticas pode contradizer várias.

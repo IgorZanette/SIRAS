@@ -215,6 +215,15 @@ As cinco são geradas, com duas em uso: elas são opções do autor, e trocar o 
 é mudar uma linha de CSS — o que só é verdade se as cinco estiverem lá. A 35 KB cada, as
 três de reserva custam menos que o PNG de uma.
 
+## Corrigida pela ADR 0013
+
+Ao abrir a interface pronta, o autor encontrou quatro defeitos que esta ADR não viu:
+a cena da hero sobrepondo o conteúdo, a do formulário duplicada, a tela de espera ainda
+mostrando o desenho 2D antigo e os fundos invisíveis. A causa era comum — os parciais da
+v7 foram colados e nunca integrados — e a correção está na
+[ADR 0013](0013-integracao-da-cena-3d-e-fundos-mensuraveis.md), que substitui a D12.6
+inteira e reposiciona as cenas descritas aqui.
+
 ## O que a avaliação de usabilidade ainda pode desfazer
 
 Esta ADR registra escolhas de interface feitas **antes** de haver dado de usuário. A

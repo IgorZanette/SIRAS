@@ -212,7 +212,12 @@ def test_a_cena_do_formulario_e_cabecalho_da_leitura_e_nao_painel_rival():
 
 
 def test_planta_generica_declarada_na_espera():
-    assert "planta da ilustração é genérica" in ler(PARCIAIS / "cena_solo_gerando.html")
+    """É a tela onde a planta cresce, e por isso a que mais se parece com uma promessa
+    de safra. A declaração fica junto da cena, não num rodapé."""
+    parcial = ler(PARCIAIS / "cena_solo_gerando.html")
+
+    assert "planta é genérica" in parcial
+    assert "não representa a sua cultura" in parcial
 
 
 def test_nenhum_parcial_de_laudo():

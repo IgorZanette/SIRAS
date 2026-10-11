@@ -71,6 +71,13 @@
         </div>
       </div>
 
+      {# A COLUNA DIREITA é uma pilha de duas peças, e a ordem importa: primeiro a
+         ilustração, que atrai, depois a régua, que afirma. A cena ficava `absolute`
+         sobre a hero inteira e passava por cima deste cartão; agora as duas ocupam
+         lugar próprio e nada se sobrepõe. #}
+      <div class="hero__coluna">
+      {% include "_parciais/cena_solo_hero.html" %}
+
       {# A régua, explicada — e não uma amostra de solo inventada para a vitrine. O que
          esta peça mostra é a própria escala do Manual, que é uma afirmação verificável;
          um laudo fictício no hero seria número agronômico fabricado. #}
@@ -108,12 +115,8 @@
           </p>
         </div>
       </div>
+      </div>
     </div>
-
-    {# A cena 3D do perfil de solo fica DEPOIS do conteudo da hero, e atras dele
-       pelo z-index. Sem JavaScript ou sem WebGL so a imagem estatica aparece, e a
-       pagina continua inteira e navegavel (ADR 0012). #}
-    {% include "_parciais/cena_solo_hero.html" %}
   </section>
 
   {# ——— 2. O problema ——— #}

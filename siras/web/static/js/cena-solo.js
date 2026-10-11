@@ -172,6 +172,7 @@
         else if (cheio) itens[vistos[id]].estado = "lido"; // vários campos, um atributo
       });
       ctx.cena.setMarkers(itens);
+      nomearNoInventario(ctx, itens);
     };
     form.addEventListener("input", atualizar);
     form.addEventListener("change", atualizar);
@@ -180,6 +181,30 @@
       form.removeEventListener("change", atualizar);
     });
     atualizar();
+  }
+
+  /**
+   * Escreve no inventário QUAL atributo entrou — o que os pontos da cena não dizem.
+   *
+   * Os marcadores são sprites 3D sem texto: eles acendem e pulsam, e um ponto aceso
+   * sem nome não informa nada. O nome mora no HTML abaixo da cena, onde se lê em
+   * qualquer largura e um leitor de tela o alcança.
+   *
+   * Só mexe em estado e texto — nunca em classe de teor, que é do motor.
+   */
+  function nomearNoInventario(ctx, itens) {
+    if (!ctx.legenda) return;
+    let lidos = 0;
+    itens.forEach(function (item) {
+      if (item.estado === "lido") lidos++;
+      const li = ctx.legenda.querySelector('li[data-atributo="' + item.id + '"]');
+      if (!li) return;
+      li.setAttribute("data-estado", item.estado);
+      const txt = li.querySelector("[data-cena-estado-texto]");
+      if (txt) txt.textContent = item.estado === "lido" ? "informado" : "não informado";
+    });
+    const contagem = ctx.legenda.querySelector("[data-cena-contagem]");
+    if (contagem) contagem.textContent = lidos + " de " + itens.length;
   }
 
   /**

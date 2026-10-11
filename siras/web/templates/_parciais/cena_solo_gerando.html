@@ -1,61 +1,34 @@
 {#
-  Cena 3D da tela de espera (Fase 3). NÃO substitui a lógica de gerando.js:
-  a cena só OBSERVA o contrato que já existe (data-etapa="N" e .passou-N).
+  Cena 3D da tela de espera. Vai dentro de `.calculando__palco`, que lhe dá caixa
+  própria; o contêiner `.calculando` leva data-cena-escopo.
 
-  data-cena-etapa-de: seletor do elemento onde gerando.js escreve data-etapa.
-  AJUSTAR o seletor ao markup real de _parciais/gerando.html.
+  A cena só OBSERVA o contrato que gerando.js já mantém — `data-etapa="N"` e
+  `.passou-N` —, e cada etapa tem a sua coreografia em stages.js:
 
-  Os passos, as regras do Manual que cada um cita e a etiqueta do que
-  ele consulta CONTINUAM no HTML existente — este parcial só acrescenta o
-  desenho. Inclua-o dentro do mesmo contêiner, com data-cena-escopo.
+    1. diagnóstico — a leitura varre o perfil
+    2. calagem     — o calcário cai sobre a superfície e fica nela
+    3. adubação    — fósforo e potássio sobem da camada de referência
+    4. formulação  — N, P e K se agrupam em montes
+    5. aptidão     — a camada corrigida ganha o tom de solo tratado
+
+  O QUE FOI REMOVIDO em 11/10/2026, e por quê: este parcial chegou do kit com três
+  peças de exemplo que nenhuma rota alimentava — uma nota da cultura selecionada, um
+  parágrafo de formulação lendo `formulacao_npk`, e uma legenda lendo `atributos_cena`.
+  Nenhuma das três variáveis existe no contexto desta tela, e não podem existir: a
+  espera acontece ANTES de o motor responder, então não há formulação nem aptidão para
+  mostrar. Renderizavam vazias, e o texto solto delas — "Montes N, P e K de mesmo
+  tamanho: proporção ilustrativa" — aparecia soltando no topo do véu, sem relação com
+  nada ao redor.
+
+  A nota dos limites fica, porque esta é a tela onde a planta cresce: é aqui que uma
+  ilustração mais se parece com uma promessa de safra.
 #}
-<div class="cena-solo nao-imprime" data-cena-solo="gerando" aria-hidden="true"
+<div class="cena-solo cena-solo--palco nao-imprime" data-cena-solo="gerando" aria-hidden="true"
      data-cena-etapa-de="[data-etapa]"
      data-cena-motor="{{ url_for('static', filename='js/cena-solo/soilScene.js') }}">
   <img class="cena-solo__fallback" alt="" width="764" height="792" decoding="async"
        src="{{ url_for('static', filename='img/cena-solo/fallback-estagio-2.webp') }}">
 </div>
-
-{#
-  Cultura selecionada (se a tela já a conhece). A planta da cena é GENÉRICA:
-  a mesma para todas as culturas. A nota deixa isso explícito.
-#}
-{% if cultura_selecionada is defined and cultura_selecionada %}
-<p class="cena-solo-cultura nao-imprime">Aptidão edáfica avaliada para <strong>{{ cultura_selecionada }}</strong>. A planta da ilustração é genérica e não representa a cultura.</p>
-{% endif %}
-
-{#
-  Fechamento com os DOIS cenários de aptidão daquela análise.
-  Os itens vêm de dados REAIS do cálculo (a página do laudo em si não
-  recebe nada de 3D). Duas opções (decidir na Fase 3):
-   a) o servidor renderiza esta lista se a página de espera já conhecer o
-      resultado; ou
-   b) gerando.js, ao receber a resposta de gerar_laudo(), cria os <li> com
-      data-atributo e data-limitacao antes de seguir para o laudo.
-  A cena reage sozinha quando a lista muda. Sem itens, não há pontos.
-#}
-{#
-  Formulação (passo de agrupar N, P, K). data-cena-npk recebe a formulação
-  REAL calculada (ex.: "05-20-20"), se já existir quando a tela é exibida;
-  gerando.js também pode preenchê-lo depois. Vazio = montes iguais e o texto
-  abaixo diz "proporção ilustrativa". AJUSTAR a variável ao nome real.
-#}
-<p class="cena-solo-cultura nao-imprime" data-cena-npk="{{ formulacao_npk|default('') }}">
-  <span data-cena-npk-texto>Montes N, P e K de mesmo tamanho: proporção ilustrativa.</span>
+<p class="cena-solo-limites cena-solo-limites--palco">
+  Ilustração conceitual: a planta é genérica e não representa a sua cultura.
 </p>
-
-<figure class="cena-solo-legenda nao-imprime" data-cena-legenda hidden>
-  <figcaption><span data-cena-cenario>Cenário potencial</span> · pontos de leitura</figcaption>
-  <ul>
-    {% for a in atributos_cena|default([]) %}
-    <li data-atributo="{{ a.id }}" data-limitacao="{{ a.limitacao or '' }}" data-estado="lido">
-      <span class="cena-solo-legenda__icone" aria-hidden="true"></span>
-      <span class="cena-solo-legenda__atributo">{{ a.rotulo }}</span>
-      <span data-cena-estado-texto>lido</span>
-      {%- if a.justificativa %}
-      <span data-cena-justificativa>{{ a.justificativa }}</span>
-      {%- endif %}
-    </li>
-    {% endfor %}
-  </ul>
-</figure>

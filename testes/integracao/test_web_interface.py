@@ -338,15 +338,53 @@ def test_os_fundos_servidos_sao_leves(cliente):
         )
 
 
-def test_o_fundo_recua_no_tema_claro():
-    """As cinco artes são paisagens escuras. Sobre o fundo claro elas não viram
-    textura, viram mancha cinza atrás do texto — então a opacidade cai."""
+def test_o_fundo_nunca_fica_atras_de_texto():
+    """A regra que o desenho dos fundos obedece, e que medir impôs.
+
+    As cinco artes são paisagens escuras. Sobre fundo escuro, misturá-las normalmente a
+    16% move o fundo em 7 de 255 — some, que foi o primeiro defeito. Quem as faz
+    aparecer é `screen`, que só clareia. Mas aí aparece o segundo limite: o teto de
+    luminância de fundo que sustenta o `--n-400` (texto terciário) a 4,5:1 é 0,027, e a
+    região mais clara da arte em screen cheio chega a 0,57. Não há opacidade que
+    resolva — ou a arte aparece, ou o texto secundário se lê.
+
+    Então a arte não é dosada, é afastada: ela mora nas CALHAS, fora da coluna de
+    conteúdo. A máscara horizontal é o que garante isso, e abaixo de 1200px ela fecha
+    sozinha pelo `calc()`, sem media query."""
+    regra = re.search(
+        r"\.fundo-horizonte::before, \.faixa--alt::before \{\s*mask-image:(.*?)\}",
+        _TELAS_CSS, re.S,
+    )
+    assert regra, "a máscara das calhas sumiu"
+    assert "calc(50% - 600px)" in regra.group(1), "a máscara deixou de poupar a coluna"
+    assert "mask-composite: intersect" in regra.group(1), (
+        "sem a interseção, a máscara vertical sozinha deixa a arte atrás do texto"
+    )
+
+
+def test_o_fundo_clareia_no_escuro_e_escurece_no_claro():
+    """`screen` sobre fundo claro move 0,3 de 255: não faz nada. A operação que marca
+    sobre papel é a inversa."""
+    assert re.search(r"\.fundo-horizonte::before[^{]*\{[^}]*mix-blend-mode: screen", _TELAS_CSS)
     assert re.search(
-        r':root\[data-tema="claro"\] \.hero\.fundo-horizonte::before \{[^}]*opacity: \.0',
+        r':root\[data-tema="claro"\] \.fundo-horizonte::before,[^{]*\{[^}]*mix-blend-mode: multiply',
         _TELAS_CSS,
     )
     # E some na impressão: é atmosfera de tela, não conteúdo do documento.
-    assert re.search(r"@media print \{ \.fundo-horizonte::before \{ display: none", _TELAS_CSS)
+    assert "@media print { .fundo-horizonte::before, .faixa--alt::before { display: none" in _TELAS_CSS
+
+
+def test_a_paisagem_em_forca_total_so_onde_nao_ha_texto():
+    """O único lugar onde uma das artes aparece sem véu é atrás do monólito, dentro da
+    vitrine da cena: ali não há texto nenhum por cima, então o teto de contraste das
+    calhas não se aplica. É o que a arte foi feita para fazer."""
+    cena_css = (_ESTATICOS / "css" / "cena-solo.css").read_text(encoding="utf-8")
+
+    # `^` com re.M: `.cena-solo.cena-solo--vitrine {`, a regra da caixa, contém esta
+    # mesma sequência e casaria primeiro.
+    vitrine = re.search(r"^\.cena-solo--vitrine \{(.*?)\}", cena_css, re.S | re.M)
+    assert vitrine, "a vitrine não existe"
+    assert "img/background/" in vitrine.group(1), "a vitrine perdeu a paisagem"
 
 
 def test_a_tela_de_calculo_nao_e_impressa(cliente):

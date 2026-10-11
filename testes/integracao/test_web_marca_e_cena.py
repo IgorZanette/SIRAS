@@ -19,6 +19,7 @@ _ESTATICOS = _RAIZ / "siras" / "web" / "static"
 _TELAS_CSS = (_ESTATICOS / "css" / "siras-telas.css").read_text(encoding="utf-8")
 _IMPRESSA_CSS = (_ESTATICOS / "css" / "siras-impressa.css").read_text(encoding="utf-8")
 _GERANDO_JS = (_ESTATICOS / "js" / "gerando.js").read_text(encoding="utf-8")
+_NARRATIVA = (_ESTATICOS / "js" / "cena-solo" / "stages.js").read_text(encoding="utf-8")
 
 _ANALISE = {
     "cultura_id": "soja", "criterio_id": "graos_convencional", "cultivo": "1",
@@ -113,35 +114,44 @@ def test_a_cena_existe_e_e_decorativa_para_o_leitor_de_tela(cliente):
     """A informação está nos cinco passos, que são texto. A cena os ilustra — anunciá-la
     a quem não a vê seria repetir a lista com ruído."""
     html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
-    cena = re.search(r'<svg class="cena"[^>]*>', html).group(0)
+    cena = re.search(r'<div class="cena-solo cena-solo--palco[^>]*>', html).group(0)
 
     assert 'aria-hidden="true"' in cena
 
 
-@pytest.mark.parametrize("etapa", ["1", "2", "3", "4", "5", "pronto"])
+@pytest.mark.parametrize("etapa", [1, 2, 3, 4, 5])
 def test_cada_passo_do_motor_tem_o_seu_movimento_na_cena(etapa):
     """Nada na cena se mexe por acaso: cada movimento acende junto de um módulo real do
-    motor, na ordem em que gerar_laudo() os chama."""
-    assert f'.calculando[data-etapa="{etapa}"]' in _TELAS_CSS, (
-        f"a etapa {etapa} não desenha nada na cena"
+    motor, na ordem em que gerar_laudo() os chama.
+
+    O movimento MUDOU DE LUGAR em 11/10/2026. Era um SVG animado por CSS, e cada etapa
+    tinha a sua regra `.calculando[data-etapa="N"] .cena__…`. Agora é a cena 3D, e a
+    coreografia de cada etapa está declarada em `PROCESSING_STAGES` (stages.js). O que
+    este teste verifica continua sendo o mesmo: a etapa N tem movimento próprio."""
+    estagios = _NARRATIVA[_NARRATIVA.index("PROCESSING_STAGES"):]
+    coreografias = re.findall(r"\{ id: '([a-z]+)', label:", estagios)
+
+    assert len(coreografias) >= etapa, (
+        f"a etapa {etapa} não tem coreografia: só há {len(coreografias)}"
     )
+    assert coreografias[etapa - 1], f"a coreografia {etapa} não tem id"
 
 
-def test_o_broto_cresce_com_o_progresso_raiz_primeiro():
-    """A ordem é a da planta, e não a de uma barra: raiz, caule em degraus, folhas, e a
-    última folha só quando o laudo fica pronto."""
-    assert re.search(r"\.calculando\.passou-1 \.cena__raizes path \{ stroke-dashoffset: 0;",
-                     _TELAS_CSS)
+def test_a_cena_nao_melhora_o_solo_enquanto_calcula():
+    """O broto que crescia com o progresso saiu junto com o SVG, e no lugar fica a regra
+    que ele quase violava.
 
-    degraus = [
-        int(re.search(rf"\.calculando\.passou-{n} \.cena__caule \{{ stroke-dashoffset: (\d+);",
-                      _TELAS_CSS).group(1))
-        for n in (1, 2, 3, 4)
-    ]
-    assert degraus == sorted(degraus, reverse=True), f"o caule não sobe em degraus: {degraus}"
-    assert degraus[-1] == 0, "o caule não chega ao fim antes do pronto"
+    O solo é o mesmo do começo ao fim do cálculo. Um perfil que fosse ficando mais vivo
+    a cada passo diria, sem número nenhum, que o laudo melhora a lavoura enquanto é
+    calculado — e é exatamente a promessa que este sistema não pode fazer. A exceção é
+    o fechamento, que alterna os dois cenários DAQUELA análise: ali a diferença é o
+    resultado, e vem de dado real."""
+    calculo = _NARRATIVA[_NARRATIVA.index("PROCESSING_STAGES"):_NARRATIVA.index("CENARIO_TARGETS")]
 
-    assert re.search(r'\.calculando\[data-etapa="pronto"\] \.cena__folha--topo', _TELAS_CSS)
+    assert "vitality" not in calculo, "algum passo do cálculo mexe na vitalidade do solo"
+
+    fechamento = _NARRATIVA[_NARRATIVA.index("CENARIO_TARGETS"):]
+    assert "vitality" in fechamento, "os dois cenários deixaram de se distinguir"
 
 
 def test_o_script_diz_a_etapa_e_nao_desenha():
@@ -153,15 +163,20 @@ def test_o_script_diz_a_etapa_e_nao_desenha():
 
 
 def test_a_cena_para_de_se_mexer_com_menos_movimento():
-    """Os passos continuam acendendo e o broto aparece em cada degrau; só para o que se
-    repete em laço, que é o que causa desconforto vestibular."""
-    blocos = re.findall(r"@media \(prefers-reduced-motion: reduce\) \{(.*?)\n\}", _TELAS_CSS, re.S)
-    da_cena = [bloco for bloco in blocos if ".cena__" in bloco]
+    """Os cinco passos continuam acendendo, a barra anda e a frase do Manual troca; só
+    para o que se repete em laço, que é o que causa desconforto vestibular.
 
-    assert da_cena, "nenhum bloco de menos movimento cobre a cena"
-    assert "animation: none" in da_cena[0]
-    for laco in (".cena__leitura", ".cena__calcario circle", ".cena__nutriente"):
-        assert laco in da_cena[0], f"{laco} continua em laço com menos movimento"
+    QUEM DESLIGA MUDOU. No SVG era CSS — `animation: none` em cada peça animada. Num
+    canvas não há peça a desligar, há um laço de render; então quem para é o próprio
+    motor, por `reducedMotion`. O adaptador passa a preferência DA APLICAÇÃO, e não só
+    a do sistema operacional, e a reaplica quando o usuário a troca, sem recarregar."""
+    motor = (_ESTATICOS / "js" / "cena-solo" / "soilScene.js").read_text(encoding="utf-8")
+    adaptador = (_ESTATICOS / "js" / "cena-solo.js").read_text(encoding="utf-8")
+
+    assert "prefers-reduced-motion" in motor
+    assert "setReducedMotion" in motor and "setReducedMotion" in adaptador
+    assert "reducedMotion: menosMovimentoNaApp()" in adaptador
+    assert "if (reducedMotion || userPaused) return;" in motor
 
 
 def test_a_espera_continua_curta():
@@ -198,15 +213,23 @@ def test_a_conformidade_do_ccae_fica_na_camada_rapida():
     assert "mark.lenta" not in codigo
 
 
-@pytest.mark.parametrize("etapa", ["1", "2", "3", "4", "5"])
-def test_cada_passo_tem_etiqueta_e_regra_proprias(cliente, etapa):
-    """A etiqueta diz o que o passo consulta; a frase, uma regra que ele aplica."""
+@pytest.mark.parametrize("etapa", [1, 2, 3, 4, 5])
+def test_cada_passo_tem_regra_propria(cliente, etapa):
+    """Cada passo cita uma regra do Manual que ele aplica — nunca curiosidade inventada.
+
+    Havia TAMBÉM uma etiqueta desenhada no pé do monólito, dizendo o capítulo que o
+    passo consulta. Ela saiu com o SVG, e o significado não se perdeu: o que o passo
+    consulta está no `<small>` do próprio passo. Aliás melhorou — a etiqueta vivia
+    dentro de um SVG `aria-hidden`, então quem não enxergava nunca a teve."""
     html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
 
-    assert f"cena__etiqueta--{etapa}" in html
     assert f"dica-passo--{etapa}" in html
-    assert f'.calculando[data-etapa="{etapa}"] .cena__etiqueta--{etapa}' in _TELAS_CSS
     assert f'.calculando[data-etapa="{etapa}"] .dica-passo--{etapa}' in _TELAS_CSS
+
+    passos = re.findall(r"<b>(.*?)</b>\s*<small>(.*?)</small>", html, re.S)
+    assert len(passos) >= 5, f"só {len(passos)} passos com título e consulta"
+    titulo, consulta = passos[etapa - 1]
+    assert consulta.strip(), f"o passo {etapa} ({titulo.strip()}) não diz o que consulta"
 
 
 def test_a_espera_anda_continua_e_nao_aos_saltos():
@@ -215,11 +238,21 @@ def test_a_espera_anda_continua_e_nao_aos_saltos():
     assert re.search(r"\.calculando__barra i \{ transition: width var\(--passo-ms", _TELAS_CSS)
 
 
-def test_o_cintilar_para_com_menos_movimento():
-    blocos = re.findall(r"@media \(prefers-reduced-motion: reduce\) \{(.*?)\n\}", _TELAS_CSS, re.S)
-    da_cena = next(bloco for bloco in blocos if ".cena__" in bloco)
+def test_o_css_do_svg_antigo_saiu_por_inteiro():
+    """O SVG do perfil saiu da tela de espera, e as cerca de 150 linhas que o animavam
+    saíram com ele. CSS órfão de um elemento que não existe mais é a forma mais
+    silenciosa de uma folha de estilo apodrecer: ninguém o vê quebrar, ele só cresce —
+    e foi assim que o SVG antigo e a cena 3D chegaram a coexistir sem ninguém notar.
 
-    assert ".cena__brilho" in da_cena
+    Os dez tokens de cor do desenho saíram junto. Sobra `--leitura`, que não era do
+    SVG: é o verde do "Você sabia?" e do traço que corre sob o passo ativo."""
+    assert ".cena__" not in _TELAS_CSS, "sobrou regra do SVG antigo"
+    assert ".cena {" not in _TELAS_CSS
+
+    for token in ("--solo-a", "--solo-grao", "--calcario", "--broto", "--semente", "--vitrine"):
+        assert token not in _TELAS_CSS, f"{token} ficou órfão no CSS"
+
+    assert "--leitura: var(--v-400)" in _TELAS_CSS
 
 
 def _coletados(*argumentos) -> str:

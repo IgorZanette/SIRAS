@@ -1511,31 +1511,11 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
    Terra, e nao verde: o solo e o assunto, e o verde fica reservado ao que o
    sistema faz com ele - a leitura, a correcao, o broto. Tons de baixa saturacao,
    que leem como fotografia de perfil e nao como ilustracao infantil. */
-.calculando {
-  --solo-a: #6B5238;
-  --solo-b: #56412C;
-  --solo-c: #3F3021;
-  --solo-grao: rgba(255, 244, 225, .18);
-  --solo-regua: rgba(233, 240, 235, .45);
-  --vitrine: rgba(233, 240, 235, .16);
-  --calcario: #EFE9DC;
-  --leitura: var(--v-400);
-  --broto: var(--v-400);
-  --broto-fundo: var(--v-600);
-  --semente: #C9A66B;
-}
-:root[data-tema="claro"] .calculando {
-  --solo-a: #8A6A48;
-  --solo-b: #735737;
-  --solo-c: #5C4529;
-  --solo-grao: rgba(255, 250, 240, .24);
-  --solo-regua: rgba(13, 20, 16, .5);
-  --vitrine: rgba(13, 20, 16, .16);
-  --calcario: #FFFFFF;
-  --leitura: var(--v-600);
-  --broto: var(--v-600);
-  --broto-fundo: var(--v-700);
-}
+/* Dez tokens pintavam o SVG do perfil -- camadas, graos, regua, vitrine, calcario,
+   broto, semente. O SVG saiu e eles sairam com ele. Sobrou `--leitura`, que nao era
+   do desenho: e o verde do "Voce sabia?" e do traco que corre sob o passo ativo. */
+.calculando { --leitura: var(--v-400); }
+:root[data-tema="claro"] .calculando { --leitura: var(--v-600); }
 
 /* --- Assinatura ---------------------------------------------------------- */
 .calculando__assinatura { display: flex; align-items: center; gap: .6rem; }
@@ -1545,164 +1525,38 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 :root[data-tema="claro"] .calculando__palavra--escuro { display: none; }
 :root[data-tema="claro"] .calculando__palavra--claro { display: block; }
 
-/* --- O monolito ---------------------------------------------------------- */
-.cena { width: min(360px, 100%); height: auto; overflow: visible; }
+/* --- O palco da cena 3D --------------------------------------------------
+   Aqui viviam cerca de 150 linhas que animavam um SVG de perfil de solo: o calcario
+   caindo, os nutrientes subindo, os minerais cintilando, a etiqueta do capitulo e o
+   broto crescendo com o progresso. O SVG saiu (ver _parciais/gerando.html) e o CSS
+   dele saiu junto -- CSS orfao de um elemento que nao existe mais e a forma mais
+   silenciosa de uma folha de estilo apodrecer.
 
-.cena__horizonte--a { fill: var(--solo-a); }
-.cena__horizonte--b { fill: var(--solo-b); }
-.cena__horizonte--c { fill: var(--solo-c); }
-.cena__graos circle { fill: var(--solo-grao); }
-.cena__vitrine { fill: none; stroke: var(--vitrine); stroke-width: 1.5; }
-.cena__regua line { stroke: var(--solo-regua); stroke-width: 1.2; stroke-linecap: round; }
-.cena__regua text { fill: var(--solo-regua); font: 600 8.5px var(--ff-ui); }
+   O que a cena 3D precisa e so uma caixa. Ela chegou como `position: absolute;
+   inset: 0; z-index: -1`, herdado do uso como fundo da hero -- e dentro desta tela
+   isso a punha ATRAS do fundo opaco do veu: ela rodava, invisivel. Com lugar proprio
+   no fluxo, ela aparece.
 
-/* SVG com transform em CSS: a caixa de referencia precisa ser a propria forma,
-   ou a origem de escala e giro cai no canto da cena inteira. */
-.cena__folha, .cena__nutriente, .cena__marco, .cena__broto {
-  transform-box: fill-box;
+   `--palco-altura` em vh e nao em px porque esta tela e vertical e disputada: em
+   notebook de 768px de altura, um palco fixo de 360px empurraria os cinco passos,
+   que sao o conteudo, para fora da tela. */
+.calculando__palco {
+  width: min(380px, 100%);
+  margin-inline: auto;
 }
-
-/* --- 1 e 3. Leitura: a linha que varre as camadas ------------------------- */
-.cena__leitura { opacity: 0; transition: opacity 280ms ease; }
-.cena__scanner { fill: var(--leitura); }
-.calculando[data-etapa="1"] .cena__leitura,
-.calculando[data-etapa="3"] .cena__leitura {
-  opacity: 1;
-  animation: varrer 1.3s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+.cena-solo.cena-solo--palco {
+  position: relative; inset: auto; z-index: 0;
+  width: 100%; aspect-ratio: 764 / 792;
+  max-height: clamp(180px, 34vh, 340px);
 }
-@keyframes varrer {
-  from { transform: translateY(0); }
-  to   { transform: translateY(86px); }
+.cena-solo--palco:not(.cena-solo--ativa) .cena-solo__fallback {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; right: auto; bottom: auto;
 }
-
-/* --- 2. Calagem: o calcario cai, e o que cai fica ------------------------- */
-.cena__calcario circle { fill: var(--calcario); opacity: 0; }
-.calculando[data-etapa="2"] .cena__calcario circle {
-  animation: cair 1.05s cubic-bezier(.55, 0, 1, .45) infinite;
+.cena-solo-limites--palco {
+  margin: var(--e-2) auto 0; max-width: 38ch; text-align: center;
+  font-size: var(--fs-3xs); color: var(--n-500);
 }
-.cena__calcario circle:nth-child(2) { animation-delay: .32s; }
-.cena__calcario circle:nth-child(3) { animation-delay: .12s; }
-.cena__calcario circle:nth-child(4) { animation-delay: .48s; }
-.cena__calcario circle:nth-child(5) { animation-delay: .22s; }
-.cena__calcario circle:nth-child(6) { animation-delay: .6s; }
-.cena__calcario circle:nth-child(7) { animation-delay: .38s; }
-@keyframes cair {
-  0%   { opacity: 0; transform: translateY(0); }
-  18%  { opacity: .95; }
-  82%  { opacity: .95; }
-  100% { opacity: 0; transform: translateY(50px); }
-}
-.cena__camada-calcario {
-  fill: none; stroke: var(--calcario); stroke-width: 3; stroke-linecap: round;
-  opacity: 0; transition: opacity 600ms ease;
-}
-.calculando.passou-2 .cena__camada-calcario { opacity: .55; }
-
-/* --- 3. Fosforo e potassio sobem da camada de referencia ------------------ */
-.cena__nutriente { opacity: 0; }
-.cena__nutriente circle { fill: rgba(140, 226, 63, .16); stroke: var(--leitura); stroke-width: 1.2; }
-.cena__nutriente text {
-  fill: var(--leitura); font: 800 8.5px var(--ff-display);
-  text-anchor: middle; dominant-baseline: central;
-}
-.calculando[data-etapa="3"] .cena__nutriente { animation: subir 1.6s ease-out infinite; }
-.calculando[data-etapa="3"] .cena__nutriente--k { animation-delay: .55s; }
-@keyframes subir {
-  0%   { opacity: 0; transform: translateY(12px); }
-  25%  { opacity: 1; }
-  78%  { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-9px); }
-}
-
-/* --- 4. Aptidao: a camada corrigida muda de tom --------------------------- */
-.cena__correcao { fill: var(--v-400); opacity: 0; transition: opacity 900ms ease; }
-.calculando[data-etapa="4"] .cena__correcao,
-.calculando.passou-4 .cena__correcao { opacity: .17; }
-
-/* --- 5. Trilha: o traco que liga as leituras ------------------------------- */
-.cena__trilha {
-  fill: none; stroke: var(--leitura); stroke-width: 1.4; stroke-linecap: round;
-  stroke-dasharray: 160; stroke-dashoffset: 160;
-  transition: stroke-dashoffset 900ms cubic-bezier(.3, 0, .2, 1);
-}
-.calculando[data-etapa="5"] .cena__trilha,
-.calculando.passou-5 .cena__trilha { stroke-dashoffset: 0; }
-.cena__marco { fill: var(--leitura); transform: scale(0); transform-origin: 50% 50%;
-               transition: transform 360ms cubic-bezier(.3, 1.6, .5, 1); }
-.calculando[data-etapa="5"] .cena__marco,
-.calculando.passou-5 .cena__marco { transform: scale(1); }
-.calculando[data-etapa="5"] .cena__marco:nth-of-type(2) { transition-delay: .3s; }
-.calculando[data-etapa="5"] .cena__marco:nth-of-type(3) { transition-delay: .6s; }
-
-/* --- O broto: cresce com o progresso, raiz primeiro ------------------------
-   A ordem e a da planta, e nao a de uma barra: primeiro a raiz (passado o
-   primeiro passo), depois o caule subindo em degraus, as folhas se abrindo, e a
-   ultima folha so quando o laudo fica pronto. */
-.cena__semente { fill: var(--semente); }
-.cena__raizes path {
-  fill: none; stroke: var(--semente); stroke-width: 1.3; stroke-linecap: round;
-  stroke-dasharray: 26; stroke-dashoffset: 26;
-  transition: stroke-dashoffset 700ms cubic-bezier(.3, 0, .2, 1);
-}
-.calculando.passou-1 .cena__raizes path { stroke-dashoffset: 0; }
-
-.cena__caule {
-  fill: none; stroke: var(--broto); stroke-width: 2.4; stroke-linecap: round;
-  stroke-dasharray: 42; stroke-dashoffset: 42;
-  transition: stroke-dashoffset 700ms cubic-bezier(.3, 0, .2, 1);
-}
-.calculando.passou-1 .cena__caule { stroke-dashoffset: 32; }
-.calculando.passou-2 .cena__caule { stroke-dashoffset: 20; }
-.calculando.passou-3 .cena__caule { stroke-dashoffset: 9; }
-.calculando.passou-4 .cena__caule { stroke-dashoffset: 0; }
-
-.cena__folha {
-  fill: var(--broto); stroke: var(--broto-fundo); stroke-width: .8;
-  transform: scale(0);
-  transition: transform 560ms cubic-bezier(.3, 1.5, .5, 1);
-}
-.cena__folha--esq  { transform-origin: 100% 100%; }
-.cena__folha--dir  { transform-origin: 0% 100%; }
-.cena__folha--topo { transform-origin: 50% 100%; }
-.calculando.passou-3 .cena__folha--esq,
-.calculando.passou-4 .cena__folha--dir,
-.calculando[data-etapa="pronto"] .cena__folha--topo { transform: scale(1); }
-
-/* Pronto: o broto balanca uma vez por respiracao, e a cena descansa. */
-.cena__broto { transform-origin: 50% 100%; }
-.calculando[data-etapa="pronto"] .cena__broto {
-  animation: balancar 2.2s ease-in-out infinite;
-}
-@keyframes balancar {
-  0%, 100% { transform: rotate(0deg); }
-  30%      { transform: rotate(-3deg); }
-  70%      { transform: rotate(2.4deg); }
-}
-
-/* --- 4. Os minerais da camada corrigida cintilam ------------------------- */
-.cena__brilho { fill: var(--calcario); opacity: 0; transform: scale(.4);
-                transform-box: fill-box; transform-origin: 50% 50%; }
-.calculando[data-etapa="4"] .cena__brilho { animation: cintilar 1.4s ease-in-out infinite; }
-.calculando[data-etapa="4"] .cena__brilho:nth-child(2) { animation-delay: .45s; }
-.calculando[data-etapa="4"] .cena__brilho:nth-child(3) { animation-delay: .9s; }
-@keyframes cintilar {
-  0%, 100% { opacity: 0;   transform: scale(.4) rotate(0deg); }
-  45%      { opacity: .9;  transform: scale(1) rotate(45deg); }
-}
-
-/* --- A etiqueta do que se consulta, uma por passo ---------------------------
-   As cinco ocupam o mesmo lugar e trocam por esmaecimento: a leitura do pe do
-   monolito acompanha a lista sem que o olho precise ir ate ela. */
-.cena__etiqueta { opacity: 0; transform: translateY(4px);
-                  transition: opacity 320ms ease, transform 320ms ease; }
-.cena__etiqueta rect { fill: rgba(5, 8, 7, .62); stroke: var(--leitura); stroke-width: .8; }
-.cena__etiqueta text { fill: #E9F0EB; font: 700 7.4px var(--ff-ui);
-                       text-anchor: middle; dominant-baseline: central; letter-spacing: .02em; }
-.calculando[data-etapa="1"] .cena__etiqueta--1,
-.calculando[data-etapa="2"] .cena__etiqueta--2,
-.calculando[data-etapa="3"] .cena__etiqueta--3,
-.calculando[data-etapa="4"] .cena__etiqueta--4,
-.calculando[data-etapa="5"] .cena__etiqueta--5 { opacity: 1; transform: none; }
 
 /* --- Uma regra do Manual por passo, abaixo do titulo ----------------------- */
 .calculando__dica { position: relative; display: grid; min-height: 2.9em; max-width: 46ch;
@@ -1743,7 +1597,7 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 
 /* --- Telas baixas: a cena cede espaco, os passos continuam inteiros ------- */
 @media (max-height: 820px) {
-  .cena { width: min(270px, 100%); }
+  .calculando__palco { width: min(280px, 100%); }
   .calculando__conteudo { gap: var(--e-3); }
 }
 @media (max-height: 680px) {
@@ -1751,19 +1605,16 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 }
 
 /* --- Menos movimento -------------------------------------------------------
-   A informacao continua inteira: os passos acendem e o broto aparece em cada
-   degrau. So para o que se repete em laco - a varredura, a queda, a subida, o
-   balanco -, que e o que causa desconforto vestibular. */
+   A informacao continua inteira: os cinco passos acendem, a barra anda e a frase do
+   Manual troca. So para o que se repete em laco, que e o que causa desconforto
+   vestibular.
+
+   O grosso desta regra desapareceu com o SVG. O movimento da cena 3D nao se desliga
+   por CSS: o canvas nao tem elemento por animacao. Quem o desliga e soilScene.js, via
+   `reducedMotion`, que o adaptador le da mesma media query (cena-solo.js,
+   menosMovimentoNaApp) e reaplica quando o usuario troca a preferencia. */
 @media (prefers-reduced-motion: reduce) {
-  .calculando[data-etapa] .cena__brilho,
-  .calculando[data-etapa="pronto"] .calculando__pronto .ico,
-  .calculando[data-etapa] .cena__leitura,
-  .calculando[data-etapa] .cena__calcario circle,
-  .calculando[data-etapa] .cena__nutriente,
-  .calculando[data-etapa="pronto"] .cena__broto { animation: none !important; }
-  .cena__caule, .cena__raizes path, .cena__folha, .cena__trilha,
-  .cena__marco, .cena__correcao, .cena__camada-calcario { transition: none !important; }
-  .calculando[data-etapa="3"] .cena__nutriente { opacity: 1; }
+  .calculando[data-etapa="pronto"] .calculando__pronto .ico { animation: none !important; }
 }
 
 /* =========================================================================
@@ -1847,9 +1698,6 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 :root[data-tema="claro"] .calculando__barra i {
   background: linear-gradient(90deg, var(--v-700), var(--v-600));
 }
-
-/* A correcao do solo na cena segue o verde da planta, que ja muda com o tema. */
-.cena__correcao { fill: var(--broto); }
 
 
 /* =========================================================================
@@ -2270,50 +2118,79 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 .hero__natureza { margin-top: var(--e-3); font-size: var(--fs-xs); color: var(--n-400);
                   letter-spacing: .01em; }
 
-/* --- Fundos de apoio (ADR 0012) ----------------------------------------- */
-/* As cinco artes de `img/background/` sao paisagens de lavoura ao amanhecer, e
-   todas sao ESCURAS. Isso decide onde elas podem entrar: uma imagem escura a baixa
-   opacidade sobre fundo claro nao vira textura, vira uma mancha cinza que derruba o
-   contraste do texto. Entao elas entram onde a pagina ja tem atmosfera -- a hero e a
-   chamada final -- e recuam quase a zero no tema claro.
+/* --- Fundos de apoio (ADR 0013) ----------------------------------------- */
+/* As cinco artes sao paisagens de lavoura ao amanhecer, e todas sao ESCURAS. A
+   primeira tentativa as pos como textura por cima da secao inteira, a 16% -- e elas
+   sumiram. Medir explicou por que, e mudou o desenho.
 
-   Sao atmosfera, nao conteudo: vao em `background-image`, e nao em `<img>`, entao nao
-   entram na arvore de acessibilidade nem na impressao. Nenhum texto depende delas. */
-.fundo-horizonte { position: relative; isolation: isolate; }
-.fundo-horizonte::before {
+   1. SOBRE FUNDO ESCURO, MISTURAR NAO FUNCIONA. Arte escura sobre fundo escuro em
+      composicao normal a 16% move o fundo em 7 de 255: nada. Quem faz uma arte escura
+      aparecer sobre fundo escuro e `screen`, que so CLAREIA -- a 55% o mesmo par move
+      31. E a operacao certa, e nao uma opacidade maior.
+
+   2. MAS ELA NAO PODE FICAR ATRAS DE TEXTO. O teto de luminancia de fundo que sustenta
+      o `--n-400` (texto terciario, `.t-aux`) a 4,5:1 e 0,027. A regiao mais clara da
+      `op-3` em screen cheio chega a 0,57 -- vinte vezes o teto. Nao ha opacidade que
+      resolva: ou a arte aparece, ou o texto secundario se le.
+
+   A saida nao e dosar, e MUDAR DE LUGAR: a arte vai onde nao ha texto nenhum.
+
+     - atras do monolito, dentro da vitrine da cena (cena-solo.css);
+     - nas CALHAS, as faixas vazias fora da coluna de 1200px, que so existem em tela
+       larga -- e que eram exatamente o "fundo chapado" que sobrava na pagina.
+
+   Abaixo de 1200px nao ha calha, a mascara fecha sozinha pelo `calc()` e a textura
+   desaparece. Em telefone nao sobra nada atras de texto, sem media query. */
+.fundo-horizonte, .faixa--alt { position: relative; isolation: isolate; }
+.fundo-horizonte::before, .faixa--alt::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
-  background-size: cover; background-repeat: no-repeat;
+  background-image: url("../img/background/op-1.webp");
+  background-size: cover; background-position: center;
+  /* `brightness` corta o pico da arte antes do screen: e o ceu da imagem que ameaca
+     o contraste, e ele nao e o que da a sensacao de paisagem. */
+  filter: brightness(.55) saturate(.85);
+  mix-blend-mode: screen;
+  opacity: .5;
   pointer-events: none;
 }
-
-/* A hero: a paisagem comeca no topo e se dissolve antes do conteudo, para a cena 3D
-   e o titulo caírem sobre fundo limpo. Sem a mascara a foto termina numa linha reta
-   no fim da section, que denuncia o retangulo. */
-.hero.fundo-horizonte::before {
-  background-image: url("../img/background/op-3.webp");
-  background-position: center top;
-  opacity: .16;
-  mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.45) 45%, transparent 88%);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.45) 45%, transparent 88%);
+/* A mascara e a interseccao de duas: VERTICAL, para a textura nao terminar numa linha
+   reta que denuncia o retangulo, e HORIZONTAL, oca no meio -- transparente ao longo da
+   coluna de conteudo e solida so nas calhas. 600px e meia largura do `.env`. */
+.fundo-horizonte::before, .faixa--alt::before {
+  mask-image:
+    linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent),
+    linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
+                    transparent calc(50% + 600px), #000 100%);
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent),
+    linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
+                    transparent calc(50% + 600px), #000 100%);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
 }
+/* As faixas alternadas entram pela propria classe, e nao uma a uma no template: a
+   regra e "as faixas escuras carregam a paisagem nas calhas". Aplicar caso a caso
+   daria uma pagina onde a textura aparece e some sem motivo visivel ao rolar. */
 
-/* A chamada final: o inverso: a paisagem entra por baixo e a pagina termina num
-   horizonte. `op-5` e a mais uniforme das cinco, que e o que serve atras de um botao. */
+/* A chamada final fecha a pagina, e la a paisagem pode subir: `op-5` e a mais uniforme
+   das cinco, e o texto dela continua dentro da coluna, fora da calha. */
 .chamada.fundo-horizonte::before {
   background-image: url("../img/background/op-5.webp");
-  background-position: center bottom;
-  opacity: .22;
-  mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.5) 55%, #000 100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.5) 55%, #000 100%);
+  opacity: .65;
 }
 
-/* No tema claro as artes trabalham contra o fundo: escurecem em vez de dar superficie.
-   Ficam como insinuacao de cor, no limite de serem percebidas -- que e o maximo que
-   uma imagem escura pode fazer sobre papel branco sem sujar o texto. */
-:root[data-tema="claro"] .hero.fundo-horizonte::before { opacity: .05; }
-:root[data-tema="claro"] .chamada.fundo-horizonte::before { opacity: .07; }
+/* No tema CLARO `screen` nao faz nada -- clarear o que ja e quase branco move o fundo
+   em 0,3 de 255. A operacao que marca ali e a inversa, `multiply`, e bem fraca: nas
+   calhas ela vira uma sombra esverdeada de lavoura, que e o que a arte tem a dar sobre
+   papel. Continua fora da coluna de texto, entao nao disputa contraste com nada. */
+:root[data-tema="claro"] .fundo-horizonte::before,
+:root[data-tema="claro"] .faixa--alt::before {
+  mix-blend-mode: multiply;
+  filter: brightness(1.35) saturate(.6);
+  opacity: .16;
+}
 
-@media print { .fundo-horizonte::before { display: none; } }
+@media print { .fundo-horizonte::before, .faixa--alt::before { display: none; } }
 
 /* --- Limites da ilustracao (cena 10 da apresentacao v7) ------------------ */
 .cena-solo-limites {

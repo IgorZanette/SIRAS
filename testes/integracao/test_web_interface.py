@@ -1420,3 +1420,43 @@ def test_o_documento_nao_muda_de_tom_entre_os_temas():
         assert token + ":" in regra, (
             token + " não é fixado em .doc e vem do tema da aplicação"
         )
+
+
+def test_a_leitura_ao_vivo_acorda_sozinha_com_a_tela_preenchida():
+    """O painel só reagia a eventos, e evento só acontece quando alguém digita.
+
+    Quem carregava um exemplo via a tela inteira com valores e o painel ainda dizendo
+    "a interpretação aparece aqui assim que você digitar o primeiro valor" — precisava
+    mexer num campo qualquer para ele acordar. O mesmo na volta do laudo para editar.
+    """
+    js = (_ESTATICOS / "js" / "leitura-ao-vivo.js").read_text(encoding="utf-8")
+
+    assert "temAlgumValor" in js, "nenhuma leitura disparada ao carregar a tela"
+    # E só quando há o que interpretar: sem campo preenchido, a mensagem de partida
+    # continua sendo a resposta certa, e uma requisição vazia seria desperdício.
+    assert re.search(r"if \(temAlgumValor\(\)\) \{\s*interpretar\(\);", js)
+
+
+def test_o_laudo_impresso_nao_deixa_pagina_orfa_no_fim():
+    """O PDF de erva-mate saía com uma quinta folha contendo uma frase só: o rodapé do
+    documento era partido pela quebra de página."""
+    bloco = _bloco_de_impressao()
+    com_avoid = " ".join(
+        m.group(1) for m in re.finditer(r"([^{}]+)\{[^}]*break-inside:\s*avoid", bloco)
+    )
+
+    assert ".doc__rodape" in com_avoid
+    assert ".assinatura" in com_avoid
+
+
+def test_o_selo_de_aptidao_encolhe_no_papel():
+    """Eram ~45mm por talhão, só de selo, e foi o que fez cada talhão do laudo de seis
+    gastar duas folhas. O que o selo informa é o rótulo da classe, não o tamanho da
+    caixa — em tela ele continua grande, porque lá é o elemento que o olho procura."""
+    bloco = _bloco_de_impressao()
+
+    assert re.search(r"\.cenario \.aptidao__selo \{[^}]*min-height:\s*0", bloco)
+    # O ícone diminui mas NÃO sai: é ele que distingue apta de inapta à distância.
+    assert "display: none" not in re.search(
+        r"\.aptidao__selo \.ico--lg \{[^}]*\}", bloco
+    ).group(0)

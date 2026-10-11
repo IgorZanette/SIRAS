@@ -198,3 +198,41 @@ não distinguia uma célula de outra, e a linha já se chama "Acidez". Ficou só
 A contagem de folhas **não foi medida por este trabalho**: a estimativa em caracteres não
 enxerga altura, e o autor é quem tem o navegador. As quatro correções acima atacam
 exatamente o que os PDFs mostraram, mas o número final precisa sair de um Ctrl+P.
+
+## Segunda passada, 11/10/2026 — o que o PDF seguinte mostrou
+
+Com a paginação corrigida, dois PDFs novos: **erva-mate, um talhão, em 5 folhas** e
+**milho, seis talhões, em 18**. A tabela já não saía cortada e os blocos já não partiam,
+mas sobrava espaço vazio.
+
+O que o milho mostrou: **cada talhão gastava duas folhas**, porque a aptidão nunca cabia
+no que restava da primeira. Medindo o que cada peça ocupa, por talhão:
+
+| | Altura |
+|---|---|
+| Os dois selos de aptidão | ~45 mm (`min-height: 150px` cada) |
+| A tabela de fatores | ~35 mm |
+| Os quatro cartões de dose | ~32 mm |
+| As duas réguas | ~30 mm |
+
+O selo era o maior, e o mais fácil de encolher **sem perder nada**: o que ele informa é o
+rótulo da classe, não o tamanho da caixa. No papel a caixa encolhe e o rótulo continua
+legível; em tela ele permanece grande, porque ali é o elemento de diagnóstico que o olho
+procura. O ícone diminui mas **não sai** — é ele que distingue apta de inapta à distância.
+
+O que a erva-mate mostrou: uma **quinta folha com uma frase só**. O rodapé do documento
+era partido pela quebra de página. Assinatura e rodapé passaram a ser blocos inteiros.
+
+Junto: a margem da `@page` de 15 mm para 12 mm, que ainda é folga de encadernação numa
+A4, e a escala do veredito de 20 pt para 17 pt — hierarquia de documento, e não de tela.
+
+## Leitura ao vivo com a tela já preenchida
+
+Defeito encontrado no mesmo dia, fora do laudo. O painel de leitura ao vivo só reagia a
+eventos, e evento só acontece quando alguém digita: quem carregava um exemplo via a tela
+inteira com valores e o painel ainda dizendo *"a interpretação aparece aqui assim que você
+digitar o primeiro valor"*. Precisava mexer num campo qualquer para ele acordar — e o
+mesmo valia na volta do laudo para editar a análise.
+
+O painel passa a interpretar uma vez ao carregar, quando há o que interpretar. O gatilho é
+**ter valor**, e não ser exemplo: o painel lê o que está na tela, venha de onde vier.

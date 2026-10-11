@@ -504,6 +504,56 @@
   .aptidao__titulo { margin-top: var(--e-3); }
   .trilha__passo { padding: 1.5pt 0; }
   .anexo { margin-top: var(--e-5); padding-top: var(--e-4); }
+
+  /* ----------------------------------------------------------------------
+     SEGUNDA PASSADA DE DENSIDADE (11/10/2026), guiada por dois PDFs reais.
+
+     Erva-mate, um talhao: 5 folhas, com a pagina 2 pela metade e a pagina 5
+     com UMA frase orfa. Milho, seis talhoes: 18 folhas, cada talhao gastando
+     duas porque a aptidao nunca cabia no que sobrava da primeira.
+
+     O que media cada coisa, por talhao, antes daqui:
+       - os dois selos de aptidao ...... ~45mm (min-height 150px cada)
+       - os quatro cartoes de dose ..... ~32mm
+       - as duas reguas ................ ~30mm
+       - a tabela de fatores ........... ~35mm
+
+     O selo era o maior, e o mais facil de encolher sem perder nada: o que ele
+     informa e o rotulo da classe, nao o tamanho da caixa. Em tela ele continua
+     grande, porque la ele e o elemento de diagnostico que o olho procura.
+     ------------------------------------------------------------------- */
+
+  /* Mais area util: 12mm ainda e margem de encadernacao folgada numa A4. */
+  @page { margin: 12mm 12mm; }
+
+  /* Os selos: a caixa encolhe, o rotulo continua legivel. O icone acompanha —
+     ele distingue o apta do inapta a distancia, entao nao sai, so diminui. */
+  .cenario .aptidao__selo { min-height: 0; max-width: 150px;
+                            padding: var(--e-2) var(--e-3); }
+  .aptidao__grau { font-size: 12pt; }
+  .cenario { gap: var(--e-1); }
+  .cenarios { gap: var(--e-3); }
+  .cenario__nota { font-size: 7.5pt; line-height: 1.35; max-width: none; }
+  .cenarios__seta .ico { width: 18px; height: 18px; }
+  .aptidao__selo .ico--lg { width: 18px; height: 18px; }
+
+  /* Os quatro numeros do veredito continuam sendo a hierarquia da folha, so
+     que numa escala de documento e nao de tela. */
+  .numero { font-size: 17pt; }
+  .numero--sec { font-size: 13pt; }
+  .dose__val { margin: var(--e-1) 0 var(--e-1); }
+
+  .limitante { padding: 1.5pt 0; }
+  .aptidao__titulo { margin: var(--e-2) 0 var(--e-1); }
+  .aptidao__ressalva, .aptidao__sem-limitacao { margin-top: var(--e-1); }
+  .doc__cab { padding-bottom: var(--e-3); }
+  .doc__corpo { padding: var(--e-4) 0 0; }
+
+  /* A PAGINA ORFA: o rodape do documento era partido e sobrava uma folha
+     inteira para uma frase. Assinatura e rodape sao blocos inteiros. */
+  .assinatura { margin-top: var(--e-5); break-inside: avoid; }
+  .doc__rodape { margin-top: var(--e-5); break-inside: avoid; }
+  .doc__assinatura-siras { break-after: avoid; }
 }
 
 /* =========================================================================

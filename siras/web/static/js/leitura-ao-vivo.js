@@ -69,4 +69,32 @@
   /* 'input' cobre digitacao; 'change' cobre os seletores e o colar com o mouse. */
   formulario.addEventListener("input", agendar);
   formulario.addEventListener("change", agendar);
+
+  /* UMA LEITURA AO CARREGAR, quando a tela ja chega preenchida.
+
+     O painel so reagia a eventos, e eventos so acontecem quando alguem digita.
+     Quem carregava um exemplo pre-preenchido via a tela inteira com valores e o
+     painel ainda dizendo "a interpretacao aparece aqui assim que voce digitar o
+     primeiro valor" -- precisava mexer num campo qualquer para o painel acordar.
+     O mesmo valia na volta do laudo para editar a analise.
+
+     O gatilho e ter valor, e nao ser exemplo: o painel interpreta o que esta na
+     tela, venha de onde vier. Sem nenhum campo preenchido nao ha o que
+     interpretar, e a mensagem de partida continua sendo a resposta certa. */
+  function temAlgumValor() {
+    var dados = coletar();
+    for (var nome in dados) {
+      if (nome === "cultura_id" || nome === "criterio_id") {
+        continue;
+      }
+      if (String(dados[nome]).trim() !== "") {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if (temAlgumValor()) {
+    interpretar();
+  }
 })();

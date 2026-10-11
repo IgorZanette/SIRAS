@@ -206,6 +206,11 @@ boa, e torna a Fase 3 bem menos arriscada do que o plano do kit supõe.
    já tem o painel de leitura ao vivo, que é o elemento de maior valor pedagógico do
    sistema. Pôr uma cena 3D ao lado dele disputa atenção com o que já funciona, e a §9.3
    do plano de front-end justifica aquele painel por um motivo que a cena não substitui.
+
+   *Revisto em 11/10/2026:* o argumento estava certo, a conclusão não. "Ao lado" era a
+   única posição considerada. Como **cabeçalho do mesmo painel** as duas não disputam —
+   a cena diz o que já foi informado, a leitura diz o que aquilo significa. Integrada
+   assim; ver a adenda da D12.2 na [ADR 0012](../decisoes/0012-cena-3d-e-acabamento-da-interface.md).
 3. **Medir o custo de partida.** Um `canvas` WebGL na página inicial atrasa o primeiro
    desenho. O kit tem fallback para máquina sem aceleração, mas não mede o atraso em
    máquina com. Vale medir antes de decidir que a hero ganha cena — a landing é a primeira

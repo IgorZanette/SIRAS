@@ -65,7 +65,7 @@ existirem**, e por isso ela é a última a ser redigida.
 | 11 | Coleta com 5 a 8 participantes | 20/10 a 14/11 | pendente | recrutamento (P8) |
 | 12 | Artigo final em `docs/artigo_final/` | 13/10 a 28/11 | pendente | Resultados dependem da etapa 11 |
 | 13 | Consolidação, lista priorizada de correções e Resultados do artigo | 17–28/11 | pendente | etapa 11 |
-| 14 | **Reformulação da interface e cena 3D** — [ADR 0012](../decisoes/0012-cena-3d-e-acabamento-da-interface.md) | 11/10 | **concluído** — antecipado por decisão do autor, para que o congelamento já inclua a interface nova e a avaliação meça o sistema final. Cena 3D na inicial e na espera (three vendorizado, ~1,2 MB, nada de 3D no laudo), revelação ao rolar, seção de estado do projeto vinda de `siras/dominio/estado.py`, link de pular e foco visível único | — |
+| 14 | **Reformulação da interface e cena 3D** — [ADR 0012](../decisoes/0012-cena-3d-e-acabamento-da-interface.md) | 11/10 | **concluído** — antecipado por decisão do autor, para que o congelamento já inclua a interface nova e a avaliação meça o sistema final. Cena 3D na inicial, no formulário e na espera — as dez cenas da v7, uma coreografia por módulo do motor (three vendorizado, ~1,2 MB, nada de 3D no laudo) —, nova identidade de marca, escolha de tema em três estados (claro, escuro, sistema), fundos de apoio em WebP, revelação ao rolar, seção de estado do projeto vinda de `siras/dominio/estado.py`, link de pular e foco visível único | — |
 
 A coleta começa em outubro, e não em novembro como a proposta prevê. É folga ganha com S3
 e S4 concluídos antes do previsto; cabe numa nota, não exige alterar o cronograma.

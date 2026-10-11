@@ -292,13 +292,43 @@ def test_sem_exemplo_o_formulario_abre_vazio(cliente):
 
 # --- modo claro ---------------------------------------------------------------
 
-def test_existe_alternador_de_tema(cliente):
+def test_existe_escolha_de_tema_em_tres_estados(cliente):
     """§14 do plano: tema escuro é ruim sob sol direto, e parte do público usa tablet em
-    campo."""
+    campo. Desde 11/10/2026 são três estados, e não dois: a terceira opção é "seguir o
+    sistema", que faltava — quem tem o computador claro de dia e escuro de noite
+    trocava à mão duas vezes por dia."""
     html = cliente.get("/").get_data(as_text=True)
 
-    assert 'id="alternar-tema"' in html
-    assert 'aria-pressed' in html
+    assert 'id="escolha-de-tema"' in html
+    for modo in ("claro", "escuro", "sistema"):
+        assert f'data-tema-modo="{modo}"' in html, modo
+    # radiogroup com aria-checked, e não três botões de alternância: são opções
+    # mutuamente exclusivas de uma escolha só. (aria-pressed segue válido noutros
+    # lugares da página, como os controles de etapa da cena, que SÃO alternâncias.)
+    controle = re.search(r'<div class="tema".*?</div>', html, re.S).group(0)
+    assert 'role="radiogroup"' in controle
+    assert controle.count('aria-checked') == 3
+    assert "aria-pressed" not in controle
+
+
+def test_o_padrao_do_tema_e_seguir_o_sistema(cliente):
+    """Um controle de três estados cujo padrão fosse um dos extremos seria estranho —
+    e a opção existe justamente para não obrigar ninguém a escolher."""
+    html = cliente.get("/").get_data(as_text=True)
+
+    assert 'data-modo="sistema"' in html
+    assert re.search(r'data-tema-modo="sistema"[^>]*aria-checked="true"', html)
+
+
+def test_o_que_fica_gravado_e_a_escolha_e_nao_o_tema_resultante():
+    """Gravar "claro" porque o sistema estava claro congelaria a decisão: a troca do
+    sistema à noite não chegaria mais. O localStorage guarda o MODO."""
+    js = (_ESTATICOS / "js" / "tema.js").read_text(encoding="utf-8")
+
+    assert 'MODOS = ["claro", "escuro", "sistema"]' in js
+    assert "setItem(CHAVE, modo)" in js, "grava o tema resultante, e não a escolha"
+    # E com "sistema" escolhido, mudar o tema do SO muda a página sem recarregar.
+    assert "prefers-color-scheme" in js and "change" in js
 
 
 def test_o_tema_salvo_e_aplicado_antes_da_primeira_pintura(cliente):
@@ -872,11 +902,26 @@ def test_pular_significa_agora_nao_e_nao_nunca_mais():
 
 # --- microinterações -----------------------------------------------------------
 
-def test_o_alternador_de_tema_usa_sol_e_lua(cliente):
+def test_a_escolha_de_tema_usa_sol_lua_e_monitor(cliente):
+    """Sol e lua dizem escolha; a tela diz "quem decide não sou eu, é o aparelho"."""
     html = cliente.get("/").get_data(as_text=True)
 
-    assert "#i-sol" in html and "#i-lua" in html
-    assert re.search(r"\.tema__claro \{[^}]*transform: rotate", _TELAS_CSS)
+    for icone in ("#i-sol", "#i-lua", "#i-monitor"):
+        assert icone in html, icone
+    # Um indicador só, que desliza entre as três células. Três fundos acendendo e
+    # apagando dariam um pisca-pisca no lugar de uma transição.
+    assert re.search(r"\.tema::before \{[^}]*transition: transform", _TELAS_CSS)
+    assert re.search(r'\.tema\[data-modo="sistema"\]::before \{[^}]*translateX', _TELAS_CSS)
+
+
+def test_cada_opcao_de_tema_tem_rotulo_para_leitor_de_tela(cliente):
+    """O ícone sozinho não diz nada a um leitor de tela."""
+    html = cliente.get("/").get_data(as_text=True)
+
+    for rotulo in ("Modo claro", "Modo escuro", "Seguir o sistema"):
+        assert rotulo in html, rotulo
+    # Fora da tela, e não display:none — que o leitor também ignoraria.
+    assert re.search(r"\.apenas-leitor \{[^}]*clip-path", _TELAS_CSS)
 
 
 def test_a_tela_de_calculo_confirma_antes_de_navegar(cliente):

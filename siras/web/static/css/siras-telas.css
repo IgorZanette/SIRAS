@@ -870,10 +870,6 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 :root[data-tema="claro"] .doc { box-shadow: none; border: 1px solid #D8E2DB; }
 
 /* Botao alternador */
-.tema { width: 40px; height: 40px; padding: 0; flex: none; }
-.tema__claro { display: none; }
-:root[data-tema="claro"] .tema__escuro { display: none; }
-:root[data-tema="claro"] .tema__claro { display: block; }
 
 /* =========================================================================
    Impressao: correcoes vistas no PDF gerado
@@ -1124,18 +1120,47 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
   to   { opacity: 1; transform: none }
 }
 
-/* Alternador de tema: os dois icones ocupam a mesma celula e fazem crossfade com
-   um quarto de giro, em vez de trocar de uma vez. */
-.tema { position: relative; overflow: hidden; }
-.tema__escuro, .tema__claro { display: grid; place-items: center;
-                              transition: opacity 260ms ease, transform 260ms ease; }
-.tema__claro { position: absolute; inset: 0; }
-:root[data-tema="claro"] .tema__escuro,
-:root[data-tema="claro"] .tema__claro { display: grid; }
-.tema__claro { opacity: 0; transform: rotate(-90deg) scale(.6); }
-.tema__escuro { opacity: 1; transform: none; }
-:root[data-tema="claro"] .tema__claro { opacity: 1; transform: none; }
-:root[data-tema="claro"] .tema__escuro { opacity: 0; transform: rotate(90deg) scale(.6); }
+/* --- Escolha de tema: claro, escuro, sistema -----------------------------
+   Controle segmentado, e nao um interruptor: sao TRES opcoes exclusivas, e o
+   terceiro estado ("seguir o sistema") nao cabe num botao que alterna.
+
+   O indicador desliza entre as tres celulas em vez de piscar na nova: o
+   movimento e o que diz QUAL saiu e QUAL entrou, numa troca sem texto. */
+.tema {
+  display: inline-grid; grid-template-columns: repeat(3, 32px);
+  align-items: center; flex: none; position: relative; isolation: isolate;
+  padding: 3px; border: var(--borda); border-radius: 999px;
+  background: var(--n-850);
+}
+/* A pilula que marca a opcao ativa. Uma so, movida por translate -- tres fundos
+   acendendo e apagando dariam um pisca-pisca no lugar de uma transicao. */
+.tema::before {
+  content: ""; position: absolute; z-index: -1; top: 3px; bottom: 3px; left: 3px;
+  width: 32px; border-radius: 999px; background: var(--v-600);
+  transition: transform 260ms cubic-bezier(.2,0,.2,1);
+}
+.tema[data-modo="escuro"]::before { transform: translateX(32px); }
+.tema[data-modo="sistema"]::before { transform: translateX(64px); }
+
+.tema__opcao {
+  display: grid; place-items: center; height: 30px; padding: 0;
+  background: none; border: 0; border-radius: 999px; cursor: pointer;
+  color: var(--n-400); transition: color 180ms ease;
+}
+.tema__opcao:hover { color: var(--n-100); }
+.tema__opcao[aria-checked="true"] { color: #fff; }
+:root[data-tema="claro"] .tema { background: var(--n-950); }
+
+/* O rotulo existe para quem usa leitor de tela; o icone sozinho nao diz nada a
+   ele. Fica fora da tela, e nao `display:none`, que o leitor tambem ignoraria. */
+.apenas-leitor {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tema::before, .tema__opcao { transition: none; }
+}
 /* A troca de cores da pagina inteira acompanha, em vez de piscar. */
 body, .painel, .barra, .campo__caixa, .etapa, .grupo, .cultura, .doc {
   transition: background-color 240ms ease, border-color 240ms ease, color 240ms ease;

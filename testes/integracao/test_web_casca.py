@@ -34,7 +34,7 @@ _ICONES_ESPERADOS = {
     "perfil", "broto", "calagem", "analise", "regua", "alvo", "aptidao", "laudo", "rastro",
     "graos", "hortalicas", "tuberculos", "frutiferas", "erva", "comerciais",
     "alerta", "confere", "avanca", "volta", "imprime", "edita", "baixa", "info",
-    "sol", "lua", "lupa",
+    "sol", "lua", "monitor", "lupa",
     "manejo", "aplicar", "area", "subsolo", "talhao", "talhoes", "assina", "soma",
     "adiciona", "exemplo", "adubo", "fosforo", "potassio", "ph", "exigencia",
     "marca",

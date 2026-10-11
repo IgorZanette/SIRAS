@@ -10,8 +10,18 @@
 <script>
   (function () {
     try {
-      var salvo = window.localStorage.getItem("siras-tema");
-      if (salvo) { document.documentElement.dataset.tema = salvo; }
+      /* O que fica gravado e a ESCOLHA ("claro", "escuro" ou "sistema"), e nao o
+         tema resultante: gravar "claro" porque o sistema estava claro congelaria a
+         decisao, e a troca do sistema a noite nao chegaria mais.
+
+         Sem escolha gravada, o padrao e seguir o sistema. */
+      var escolha = window.localStorage.getItem("siras-tema") || "sistema";
+      var tema = escolha;
+      if (escolha === "sistema") {
+        tema = window.matchMedia("(prefers-color-scheme: light)").matches
+          ? "claro" : "escuro";
+      }
+      document.documentElement.dataset.tema = tema;
       /* `tem-js` guarda tudo que so faz sentido com JavaScript: a revelacao ao
          rolar esconde o conteudo ANTES de revela-lo, e sem este marcador quem
          estiver sem JS veria a pagina em branco. A classe entra aqui, no mesmo
@@ -89,11 +99,35 @@
       <a class="btn btn--fantasma barra__secundario" href="{{ url_for('siras.tabelas') }}">
         Tabelas do Manual
       </a>
-      <button class="btn btn--contorno tema" type="button" id="alternar-tema"
-              aria-pressed="false" aria-label="Mudar para o modo claro">
-        <span class="tema__escuro">{{ i.ico("sol", "ico ico--sm") }}</span>
-        <span class="tema__claro">{{ i.ico("lua", "ico ico--sm") }}</span>
-      </button>
+      {# Escolha de tema em três estados, e não um interruptor de dois.
+
+         "Seguir o sistema" é o padrão e é a terceira opção que faltava: quem tem o
+         computador claro de dia e escuro de noite trocava à mão duas vezes por dia.
+
+         `radiogroup` com `aria-checked`, e não três botões de alternância: são opções
+         mutuamente exclusivas de uma escolha só, e o Tab precisa parar uma vez (as
+         setas navegam dentro, como num radiogroup nativo).
+
+         Sem JavaScript o grupo aparece e não responde — por isso o tema padrão do CSS
+         já é um tema completo, e não um estado de espera. #}
+      <div class="tema" id="escolha-de-tema" role="radiogroup"
+           aria-label="Tema da interface" data-modo="sistema">
+        <button class="tema__opcao" type="button" role="radio"
+                data-tema-modo="claro" aria-checked="false" tabindex="-1">
+          {{ i.ico("sol", "ico ico--sm") }}
+          <span class="apenas-leitor">Modo claro</span>
+        </button>
+        <button class="tema__opcao" type="button" role="radio"
+                data-tema-modo="escuro" aria-checked="false" tabindex="-1">
+          {{ i.ico("lua", "ico ico--sm") }}
+          <span class="apenas-leitor">Modo escuro</span>
+        </button>
+        <button class="tema__opcao" type="button" role="radio"
+                data-tema-modo="sistema" aria-checked="true" tabindex="0">
+          {{ i.ico("monitor", "ico ico--sm") }}
+          <span class="apenas-leitor">Seguir o sistema</span>
+        </button>
+      </div>
       {% block barra_nav %}{% endblock %}
     </nav>
   </div>

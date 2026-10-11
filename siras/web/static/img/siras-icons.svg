@@ -392,4 +392,15 @@
   <path d="M3.4 20.8h17.2"/>
 </symbol>
 
+<!-- Monitor: a terceira opcao do seletor de tema, "seguir o sistema". Sol e lua
+     dizem escolha; a tela diz "quem decide nao sou eu, e o aparelho". A onda de
+     horizonte atravessa a tela, como nos demais. -->
+<symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2.8" y="4.2" width="18.4" height="12.4" rx="2.2"/>
+  <path d="M4.8 10.2c1.6-1.2 2.9 1.2 4.5 0s2.9 1.2 4.5 0 2.1.6 3.4 0"/>
+  <path d="M9 20.2h6"/>
+  <path d="M12 16.6v3.6"/>
+</symbol>
+
 </svg>

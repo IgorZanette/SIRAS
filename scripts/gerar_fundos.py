@@ -1,8 +1,21 @@
 """Gera os fundos de apoio da interface a partir das artes originais.
 
-ENTRADA: `docs/fundos/`, as cinco artes como o autor as entregou — paisagens de
-lavoura ao amanhecer, 1672x941 px, PNG de 1,7 a 2,0 MB cada. São a FONTE, e por isso
-não ficam em `static/`, que é o que o navegador baixa.
+ENTRADA: `docs/fundos/`, as artes como o autor as entregou, 1672x941 px e PNG de 1,4 a
+2,0 MB cada. São a FONTE, e por isso não ficam em `static/`, que é o que o navegador
+baixa. São DUAS FAMÍLIAS, e a distinção importa:
+
+- `op-1` a `op-5`: paisagens de lavoura ao amanhecer, escuras (luminância média ~43).
+  Para o tema escuro, onde entram por `screen`, que só clareia.
+- `claro-1` e `claro-2`: as mesmas colinas sob névoa de manhã, claras (luminância média
+  ~226). Para o tema claro, nas calhas e na chamada final.
+- `claro-vitrine`: a contraparte clara da `op-3`, e a única quadrada (1254x1254) —
+  é a que fica atrás do monólito, numa caixa de proporção quase quadrada.
+
+A segunda família chegou depois, e resolveu um problema que nenhuma dosagem resolvia:
+sobre fundo quase branco, `screen` com arte escura move 0,3 de 255 — não faz nada — e
+`multiply` dá uma sombra cinza, não uma paisagem. Arte clara sobre fundo claro aparece
+por composição normal, sem truque de mesclagem. Uma arte certa vale mais que um filtro
+bem ajustado.
 
 SAÍDA: `siras/web/static/img/background/op-N.webp`, de 100 a 200 KB cada.
 
@@ -18,9 +31,9 @@ WebP com perda a 70 resolve: a mesma imagem sai com cerca de um décimo do taman
 diferença visível a 10% de opacidade é zero. A largura cai de 1672 para 1600 px, que é
 o que uma faixa full-bleed usa num monitor comum.
 
-AS CINCO SÃO GERADAS, mesmo com duas em uso hoje. Elas são opções do autor: trocar o
-fundo da hero é mudar `op-3` para `op-1` numa linha de CSS, e isso só é verdade se as
-cinco estiverem lá. A 130 KB cada, as três de reserva custam menos que o PNG de uma.
+TODAS SÃO GERADAS, mesmo com três em uso hoje. Elas são opções do autor: trocar o fundo
+de uma tela é mudar um nome numa linha de CSS, e isso só é verdade se todas estiverem
+lá. A algumas dezenas de KB cada, as de reserva custam menos que o PNG de uma.
 
 Pillow é dependência DESTE script, não do sistema: o SIRAS continua rodando só com
 flask, jsonschema e pytest (CLAUDE.md). Rode uma vez, versione a saída, e o script
@@ -44,9 +57,12 @@ RAIZ = pathlib.Path(__file__).resolve().parent.parent
 ORIGEM = RAIZ / "docs" / "fundos"
 DESTINO = RAIZ / "siras" / "web" / "static" / "img" / "background"
 
-#: Largura servida. O original tem 1672 px e a diferença não aparece: a imagem é
+#: Largura MÁXIMA servida. A diferença para o original não aparece: a imagem é
 #: `background-size: cover` atrás de conteúdo, nunca examinada de perto.
-LARGURA = 1600
+#:
+#: É teto, e não alvo: `claro-vitrine` é quadrada e tem 1254 px, e ampliá-la para 1600
+#: custaria bytes para inventar detalhe que a arte não tem.
+LARGURA_MAXIMA = 1600
 
 #: Qualidade do WebP. Em 70 o céu ainda degrada liso; abaixo disso aparece banding nas
 #: faixas de névoa, que é justamente o que uma destas imagens tem de mais frágil.
@@ -58,16 +74,17 @@ def gerar() -> int:
         sys.exit(f"Pasta das artes não encontrada: {ORIGEM}")
 
     DESTINO.mkdir(parents=True, exist_ok=True)
-    artes = sorted(ORIGEM.glob("op-*.png"))
+    artes = sorted(ORIGEM.glob("*.png"))
     if not artes:
-        sys.exit(f"Nenhuma arte op-*.png em {ORIGEM}")
+        sys.exit(f"Nenhuma arte .png em {ORIGEM}")
 
     total_antes = total_depois = 0
     for arte in artes:
         with Image.open(arte) as img:
             img = img.convert("RGB")
-            altura = round(img.height * LARGURA / img.width)
-            img = img.resize((LARGURA, altura), Image.LANCZOS)
+            if img.width > LARGURA_MAXIMA:
+                altura = round(img.height * LARGURA_MAXIMA / img.width)
+                img = img.resize((LARGURA_MAXIMA, altura), Image.LANCZOS)
             saida = DESTINO / f"{arte.stem}.webp"
             img.save(saida, "WEBP", quality=QUALIDADE, method=6)
 

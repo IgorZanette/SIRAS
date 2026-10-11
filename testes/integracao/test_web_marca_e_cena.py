@@ -179,12 +179,28 @@ def test_a_cena_para_de_se_mexer_com_menos_movimento():
     assert "if (reducedMotion || userPaused) return;" in motor
 
 
-def test_a_espera_continua_curta():
-    """O pedido original era de três a cinco segundos; em 13/09/2026 o autor pediu mais
-    1,8 s (4,2 -> 6,0 s), para ler a regra de cada passo. Tempo de ler, e não de esperar."""
-    espera = int(re.search(r"var ESPERA_MINIMA_MS = (\d+);", _GERANDO_JS).group(1))
+def test_a_espera_tem_tempo_para_a_cena_acontecer():
+    """A duração desta tela é decisão do autor, e mudou três vezes: 4,2 s no começo,
+    6,0 s em 13/09/2026 para dar tempo de ler a regra de cada passo, e 24 s em
+    11/10/2026, quando a cena 3D entrou e as cinco coreografias não cabiam — o calcário
+    caía e a tela já trocava.
 
-    assert espera == 6000
+    O teste fixa o número para que mudá-lo seja deliberado, e fixa também o que o número
+    PRECISA sustentar: cada passo com tempo de uma transição do monólito ser lida como
+    movimento, e não como corte.
+
+    É pausa deliberada, não progresso simulado: o motor responde em dezenas de
+    milissegundos. Se a avaliação de usabilidade disser que 24 s é demais, este é o
+    número a mudar — e nada mais."""
+    espera = int(re.search(r"var ESPERA_MINIMA_MS = (\d+);", _GERANDO_JS).group(1))
+    pronto = int(re.search(r"var FATIA_DO_PRONTO_MS = (\d+);", _GERANDO_JS).group(1))
+
+    assert espera == 24000
+
+    por_passo = (espera - pronto) / 5
+    assert por_passo >= 3000, (
+        f"{por_passo:.0f} ms por passo: a coreografia não tem tempo de acontecer"
+    )
 
 
 def test_a_animacao_antiga_saiu_por_inteiro():

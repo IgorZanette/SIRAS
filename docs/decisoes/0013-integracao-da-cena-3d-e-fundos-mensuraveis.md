@@ -157,6 +157,88 @@ diferença visível.
 
 ---
 
+## Segunda rodada, 11/10/2026 — o que a tela mostrou
+
+Com a primeira rodada no ar, o autor voltou com cinco pontos. Três deles corrigem
+decisões desta mesma ADR, e um deles por um motivo que vale registrar.
+
+### A arte certa vale mais que o filtro bem ajustado
+
+A D13.5 gastou duas tentativas forçando as cinco paisagens escuras a servir nos **dois**
+temas. Medir mostrou que não dava: sobre quase-branco, `screen` move 0,3 de 255 e
+`multiply` dá uma sombra cinza — nenhuma das duas desenha uma paisagem.
+
+O autor entregou então três artes **claras**: as mesmas colinas sob névoa, luminância
+média 226 contra os 43 das escuras, mais uma quadrada para a vitrine do monólito. Com
+elas o tema claro dispensa mesclagem: é composição normal, e aparece.
+
+A lição fica no teste `test_cada_tema_tem_a_sua_arte_de_fundo`: **quando um ajuste de
+mesclagem precisa de três tentativas, o problema costuma ser o material, e não o
+número.** Eu estava afinando um filtro para fazer uma arte dizer o que ela não dizia.
+
+### A cautela que sobrou de um caso que não existia
+
+A primeira rodada pôs a textura a 50% de opacidade por causa do teto de contraste do
+`--n-400`. Mas o mesmo desenho já tinha posto a textura **só nas calhas**, onde não há
+texto — e lá o teto não se aplica. Era cautela herdada de um problema que a solução
+anterior já tinha eliminado. Agora vão em 78% (escuro) e 85% (claro).
+
+### A camada passou a ser global e fixa
+
+O pedido era que o fundo valesse em todas as telas, e não só na inicial. Tabelas,
+cultura e dados não têm faixas para receber uma camada própria, então a camada foi para
+o `body`, `position: fixed`, com a mesma máscara de calhas.
+
+Fixa, ela não rola: a paisagem fica como horizonte atrás da página inteira, em vez de
+passar como objeto. E uma camada só não empilha com ela mesma — seções vizinhas com
+textura própria somavam duas artes na mesma calha e embarravam a cor.
+
+### A cena da espera nascia sem área
+
+Ela continuava invisível, e não era mais o z-index: o véu nasce `hidden`, e a cena
+montava o contexto WebGL numa caixa de 0×0 dentro de uma subárvore `display: none`.
+Chegava à tela sem nunca ter pintado. O `ResizeObserver` de `soilScene.js` reenquadra,
+mas reenquadrar um contexto que nasceu sem área é tarde demais.
+
+Agora **toda cena dentro de um escopo `hidden` espera o escopo abrir**. Isso resolve
+duas coisas de uma vez: ela nasce com o tamanho certo, e não há um segundo canvas
+consumindo GPU durante todo o preenchimento do formulário — que era a travada relatada
+na tela de dados.
+
+### A espera passou de 6 s para 24 s
+
+A pedido do autor, porque as cinco coreografias não tinham tempo de acontecer: o
+calcário caía e a tela já trocava. Em 24 s cada passo fica com cerca de 4,6 s.
+
+**É uma decisão de risco assumido, e fica registrada como tal.** Vinte e quatro segundos
+de espera deliberada para um cálculo que leva dezenas de milissegundos é muito, e a
+avaliação de usabilidade pode condená-la. O argumento do autor é que esta tela não tem
+função — o laudo já está calculado — e existe para ser vista. O contra-argumento é que
+tempo de espera é o item que usuários mais reclamam em teste. O número está numa
+constante só, `ESPERA_MINIMA_MS`, e mudá-lo não quebra mais nada.
+
+### A leitura ao vivo tinha teto errado
+
+Ela era `sticky` e crescia sem limite: com a análise toda preenchida ficava mais alta
+que a janela, e aí grudar no topo não adianta — o fim do painel some embaixo e não
+volta. **Quanto mais completa a leitura, menos dela se via.**
+
+Agora o painel tem altura máxima da janela, o cabeçalho e a cena ficam parados, e só a
+interpretação rola por dentro. A cena caiu de 320 px para `clamp(120px, 17vh, 185px)`:
+ela ilustra o que já foi informado, não é o assunto, e o tamanho tem de dizer isso.
+
+### A décima cena saiu da hero
+
+O parágrafo "Ilustração conceitual…" repetia, em quatro linhas, o que a legenda logo
+abaixo já diz em cinco palavras: *exemplo ilustrativo, sem valores*. Saiu da hero e
+continua na tela de espera, que é onde a planta cresce e onde a ilustração mais se
+parece com uma promessa de safra.
+
+A declaração não se perdeu, e é isso que separa remover texto redundante de remover uma
+garantia: `test_a_cena_da_hero_se_declara_ilustrativa` guarda a que ficou.
+
+---
+
 ## O que isto não resolve
 
 As duas verificações que só a tela dá, e que a suíte não substitui:

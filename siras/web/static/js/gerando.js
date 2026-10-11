@@ -23,7 +23,16 @@
 (function () {
   "use strict";
 
-  var ESPERA_MINIMA_MS = 6000;
+  /* 24 s. Era 6 s, e o autor pediu quatro vezes mais em 11/10/2026, porque as cinco
+     coreografias da cena 3D nao tinham tempo de acontecer: o calcario caia e a tela ja
+     trocava. Em 24 s cada passo fica com cerca de 4,6 s, que e o que uma transicao do
+     monolito leva para ler como movimento e nao como corte.
+
+     E PAUSA DELIBERADA, e nao progresso simulado -- o motor responde em dezenas de
+     milissegundos. A escolha e assumida: esta tela existe para ser vista. Se a
+     avaliacao de usabilidade disser que 24 s e espera demais, o numero aqui e o unico
+     lugar a mudar, e o comportamento continua correto em qualquer valor. */
+  var ESPERA_MINIMA_MS = 24000;
 
   /* A confirmacao ocupa a ultima fatia: o broto precisa de um instante para abrir
      a folha final antes de a pagina trocar. */

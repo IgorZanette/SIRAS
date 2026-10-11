@@ -237,7 +237,37 @@
 
 /* Cola abaixo da barra JA REDUZIDA: quando este painel gruda, a pagina rolou, e
    a barra ali ja esta nos 80%. Medir pela altura cheia deixaria uma faixa morta. */
-.leitura { position: sticky; top: 84px; overflow: hidden; }
+/* A LEITURA AO VIVO E COMPANHIA, E NAO A TELA.
+   Ela era `sticky` e crescia sem limite: com a analise toda preenchida ficava mais
+   alta que a janela, e entao grudar no topo nao adianta -- o fim do painel some
+   embaixo e nao volta, porque rolar a pagina rola o formulario junto. Quanto mais
+   completa a leitura, menos dela se via.
+
+   Agora ela tem teto. A altura e a da janela menos a barra, o cabecalho e o
+   cabecalho da propria cena ficam parados, e so a INTERPRETACAO rola, por dentro.
+   O painel deixa de empurrar a pagina e passa a ser o que deveria: um acompanhamento
+   estavel ao lado do campo que esta sendo digitado. */
+.leitura {
+  position: sticky; top: 84px;
+  display: flex; flex-direction: column;
+  max-height: calc(100vh - 84px - var(--e-5));
+  overflow: hidden;
+}
+.leitura__corpo { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; }
+/* Rolagem discreta: a barra cheia do sistema operacional corta a borda arredondada
+   do painel e parece defeito. */
+.leitura__corpo { scrollbar-width: thin; scrollbar-color: var(--n-700) transparent; }
+.leitura__corpo::-webkit-scrollbar { width: 8px; }
+.leitura__corpo::-webkit-scrollbar-thumb {
+  background: var(--n-700); border-radius: 999px;
+  border: 2px solid transparent; background-clip: content-box;
+}
+/* Abaixo de 1040px o painel desce para o fim do formulario (.oficina vira uma coluna),
+   e ai limitar a altura so criaria uma segunda rolagem dentro da pagina. */
+@media (max-width: 1040px) {
+  .leitura { position: static; max-height: none; }
+  .leitura__corpo { overflow: visible; }
+}
 .leitura__cab { display: flex; align-items: center; gap: var(--e-3);
                 padding: var(--e-4) var(--e-5); border-bottom: var(--borda);
                 background: rgba(140,226,63,.06); }
@@ -655,7 +685,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 }
 
 .calculando__conteudo {
-  position: relative; width: min(560px, 100%);
+  position: relative; width: min(640px, 100%);
   display: grid; justify-items: center; text-align: center; gap: var(--e-4);
 }
 
@@ -666,18 +696,24 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 .passos { list-style: none; margin: var(--e-3) 0 0; padding: 0; width: 100%;
           display: grid; gap: var(--e-2); text-align: left; }
 .passo {
-  display: grid; grid-template-columns: 38px minmax(0,1fr) 20px;
-  align-items: center; gap: var(--e-3);
-  padding: var(--e-3); border-radius: var(--r-campo);
+  display: grid; grid-template-columns: 28px minmax(0,1fr) 18px;
+  align-items: center; gap: var(--e-2);
+  padding: var(--e-2) var(--e-3); border-radius: var(--r-campo);
   border: 1px solid transparent; background: rgba(233,240,235,.03);
   color: var(--n-500);
   transition: color var(--tr), background var(--tr), border-color var(--tr);
 }
-.passo__ico { display: grid; place-content: center; width: 38px; height: 38px;
-              border-radius: 11px; background: rgba(233,240,235,.05); }
-.passo__txt { display: grid; gap: 1px; min-width: 0; }
-.passo__txt b { font-size: var(--fs-sm); font-weight: 700; }
-.passo__txt small { font-size: var(--fs-3xs); color: var(--n-600); }
+.passo__ico { display: grid; place-content: center; width: 28px; height: 28px;
+              border-radius: 9px; background: rgba(233,240,235,.05); }
+.passo__ico .ico { width: 16px; height: 16px; }
+.passo__txt { display: grid; gap: 0; min-width: 0; }
+.passo__txt b { font-size: var(--fs-xs); font-weight: 700; }
+/* O subtitulo so no passo ativo: cinco linhas de detalhe de uma vez competiam com a
+   cena, e quatro delas sao sobre o que ja passou ou ainda nao comecou. */
+.passo__txt small { font-size: var(--fs-3xs); color: var(--n-600);
+                    max-height: 0; opacity: 0; overflow: hidden;
+                    transition: max-height var(--tr), opacity var(--tr); }
+.passo.is-ativo .passo__txt small { max-height: 2.6em; opacity: 1; }
 .passo__marca { opacity: 0; color: var(--v-400); transition: opacity var(--tr); }
 
 .passo.is-ativo {
@@ -686,7 +722,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 }
 .passo.is-ativo .passo__ico { background: rgba(140,226,63,.16); color: var(--v-400);
                               animation: bater 1s ease-in-out infinite; }
-.passo.is-ativo .passo__txt small { color: var(--n-400); }
+.passo.is-ativo .passo__txt small { color: var(--n-300); }
 @keyframes bater { 50% { transform: scale(1.08) } }
 
 .passo.is-feito { color: var(--n-300); background: rgba(233,240,235,.04); }
@@ -1540,22 +1576,26 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
    `--palco-altura` em vh e nao em px porque esta tela e vertical e disputada: em
    notebook de 768px de altura, um palco fixo de 360px empurraria os cinco passos,
    que sao o conteudo, para fora da tela. */
+/* O PALCO E O ASSUNTO DESTA TELA. Ela nao tem funcao -- o motor ja respondeu, ou vai
+   responder em milissegundos --, entao o que ela faz e ocupar bem uma espera. A cena
+   cresce e os passos recuam: eles continuam dizendo o que o sistema faz, em texto, mas
+   deixam de disputar o centro. */
 .calculando__palco {
-  width: min(380px, 100%);
+  width: min(560px, 94vw);
   margin-inline: auto;
 }
 .cena-solo.cena-solo--palco {
   position: relative; inset: auto; z-index: 0;
   width: 100%; aspect-ratio: 764 / 792;
-  max-height: clamp(180px, 34vh, 340px);
+  max-height: clamp(260px, 48vh, 540px);
 }
 .cena-solo--palco:not(.cena-solo--ativa) .cena-solo__fallback {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: contain; right: auto; bottom: auto;
 }
 .cena-solo-limites--palco {
-  margin: var(--e-2) auto 0; max-width: 38ch; text-align: center;
-  font-size: var(--fs-3xs); color: var(--n-500);
+  margin: var(--e-1) auto 0; max-width: 42ch; text-align: center;
+  font-size: var(--fs-3xs); line-height: 1.4; color: var(--n-600);
 }
 
 /* --- Uma regra do Manual por passo, abaixo do titulo ----------------------- */
@@ -2118,79 +2158,90 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 .hero__natureza { margin-top: var(--e-3); font-size: var(--fs-xs); color: var(--n-400);
                   letter-spacing: .01em; }
 
-/* --- Fundos de apoio (ADR 0013) ----------------------------------------- */
-/* As cinco artes sao paisagens de lavoura ao amanhecer, e todas sao ESCURAS. A
-   primeira tentativa as pos como textura por cima da secao inteira, a 16% -- e elas
-   sumiram. Medir explicou por que, e mudou o desenho.
+/* --- Fundos de apoio (ADR 0013, revisto em 11/10/2026) ------------------- */
+/* As cinco artes sao paisagens de lavoura ao amanhecer, e todas sao ESCURAS. Duas
+   medicoes decidiram o desenho:
 
    1. SOBRE FUNDO ESCURO, MISTURAR NAO FUNCIONA. Arte escura sobre fundo escuro em
-      composicao normal a 16% move o fundo em 7 de 255: nada. Quem faz uma arte escura
-      aparecer sobre fundo escuro e `screen`, que so CLAREIA -- a 55% o mesmo par move
-      31. E a operacao certa, e nao uma opacidade maior.
+      composicao normal a 16% move o fundo em 7 de 255: some. Quem a faz aparecer e
+      `screen`, que so clareia. No tema claro e o contrario: `screen` move 0,3 de 255,
+      e quem marca ali e `multiply`.
 
-   2. MAS ELA NAO PODE FICAR ATRAS DE TEXTO. O teto de luminancia de fundo que sustenta
-      o `--n-400` (texto terciario, `.t-aux`) a 4,5:1 e 0,027. A regiao mais clara da
-      `op-3` em screen cheio chega a 0,57 -- vinte vezes o teto. Nao ha opacidade que
-      resolva: ou a arte aparece, ou o texto secundario se le.
+   2. ELA NAO PODE FICAR ATRAS DE TEXTO. O teto de luminancia de fundo que sustenta o
+      `--n-400` (texto terciario) a 4,5:1 e 0,027, e a arte em screen cheio chega a
+      0,57. Nao ha opacidade que resolva.
 
-   A saida nao e dosar, e MUDAR DE LUGAR: a arte vai onde nao ha texto nenhum.
+   Dai o desenho: a arte mora nas CALHAS, as faixas vazias fora da coluna de 1200px.
+   E -- a consequencia que eu nao tinha tirado na primeira versao -- COMO NAO HA TEXTO
+   NAS CALHAS, O TETO DE CONTRASTE NAO SE APLICA LA. A primeira versao ficou em 50% de
+   opacidade por cautela herdada do caso que nao existe. Agora vao fortes.
 
-     - atras do monolito, dentro da vitrine da cena (cena-solo.css);
-     - nas CALHAS, as faixas vazias fora da coluna de 1200px, que so existem em tela
-       larga -- e que eram exatamente o "fundo chapado" que sobrava na pagina.
+   A CAMADA E GLOBAL E FIXA, no `body`, e nao uma por secao. Tres razoes:
+     - vale em todas as telas, inclusive as que nao tem faixas (tabelas, cultura,
+       dados), que era o pedido;
+     - fixa, ela nao rola: a paisagem fica como horizonte atras da pagina inteira, em
+       vez de passar como um objeto;
+     - uma camada so nao empilha com ela mesma. Secoes vizinhas com textura propria
+       somavam duas artes na mesma calha e embarravam a cor.
 
-   Abaixo de 1200px nao ha calha, a mascara fecha sozinha pelo `calc()` e a textura
+   Abaixo de 1200px nao ha calha: a mascara fecha sozinha pelo `calc()` e a textura
    desaparece. Em telefone nao sobra nada atras de texto, sem media query. */
-.fundo-horizonte, .faixa--alt { position: relative; isolation: isolate; }
-.fundo-horizonte::before, .faixa--alt::before {
-  content: ""; position: absolute; inset: 0; z-index: -1;
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background-image: url("../img/background/op-1.webp");
   background-size: cover; background-position: center;
-  /* `brightness` corta o pico da arte antes do screen: e o ceu da imagem que ameaca
-     o contraste, e ele nao e o que da a sensacao de paisagem. */
-  filter: brightness(.55) saturate(.85);
+  /* `brightness` corta o pico da arte: e o ceu que ameacaria o contraste se a mascara
+     algum dia falhasse, e nao e ele que da a sensacao de paisagem. */
+  filter: brightness(.62) saturate(.9);
   mix-blend-mode: screen;
-  opacity: .5;
-  pointer-events: none;
+  opacity: .78;
+  mask-image: linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
+                              transparent calc(50% + 600px), #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
+                                      transparent calc(50% + 600px), #000 100%);
 }
-/* A mascara e a interseccao de duas: VERTICAL, para a textura nao terminar numa linha
-   reta que denuncia o retangulo, e HORIZONTAL, oca no meio -- transparente ao longo da
-   coluna de conteudo e solida so nas calhas. 600px e meia largura do `.env`. */
-.fundo-horizonte::before, .faixa--alt::before {
-  mask-image:
-    linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent),
-    linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
-                    transparent calc(50% + 600px), #000 100%);
-  -webkit-mask-image:
-    linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent),
-    linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
-                    transparent calc(50% + 600px), #000 100%);
-  mask-composite: intersect;
-  -webkit-mask-composite: source-in;
-}
-/* As faixas alternadas entram pela propria classe, e nao uma a uma no template: a
-   regra e "as faixas escuras carregam a paisagem nas calhas". Aplicar caso a caso
-   daria uma pagina onde a textura aparece e some sem motivo visivel ao rolar. */
+/* NO TEMA CLARO A ARTE E OUTRA, e por isso aqui nao ha truque de mesclagem nenhum.
 
-/* A chamada final fecha a pagina, e la a paisagem pode subir: `op-5` e a mais uniforme
-   das cinco, e o texto dela continua dentro da coluna, fora da calha. */
+   As duas primeiras tentativas forcaram a arte escura a servir nos dois temas: `screen`
+   sobre quase-branco move 0,3 de 255 (nao faz nada), e `multiply` da uma sombra cinza
+   em vez de uma paisagem. O autor entregou em 11/10/2026 duas artes CLARAS -- as mesmas
+   colinas sob nevoa de manha, luminancia media 226 contra os 43 das escuras.
+
+   Arte clara sobre fundo claro aparece por composicao normal. Uma arte certa vale mais
+   que um filtro bem ajustado, e a licao fica: quando um ajuste de mesclagem precisa de
+   tres tentativas, o problema costuma ser o material, e nao o numero. */
+:root[data-tema="claro"] body::before {
+  background-image: url("../img/background/claro-1.webp");
+  mix-blend-mode: normal;
+  filter: none;
+  opacity: .85;
+}
+
+/* A CHAMADA FINAL fecha a pagina, e ali a paisagem sobe: a secao inteira, e nao so as
+   calhas. E o unico lugar da pagina com texto por cima de arte, entao ela e a unica
+   que paga o teto de contraste -- dai o veu solido por baixo, que fixa a luminancia do
+   fundo independentemente do que a foto faz. */
+.chamada.fundo-horizonte { position: relative; isolation: isolate; }
 .chamada.fundo-horizonte::before {
-  background-image: url("../img/background/op-5.webp");
-  opacity: .65;
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(180deg, rgba(10,15,12,.97), rgba(10,15,12,.86)),
+    url("../img/background/op-5.webp");
+  background-size: cover; background-position: center 65%;
+  mask-image: linear-gradient(180deg, transparent, #000 30%);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%);
+}
+:root[data-tema="claro"] .chamada.fundo-horizonte::before {
+  background-image:
+    linear-gradient(180deg, rgba(246,248,245,.92), rgba(246,248,245,.62)),
+    url("../img/background/claro-2.webp");
+  background-position: center 70%;
 }
 
-/* No tema CLARO `screen` nao faz nada -- clarear o que ja e quase branco move o fundo
-   em 0,3 de 255. A operacao que marca ali e a inversa, `multiply`, e bem fraca: nas
-   calhas ela vira uma sombra esverdeada de lavoura, que e o que a arte tem a dar sobre
-   papel. Continua fora da coluna de texto, entao nao disputa contraste com nada. */
-:root[data-tema="claro"] .fundo-horizonte::before,
-:root[data-tema="claro"] .faixa--alt::before {
-  mix-blend-mode: multiply;
-  filter: brightness(1.35) saturate(.6);
-  opacity: .16;
-}
+/* A hero nao tem camada propria: a paisagem dela esta ATRAS DO MONOLITO, dentro da
+   vitrine da cena (cena-solo.css), que e onde ela pode aparecer sem veu nenhum. */
 
-@media print { .fundo-horizonte::before, .faixa--alt::before { display: none; } }
+@media print { body::before, .chamada.fundo-horizonte::before { display: none; } }
 
 /* --- Limites da ilustracao (cena 10 da apresentacao v7) ------------------ */
 .cena-solo-limites {

@@ -69,13 +69,13 @@
   background-position: center 38%;
   border: 1px solid var(--cs-borda);
 }
-/* No tema claro a mesma arte escura afundaria a vitrine num bloco preto no meio de uma
-   pagina clara. O verniz inverte: clareia em vez de escurecer, e a paisagem fica como
-   aquarela atras do monolito. */
+/* No tema claro a arte e a clara, e o verniz fica quase so para garantir que o
+   monolito -- que e escuro -- nao se perca contra um ceu claro demais. */
 :root[data-tema="claro"] .cena-solo--vitrine {
   background-image:
-    linear-gradient(180deg, rgba(246,248,245,.80), rgba(246,248,245,.94)),
-    url("../img/background/op-3.webp");
+    linear-gradient(180deg, rgba(246,248,245,.26), rgba(246,248,245,.04)),
+    url("../img/background/claro-vitrine.webp");
+  background-position: center 58%;
 }
 
 .cena-solo--vitrine:not(.cena-solo--ativa) .cena-solo__fallback {
@@ -147,7 +147,7 @@
    Compacto: ele e cabecalho de um painel, e nao a peca principal da tela. Duas colunas
    em qualquer largura util -- sete linhas empilhadas empurrariam a leitura ao vivo,
    que e o que o usuario veio ver, para fora da primeira tela. */
-.cena-solo-legenda--inventario { margin-top: var(--e-3); }
+.cena-solo-legenda--inventario { margin: var(--e-2) var(--e-5) var(--e-3); }
 .cena-solo-legenda--inventario figcaption {
   font-size: var(--fs-2xs); font-weight: 600; letter-spacing: .02em;
   text-transform: uppercase; color: var(--cs-suave, #a3b6a5); margin-bottom: 8px;
@@ -172,7 +172,16 @@
 .cena-solo-cultura strong { color: var(--cs-texto, #eef5ea); }
 
 /* Variante painel: no formulário a cena fica AO LADO dos campos, nunca atrás */
-.cena-solo.cena-solo--painel { position: relative; inset: auto; z-index: 0; height: 320px; }
+/* 320px de monolito no topo do painel empurravam a interpretacao -- o conteudo pelo
+   qual a tela existe -- para fora da primeira dobra. A cena aqui ILUSTRA o que ja foi
+   informado; ela nao e o assunto, e o tamanho tem de dizer isso.
+
+   `vh` e nao px: este painel agora tem teto igual a altura da janela, e uma cena de
+   altura fixa comeria uma fracao diferente dele em cada tela. */
+.cena-solo.cena-solo--painel {
+  position: relative; inset: auto; z-index: 0;
+  height: clamp(120px, 17vh, 185px);
+}
 /* `:not(.cena-solo--ativa)` e o que conserta a DUPLICACAO.
    Esta regra e a de cima (`.cena-solo--ativa .cena-solo__fallback { display: none }`)
    tem a mesma especificidade, 0-2-0, e esta vem depois no arquivo -- entao ela vencia,

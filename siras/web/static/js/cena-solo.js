@@ -373,7 +373,32 @@
   }
 
   const ativos = [];
-  function iniciarTodas() { raizes.forEach(iniciar); }
+
+  /**
+   * Monta cada cena — mas espera a que estiver dentro de um escopo `hidden`.
+   *
+   * A cena da espera vive dentro do véu, que nasce `hidden` e só aparece no clique de
+   * "Gerar laudo". Montada junto com a página, ela criava o contexto WebGL numa caixa
+   * de 0x0 dentro de uma subárvore `display: none`, e chegava à tela sem nunca ter
+   * pintado: o palco ficava preto. O `ResizeObserver` de soilScene.js reenquadra, mas
+   * reenquadrar um contexto que nasceu sem área é tarde demais.
+   *
+   * Esperar resolve duas coisas de uma vez: ela nasce com o tamanho certo, e não há
+   * um segundo canvas consumindo GPU durante todo o preenchimento do formulário —
+   * que é justamente a tela onde o usuário digita, e onde a travada aparece.
+   */
+  function iniciarTodas() {
+    raizes.forEach(function (raiz) {
+      const escopo = raiz.closest("[data-cena-escopo]");
+      if (!escopo || !escopo.hasAttribute("hidden")) { iniciar(raiz); return; }
+      const espera = new MutationObserver(function () {
+        if (escopo.hasAttribute("hidden")) return;
+        espera.disconnect();
+        iniciar(raiz);
+      });
+      espera.observe(escopo, { attributes: true, attributeFilter: ["hidden"] });
+    });
+  }
 
   // Só depois que a página carregou e o navegador ficou ocioso: o texto da
   // hero nunca espera pelo three.js.

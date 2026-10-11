@@ -306,19 +306,35 @@ def test_as_dez_cenas_da_v7_estao_todas_em_uso(cliente):
     # test_cada_passo_da_espera_tem_uma_coreografia_na_cena.
     assert 'data-cena-solo="gerando"' in dados
 
-    # 10 — os limites, junto dos controles da cena e não num rodapé.
-    assert "cena-solo-limites" in inicio
-    assert "não há" in inicio and "promessa de produtividade" in inicio
+    # 10 — os limites. Ela é a única que não virou movimento: diz o que a ilustração
+    # não é, e para isso uma animação não serve. Esteve em duas telas e hoje está na
+    # espera, que é onde a planta cresce e onde a cena mais se parece com uma promessa
+    # de safra. Na hero bastava a legenda, que diz o mesmo em cinco palavras.
+    assert "cena-solo-limites" in dados
+    assert "planta é genérica" in dados
 
 
-def test_os_limites_da_cena_so_aparecem_quando_a_cena_aparece(cliente):
-    """Um aviso sobre uma ilustração que não carregou só confunde. O texto mora dentro
-    de `.cena-solo-controles`, que fica `hidden` até o motor 3D subir."""
+def test_a_cena_da_hero_se_declara_ilustrativa(cliente):
+    """O parágrafo de quatro linhas saiu da hero em 11/10/2026 — repetia o que a legenda
+    logo abaixo já dizia. A DECLARAÇÃO não saiu, e é ela que este teste guarda: quem vê
+    o monólito precisa saber, ali, que não há valor nenhum nele.
+
+    A diferença entre remover texto redundante e remover uma garantia é esta linha."""
     html = cliente.get("/").get_data(as_text=True)
 
-    controles = html[html.index("cena-solo-controles"):]
-    controles = controles[:controles.index("</div>")]
-    assert "cena-solo-limites" in controles, "os limites ficaram fora dos controles"
+    legenda = html[html.index("cena-solo-legenda"):]
+    legenda = legenda[:legenda.index("</figure>")]
+    assert "exemplo ilustrativo, sem valores" in legenda
+
+
+def test_o_aviso_so_aparece_quando_a_cena_aparece(cliente):
+    """Um aviso sobre uma ilustração que não carregou só confunde. Na espera ele mora
+    dentro de `.calculando__palco`, junto da cena."""
+    dados = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    palco = dados[dados.index("calculando__palco"):]
+    palco = palco[:palco.index("calculando__titulo")]
+    assert "cena-solo-limites" in palco, "o aviso ficou fora do palco da cena"
 
 
 def test_os_fundos_servidos_sao_leves(cliente):
@@ -351,27 +367,57 @@ def test_o_fundo_nunca_fica_atras_de_texto():
     Então a arte não é dosada, é afastada: ela mora nas CALHAS, fora da coluna de
     conteúdo. A máscara horizontal é o que garante isso, e abaixo de 1200px ela fecha
     sozinha pelo `calc()`, sem media query."""
-    regra = re.search(
-        r"\.fundo-horizonte::before, \.faixa--alt::before \{\s*mask-image:(.*?)\}",
-        _TELAS_CSS, re.S,
-    )
-    assert regra, "a máscara das calhas sumiu"
+    regra = re.search(r"body::before \{(.*?)\n\}", _TELAS_CSS, re.S)
+    assert regra, "a camada de fundo sumiu"
     assert "calc(50% - 600px)" in regra.group(1), "a máscara deixou de poupar a coluna"
-    assert "mask-composite: intersect" in regra.group(1), (
-        "sem a interseção, a máscara vertical sozinha deixa a arte atrás do texto"
+    assert "position: fixed" in regra.group(1), (
+        "a camada deixou de ser fixa: ela vale em todas as telas, e não por seção"
     )
 
 
-def test_o_fundo_clareia_no_escuro_e_escurece_no_claro():
-    """`screen` sobre fundo claro move 0,3 de 255: não faz nada. A operação que marca
-    sobre papel é a inversa."""
-    assert re.search(r"\.fundo-horizonte::before[^{]*\{[^}]*mix-blend-mode: screen", _TELAS_CSS)
-    assert re.search(
-        r':root\[data-tema="claro"\] \.fundo-horizonte::before,[^{]*\{[^}]*mix-blend-mode: multiply',
-        _TELAS_CSS,
-    )
-    # E some na impressão: é atmosfera de tela, não conteúdo do documento.
-    assert "@media print { .fundo-horizonte::before, .faixa--alt::before { display: none" in _TELAS_CSS
+def test_o_fundo_some_na_impressao():
+    """É atmosfera de tela, não conteúdo do documento: no papel ele só gastaria tinta.
+
+    Qual operação de mesclagem cada tema usa está em
+    `test_cada_tema_tem_a_sua_arte_de_fundo` — aqui ficou só o que vale nos dois."""
+    assert ("@media print { body::before, .chamada.fundo-horizonte::before { display: none"
+            in _TELAS_CSS)
+
+
+def test_o_fundo_vale_em_todas_as_telas(cliente):
+    """O pedido foi que o fundo deixasse de ser só da tela inicial. Pô-lo no `body`, e
+    não em cada seção, é o que faz isso valer em tabelas, cultura e dados — telas que
+    não têm faixa nenhuma para receber uma camada própria."""
+    for rota in ("/", "/tabelas", "/analise", "/analise/dados?cultura_id=soja"):
+        html = cliente.get(rota).get_data(as_text=True)
+        assert "siras-telas.css" in html, rota
+
+    # E é uma camada só por tema: duas artes na mesma calha embarram a cor.
+    assert _TELAS_CSS.count(chr(10) + "body::before {") == 1
+    assert _TELAS_CSS.count(':root[data-tema="claro"] body::before {') == 1
+
+
+def test_cada_tema_tem_a_sua_arte_de_fundo():
+    """Duas tentativas forçaram a arte escura a servir nos dois temas, e nenhuma dosagem
+    resolveu: `screen` sobre quase-branco move 0,3 de 255, e `multiply` dá sombra cinza
+    em vez de paisagem. O autor entregou artes claras, e aí o tema claro dispensa
+    truque de mesclagem — é composição normal.
+
+    A lição que o teste fixa: quando um ajuste de mesclagem precisa de três tentativas,
+    o problema é o material, e não o número."""
+    def bloco(seletor):
+        achado = re.search(re.escape(seletor) + r' \{(.*?)^\}', _TELAS_CSS, re.S | re.M)
+        assert achado, seletor
+        return achado.group(1)
+
+    escuro = bloco("\nbody::before")
+    claro = bloco(':root[data-tema="claro"] body::before')
+
+    assert "op-1.webp" in escuro and "mix-blend-mode: screen" in escuro
+    assert "claro-1.webp" in claro and "mix-blend-mode: normal" in claro
+
+    for arte in ("op-1", "claro-1", "claro-2"):
+        assert (_ESTATICOS / "img" / "background" / f"{arte}.webp").exists(), arte
 
 
 def test_a_paisagem_em_forca_total_so_onde_nao_ha_texto():

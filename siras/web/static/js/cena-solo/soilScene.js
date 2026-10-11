@@ -319,6 +319,9 @@ function stageChoreography(stage, t, animate = true) {
  * @param {object} [opts]
  * @param {Array}   [opts.stages=HERO_STAGES]
  * @param {number}  [opts.initialStage=0]
+ * @param {object}  [opts.enterFrom]            Estado de onde a cena ENTRA no primeiro
+ *   estágio. Sem ele a cena abre já no estado final do estágio inicial, e a primeira
+ *   transição não acontece.
  * @param {boolean} [opts.autoplay=true]       Avança os estágios sozinho.
  * @param {'dark'|'light'} [opts.theme='dark']
  * @param {'auto'|'high'|'medium'|'low'} [opts.quality='auto']
@@ -409,7 +412,15 @@ export function createSoilScene(container, opts = {}) {
 
   /* ---------- Parâmetros animados ---------- */
   // "params" = valores atuais; "targets" = para onde estão indo.
-  const params = { ...stages[initialStage].targets, hover: 0 };
+  /* `enterFrom` existe por causa da tela de espera.
+     Sem ele, `params` e `targets` nascem IGUAIS, e o primeiro estágio não tem o que
+     animar: a cena abre já no estado final dele. Nos outros usos isso é o certo — a
+     hero deve abrir mostrando o solo, e não montando-o. Mas numa sequência de cinco
+     etapas, a primeira ficava parada enquanto as outras quatro se moviam, e parecia
+     travada, que é como o autor a descreveu em 11/10/2026.
+     Com `enterFrom`, `params` começa no repouso e o primeiro estágio é uma transição
+     como qualquer outra. */
+  const params = { ...stages[initialStage].targets, ...(opts.enterFrom || {}), hover: 0 };
   const targets = { ...stages[initialStage].targets };
   const disposables = [];   // tudo que precisa de .dispose()
   const track = (o) => (disposables.push(o), o);

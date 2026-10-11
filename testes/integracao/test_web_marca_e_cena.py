@@ -179,28 +179,88 @@ def test_a_cena_para_de_se_mexer_com_menos_movimento():
     assert "if (reducedMotion || userPaused) return;" in motor
 
 
-def test_a_espera_tem_tempo_para_a_cena_acontecer():
-    """A duração desta tela é decisão do autor, e mudou três vezes: 4,2 s no começo,
-    6,0 s em 13/09/2026 para dar tempo de ler a regra de cada passo, e 24 s em
-    11/10/2026, quando a cena 3D entrou e as cinco coreografias não cabiam — o calcário
-    caía e a tela já trocava.
+def _ritmo_da_espera():
+    """Lê do próprio gerando.js a duração de cada etapa, em ms."""
+    total = int(re.search(r"var ESPERA_MINIMA_MS = (\d+);", _GERANDO_JS).group(1))
+    pronto = int(re.search(r"var FATIA_DO_PRONTO_MS = (\d+);", _GERANDO_JS).group(1))
+    pesos = [float(x) for x in
+             re.search(r"PESOS_DAS_ETAPAS = \[([^\]]+)\]", _GERANDO_JS).group(1).split(",")]
+    animado = total - pronto
+    soma = sum(pesos)
+    return total, [animado * peso / soma for peso in pesos]
 
-    O teste fixa o número para que mudá-lo seja deliberado, e fixa também o que o número
-    PRECISA sustentar: cada passo com tempo de uma transição do monólito ser lida como
-    movimento, e não como corte.
+
+def test_a_espera_nao_e_exaustiva():
+    """A duração desta tela é decisão do autor, e mudou quatro vezes: 4,2 s no começo,
+    6 s para dar tempo de ler a regra de cada passo, 24 s quando a cena 3D entrou e as
+    coreografias não cabiam, e 12 s agora.
+
+    O 24 s era espera exaustiva. O objetivo da tela é passar robustez de recomendação, e
+    uma tela que demora demais passa o contrário — falta de desempenho.
 
     É pausa deliberada, não progresso simulado: o motor responde em dezenas de
-    milissegundos. Se a avaliação de usabilidade disser que 24 s é demais, este é o
-    número a mudar — e nada mais."""
-    espera = int(re.search(r"var ESPERA_MINIMA_MS = (\d+);", _GERANDO_JS).group(1))
-    pronto = int(re.search(r"var FATIA_DO_PRONTO_MS = (\d+);", _GERANDO_JS).group(1))
+    milissegundos."""
+    total, _ = _ritmo_da_espera()
 
-    assert espera == 24000
+    assert total == 12000
 
-    por_passo = (espera - pronto) / 5
-    assert por_passo >= 3000, (
-        f"{por_passo:.0f} ms por passo: a coreografia não tem tempo de acontecer"
+
+def test_o_tempo_vai_para_as_etapas_que_tem_coreografia():
+    """O que faz 12 s bastarem não é o total, é a distribuição.
+
+    As três do meio — calagem, adubação, formulação — têm coreografia de verdade: o
+    calcário caindo e ficando na superfície, o fósforo e o potássio subindo da camada de
+    referência, os três montes se agrupando. Precisam de tempo para serem lidas como
+    movimento, e não como corte.
+
+    As duas das pontas não: a leitura é uma varredura que atravessa o perfil uma vez, e
+    a aptidão se entende no primeiro ciclo da alternância. Dar a elas o mesmo tempo era
+    alongar a espera sem acrescentar nada para ver."""
+    _, duracoes = _ritmo_da_espera()
+    leitura, calagem, adubacao, formulacao, aptidao = duracoes
+
+    for nome, meio in (("calagem", calagem), ("adubação", adubacao),
+                       ("formulação", formulacao)):
+        assert meio > leitura and meio > aptidao, (
+            f"{nome} não tem mais tempo que as etapas das pontas"
+        )
+        assert meio >= 2200, f"{nome} com {meio:.0f} ms: a coreografia vira corte"
+
+    # E a aptidão precisa alcançar ao menos uma troca de cenário: mostrar "os dois
+    # cenários" e dar tempo de um só é pior que não alternar.
+    alternancia = int(re.search(r"ALTERNANCIA_CENARIOS_MS = (\d+);",
+                                (_ESTATICOS / "js" / "cena-solo.js").read_text(encoding="utf-8")
+                                ).group(1))
+    assert aptidao >= alternancia, (
+        f"aptidão dura {aptidao:.0f} ms e a alternância leva {alternancia} ms: "
+        "o segundo cenário nunca aparece"
     )
+
+
+def test_a_barra_mede_tempo_e_nao_passos():
+    """Com etapas de durações diferentes, encher um quinto da barra por etapa a faria
+    parar e disparar. Ela anda pelo relógio."""
+    assert "inicios[indice + 1] / animado" in _GERANDO_JS
+    # E a duração vai ao CSS a cada etapa, não uma vez no começo.
+    assert 'setProperty("--passo-ms", Math.round(duracoes[indice])' in _GERANDO_JS
+
+
+def test_a_primeira_etapa_tambem_se_move():
+    """A cena abria JÁ no estado final da primeira etapa — `params` e `targets` nasciam
+    iguais —, então ela ficava parada enquanto as outras quatro se moviam. Numa
+    sequência, a primeira parecer travada é o pior lugar para isso acontecer: é a
+    impressão que fica.
+
+    `enterFrom` dá à cena um estado de onde entrar, e a primeira etapa vira uma
+    transição como qualquer outra. Só na espera: na hero e no formulário a cena deve
+    abrir pronta, e não montando-se."""
+    motor = (_ESTATICOS / "js" / "cena-solo" / "soilScene.js").read_text(encoding="utf-8")
+    adaptador = (_ESTATICOS / "js" / "cena-solo.js").read_text(encoding="utf-8")
+    narrativa = (_ESTATICOS / "js" / "cena-solo" / "stages.js").read_text(encoding="utf-8")
+
+    assert "...(opts.enterFrom || {})" in motor, "o motor voltou a nascer no estado final"
+    assert 'enterFrom: modo === "gerando" ? ctx.mod.BASE : null' in adaptador
+    assert "export const BASE" in narrativa
 
 
 def test_a_animacao_antiga_saiu_por_inteiro():

@@ -62,7 +62,11 @@
   const ATRIBUTO_MENOS_MOVIMENTO = "data-movimento";
   const VALOR_MENOS_MOVIMENTO = "reduzido";
   // Fechamento da tela de espera: alterna os dois cenários neste intervalo.
-  const ALTERNANCIA_CENARIOS_MS = 3200;
+  /* 1,1 s. Eram 3,2 s, e a etapa da aptidão passou a durar cerca de 2 s quando a
+     espera foi reduzida pela metade: nesse tempo a alternância nunca chegava a
+     acontecer uma vez, e o fechamento — que é justamente mostrar os DOIS cenários —
+     não mostrava nenhum. */
+  const ALTERNANCIA_CENARIOS_MS = 1100;
 
   const ROTULO_ESTADO = {
     ausente: "não informado na análise",
@@ -288,6 +292,9 @@
           initialStage: 0,
           theme: temaAtual(),
           reducedMotion: menosMovimentoNaApp(),
+          // Só na espera: lá a cena é uma SEQUÊNCIA, e a primeira etapa precisa se
+          // mover como as outras. Na hero e no formulário a cena deve abrir pronta.
+          enterFrom: modo === "gerando" ? ctx.mod.BASE : null,
           // Na espera, quem manda é o estado real: sem autoplay, sem clique.
           autoplay: modo === "inicio",
           clickToAdvance: modo === "inicio",
@@ -374,6 +381,15 @@
 
   const ativos = [];
 
+  /** Baixa e compila o motor sem criar cena nenhuma. */
+  function precarregar(raiz) {
+    const urlMotor = raiz.getAttribute("data-cena-motor");
+    if (!urlMotor) return;
+    const urlAbs = new URL(urlMotor, document.baseURI).href;
+    Promise.all([import(urlAbs), import(new URL("stages.js", urlAbs).href)])
+      .catch(function () { /* sem módulos: iniciar() cuida do fallback */ });
+  }
+
   /**
    * Monta cada cena — mas espera a que estiver dentro de um escopo `hidden`.
    *
@@ -397,6 +413,11 @@
         iniciar(raiz);
       });
       espera.observe(escopo, { attributes: true, attributeFilter: ["hidden"] });
+      // Os MÓDULOS podem vir desde já — o que não pode é o contexto WebGL, que
+      // precisa de caixa. Assim, quando o véu abre, resta só montar a cena: baixar e
+      // compilar o motor no meio da primeira etapa é parte do que a fazia parecer
+      // travada. `import()` é idempotente: se outra cena já os carregou, é de graça.
+      precarregar(raiz);
     });
   }
 

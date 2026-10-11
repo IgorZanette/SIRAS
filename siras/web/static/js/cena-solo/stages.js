@@ -39,7 +39,9 @@
  *   'dois-cenarios' alterna diagnóstico ⇄ potencial (fechamento da tela de espera)
  */
 
-const BASE = { vitality: 0.5, plantGrowth: 0.45, rootGrowth: 0.5, rootGlow: 0, grassDensity: 0.45,
+/* Exportado por causa da tela de espera: a cena precisa ENTRAR no primeiro estágio
+   vindo de algum lugar, e este é o lugar. Ver `enterFrom` em soilScene.js. */
+export const BASE = { vitality: 0.5, plantGrowth: 0.45, rootGrowth: 0.5, rootGlow: 0, grassDensity: 0.45,
   layerSeparation: 0, scan: 0, leitura: 1, particles: 0.24, glow: 0.46, sprouts: 0, calagem: 0, adubacao: 0,
   moleculas: 0, npk: 0, agrupar: 0 };
 

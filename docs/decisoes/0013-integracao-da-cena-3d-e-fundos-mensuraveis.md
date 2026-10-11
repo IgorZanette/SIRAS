@@ -239,6 +239,76 @@ garantia: `test_a_cena_da_hero_se_declara_ilustrativa` guarda a que ficou.
 
 ---
 
+## Terceira rodada — o ritmo da espera
+
+### A primeira etapa não se movia, e a causa não era o tempo
+
+Com a cena enfim visível, ela abria parada em "Lendo a análise de solo" — e a segunda
+rodada tinha acabado de dar a essa etapa 4,6 s de nada.
+
+A causa estava em `soilScene.js`, na criação da cena:
+
+```js
+const params  = { ...stages[initialStage].targets, hover: 0 };
+const targets = { ...stages[initialStage].targets };
+```
+
+**`params` e `targets` nasciam iguais.** A cena abria já no estado final do primeiro
+estágio, então não havia o que animar: a varredura que devia atravessar o perfil já
+estava no fim antes de começar. As outras quatro etapas se moviam porque cada uma entra
+vindo da anterior; só a primeira não tinha de onde vir.
+
+Nos outros usos isso é o comportamento certo — a hero deve abrir mostrando o solo, e
+não montando-o. Numa **sequência**, não: a opção `enterFrom` dá à cena um estado de
+partida, e na espera ela entra do repouso (`BASE`, de stages.js). A primeira etapa vira
+uma transição como qualquer outra.
+
+Vale notar onde o defeito estava: não no tempo, que era o sintoma, mas na inicialização.
+Alongar a etapa tinha piorado — mais segundos de imagem parada.
+
+### 24 s era espera exaustiva
+
+Metade: **12 s**. O objetivo da tela é passar robustez de recomendação, e uma tela que
+demora demais passa o contrário — falta de desempenho. O risco que a segunda rodada
+registrou se confirmou antes mesmo da avaliação de usabilidade, e por observação do
+próprio autor.
+
+### O tempo deixou de ser dividido por igual
+
+É isto, e não o total, que faz 12 s bastarem:
+
+| etapa | tempo | por quê |
+|---|---|---|
+| Lendo a análise | 1,45 s | uma varredura que atravessa o perfil uma vez |
+| Calagem | 2,62 s | o calcário cai e fica na superfície |
+| Adubação | 2,62 s | fósforo e potássio sobem da camada de referência |
+| Formulação | 2,62 s | os três montes se agrupam |
+| Aptidão | 1,78 s | a alternância se entende no primeiro ciclo |
+
+As três do meio têm coreografia de verdade e precisam de tempo para serem lidas como
+movimento, e não como corte. As duas das pontas não — dar a elas o mesmo tempo era
+alongar a espera sem acrescentar nada para ver.
+
+Duas consequências que o ritmo desigual obrigou:
+
+- **A barra passou a medir tempo, e não passos.** Encher um quinto por etapa com etapas
+  desiguais a faria parar e disparar.
+- **A alternância dos cenários caiu de 3,2 s para 1,1 s.** Com a aptidão em 1,78 s, a
+  3,2 s ela não chegava a acontecer uma vez — e uma etapa que anuncia "os dois cenários"
+  mostrando um só é pior que não alternar. `test_o_tempo_vai_para_as_etapas_que_tem_coreografia`
+  guarda a relação entre os dois números, e não cada um deles.
+
+Os pesos são relativos (`PESOS_DAS_ETAPAS`): mexer em `ESPERA_MINIMA_MS` redistribui
+tudo sozinho, e um passo novo no template entra com peso 1 em vez de quebrar a tela.
+
+### E o motor chega antes
+
+Os módulos da cena passaram a ser pré-carregados quando o formulário abre; o que espera
+o véu é a criação do contexto WebGL, que precisa de caixa. Baixar e compilar o motor no
+meio da primeira etapa era a outra metade da sensação de travamento.
+
+---
+
 ## O que isto não resolve
 
 As duas verificações que só a tela dá, e que a suíte não substitui:

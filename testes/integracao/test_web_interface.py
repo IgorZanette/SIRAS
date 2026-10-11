@@ -231,16 +231,122 @@ def test_a_tela_de_calculo_existe_e_comeca_oculta(cliente):
     assert 'aria-live="polite"' in html
 
 
+#: O que cada passo da tela de espera diz, e o módulo do motor que ele anuncia.
+#:
+#: O primeiro não é módulo: é a leitura do formulário, que acontece antes de
+#: `gerar_laudo()` ser chamada. Os quatro seguintes são, na ordem em que o motor os
+#: percorre, e os nomes dos módulos vêm de `_ORDEM_DOS_MODULOS` em apresentacao.py —
+#: a mesma lista que agrupa a trilha do laudo.
+_PASSOS_DA_ESPERA = (
+    ("Lendo a análise de solo", None),
+    ("Calculando a calagem", "Calagem"),
+    ("Calculando a adubação", "Adubação"),
+    ("Escolhendo o adubo formulado", "Adubo formulado"),
+    ("Avaliando a aptidão edáfica", "Aptidão edáfica"),
+)
+
+
 def test_a_tela_de_calculo_lista_os_modulos_reais_do_motor(cliente):
     """A sequência não é enfeite: são os módulos que gerar_laudo() percorre, na ordem em
-    que os chama. Quem espera aprende o que o sistema faz."""
+    que os chama. Quem espera aprende o que o sistema faz.
+
+    Era o que o teste dizia, e a lista tinha envelhecido: anunciava "Montando a trilha"
+    e não anunciava a formulação, que o motor executa desde a ADR 0007. Agora a
+    expectativa é derivada de `_ORDEM_DOS_MODULOS`, a mesma lista que agrupa a trilha do
+    laudo — um módulo novo no motor volta a quebrar este teste, que é o ponto."""
+    from siras.relatorio.apresentacao import _ORDEM_DOS_MODULOS
+
     html = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
 
-    assert html.count("data-passo") == 5
-    for passo in ("Lendo a análise de solo", "Calculando a calagem",
-                  "Classificando fósforo e potássio", "Avaliando a aptidão edáfica",
-                  "Montando a trilha"):
-        assert passo in html
+    assert html.count("data-passo") == len(_PASSOS_DA_ESPERA)
+    for titulo, _modulo in _PASSOS_DA_ESPERA:
+        assert titulo in html, titulo
+
+    # Todo módulo do motor é anunciado por um passo, e na mesma ordem.
+    anunciados = [m for _t, m in _PASSOS_DA_ESPERA if m]
+    assert anunciados == list(_ORDEM_DOS_MODULOS), (
+        f"a tela de espera anuncia {anunciados} e o motor percorre "
+        f"{list(_ORDEM_DOS_MODULOS)}"
+    )
+
+
+def test_cada_passo_da_espera_tem_uma_coreografia_na_cena(cliente):
+    """A v7 deu a cada etapa da geração do laudo um movimento próprio. São cinco
+    coreografias para cinco passos, e a correspondência é o que faz o desenho explicar
+    a etapa em vez de só preencher a espera."""
+    narrativa = (_ESTATICOS / "js" / "cena-solo" / "stages.js").read_text(encoding="utf-8")
+
+    coreografias = re.findall(r"\{ id: '([a-z]+)', label:", narrativa)
+    assert len(coreografias) == len(_PASSOS_DA_ESPERA), (
+        f"{len(coreografias)} coreografias para {len(_PASSOS_DA_ESPERA)} passos"
+    )
+    assert coreografias == ["diagnostico", "calagem", "adubacao", "formulacao", "aptidao"]
+
+
+def test_as_dez_cenas_da_v7_estao_todas_em_uso(cliente):
+    """As dez cenas da apresentação v7 foram desenhadas para o SIRAS, e o pedido foi
+    que todas entrassem. Este teste é o inventário: ele falha se alguma sumir numa
+    refatoração do frontend, que é como esse tipo de coisa se perde.
+
+    A divisão: as três primeiras são os estágios da hero, a quarta é o cabeçalho do
+    painel de leitura ao vivo, da quinta à nona são as coreografias da tela de espera
+    (uma por módulo do motor), e a décima — os limites da ilustração — é texto, não
+    movimento: ela diz o que a cena não é, e para isso uma animação não serve."""
+    inicio = cliente.get("/").get_data(as_text=True)
+    dados = cliente.get("/analise/dados?cultura_id=soja").get_data(as_text=True)
+
+    # 1 a 3 — os estágios da hero.
+    for estagio in range(3):
+        assert f'data-cena-estagio="{estagio}"' in inicio, estagio
+
+    # 4 — durante o preenchimento, no painel de leitura ao vivo.
+    assert 'data-cena-solo="formulario"' in dados
+
+    # 5 a 9 — uma coreografia por módulo, verificada em
+    # test_cada_passo_da_espera_tem_uma_coreografia_na_cena.
+    assert 'data-cena-solo="gerando"' in dados
+
+    # 10 — os limites, junto dos controles da cena e não num rodapé.
+    assert "cena-solo-limites" in inicio
+    assert "não há" in inicio and "promessa de produtividade" in inicio
+
+
+def test_os_limites_da_cena_so_aparecem_quando_a_cena_aparece(cliente):
+    """Um aviso sobre uma ilustração que não carregou só confunde. O texto mora dentro
+    de `.cena-solo-controles`, que fica `hidden` até o motor 3D subir."""
+    html = cliente.get("/").get_data(as_text=True)
+
+    controles = html[html.index("cena-solo-controles"):]
+    controles = controles[:controles.index("</div>")]
+    assert "cena-solo-limites" in controles, "os limites ficaram fora dos controles"
+
+
+def test_os_fundos_servidos_sao_leves(cliente):
+    """As cinco artes originais somam 8,6 MB de PNG. Servi-las inteiras para pintar uma
+    textura a 16% de opacidade é cobrar do produtor, por 4G, o que ele não vê.
+
+    `scripts/gerar_fundos.py` converte para WebP; este teste é o que impede alguém de
+    voltar a apontar o CSS para o original. O teto de 300 KB é folgado de propósito: é
+    para pegar o PNG de 1,7 MB voltando, não para disputar quilobytes."""
+    fundos = sorted((_ESTATICOS / "img" / "background").glob("*"))
+
+    assert fundos, "nenhum fundo em static/img/background"
+    for fundo in fundos:
+        assert fundo.suffix == ".webp", f"{fundo.name} não é WebP"
+        assert fundo.stat().st_size < 300 * 1024, (
+            f"{fundo.name} tem {fundo.stat().st_size / 1024:.0f} KB"
+        )
+
+
+def test_o_fundo_recua_no_tema_claro():
+    """As cinco artes são paisagens escuras. Sobre o fundo claro elas não viram
+    textura, viram mancha cinza atrás do texto — então a opacidade cai."""
+    assert re.search(
+        r':root\[data-tema="claro"\] \.hero\.fundo-horizonte::before \{[^}]*opacity: \.0',
+        _TELAS_CSS,
+    )
+    # E some na impressão: é atmosfera de tela, não conteúdo do documento.
+    assert re.search(r"@media print \{ \.fundo-horizonte::before \{ display: none", _TELAS_CSS)
 
 
 def test_a_tela_de_calculo_nao_e_impressa(cliente):
@@ -1618,6 +1724,9 @@ def test_tudo_que_recebe_foco_tem_anel_visivel():
 def test_a_hero_nao_e_revelada(cliente):
     """Revelar o que já está na tela ao abrir é piscar sem motivo."""
     html = cliente.get("/").get_data(as_text=True)
-    hero = re.search(r'<section class="hero"[^>]*>', html).group(0)
+    # `class="hero ..."`: a hero acumula modificadores (hoje `fundo-horizonte`), e
+    # prender o teste à classe exata o quebra a cada um deles sem nada a ver com o
+    # que ele verifica.
+    hero = re.search(r'<section class="hero[ "][^>]*>', html).group(0)
 
     assert "data-revelar" not in hero

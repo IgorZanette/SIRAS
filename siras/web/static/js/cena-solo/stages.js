@@ -40,7 +40,7 @@
  */
 
 const BASE = { vitality: 0.5, plantGrowth: 0.45, rootGrowth: 0.5, rootGlow: 0, grassDensity: 0.45,
-  layerSeparation: 0, scan: 0, leitura: 1, particles: 0.35, glow: 0.5, sprouts: 0, calagem: 0, adubacao: 0,
+  layerSeparation: 0, scan: 0, leitura: 1, particles: 0.24, glow: 0.46, sprouts: 0, calagem: 0, adubacao: 0,
   moleculas: 0, npk: 0, agrupar: 0 };
 
 export const HERO_STAGES = [
@@ -56,7 +56,7 @@ export const HERO_STAGES = [
     label: 'O que a análise revela',
     durationMs: 7500,
     marcadores: 'diagnostico',
-    targets: { ...BASE, rootGlow: 0.6, layerSeparation: 1, scan: 1, particles: 0.8, glow: 0.6 },
+    targets: { ...BASE, rootGlow: 0.6, layerSeparation: 1, scan: 1, particles: 0.48, glow: 0.56 },
   },
   {
     id: 'aptidao-potencial',
@@ -66,7 +66,7 @@ export const HERO_STAGES = [
     // O mesmo solo APÓS as correções recomendadas: o calcário e o adubo ficam
     // visíveis na superfície como a CAUSA da melhora (sem rótulos, para não
     // poluir a hero). Limitações permanentes continuam marcadas.
-    targets: { ...BASE, vitality: 0.72, plantGrowth: 0.7, rootGrowth: 0.7, rootGlow: 0.1, grassDensity: 0.7, particles: 0.5, glow: 0.75, calagem: 1, adubacao: 1 },
+    targets: { ...BASE, vitality: 0.72, plantGrowth: 0.7, rootGrowth: 0.7, rootGlow: 0.1, grassDensity: 0.7, particles: 0.34, glow: 0.64, calagem: 1, adubacao: 1 },
   },
 ];
 

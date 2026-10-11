@@ -32,8 +32,17 @@
 {% import "_macros/ico.html" as i %}
 
 {# `data-cena-escopo` agrupa a cena com o veu. A cena so OBSERVA o `data-etapa`
-   que gerando.js ja mantem aqui: nem o ESPERA_MINIMA_MS, nem os passos, nem os
-   textos mudaram para ela entrar (ADR 0012). #}
+   que gerando.js ja mantem aqui: nem o ESPERA_MINIMA_MS nem a mecanica dos passos
+   mudaram para ela entrar (ADR 0012).
+
+   OS CINCO PASSOS FORAM REFEITOS em 11/10/2026, e nao por causa da cena. Eles
+   estavam fora de sincronia com o motor: diziam "Montando a trilha" e nao diziam
+   "Formulacao", que gerar_laudo() executa desde a ADR 0007. A sequencia agora e a
+   que o motor percorre — calagem, adubacao, formulacao, aptidao —, e e a mesma que
+   as cinco coreografias da cena desenham, uma por etapa.
+
+   Cada passo continua citando a tabela do Manual que consulta. A cena ACRESCENTA
+   desenho; se algum desses significados se perdesse, a troca seria regressao. #}
 <div class="calculando nao-imprime" id="calculando" hidden aria-hidden="true"
      data-etapa="0" data-cena-escopo>
   <div class="calculando__halo" aria-hidden="true"></div>
@@ -200,8 +209,16 @@
       <li class="passo" data-passo>
         <span class="passo__ico">{{ i.ico("regua") }}</span>
         <span class="passo__txt">
-          <b>Classificando fósforo e potássio</b>
-          <small>Por classe de argila e por faixa de CTC</small>
+          <b>Calculando a adubação</b>
+          <small>Fósforo pela classe de argila, potássio pela faixa de CTC</small>
+        </span>
+        <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
+      </li>
+      <li class="passo" data-passo>
+        <span class="passo__ico">{{ i.ico("adubo") }}</span>
+        <span class="passo__txt">
+          <b>Escolhendo o adubo formulado</b>
+          <small>Fórmula ideal, melhores do catálogo e mistura de simples</small>
         </span>
         <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
       </li>
@@ -210,14 +227,6 @@
         <span class="passo__txt">
           <b>Avaliando a aptidão edáfica</b>
           <small>Nos cenários de hoje e depois da correção</small>
-        </span>
-        <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
-      </li>
-      <li class="passo" data-passo>
-        <span class="passo__ico">{{ i.ico("rastro") }}</span>
-        <span class="passo__txt">
-          <b>Montando a trilha</b>
-          <small>Cada dose com a regra e a tabela que a produziram</small>
         </span>
         <span class="passo__marca">{{ i.ico("confere", "ico ico--sm") }}</span>
       </li>

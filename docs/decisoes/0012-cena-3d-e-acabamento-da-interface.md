@@ -71,6 +71,33 @@ que ali já funciona.
 `test_o_formulario_nao_recebe_cena` registra a decisão em código: se o parcial voltar, a
 suíte avisa.
 
+### Adenda de 11/10/2026 — REVERTIDA, e o argumento sobreviveu
+
+A cena do formulário **voltou**, em outro lugar: como **cabeçalho do painel de leitura
+ao vivo**, e não como painel ao lado dele.
+
+O corte estava certo pelo motivo que deu — um painel rival disputaria atenção com o
+elemento mais pedagógico da tela. O que a reversão descobriu é que *ao lado* era a única
+posição considerada. Como cabeçalho do mesmo painel as duas não disputam, porque
+respondem perguntas diferentes e em sequência:
+
+| | pergunta que responde | linguagem |
+|---|---|---|
+| a cena, acima | o que já foi informado | um ponto aceso por atributo |
+| a leitura, abaixo | o que aquilo significa | classe, régua e tabela do Manual |
+
+Inventário e depois interpretação. A cena continua **sem interpretar nada**: ela mostra
+"lido" ou "ausente", e só — `seguirFormulario` segue proibida de usar `limitante` e
+`corrigido`, e o teste continua verificando isso. O que mudou de verdade é que o usuário
+passa a ver, sem rolar, quanto da análise já entrou.
+
+O mapa de qual campo acende qual ponto fica em `ATRIBUTO_DA_CENA`, no macro `campo()`, e
+não em cada chamada: o macro é chamado em sete lugares, e um argumento a mais em todos
+divergiria na primeira tela que alguém esquecesse.
+
+`test_a_cena_do_formulario_e_cabecalho_da_leitura_e_nao_painel_rival` substitui o teste
+anterior e guarda as duas metades: a cena está dentro do painel, e não interpreta.
+
 ## D12.3 — A landing não foi reescrita
 
 O diagnóstico do plano encontrou o que não se esperava: **a estrutura da landing já
@@ -114,6 +141,79 @@ palavras.
 A seção também trouxe o **selo de natureza** para o alto do hero — *Trabalho de Conclusão
 de Curso · em desenvolvimento · roda local e offline*. Estava só no rodapé do laudo. Um
 TCC que se apresenta como produto acabado perde mais credibilidade do que ganha.
+
+## D12.5 — As dez cenas da v7, e onde cada uma coube
+
+A v7 do kit trouxe dez cenas, e o pedido foi que todas entrassem no sistema. Elas não
+são dez telas: são dez momentos, e o sistema tem três lugares onde um momento desses faz
+sentido.
+
+| cenas | onde | por quê ali |
+|---|---|---|
+| 1 a 3 — o solo, o que a análise revela, aptidão potencial | estágios da hero | são o arco inteiro do sistema em três cliques, que é o que uma hero precisa dizer |
+| 4 — durante o preenchimento | cabeçalho da leitura ao vivo | ver a análise entrando enquanto se digita (D12.2, adenda) |
+| 5 a 9 — diagnóstico, calagem, adubação, formulação, aptidão | tela de espera | uma coreografia por módulo do motor |
+| 10 — limites desta camada visual | texto, junto dos controles da hero | ver abaixo |
+
+A décima é a única que **não** virou movimento, e de propósito: ela diz o que a
+ilustração não é, e uma animação que explica os limites de uma animação é um nó. O texto
+é o da própria apresentação, quase palavra por palavra — *"Ilustração conceitual: a
+planta é genérica, nenhum valor aparece na cena, não há promessa de produtividade, e o
+laudo, em tela e impresso, não tem 3D."*
+
+Ela importa mais do que o tamanho sugere. Uma cena 3D convence mais do que deveria: o
+perfil desenhado tem aparência de medição, e a planta que cresce entre os estágios tem
+aparência de promessa de safra — que é exatamente o que um sistema de recomendação não
+pode insinuar. É a mesma regra que proíbe número sem tabela no resto do sistema,
+aplicada ao desenho.
+
+O texto fica **dentro** de `.cena-solo-controles`, que é `hidden` até o motor 3D subir:
+sem WebGL não há ilustração, e um aviso sobre uma ilustração ausente só confunde.
+
+`test_as_dez_cenas_da_v7_estao_todas_em_uso` é o inventário em código — é assim que esse
+tipo de coisa se perde numa refatoração.
+
+### A tela de espera estava mentindo
+
+Ao encaixar as cinco coreografias apareceu um defeito que não tinha nada a ver com a
+cena: **os passos anunciados não eram mais os do motor.** A tela dizia "Montando a
+trilha" e não dizia "Formulação", que `gerar_laudo()` executa desde a ADR 0007.
+
+Era uma lista escrita à mão, e o teste que a verificava era outra lista escrita à mão —
+as duas envelheceram juntas, concordando entre si. Agora a expectativa deriva de
+`_ORDEM_DOS_MODULOS`, a mesma constante que agrupa a trilha do laudo: um módulo novo no
+motor volta a quebrar o teste, que é o ponto de ele existir.
+
+## D12.6 — Os fundos entram como atmosfera, não como imagem
+
+As cinco artes de fundo são paisagens de lavoura ao amanhecer, e **todas são escuras**.
+Isso, e não o gosto, decidiu onde elas podiam entrar.
+
+Uma imagem escura a baixa opacidade sobre fundo claro não vira textura: vira uma mancha
+cinza que derruba o contraste do texto. Então elas entram nos dois lugares onde a página
+já tem atmosfera — a **hero**, dissolvendo-se antes do conteúdo, e a **chamada final**,
+entrando por baixo para a página terminar num horizonte — e recuam de 16% para 5% no
+tema claro, no limite de serem percebidas.
+
+São `background-image`, e não `<img>`: não entram na árvore de acessibilidade, nenhum
+texto depende delas, e somem na impressão.
+
+### 8,6 MB que estavam sendo servidos
+
+As cinco artes entraram em `static/` no commit da identidade, e estavam sendo baixadas
+inteiras: 8,6 MB de PNG para pintar uma textura a 16% de opacidade. PNG é formato sem
+perda — ele preservava com precisão um degradê de céu que, no uso final, está sob uma
+camada de 84% de fundo sólido. Numa tela de campo, por 4G, é o produtor esperando por
+aquilo que ele não vê.
+
+`scripts/gerar_fundos.py` converte para WebP a 1600 px: **8,6 MB viraram 175 KB**, e a
+diferença visível é zero. O padrão é o mesmo da marca — a arte original fica em
+`docs/fundos/`, que não é servido, e o script registra como o arquivo servido foi
+produzido. `test_os_fundos_servidos_sao_leves` impede o PNG de voltar.
+
+As cinco são geradas, com duas em uso: elas são opções do autor, e trocar o fundo da hero
+é mudar uma linha de CSS — o que só é verdade se as cinco estiverem lá. A 35 KB cada, as
+três de reserva custam menos que o PNG de uma.
 
 ## O que a avaliação de usabilidade ainda pode desfazer
 

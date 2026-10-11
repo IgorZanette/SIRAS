@@ -182,19 +182,28 @@ def test_adaptador_recusa_renderizacao_por_software():
     assert "isSoftwareRenderer()" in js and "cena-software=1" in js
 
 
-def test_o_formulario_nao_recebe_cena():
-    """A Fase 2b do kit — um painel 3D ao lado dos campos — foi CORTADA, e não adiada.
+def test_a_cena_do_formulario_e_cabecalho_da_leitura_e_nao_painel_rival():
+    """A D12.2 cortou a cena do formulário; em 11/10/2026 ela voltou, e em outro lugar.
 
-    A tela de dados já tem o painel de leitura ao vivo, que interpreta cada valor
-    digitado contra as tabelas do Manual. É o elemento de maior valor pedagógico do
-    sistema, e a §9.3 do plano de front-end o justifica por um motivo que uma
-    ilustração não substitui: ele mostra a CLASSE, com a régua e a fonte. Pôr uma cena
-    ao lado disputaria atenção com o que ali já funciona.
+    O corte estava certo pelo motivo que deu: um painel 3D AO LADO dos campos disputaria
+    atenção com a leitura ao vivo, que é o elemento de maior valor pedagógico da tela —
+    ela mostra a CLASSE de cada valor, com a régua e a tabela do Manual.
 
-    Decisão registrada em docs/processo/plano-frontend-v2.md e na ADR 0012."""
-    assert not (PARCIAIS / "cena_solo_formulario.html").exists(), (
-        "o painel do formulário voltou: confira se a decisão mudou antes de integrá-lo"
-    )
+    O que mudou foi a posição, não o argumento. Como CABEÇALHO do mesmo painel, as duas
+    não disputam: respondem perguntas diferentes, em sequência. A cena diz O QUE JÁ FOI
+    INFORMADO — cada atributo preenchido acende o seu ponto no perfil — e as linhas
+    abaixo dizem O QUE AQUILO SIGNIFICA. Inventário e depois interpretação.
+
+    Este teste guarda as duas metades: que a cena está dentro do painel da leitura, e
+    que ela continua sem interpretar nada."""
+    assert (PARCIAIS / "cena_solo_formulario.html").exists()
+
+    # Dentro do painel da leitura ao vivo, e não solta na coluna dos campos.
+    dados = ler(RAIZ / "siras/web/templates/dados.html")
+    aside = dados[dados.index("<aside"):]
+    aside = aside[:aside.index("</aside>")]
+    assert "cena_solo_formulario.html" in aside, "a cena saiu do painel de leitura"
+
     js = ler(STATIC / "js/cena-solo.js")
     # O adaptador mantém a função; ela simplesmente não encontra contêiner nenhum.
     # O que não pode é ela interpretar — isso é papel da leitura ao vivo.

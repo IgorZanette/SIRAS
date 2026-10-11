@@ -1,5 +1,26 @@
 {% import "_macros/ico.html" as _i %}
 
+{# Qual atributo da cena 3D cada campo acende (ADR 0012).
+
+   A cena do formulário mostra SÓ se o atributo foi informado ou não — nunca a
+   classe, nunca a dose. Interpretar é papel do painel de leitura ao vivo, logo
+   abaixo dela, e do motor no servidor.
+
+   O mapa fica aqui, e não em cada chamada do macro: `campo()` é chamado em sete
+   lugares, e passar mais um argumento em todos faria a marcação divergir na
+   primeira tela que alguém esquecesse. Campo fora do mapa simplesmente não acende
+   ponto nenhum, que é o certo — não há ponto para "PRNT do corretivo". #}
+{% set ATRIBUTO_DA_CENA = {
+  "ph_agua": "ph",
+  "p": "fosforo",
+  "k": "potassio",
+  "ca": "calcio-magnesio",
+  "mg": "calcio-magnesio",
+  "mo": "materia-organica",
+  "ctc_ph7": "ctc",
+  "argila": "textura"
+} %}
+
 {# Marca de campo dispensável mais a dica do "por que preencher".
 
    Um campo opcional sem sinal vira campo ignorado: quem passa os olhos pula tudo que
@@ -59,6 +80,7 @@
       {# Os espaços antes de cada {% raw %}{% if %}{% endraw %} são necessários: trim_blocks remove a quebra de
          linha que separaria os atributos, e sem eles sai value="5,4"required. #}
       <input type="number" step="{{ passo }}" id="{{ id }}" name="{{ id }}"
+             {% if ATRIBUTO_DA_CENA.get(id) %}data-cena-atributo="{{ ATRIBUTO_DA_CENA[id] }}" {% endif -%}
              inputmode="decimal" placeholder="{{ placeholder }}"{% if valor is not none %} value="{{ valor }}"{% endif %}{% if faixa %}{% if faixa[0] is not none %} min="{{ faixa[0] }}"{% endif %}{% if faixa[1] is not none %} max="{{ faixa[1] }}"{% endif %}{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}{% if obrigatorio %} required{% endif %}>
       {# |safe: a unidade traz marcação (cmol<sub>c</sub>/dm<sup>3</sup>) e é constante
          escrita no código, nunca texto vindo do usuário. #}

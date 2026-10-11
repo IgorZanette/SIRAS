@@ -1,0 +1,20 @@
+{#
+  Cena 3D no formulário da análise (opcional). Fica AO LADO dos campos,
+  como painel, nunca atrás deles (contraste e foco no preenchimento).
+
+  Uso: no template do formulário, dentro de um contêiner com data-cena-escopo,
+  e marque cada campo com o atributo que ele representa:
+     <input name="ph_agua" data-cena-atributo="ph" ...>
+     <input name="p_mehlich" data-cena-atributo="fosforo" ...>
+  Vários campos podem apontar para o mesmo atributo (basta um preenchido).
+
+  data-cena-campos: seletor do <form>. AJUSTAR ao markup real.
+  A cena mostra só "lido" (preenchido) ou "ausente" (vazio): nenhuma
+  interpretação acontece aqui; ela é do motor agronômico, no servidor.
+#}
+<div class="cena-solo cena-solo--painel nao-imprime" data-cena-solo="formulario" aria-hidden="true"
+     data-cena-campos="form[data-cena-formulario]"
+     data-cena-motor="{{ url_for('static', filename='js/cena-solo/soilScene.js') }}">
+  <img class="cena-solo__fallback" alt="" width="761" height="708" decoding="async"
+       src="{{ url_for('static', filename='img/cena-solo/fallback-estagio-1.webp') }}">
+</div>

@@ -27,6 +27,24 @@
   </ol>
   <p data-cena-descricao aria-live="polite"></p>
   <button type="button" data-cena-pausar aria-pressed="false">Pausar animação</button>
+
+  {# "Limites desta camada visual" — a décima e última cena da apresentação v7, aqui
+     em texto e não em movimento. O texto é o da própria apresentação, quase palavra
+     por palavra: é o autor dizendo o que a ilustração não é, e trocá-lo por uma
+     versão minha só tiraria precisão.
+
+     Por que ela existe: uma cena 3D convence mais do que deveria. O perfil desenhado
+     tem aparência de medição, e a planta que cresce entre os estágios tem aparência
+     de promessa de safra — que é exatamente o que um sistema de recomendação não pode
+     insinuar. Dizer isto aqui, junto dos controles da cena, e não num rodapé, é a
+     mesma regra que proíbe número sem tabela no resto do sistema.
+
+     Fica DENTRO de `.cena-solo-controles`, que é `hidden` até a cena rodar: sem WebGL
+     não há ilustração, e um aviso sobre uma ilustração ausente só confunde. #}
+  <p class="cena-solo-limites">
+    Ilustração conceitual: a planta é genérica, nenhum valor aparece na cena, não há
+    promessa de produtividade, e o laudo, em tela e impresso, não tem 3D.
+  </p>
 </div>
 
 {#

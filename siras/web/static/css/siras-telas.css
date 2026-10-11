@@ -2269,3 +2269,54 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 /* O que o sistema E, dito no alto do hero e nao so no rodape do laudo. */
 .hero__natureza { margin-top: var(--e-3); font-size: var(--fs-xs); color: var(--n-400);
                   letter-spacing: .01em; }
+
+/* --- Fundos de apoio (ADR 0012) ----------------------------------------- */
+/* As cinco artes de `img/background/` sao paisagens de lavoura ao amanhecer, e
+   todas sao ESCURAS. Isso decide onde elas podem entrar: uma imagem escura a baixa
+   opacidade sobre fundo claro nao vira textura, vira uma mancha cinza que derruba o
+   contraste do texto. Entao elas entram onde a pagina ja tem atmosfera -- a hero e a
+   chamada final -- e recuam quase a zero no tema claro.
+
+   Sao atmosfera, nao conteudo: vao em `background-image`, e nao em `<img>`, entao nao
+   entram na arvore de acessibilidade nem na impressao. Nenhum texto depende delas. */
+.fundo-horizonte { position: relative; isolation: isolate; }
+.fundo-horizonte::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background-size: cover; background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* A hero: a paisagem comeca no topo e se dissolve antes do conteudo, para a cena 3D
+   e o titulo caírem sobre fundo limpo. Sem a mascara a foto termina numa linha reta
+   no fim da section, que denuncia o retangulo. */
+.hero.fundo-horizonte::before {
+  background-image: url("../img/background/op-3.webp");
+  background-position: center top;
+  opacity: .16;
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.45) 45%, transparent 88%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.45) 45%, transparent 88%);
+}
+
+/* A chamada final: o inverso: a paisagem entra por baixo e a pagina termina num
+   horizonte. `op-5` e a mais uniforme das cinco, que e o que serve atras de um botao. */
+.chamada.fundo-horizonte::before {
+  background-image: url("../img/background/op-5.webp");
+  background-position: center bottom;
+  opacity: .22;
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.5) 55%, #000 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.5) 55%, #000 100%);
+}
+
+/* No tema claro as artes trabalham contra o fundo: escurecem em vez de dar superficie.
+   Ficam como insinuacao de cor, no limite de serem percebidas -- que e o maximo que
+   uma imagem escura pode fazer sobre papel branco sem sujar o texto. */
+:root[data-tema="claro"] .hero.fundo-horizonte::before { opacity: .05; }
+:root[data-tema="claro"] .chamada.fundo-horizonte::before { opacity: .07; }
+
+@media print { .fundo-horizonte::before { display: none; } }
+
+/* --- Limites da ilustracao (cena 10 da apresentacao v7) ------------------ */
+.cena-solo-limites {
+  margin-top: var(--e-4); max-width: 54ch;
+  font-size: var(--fs-3xs); line-height: 1.55; color: var(--n-500);
+}

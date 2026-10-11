@@ -76,7 +76,8 @@
   {% endif %}
 
   <div class="oficina" style="margin-top:var(--e-5)">
-  <form method="post" action="{{ url_for('siras.laudo') }}" data-formulario-analise>
+  <form method="post" action="{{ url_for('siras.laudo') }}" data-formulario-analise
+        data-cena-formulario>
 
     <div class="painel bloco">
       <div class="bloco__cab">
@@ -340,7 +341,16 @@
   {# Painel de leitura ao vivo. Abaixo de 1040px o CSS o move para o fim do
      formulário — desce, não some: é onde o erro de transcrição é percebido no campo
      em que ocorreu, e não três telas adiante. #}
-  <aside class="painel painel--marca leitura nao-imprime">
+  {# A cena 3D entra COMO CABEÇALHO deste painel, e não como um painel ao lado.
+
+     A decisão anterior (ADR 0012, D12.2) foi cortá-la daqui, para não disputar
+     atenção com a leitura ao vivo. Aqui ela não disputa: as duas respondem perguntas
+     diferentes e em sequência. A cena diz O QUE JÁ FOI INFORMADO — cada atributo
+     preenchido acende o seu ponto no perfil —, e as linhas abaixo dizem O QUE AQUILO
+     SIGNIFICA, com a régua e a tabela. Uma é inventário, a outra é interpretação.
+
+     A cena não interpreta nada: mostra "lido" ou "ausente", e só. #}
+  <aside class="painel painel--marca leitura nao-imprime" data-cena-escopo>
     <div class="leitura__cab">
       {{ i.ico("regua") }}
       <div>
@@ -348,6 +358,7 @@
         <p>Interpretação conforme você digita</p>
       </div>
     </div>
+    {% include "_parciais/cena_solo_formulario.html" %}
     <div class="leitura__corpo" id="leitura" aria-live="polite"
          data-url="{{ url_for('siras.interpretar') }}">
       {% include "_parciais/leitura.html" %}

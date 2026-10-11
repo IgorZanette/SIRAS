@@ -1,5 +1,5 @@
 /**
- * soilScene.js — Motor da cena 3D "transformação do solo" do SIRAS.
+ * soilScene.js — Motor da cena 3D "transformação do solo" do SIRAS (choreography v7).
  *
  * Framework-agnóstico: usa apenas Three.js. O wrapper React
  * (SoilTransformationScene.jsx) só cria/destroi esta cena; você também
@@ -202,6 +202,112 @@ const QUALITY = {
   medium: { dpr: 1.5,  seg: 32, particles: 150, grassClusters: 120, rootDetail: 0.8, crumbs: 14, straw: 170, granules: 110 },
   low:    { dpr: 1.25, seg: 22, particles: 70,  grassClusters: 80,  rootDetail: 0.6, crumbs: 7,  straw: 90,  granules: 60 },
 };
+
+/**
+ * Linguagem de movimento v6: a cena continua viva, mas sem o aspecto de
+ * "objeto flutuando". A prioridade é comunicar mudança de estado com
+ * movimentos curtos, amortecidos e intencionais.
+ */
+const MOTION = {
+  idleYaw: 0.026,
+  idleBob: 0.007,
+  parallaxYaw: 0.09,
+  parallaxPitch: 0.026,
+  stageDamp: 4.4,
+  settleDamp: 4.0,
+  markerPulse: 0.045,
+  particleDrift: 0.34,
+};
+
+const PROCESSING_IDS = new Set(['diagnostico', 'calagem', 'adubacao', 'formulacao', 'aptidao']);
+
+function stageMotion(stage) {
+  const id = stage?.id || '';
+  // Cada passo tem um enquadramento próprio, mas a diferença é deliberadamente
+  // pequena: a coreografia vem da ação, não de movimentos de câmera chamativos.
+  if (id === 'analise-revela') return { yaw: -0.045, pitch: 0.012, scale: 1.015 };
+  if (id === 'diagnostico') return { yaw: -0.055, pitch: 0.014, scale: 1.022 };
+  if (id === 'calagem') return { yaw: -0.028, pitch: -0.012, scale: 1.025 };
+  if (id === 'adubacao') return { yaw: 0.032, pitch: 0.002, scale: 1.024 };
+  if (id === 'formulacao') return { yaw: 0.012, pitch: 0.012, scale: 1.03 };
+  if (id === 'aptidao') return { yaw: 0.036, pitch: -0.008, scale: 0.998 };
+  if (id === 'aptidao-potencial') return { yaw: 0.042, pitch: -0.008, scale: 1.02 };
+  return { yaw: 0, pitch: 0, scale: 1 };
+}
+
+/**
+ * Coreografia v7 da tela de geração do laudo.
+ * Não cria lógica agronômica: apenas organiza no tempo os elementos visuais
+ * existentes. Servidor/DOM continuam sendo a fonte da verdade.
+ */
+function stageChoreography(stage, t, animate = true) {
+  const id = stage?.id || '';
+  const reveal = (a, b) => animate ? smoothstep(a, b, t) : 1;
+  const pulse = (a, b) => {
+    if (!animate) return 0;
+    const x = smoothstep(a, b, t);
+    return Math.sin(Math.PI * x);
+  };
+  const base = {
+    limeGate: 1,
+    moleculeWaves: [1, 1, 1],
+    fertGate: 1,
+    npkWaves: [1, 1, 1],
+    npkLabelWaves: [1, 1, 1],
+    groupGate: 1,
+    outline: 0,
+    outlineScale: 1,
+    rootFocus: 0,
+    lightLift: 0,
+    particleFactor: 1,
+    scanGain: 1,
+    cameraYaw: 0,
+    cameraPitch: 0,
+    cameraScale: 0,
+  };
+  if (!PROCESSING_IDS.has(id)) return base;
+
+  if (id === 'diagnostico') {
+    const p = pulse(0.12, 1.18);
+    return { ...base,
+      outline: 0.055 + 0.17 * p, outlineScale: 1 + 0.014 * p,
+      rootFocus: 0.10 * reveal(0.78, 1.45), lightLift: 0.035 * p,
+      particleFactor: 0.72, scanGain: 1.08, cameraScale: 0.004 * p };
+  }
+  if (id === 'calagem') {
+    const p = pulse(0.10, 1.35);
+    return { ...base,
+      limeGate: reveal(0.15, 0.92),
+      moleculeWaves: [reveal(0.95, 1.48), reveal(1.20, 1.73), reveal(1.45, 1.98)],
+      outline: 0.065 + 0.20 * p, outlineScale: 1 + 0.018 * p,
+      lightLift: 0.05 * p, particleFactor: 0.62, scanGain: 0.82,
+      cameraPitch: -0.005 * p };
+  }
+  if (id === 'adubacao') {
+    const p = pulse(0.10, 1.55);
+    return { ...base,
+      fertGate: reveal(0.12, 0.72),
+      npkWaves: [reveal(0.16, 0.78), reveal(0.46, 1.08), reveal(0.76, 1.38)],
+      npkLabelWaves: [reveal(0.58, 1.08), reveal(0.83, 1.33), reveal(1.08, 1.58)],
+      outline: 0.055 + 0.18 * p, outlineScale: 1 + 0.015 * p,
+      rootFocus: 0.12 * reveal(1.0, 1.75), lightLift: 0.045 * p,
+      particleFactor: 0.68, cameraYaw: 0.010 * p };
+  }
+  if (id === 'formulacao') {
+    const p = pulse(0.18, 1.55);
+    const group = reveal(0.24, 1.42);
+    return { ...base,
+      groupGate: group, outline: 0.07 + 0.19 * p,
+      outlineScale: 1 + 0.017 * p, lightLift: 0.04 * p,
+      particleFactor: 0.50, cameraScale: 0.010 * group };
+  }
+  const p = pulse(0.12, 1.42);
+  const settle = reveal(0.38, 1.28);
+  return { ...base,
+    outline: 0.10 + 0.18 * p, outlineScale: 1 + 0.026 * p,
+    lightLift: 0.12 * settle, particleFactor: 0.52,
+    cameraScale: -0.012 * settle };
+}
 
 /* ------------------------------------------------------------------ */
 /* Cena                                                                 */
@@ -582,25 +688,28 @@ export function createSoilScene(container, opts = {}) {
   }
 
   const _gm = new THREE.Matrix4(), _gq = new THREE.Quaternion(), _gs = new THREE.Vector3(), _gp = new THREE.Vector3();
-  function updateGranules(sys, target, dt, animate, agrupar = 0) {
-    sys.vis = animate ? damp(sys.vis, target, 3, dt) : target;
-    sys.agrupado = animate ? damp(sys.agrupado, agrupar, 1.6, dt) : agrupar;
+  function updateGranules(sys, target, dt, animate, agrupar = 0, typeReveal = null) {
+    sys.vis = animate ? damp(sys.vis, target, 3.4, dt) : target;
+    sys.agrupado = animate ? damp(sys.agrupado, agrupar, 1.9, dt) : agrupar;
     const active = target > 0.5;
     const a = smoothstep(0, 1, sys.agrupado);
     sys.items.forEach((it, i) => {
-      if (!animate) it.g = active ? 1 : 0;
-      else if (active) it.g = Math.min(1, it.g + dt * it.speed * (it.g > 0 || sys.vis > it.delay ? 1 : 0));
-      else if (sys.vis < 0.02) it.g = 0; // some e "recarrega" para a próxima vez
-      const e = it.g * it.g; // queda acelerada
+      const reveal = it.tipo >= 0 && typeReveal ? (typeReveal[it.tipo] ?? 1) : 1;
+      const canFall = active && reveal > 0.03;
+      if (!animate) it.g = canFall ? 1 : 0;
+      else if (canFall) it.g = Math.min(1, it.g + dt * it.speed * (it.g > 0 || sys.vis > it.delay ? 1 : 0));
+      else if (sys.vis < 0.02) it.g = 0;
+      const e = it.g * it.g;
       _gp.set(it.x, THREE.MathUtils.lerp(it.y0, it.y1, e), it.z);
       if (it.hx !== undefined && a > 0) {
-        // vai do ponto onde caiu até o monte, num pequeno arco
+        // Formulação: convergência curta e legível, sem explosão de partículas.
         _gp.x = THREE.MathUtils.lerp(_gp.x, it.hx, a);
         _gp.z = THREE.MathUtils.lerp(_gp.z, it.hz, a);
-        _gp.y = THREE.MathUtils.lerp(_gp.y, it.hy, a) + Math.sin(a * Math.PI) * 0.12;
+        _gp.y = THREE.MathUtils.lerp(_gp.y, it.hy, a) + Math.sin(a * Math.PI) * 0.10;
       }
       const sumir = it.ativo || a < 0.5 ? 1 : 1 - smoothstep(0.5, 0.9, a);
-      _gs.setScalar(it.s * sys.vis * (it.g > 0 ? 1 : 0) * sumir);
+      const wave = it.tipo >= 0 ? reveal : 1;
+      _gs.setScalar(it.s * sys.vis * wave * (it.g > 0 ? 1 : 0) * sumir);
       _gm.compose(_gp, _gq, _gs);
       sys.mesh.setMatrixAt(i, _gm);
     });
@@ -688,25 +797,27 @@ export function createSoilScene(container, opts = {}) {
     return { spr, solto: new THREE.Vector3(hx * 1.1, surfaceY(hx, hz) + 0.42, hz - 0.35), monte: new THREE.Vector3(hx, surfaceY(hx, hz) + 0.27, hz), fase: k * 2 };
   });
   const rot = { mol: 0, npk: 0 };
-  function updateRotulos(t, dt, animate) {
-    rot.mol = animate ? damp(rot.mol, params.moleculas ?? 0, 3, dt) : (params.moleculas ?? 0);
-    rot.npk = animate ? damp(rot.npk, params.npk ?? 0, 3, dt) : (params.npk ?? 0);
-    moleculas.forEach((m) => {
-      const v = rot.mol;
-      m.wrap.visible = v > 0.01;
-      m.wrap.scale.setScalar(0.4 + 0.6 * v);
-      m.g.rotation.y = animate ? t * 0.6 + m.fase : m.fase;
-      m.g.rotation.x = animate ? Math.sin(t * 0.8 + m.fase) * 0.4 : 0.3;
-      m.wrap.position.y = surfaceY(m.wrap.position.x, m.wrap.position.z) + 0.36 + (animate ? Math.sin(t * 1.2 + m.fase) * 0.025 : 0);
-      m.g.children.forEach((c) => { c.material.opacity = v; });
-      m.spr.material.opacity = v;
+  function updateRotulos(t, dt, animate, cue) {
+    rot.mol = animate ? damp(rot.mol, params.moleculas ?? 0, 3.2, dt) : (params.moleculas ?? 0);
+    rot.npk = animate ? damp(rot.npk, params.npk ?? 0, 3.2, dt) : (params.npk ?? 0);
+    moleculas.forEach((m, i) => {
+      const local = rot.mol * (cue?.moleculeWaves?.[i] ?? 1);
+      m.wrap.visible = local > 0.01;
+      m.wrap.scale.setScalar(0.62 + 0.38 * local);
+      m.g.rotation.y = animate ? t * 0.34 + m.fase : m.fase;
+      m.g.rotation.x = animate ? 0.22 + Math.sin(t * 0.55 + m.fase) * 0.12 : 0.22;
+      m.wrap.position.y = surfaceY(m.wrap.position.x, m.wrap.position.z) + 0.36
+        + (animate ? Math.sin(t * 0.75 + m.fase) * 0.012 : 0);
+      m.g.children.forEach((c) => { c.material.opacity = local; });
+      m.spr.material.opacity = local;
     });
     const a = smoothstep(0, 1, fert.agrupado);
-    selos.forEach((s) => {
-      s.spr.visible = rot.npk > 0.01;
-      s.spr.material.opacity = rot.npk;
+    selos.forEach((s, i) => {
+      const local = rot.npk * (cue?.npkLabelWaves?.[i] ?? 1);
+      s.spr.visible = local > 0.01;
+      s.spr.material.opacity = local;
       s.spr.position.lerpVectors(s.solto, s.monte, a);
-      if (animate) s.spr.position.y += Math.sin(t * 1.4 + s.fase) * 0.015 * (1 - a);
+      if (animate) s.spr.position.y += Math.sin(t * 0.9 + s.fase) * 0.008 * (1 - a);
     });
   }
 
@@ -740,8 +851,8 @@ export function createSoilScene(container, opts = {}) {
       `#include <begin_vertex>
        vec4 ip = instanceMatrix[3];
        float h = position.y * position.y;
-       transformed.x += sin(uTime * 1.7 + ip.x * 5.0 + ip.z * 3.0) * 0.07 * h;
-       transformed.z += cos(uTime * 1.3 + ip.z * 4.0) * 0.05 * h;`);
+       transformed.x += sin(uTime * 1.45 + ip.x * 5.0 + ip.z * 3.0) * 0.035 * h;
+       transformed.z += cos(uTime * 1.1 + ip.z * 4.0) * 0.024 * h;`);
   };
   grassMat.onBeforeCompile = windShader;
   const grassItems = [];
@@ -948,11 +1059,11 @@ export function createSoilScene(container, opts = {}) {
         const k = smoothstep(lf.thr, lf.thr + 0.2, growth);
         lf.pivot.scale.setScalar(Math.max(k, 0.0001));
         // folhas "abrem" ao crescer e balançam levemente
-        const sway = animate ? Math.sin(t * 1.1 + lf.phase) * 0.06 : 0;
+        const sway = animate ? Math.sin(t * 0.9 + lf.phase) * 0.035 : 0;
         lf.leaf.rotation.z = lf.baseZ + (1 - k) * 0.9 + sway;
       });
       bud.scale.setScalar(Math.max(0.0001, smoothstep(0.2, 0.5, growth)));
-      plant.rotation.z = animate ? Math.sin(t * 0.7 + seedOffset) * 0.03 : 0;
+      plant.rotation.z = animate ? Math.sin(t * 0.55 + seedOffset) * 0.016 : 0;
     }
     return { plant, update };
   }
@@ -1110,6 +1221,12 @@ export function createSoilScene(container, opts = {}) {
   scanGroup.add(scanLine, scanSheet);
   root.add(scanGroup);
 
+  // Um único contorno sutil pontua a entrada e o fechamento de cada etapa.
+  const cueOutlineMat = track(new THREE.LineBasicMaterial({ color: accent, transparent: true, opacity: 0, depthWrite: false }));
+  const cueOutline = new THREE.LineLoop(track(new THREE.BufferGeometry().setFromPoints(outlinePts)), cueOutlineMat);
+  cueOutline.visible = effects;
+  root.add(cueOutline);
+
   const dotTex = track(radialTexture([[0, 'rgba(255,255,255,1)'], [0.25, 'rgba(255,255,255,0.9)'], [0.5, 'rgba(255,255,255,0.15)'], [1, 'rgba(255,255,255,0)']]));
 
   /* ---------- Pontos de leitura (um por atributo da análise) ---------- */
@@ -1234,9 +1351,13 @@ export function createSoilScene(container, opts = {}) {
           if (m.k === 0) { m.estado = m.alvo; applyMarkerColors(); }
         }
       } else if (m.k < 1) m.k = animate ? Math.min(1, m.k + dt * 4) : 1;
-      // aparecimento escalonado conforme "leitura" sobe
-      const appear = smoothstep(0, 1, vis * 1.6 - i * 0.06);
-      const pulse = animate && m.estado === 'limitante' ? 1 + 0.12 * Math.sin(t * 3 + m.phase) : 1;
+      // aparecimento escalonado: cada troca de etapa redesenha a leitura,
+      // evitando que todos os marcadores "estourem" ao mesmo tempo.
+      const stageReveal = animate ? smoothstep(i * 0.07, i * 0.07 + 0.55, stageElapsed) : 1;
+      const appear = smoothstep(0, 1, vis * 1.6 - i * 0.06) * stageReveal;
+      const pulse = animate && m.estado === 'limitante'
+        ? 1 + MOTION.markerPulse * Math.sin(t * 2.2 + m.phase)
+        : 1;
       m.sprite.scale.setScalar(0.15 * m.k * pulse * (0.6 + 0.4 * appear));
       m.spriteMat.opacity = appear;
       m.lineMat.opacity = appear * (m.estado === 'lido' ? 0.22 : m.estado === 'ausente' ? 0.08 : 0.4);
@@ -1247,11 +1368,13 @@ export function createSoilScene(container, opts = {}) {
   // Partículas ambientais
   const PCOUNT = Q.particles;
   const pPos = new Float32Array(PCOUNT * 3), pVel = new Float32Array(PCOUNT);
+  const pPhase = new Float32Array(PCOUNT), pBaseX = new Float32Array(PCOUNT), pBaseZ = new Float32Array(PCOUNT);
   for (let i = 0; i < PCOUNT; i++) {
-    pPos[i * 3] = (rand() * 2 - 1) * 2.6;
+    pPos[i * 3] = pBaseX[i] = (rand() * 2 - 1) * 2.6;
     pPos[i * 3 + 1] = -1.3 + rand() * 3.6;
-    pPos[i * 3 + 2] = (rand() * 2 - 1) * 1.8;
-    pVel[i] = 0.04 + rand() * 0.12;
+    pPos[i * 3 + 2] = pBaseZ[i] = (rand() * 2 - 1) * 1.8;
+    pVel[i] = 0.025 + rand() * 0.075;
+    pPhase[i] = rand() * Math.PI * 2;
   }
   const pGeo = track(new THREE.BufferGeometry());
   pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
@@ -1292,7 +1415,7 @@ export function createSoilScene(container, opts = {}) {
     const blend = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
     [pMat, glowMat, scanSheetMat].forEach((m) => { m.blending = blend; m.needsUpdate = true; });
     const fx = new THREE.Color(dark ? PALETTE.accent : PALETTE.accentDeep);
-    [pMat, scanLineMat, scanSheetMat].forEach((m) => m.color.copy(fx));
+    [pMat, scanLineMat, scanSheetMat, cueOutlineMat].forEach((m) => m.color.copy(fx));
     applyMarkerColors();
     shadowMat.opacity = dark ? 1 : 0.55;
     hemi.intensity = dark ? 1.1 : 1.35;
@@ -1314,6 +1437,7 @@ export function createSoilScene(container, opts = {}) {
   function applyParams(t, animate) {
     const p = params;
     const v = p.vitality;
+    const cue = stageChoreography(stages[stageIndex], stageElapsed, animate);
 
     // separação das camadas (centralizada: topo sobe, base desce)
     const sep = p.layerSeparation * 0.13;
@@ -1326,9 +1450,12 @@ export function createSoilScene(container, opts = {}) {
       L.crumbMat.color.lerpColors(L.dull, L.rich, v).multiplyScalar(0.82);
     });
     strawMat.color.lerpColors(tmpColor.set('#c2bcae'), tmpColor2.set('#ffffff'), v); // tons por instância
-    updateGranules(lime, p.calagem ?? 0, lastDt, animate);
-    updateGranules(fert, p.adubacao ?? 0, lastDt, animate, p.agrupar ?? 0);
-    updateRotulos(t, lastDt, animate);
+    const limeTarget = (p.calagem ?? 0) * cue.limeGate;
+    const fertTarget = (p.adubacao ?? 0) * cue.fertGate;
+    const groupTarget = (p.agrupar ?? 0) * cue.groupGate;
+    updateGranules(lime, limeTarget, lastDt, animate);
+    updateGranules(fert, fertTarget, lastDt, animate, groupTarget, cue.npkWaves);
+    updateRotulos(t, lastDt, animate, cue);
     cloverMat.color.lerpColors(mossDry, tmpColor.set('#5aa83a'), v);
     sepU.value = sep;
     topLayer.topMat.color.lerpColors(dryTop, richTop, v);
@@ -1350,24 +1477,45 @@ export function createSoilScene(container, opts = {}) {
     });
 
     rootGrowthU.value = p.rootGrowth;
-    rootTipU.value = 0.25 + p.rootGlow * 0.9;
+    const effectiveRootGlow = Math.max(p.rootGlow, cue.rootFocus);
+    rootTipU.value = 0.25 + effectiveRootGlow * 0.9;
     rootMat.color.lerpColors(rootDull, rootRich, v);
-    rootMat.emissiveIntensity = p.rootGlow * 0.18;
+    const rootBreath = animate ? 0.93 + 0.07 * Math.sin(t * 1.1) : 1;
+    rootMat.emissiveIntensity = effectiveRootGlow * 0.13 * rootBreath;
 
-    // linha de análise: varre de cima para baixo em ciclos
+    // Linha de análise v6: uma varredura com pausa curta entre ciclos.
+    // Parece uma leitura deliberada, não um scanner rodando sem parar.
     const top = boundaryY(N, 0, 0) + sep * (N - 1) / 2 + 0.1;
     const bottom = bases[0] - sep * (N - 1) / 2 - 0.05;
-    const cyc = animate ? (t * 0.28) % 1 : 0.35;
+    const cycleLen = 4.6;
+    const moveLen = 2.55;
+    const phase = animate ? (stageElapsed % cycleLen) : moveLen * 0.38;
+    const raw = Math.min(1, phase / moveLen);
+    const cyc = smoothstep(0, 1, raw);
+    const activeWindow = phase <= moveLen ? 1 : smoothstep(cycleLen, moveLen + 0.18, phase);
     scanGroup.position.y = THREE.MathUtils.lerp(top, bottom, cyc);
-    const edgeFade = smoothstep(0, 0.1, cyc) * smoothstep(1, 0.88, cyc);
-    scanLineMat.opacity = p.scan * edgeFade * 0.95;
-    scanSheetMat.opacity = p.scan * edgeFade * (theme === 'dark' ? 0.22 : 0.12);
+    const edgeFade = smoothstep(0, 0.09, raw) * smoothstep(1, 0.9, raw) * activeWindow;
+    const scanStrength = p.scan * cue.scanGain;
+    scanLineMat.opacity = scanStrength * edgeFade * 0.88;
+    scanSheetMat.opacity = scanStrength * edgeFade * (theme === 'dark' ? 0.15 : 0.085);
+
+    cueOutline.position.y = top + 0.012;
+    cueOutline.scale.setScalar(cue.outlineScale * (1 + scenarioAccent * 0.010));
+    cueOutlineMat.opacity = Math.min(0.42, cue.outline + scenarioAccent * 0.10)
+      * (theme === 'dark' ? 1 : 0.72);
 
     updateMarkers(t, lastDt, animate);
 
-    pMat.opacity = p.particles * (theme === 'dark' ? 0.85 : 0.6);
-    pMat.color.lerpColors(dust, theme === 'dark' ? accent : tmpColor.set(PALETTE.accentDeep), Math.min(1, v + p.scan));
-    glowMat.opacity = p.glow * (theme === 'dark' ? 0.75 : 0.35);
+    pMat.opacity = p.particles * cue.particleFactor * (theme === 'dark' ? 0.82 : 0.56);
+    pMat.color.lerpColors(dust, theme === 'dark' ? accent : tmpColor.set(PALETTE.accentDeep), Math.min(1, v + scanStrength));
+    const accentPulse = animate ? stageAccent : 0;
+    glowMat.opacity = p.glow * (theme === 'dark' ? 0.56 : 0.27)
+      + accentPulse * (theme === 'dark' ? 0.06 : 0.03)
+      + cue.lightLift * (theme === 'dark' ? 0.16 : 0.08)
+      + scenarioAccent * (theme === 'dark' ? 0.045 : 0.022);
+    const glowScale = 6.5 * (1 + accentPulse * 0.028 + cue.lightLift * 0.04 + scenarioAccent * 0.016);
+    glow.scale.set(glowScale, glowScale, 1);
+    rim.intensity = (theme === 'dark' ? 1.6 : 0.6) + cue.lightLift * 0.55 + scenarioAccent * 0.10;
     shadow.position.y = bases[0] - sep * (N - 1) / 2 - 0.03;
   }
 
@@ -1422,13 +1570,38 @@ export function createSoilScene(container, opts = {}) {
   /* ---------- Estágios ---------- */
   let stageIndex = initialStage;
   let stageClock = 0;
+  let stageElapsed = 0;
+  let stageAccent = 0;
+  let scenarioAccent = 0;
   let autoplayPausedUntil = 0;
   let elapsed = 0;
+  const stageView = { yaw: 0, pitch: 0, scale: 1 };
+
+  function primeStageChoreography(stage) {
+    if (reducedMotion || userPaused) return;
+    const id = stage?.id;
+    if (id === 'calagem') {
+      lime.vis = 0;
+      lime.items.forEach((it) => { it.g = 0; });
+      rot.mol = 0;
+    } else if (id === 'adubacao') {
+      fert.vis = 0;
+      fert.agrupado = 0;
+      fert.items.forEach((it) => { it.g = 0; });
+      rot.npk = 0;
+    } else if (id === 'formulacao') {
+      fert.agrupado = 0;
+    }
+  }
 
   function setStage(i, { source = 'api' } = {}) {
     const idx = ((i % stages.length) + stages.length) % stages.length;
     stageIndex = idx;
     stageClock = 0;
+    stageElapsed = 0;
+    stageAccent = reducedMotion ? 0 : 1;
+    scenarioAccent = 0;
+    primeStageChoreography(stages[idx]);
     Object.assign(targets, stages[idx].targets);
     if (source !== 'autoplay') autoplayPausedUntil = elapsed + 20; // usuário interagiu: pausa autoplay 20 s
     if (reducedMotion || userPaused) Object.assign(params, targets); // sem transição
@@ -1500,6 +1673,9 @@ export function createSoilScene(container, opts = {}) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     elapsed += dt;
+    stageElapsed += dt;
+    stageAccent = damp(stageAccent, 0, MOTION.settleDamp, dt);
+    scenarioAccent = damp(scenarioAccent, 0, 3.8, dt);
     lastDt = dt;
     timeUniform.value = elapsed;
 
@@ -1508,25 +1684,42 @@ export function createSoilScene(container, opts = {}) {
       stageClock += dt * 1000;
       if (stageClock > (stages[stageIndex].durationMs || 6000)) setStage(stageIndex + 1, { source: 'autoplay' });
     }
-    // interpolação suave de todos os parâmetros
-    for (const k in targets) params[k] = damp(params[k], targets[k], k === 'layerSeparation' ? 2.2 : 1.4, dt);
+    // Interpolação v6: transições visuais têm velocidades diferentes.
+    // Estrutura (camadas/plantas) assenta mais devagar; efeitos informativos
+    // (scan/marcadores) respondem mais rápido.
+    for (const k in targets) {
+      const speed = k === 'layerSeparation' ? 2.35
+        : (k === 'scan' || k === 'leitura' ? 3.0
+          : (k === 'calagem' || k === 'adubacao' || k === 'agrupar' ? 2.1 : 1.55));
+      params[k] = damp(params[k], targets[k], speed, dt);
+    }
     layers.forEach((L, k) => { L.hover = damp(L.hover, k === hoveredLayer ? 1 : 0, 8, dt); });
 
-    // paralaxe pelo cursor + balanço ambiente
+    // Movimento de câmera/objeto v6: enquadramento por etapa + paralaxe leve.
+    // O bloco deixa de parecer "flutuante" e passa a se comportar como um
+    // objeto de produto em estúdio, com micro-movimento ambiental.
     const px = pointer.mouse && interactive ? pointer.x : 0;
     const py = pointer.mouse && interactive ? pointer.y : 0;
-    parallax.x = damp(parallax.x, px, 2.5, dt);
-    parallax.y = damp(parallax.y, py, 2.5, dt);
-    root.rotation.y = parallax.x * 0.22 + Math.sin(elapsed * 0.25) * 0.12;
-    root.rotation.x = -parallax.y * 0.06;
-    root.position.y = Math.sin(elapsed * 0.6) * 0.035;
+    parallax.x = damp(parallax.x, px, 3.0, dt);
+    parallax.y = damp(parallax.y, py, 3.0, dt);
+    const viewTarget = stageMotion(stages[stageIndex]);
+    const frameCue = stageChoreography(stages[stageIndex], stageElapsed, true);
+    stageView.yaw = damp(stageView.yaw, viewTarget.yaw + frameCue.cameraYaw, MOTION.stageDamp, dt);
+    stageView.pitch = damp(stageView.pitch, viewTarget.pitch + frameCue.cameraPitch, MOTION.stageDamp, dt);
+    stageView.scale = damp(stageView.scale, viewTarget.scale + frameCue.cameraScale, MOTION.stageDamp, dt);
+    root.rotation.y = stageView.yaw + parallax.x * MOTION.parallaxYaw + Math.sin(elapsed * 0.19) * MOTION.idleYaw;
+    root.rotation.x = stageView.pitch - parallax.y * MOTION.parallaxPitch;
+    root.position.y = Math.sin(elapsed * 0.42) * MOTION.idleBob;
+    root.scale.setScalar(stageView.scale * (1 + stageAccent * 0.005 + scenarioAccent * 0.0025));
 
-    // partículas sobem e reaparecem embaixo
+    // Partículas v6: poeira suspensa lenta, com deriva lateral quase imperceptível.
     const arr = pGeo.attributes.position.array;
     for (let i = 0; i < PCOUNT; i++) {
-      arr[i * 3 + 1] += pVel[i] * dt * (0.6 + params.particles);
-      arr[i * 3] += Math.sin(elapsed * 0.5 + i) * 0.0015;
-      if (arr[i * 3 + 1] > 2.4) arr[i * 3 + 1] = -1.3;
+      arr[i * 3 + 1] += pVel[i] * dt * (0.35 + params.particles * 0.55);
+      const drift = MOTION.particleDrift * (0.012 + pVel[i] * 0.05);
+      arr[i * 3] = pBaseX[i] + Math.sin(elapsed * 0.32 + pPhase[i]) * drift;
+      arr[i * 3 + 2] = pBaseZ[i] + Math.cos(elapsed * 0.27 + pPhase[i]) * drift * 0.7;
+      if (arr[i * 3 + 1] > 2.25) arr[i * 3 + 1] = -1.25;
     }
     pGeo.attributes.position.needsUpdate = true;
 
@@ -1613,7 +1806,12 @@ export function createSoilScene(container, opts = {}) {
      */
     setNPK,
     /** Sobrescreve alvos diretamente (ex.: dirigir a cena por dados/estados reais). */
-    setTargets: (partial) => { Object.assign(targets, partial); if (reducedMotion) Object.assign(params, targets); requestRender(); },
+    setTargets: (partial) => {
+      Object.assign(targets, partial);
+      if (stages[stageIndex]?.id === 'aptidao' && !reducedMotion && !userPaused) scenarioAccent = 1;
+      if (reducedMotion) Object.assign(params, targets);
+      requestRender();
+    },
     dispose,
   };
 }

@@ -1463,7 +1463,8 @@ def test_o_laudo_impresso_nao_deixa_pagina_orfa_no_fim():
     )
 
     assert ".doc__rodape" in com_avoid
-    assert ".assinatura" in com_avoid
+    # A assinatura tem bloco de impressão próprio, com display:block — ver
+    # test_a_assinatura_nao_parte_entre_duas_folhas.
 
 
 def test_o_selo_de_aptidao_encolhe_no_papel():
@@ -1477,3 +1478,33 @@ def test_o_selo_de_aptidao_encolhe_no_papel():
     assert "display: none" not in re.search(
         r"\.aptidao__selo \.ico--lg \{[^}]*\}", bloco
     ).group(0)
+
+
+def test_o_espaco_de_assinar_sobrevive_a_quebra_de_pagina():
+    """Era `margin-top: 22mm`, e o PDF de 11/10/2026 mostrou o defeito: margem superior
+    é DESCARTADA pelo navegador quando o bloco começa numa página nova — justamente
+    quando o espaço mais faz falta. A folha saiu com a linha colada no topo e sem lugar
+    para a caneta.
+
+    Padding pertence à caixa e viaja com ela."""
+    regra = re.search(
+        r"@media print \{\s*\.assinatura \{(.*?)\}", _TELAS_CSS, re.S
+    ).group(1)
+
+    assert re.search(r"padding-top:\s*\d+mm", regra), (
+        "o espaço de assinar voltou a ser margem, que some na quebra de página"
+    )
+
+
+def test_a_assinatura_nao_parte_entre_duas_folhas():
+    """A seção é grid em tela, e `break-inside: avoid` sobre container de grid não é
+    respeitado de forma confiável pelos motores de fragmentação. Foi assim que a linha
+    ficou no pé de uma folha e o nome na seguinte."""
+    regra = re.search(
+        r"@media print \{\s*\.assinatura \{(.*?)\}", _TELAS_CSS, re.S
+    ).group(1)
+
+    assert "display: block" in regra, "grid no papel: o break-inside volta a não valer"
+    assert "break-inside: avoid" in regra
+    # E a linha continua centrada, que em bloco não vem de graça.
+    assert re.search(r"\.assinatura__linha \{[^}]*margin-inline:\s*auto", _TELAS_CSS)

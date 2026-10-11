@@ -560,7 +560,6 @@
 
   /* A PAGINA ORFA: o rodape do documento era partido e sobrava uma folha
      inteira para uma frase. Assinatura e rodape sao blocos inteiros. */
-  .assinatura { margin-top: var(--e-5); break-inside: avoid; }
   .doc__rodape { margin-top: var(--e-5); break-inside: avoid; }
   .doc__assinatura-siras { break-after: avoid; }
 }
@@ -1060,7 +1059,35 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 .assinatura__carimbo { margin-top: var(--e-4); font-size: var(--fs-3xs);
                        letter-spacing: .08em; text-transform: uppercase;
                        color: #7A8C82; }
-@media print { .assinatura { margin-top: 22mm; } }
+/* O ESPACO DE ASSINAR E PADDING, E NAO MARGEM.
+
+   Era `margin-top: 22mm`, e o PDF de 11/10/2026 mostrou o defeito: margem superior
+   e DESCARTADA pelo navegador quando o bloco comeca numa pagina nova, que e
+   justamente quando o espaco mais faz falta. A folha saiu com a linha colada no
+   topo e sem lugar para a caneta.
+
+   Padding pertence a caixa e viaja com ela. 20mm e a altura que uma assinatura a
+   mao pede — e o mesmo que um cartorio reserva.
+
+   display:block NO PAPEL: a seccao e grid em tela, e `break-inside: avoid` sobre
+   container de grid nao e respeitado de forma confiavel pelos motores de
+   fragmentacao. Foi assim que a linha ficou no pe de uma folha e o nome na
+   seguinte. Em bloco, a regra vale, e o empilhamento centrado se mantem com
+   text-align e margin-inline. */
+@media print {
+  .assinatura {
+    display: block;
+    text-align: center;
+    padding-top: 20mm;
+    margin-top: var(--e-4);
+    break-inside: avoid;
+    /* Nao se separa do rodape, que fecha o documento junto com ela. */
+    break-after: avoid;
+  }
+  .assinatura__linha { margin-inline: auto; }
+  .assinatura > * + * { margin-top: 2px; }
+  .assinatura__carimbo { margin-top: var(--e-3); }
+}
 
 /* Escolha do exemplo: uma area ou varias. Mora na tela da cultura, porque o exemplo
    traz a propria cultura. */

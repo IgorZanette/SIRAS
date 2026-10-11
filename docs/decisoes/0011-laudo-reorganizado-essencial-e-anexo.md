@@ -249,3 +249,25 @@ mesmo valia na volta do laudo para editar a análise.
 
 O painel passa a interpretar uma vez ao carregar, quando há o que interpretar. O gatilho é
 **ter valor**, e não ser exemplo: o painel lê o que está na tela, venha de onde vier.
+
+## D11.10 — O espaço de assinar é padding, e não margem
+
+Terceiro PDF, terceiro defeito que só o papel mostra. Na soja, a página 4 trazia a
+assinatura **partida e sem lugar para assinar**: a linha ficou no pé da página 3 e o nome
+no topo da 4, colado na borda.
+
+Duas causas independentes, as duas sutis:
+
+**A margem some na quebra.** O espaço de assinar era `margin-top: 22mm`. Margem superior é
+**descartada pelo navegador quando o bloco começa numa página nova** — exatamente quando o
+espaço mais faz falta. Virou `padding-top: 20mm`, que pertence à caixa e viaja com ela.
+
+**`break-inside: avoid` não vale sobre grid.** A seção é `display: grid` em tela, e os
+motores de fragmentação não respeitam a regra de forma confiável sobre um container de
+grid. Foi por isso que ela partiu, apesar de a regra estar declarada duas vezes. No papel
+a seção passa a `display: block`, onde a regra vale; o empilhamento centrado se mantém com
+`text-align` e `margin-inline: auto`.
+
+Vale o registro de que **nenhum dos dois apareceria em revisão de código**: a primeira é
+uma regra de colapso de margem que só se manifesta na fragmentação, e a segunda é uma
+limitação de motor. As duas vieram de olhar um PDF.

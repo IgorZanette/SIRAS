@@ -55,7 +55,7 @@
       },
       "muito_alto": {
         "cultivo_1": "0",
-        "cultivo_2": "<= manutencao (reposicao, a criterio do tecnico)"
+        "cultivo_2": "<= exportacao_nos_graos * rendimento (reposicao, a criterio do tecnico)"
       }
     },
     "arredondamento": "A parcela de correcao e arredondada para a dezena mais proxima ANTES de somar a manutencao. Ex.: 2/3 * 160 = 106,67 -> 110.",

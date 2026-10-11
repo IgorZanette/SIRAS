@@ -163,16 +163,23 @@ def _registrar_adubacao_no_trace(
         ),
     )
 
+    # A expectativa de rendimento entra aqui desde a ADR 0010: a parcela adicional sai
+    # separada na saída do passo, porque a dose publicada é a tabelada e o excedente é
+    # decisão de outra linha do Manual. Um total sem essa separação deixaria o leitor da
+    # trilha sem saber de onde veio a diferença.
     trace.registrar(
-        regra="R-ADU-02: dose de N pela faixa de matéria orgânica",
+        regra="R-ADU-02: dose de N pela faixa de matéria orgânica e pela expectativa de rendimento",
         entradas={
             "cultura_id": cultura_id,
             "mo": analise.mo,
             "antecedente": contexto.antecedente,
+            "expectativa_rendimento": contexto.expectativa_rendimento,
         },
         saida={
             "n": resultado_n["n"],
             "faixa_mo": resultado_n["faixa_mo"],
+            "adicional_kg_n_ha": resultado_n["adicional_kg_n_ha"],
+            "teto_na_faixa_de_mo": resultado_n["teto"],
             "motivo": resultado_n["motivo"],
         },
         fonte=_fonte_legivel(dados_graos["adubacao_n"]["fonte"]),
@@ -205,6 +212,7 @@ def _adubacao_graos(
         cultura_id,
         mo=analise.mo,
         antecedente=contexto.antecedente,
+        expectativa_rendimento=contexto.expectativa_rendimento,
         dados_graos=dados_graos,
     )
     resultado_pk = calcular_fosforo_potassio(

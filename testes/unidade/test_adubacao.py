@@ -7,6 +7,7 @@ K 80, CTC 9,5, cultivo 1 -> classe_p=muito_baixo, classe_k=medio, n=0, p2o5=155,
 
 import pytest
 
+from siras.conhecimento.carregador import carregar_dados_graos
 from siras.motor.adubacao import ErroAdubacao, calcular_fosforo_potassio, calcular_nitrogenio
 
 
@@ -140,11 +141,16 @@ class TestFosforoPotassio:
 
 
 class TestClasseMuitoAlto:
-    """Achado de revisão (2026-08-23): cultivo 2 na classe muito_alto retornava a
-    manutenção como escalar, mas a tabela (graos_adubacao_pk.json, algoritmo_dose.regras)
-    so da um teto — "<= manutencao (reposicao, a criterio do tecnico)" — nao um valor.
-    Sem o qualificador, o SIRAS recomendaria uma dose fixa onde o Manual autoriza nao
-    aplicar nada, justamente o oposto do que a classe Muito alto significa."""
+    """Dois achados sobre a mesma linha da tabela.
+
+    Revisão de 2026-08-23: cultivo 2 na classe muito_alto retornava um escalar, mas a
+    tabela (graos_adubacao_pk.json, algoritmo_dose.regras) só dá um TETO, não um valor.
+    Sem o qualificador, o SIRAS recomendaria uma dose fixa onde o Manual autoriza não
+    aplicar nada, justamente o oposto do que a classe Muito alto significa.
+
+    Caso ADU-27, 2026-10-10: o teto estava na manutenção, e não na reposição. Ver
+    docs/decisoes/0010.
+    """
 
     def test_cultivo_1_muito_alto_e_zero_escalar(self):
         # P=50,0 (>36,0) e K=300 (>180), argila 32/CTC 9,5: ambos Muito alto (ADU-05).
@@ -159,7 +165,94 @@ class TestClasseMuitoAlto:
     def test_cultivo_2_muito_alto_e_teto_nao_escalar(self):
         resultado = calcular_fosforo_potassio(
             cultura_id="soja", argila=32, p_solo=50.0, ctc_ph7=9.5, k_solo=300, cultivo=2,
+            expectativa_rendimento=3.0,
         )
-        # manutencao da soja: p2o5=45, k2o=75 (graos_adubacao_pk.json).
-        assert resultado["p2o5"] == {"valor": 45, "qualificador": "ate"}
-        assert resultado["k2o"] == {"valor": 75, "qualificador": "ate"}
+        assert isinstance(resultado["p2o5"], dict)
+        assert resultado["p2o5"]["qualificador"] == "ate"
+        assert resultado["k2o"]["qualificador"] == "ate"
+
+    def test_cultivo_2_muito_alto_usa_reposicao_e_nao_manutencao(self):
+        """Regressão do ADU-27: o teto é a exportação nos grãos x rendimento."""
+        pk = carregar_dados_graos()["adubacao_pk"]
+        exportacao = pk["exportacao_nos_graos"]["culturas"]["soja"]
+        manutencao = pk["manutencao_por_cultura"]["culturas"]["soja"]
+        rendimento = manutencao["rendimento_referencia_t_ha"]
+
+        resultado = calcular_fosforo_potassio(
+            cultura_id="soja", argila=32, p_solo=50.0, ctc_ph7=9.5, k_solo=300, cultivo=2,
+            expectativa_rendimento=rendimento,
+        )
+        assert resultado["p2o5"]["valor"] == exportacao["p2o5"] * rendimento
+        assert resultado["k2o"]["valor"] == exportacao["k2o"] * rendimento
+        # Discriminante: se voltar a usar a manutenção, o teste tem de falhar.
+        assert resultado["p2o5"]["valor"] != manutencao["p2o5_manutencao"]
+        assert resultado["k2o"]["valor"] != manutencao["k2o_manutencao"]
+
+    def test_reposicao_acompanha_a_expectativa_de_rendimento(self):
+        exportacao = carregar_dados_graos()["adubacao_pk"]["exportacao_nos_graos"]["culturas"]["soja"]
+        comum = dict(cultura_id="soja", argila=32, p_solo=50.0, ctc_ph7=9.5, k_solo=300, cultivo=2)
+        baixo = calcular_fosforo_potassio(**comum, expectativa_rendimento=3.0)
+        alto = calcular_fosforo_potassio(**comum, expectativa_rendimento=4.0)
+        assert alto["p2o5"]["valor"] - baixo["p2o5"]["valor"] == exportacao["p2o5"]
+        assert alto["k2o"]["valor"] - baixo["k2o"]["valor"] == exportacao["k2o"]
+
+
+class TestAdicionalDeNitrogenioPorRendimento:
+    """Achado do caso ADU-25 (2026-10-10): `adicional_kg_n_por_t` estava transcrito em 16
+    culturas de grãos e nenhuma linha de código o lia. A dose de N não reagia à
+    expectativa de rendimento, enquanto P e K reagiam. Ver docs/decisoes/0010.
+
+    Os testes comparam a dose COM e SEM excedente, e leem o adicional do próprio
+    `dados/`: assim medem a aritmética sem fixar nenhum número do Manual no teste.
+    """
+
+    def _entrada_do_milho(self):
+        return carregar_dados_graos()["adubacao_n"]["culturas"]["milho"]
+
+    def test_rendimento_acima_da_referencia_soma_o_adicional(self):
+        entrada = self._entrada_do_milho()
+        referencia = entrada["rendimento_referencia_t_ha"]
+        por_tonelada = entrada["adicional_kg_n_por_t"]
+
+        na_referencia = calcular_nitrogenio(
+            "milho", mo=3.5, antecedente="graminea", expectativa_rendimento=referencia
+        )
+        acima = calcular_nitrogenio(
+            "milho", mo=3.5, antecedente="graminea", expectativa_rendimento=referencia + 2
+        )
+        assert acima["n"] - na_referencia["n"] == 2 * por_tonelada
+        assert acima["adicional_kg_n_ha"] == 2 * por_tonelada
+        assert na_referencia["adicional_kg_n_ha"] == 0.0
+
+    def test_rendimento_abaixo_da_referencia_nao_desconta(self):
+        entrada = self._entrada_do_milho()
+        referencia = entrada["rendimento_referencia_t_ha"]
+        abaixo = calcular_nitrogenio(
+            "milho", mo=3.5, antecedente="graminea", expectativa_rendimento=referencia - 2
+        )
+        sem_expectativa = calcular_nitrogenio("milho", mo=3.5, antecedente="graminea")
+        assert abaixo["n"] == sem_expectativa["n"]
+        assert abaixo["adicional_kg_n_ha"] == 0.0
+
+    def test_faixa_de_mo_acima_de_5_0_e_teto_e_nao_soma_adicional(self):
+        """Decisão do autor em 2026-10-10: nessa faixa o Manual publica a dose como teto
+        (`acima_de_5_0_e_maximo`), e somar o adicional passaria do que o teto admite."""
+        entrada = self._entrada_do_milho()
+        assert entrada["acima_de_5_0_e_maximo"] is True
+
+        referencia = entrada["rendimento_referencia_t_ha"]
+        na_referencia = calcular_nitrogenio(
+            "milho", mo=6.0, antecedente="graminea", expectativa_rendimento=referencia
+        )
+        acima = calcular_nitrogenio(
+            "milho", mo=6.0, antecedente="graminea", expectativa_rendimento=referencia + 6
+        )
+        assert acima["n"] == na_referencia["n"]
+        assert acima["teto"] is True
+        assert acima["adicional_kg_n_ha"] == 0.0
+
+    def test_leguminosa_nao_recebe_adicional(self):
+        # As 5 culturas de modelo 'nao_aplica' são leguminosas e não declaram adicional.
+        resultado = calcular_nitrogenio("soja", mo=3.0, expectativa_rendimento=10.0)
+        assert resultado["n"] == 0
+        assert resultado["adicional_kg_n_ha"] == 0

@@ -111,8 +111,9 @@ def formatar_dose(dose: Any, casas: int = 0) -> str:
     """Formata uma dose que pode não ser um único número.
 
     O Manual nem sempre publica um valor: na classe Muito alto em 2º cultivo dá um teto
-    ("<= manutenção"), e a videira fica sem correspondência declarada para o K. O motor
-    preserva essas formas (ADR 0004); achatá-las aqui num número inventaria precisão.
+    (até a reposição do que a colheita exporta, a critério do técnico — ADR 0010), e a
+    videira fica sem correspondência declarada para o K. O motor preserva essas formas
+    (ADR 0004); achatá-las aqui num número inventaria precisão.
     """
     if dose is None:
         return "—"

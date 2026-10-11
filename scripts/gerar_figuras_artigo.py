@@ -564,10 +564,21 @@ def f7_concordancia() -> None:
     ax.spines["left"].set_visible(False)
     ax.tick_params(axis="y", length=0)
 
+    # O subtítulo sai do dado, e não de um texto fixo: até 10/10/2026 o conjunto tinha
+    # 15 casos e o limite inferior ficava ABAIXO do limiar, e a frase dizia isso. Com os
+    # dez casos novos ele passou a 86,7%, e uma frase fixa teria publicado o contrário
+    # do que o gráfico mostra.
     inferior_global = recomendacao.intervalo()[0] * 100
+    acima = inferior_global >= 80
+    veredito = (
+        "acima do limiar: a amostra sustenta a hipótese"
+        if acima else
+        "abaixo do limiar, por tamanho de amostra"
+    )
+    valor = f"{inferior_global:.1f}".replace(".", ",")
     ax.set_title(
-        f"Todas as taxas pontuais são de 100%. O limite inferior do intervalo global da\n"
-        f"recomendação fica em {inferior_global:.1f}% — abaixo do limiar, por tamanho de amostra.",
+        "Todas as taxas pontuais são de 100%. O limite inferior do intervalo global da\n"
+        f"recomendação fica em {valor}% — {veredito}.",
         fontsize=8.6, color=CINZA, pad=12, loc="left", linespacing=1.4,
     )
 

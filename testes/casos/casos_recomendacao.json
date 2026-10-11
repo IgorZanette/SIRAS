@@ -3,8 +3,9 @@
   "instrucoes": {
     "referencia": "Autor - Casos de teste de acordo com Manual.",
     "verificacao_cruzada": "Valor pre-calculado por assistente de IA a partir das mesmas tabelas transcritas. NAO e o oraculo. Serve como segunda opiniao independente: o teste compara referencia com verificacao_cruzada e falha se divergirem, obrigando a investigar qual dos dois esta errado.",
-    "origem_referencia": "Autor - Calculado a mão",
-    "conferido_por_autor_em": "2026-08-22"
+    "origem_referencia": "Duas procedencias, e a distincao importa para o artigo. 'Autor - Calculado a mao': o autor calculou o oraculo a mao a partir do Manual impresso, sem ver a saida do sistema (CAL-01 a CAL-11, ADU-01, ADU-15 a ADU-17). 'Assistente - calculado a partir das transcricoes JSON; conferido pelo autor': o valor foi derivado das tabelas ja transcritas em dados/ e depois conferido pelo autor contra o Manual (ADU-20 a ADU-28, CAL-12). Estes ultimos sao mais fracos como oraculo, porque partem da mesma transcricao que o motor le: provam que o ALGORITMO esta certo, nao que a TRANSCRICAO esta certa.",
+    "conferido_por_autor_em": "Data em que o autor conferiu o caso. Nos casos novos, a conferencia foi do resultado e da memoria de calculo, nao do calculo manual do zero.",
+    "verificacao_cruzada_nos_casos_novos": "Nos casos ADU-20 a ADU-28 e CAL-12, verificacao_cruzada repete referencia: as duas vieram do mesmo calculo, e nao de duas leituras independentes. A comparacao entre os dois campos nao acrescenta nada nesses casos, e o teste de coerencia continua valendo apenas como guarda contra edicao parcial de um dos dois."
   },
   "cobertura": {
     "CAL-01": "caminho base: disparo simples, fator 1, PRNT 100",
@@ -19,7 +20,17 @@
     "CAL-10": "graos_pd_com_restricoes: decisao pela subsuperficie, dose por SMP medio das duas camadas, SMP medio exato na grade",
     "CAL-11": "graos_pd_com_restricoes: SMP medio fora da grade de 0,1 (5,45), arredondado antes da consulta (D10)",
     "ADU-01": "interpretacao de P por argila e de K por CTC + algoritmo de dose + leguminosa sem N",
-    "ADU-15": "amoreira-preta, manutencao: colunas de N nao-ordinais por ano; P e K classificam diferente no mesmo caso (discriminante contra contaminacao entre nutrientes)"
+    "ADU-15": "amoreira-preta, manutencao: colunas de N nao-ordinais por ano; P e K classificam diferente no mesmo caso (discriminante contra contaminacao entre nutrientes)",
+    "ADU-20": "Cebola: P e K por classe de teor, argila classe 1 e CTC faixa a",
+    "ADU-21": "Tomateiro: grupo P2/K1, argila classe 4 e CTC faixa c",
+    "ADU-22": "Batata: P e K em classe alta, cultura do grupo 1",
+    "ADU-23": "Cana-de-açúcar, cana-planta: P e K por classe e faixa de produtividade",
+    "ADU-24": "Tabaco Virginia: doses específicas por tipo, P e K em classes distintas",
+    "ADU-25": "Milho, primeiro cultivo: N com antecedente graminea e rendimento acima da referência",
+    "ADU-26": "Trigo, segundo cultivo: redução da correção de P e K pela regra da Tabela 6.1.4",
+    "ADU-27": "Trigo, segundo cultivo: P e K muito altos, saída com qualificador ate para reposição",
+    "ADU-28": "Cebola: interpretação de K na faixa CTC d (>30 cmolc/dm³)",
+    "CAL-12": "Cana-de-açúcar: disparo de calagem por pH e dose SMP com correção por PRNT"
   },
   "casos": [
     {
@@ -459,6 +470,325 @@
       "memoria_calculo": "Secao 6.5.18, p. 228-231. Crescimento (p.228-229): as quantidades de N variam com MO, tipo de uva e idade do vinhedo. Para MO de 3,5%, faixa '2,6 a 5,0', ano 2 e uva para vinho, a Tabela de N indica 20 kg de N/ha. P e K: o Manual informa na p.228 que, nos pomares adubados com P e K em pre-plantio, nao ha necessidade de adicionar esses nutrientes durante a fase de crescimento. Portanto, para o caso de teste, P2O5 = 0 e K2O = 0, sob essa condicao. As paginas 230-231 apresentam as doses de manutencao, nao aplicaveis a este caso de fase 'crescimento'. Os valores de p, argila e ctc_ph7 sao mantidos na entrada no formato ADU-15, mas nao participam diretamente desse calculo.",
       "origem_referencia": "Autor - Calculado a mão",
       "conferido_por_autor_em": "2026-09-13"
+    },
+    {
+      "id": "ADU-20",
+      "descricao": "Cebola: P e K por classe de teor, argila classe 1 e CTC faixa a",
+      "entrada": {
+        "cultura": "cebola",
+        "mo": 3.5,
+        "argila": 65,
+        "p": 7.5,
+        "k": 50,
+        "ctc_ph7": 6.5,
+        "expectativa_rendimento": 30
+      },
+      "referencia": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 100,
+        "p2o5": 160,
+        "k2o": 120
+      },
+      "verificacao_cruzada": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 100,
+        "p2o5": 160,
+        "k2o": 120
+      },
+      "memoria_calculo": "Secao 6.3.9, p. 168-169; interpretacao: Tab. 6.4 p. 94 e Tab. 6.9 p. 96. Argila 65% -> classe 1 (Tab. 6.1, p. 91). Cebola: grupo P2/K2. P=7,5 mg/dm3 na classe de argila 1 do grupo 2 -> medio (6-9); K=50 mg/dm3 com CTC 6,5 -> faixa a do grupo 2 -> medio (40-60). Doses de cebola: N para MO 2,6-5,0 = 100 kg/ha; P2O5 classe medio = 160 kg/ha; K2O classe medio = 120 kg/ha. Produtividade 30 t/ha nao excede o limiar de ajuste (>30 t/ha).",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-21",
+      "descricao": "Tomateiro: grupo P2/K1, argila classe 4 e CTC faixa c",
+      "entrada": {
+        "cultura": "tomate",
+        "mo": 3.5,
+        "argila": 15,
+        "p": 25,
+        "k": 150,
+        "ctc_ph7": 20,
+        "expectativa_rendimento": 80
+      },
+      "referencia": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 140,
+        "p2o5": 110,
+        "k2o": 135
+      },
+      "verificacao_cruzada": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 140,
+        "p2o5": 110,
+        "k2o": 135
+      },
+      "memoria_calculo": "Secao 6.3.20, p. 180-181; interpretacao: Tab. 6.4 p. 94 e Tab. 6.8 p. 95. Argila 15% -> classe 4 (Tab. 6.1, p. 91). Tomate: grupo P2/K1. P=25 mg/dm3 na classe 4 do grupo 2 -> medio (20-30); K=150 mg/dm3 com CTC 20 -> faixa c do grupo 1 -> medio (120-180). Doses do tomateiro: N para MO 2,6-5,0 = 140 kg/ha; tabela também informa 20 kg N/ha no plantio; P2O5 classe medio = 110 kg/ha; K2O classe medio = 135 kg/ha. Produtividade 80 t/ha nao excede o limiar de ajuste (>80 t/ha).",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-22",
+      "descricao": "Batata: P e K em classe alta, cultura do grupo 1",
+      "entrada": {
+        "cultura": "batata",
+        "mo": 3.5,
+        "argila": 65,
+        "p": 20,
+        "k": 100,
+        "ctc_ph7": 6.5,
+        "expectativa_rendimento": 30
+      },
+      "referencia": {
+        "classe_p": "alto",
+        "classe_k": "alto",
+        "n": 100,
+        "p2o5": 125,
+        "k2o": 100
+      },
+      "verificacao_cruzada": {
+        "classe_p": "alto",
+        "classe_k": "alto",
+        "n": 100,
+        "p2o5": 125,
+        "k2o": 100
+      },
+      "memoria_calculo": "Secao 6.4.1, p. 184; interpretacao: Tab. 6.3 p. 93 e Tab. 6.8 p. 95. Argila 65% -> classe 1. Batata: grupo P1/K1. P=20 mg/dm3 na classe 1 do grupo 1 -> alto (15-30); K=100 mg/dm3 com CTC 6,5 -> faixa a do grupo 1 -> alto (90-180). Doses para MO 2,6-5,0: N=100 kg/ha; P2O5 classe alto=125 kg/ha; K2O classe alto=100 kg/ha. Produtividade 30 t/ha nao excede o limiar de ajuste (>30 t/ha).",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-23",
+      "descricao": "Cana-de-açúcar, cana-planta: P e K por classe e faixa de produtividade",
+      "entrada": {
+        "cultura": "cana_de_acucar",
+        "ciclo": "cana_planta",
+        "mo": 3.5,
+        "argila": 45,
+        "p": 5.0,
+        "k": 50,
+        "ctc_ph7": 10,
+        "produtividade_t_ha": 100
+      },
+      "referencia": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 50,
+        "p2o5": 60,
+        "k2o": 60
+      },
+      "verificacao_cruzada": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 50,
+        "p2o5": 60,
+        "k2o": 60
+      },
+      "memoria_calculo": "Secao 6.9.1, p. 280-282; interpretacao: Tab. 6.5 p. 94 e Tab. 6.10 p. 96. Cana-de-açúcar: grupo P3/K3. Argila 45% -> classe 2; P=5,0 mg/dm3 na classe 2 do grupo 3 -> medio (4-6). CTC 10 -> faixa b; K=50 mg/dm3 na faixa b do grupo 3 -> medio (40-60). Para cana-planta, MO 2,6-5,0 -> N=50 kg/ha. Produtividade 100 t/ha cai na faixa 90-120: P2O5 classe medio=60 kg/ha e K2O classe medio=60 kg/ha.",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-24",
+      "descricao": "Tabaco Virginia: doses específicas por tipo, P e K em classes distintas",
+      "entrada": {
+        "cultura": "tabaco",
+        "tipo": "virginia",
+        "mo": 3.5,
+        "argila": 45,
+        "p": 3.0,
+        "k": 75,
+        "ctc_ph7": 20
+      },
+      "referencia": {
+        "classe_p": "baixo",
+        "classe_k": "medio",
+        "n": {
+          "min": 110,
+          "max": 120
+        },
+        "p2o5": 80,
+        "k2o": 140
+      },
+      "verificacao_cruzada": {
+        "classe_p": "baixo",
+        "classe_k": "medio",
+        "n": {
+          "min": 110,
+          "max": 120
+        },
+        "p2o5": 80,
+        "k2o": 140
+      },
+      "memoria_calculo": "Secao 6.9.2, p. 282-283; interpretacao: Tab. 6.5 p. 94 e Tab. 6.10 p. 96. Tabaco: grupo P3/K3. Argila 45% -> classe 2; P=3,0 mg/dm3 na classe 2 do grupo 3 -> baixo (2-4). CTC 20 -> faixa c; K=75 mg/dm3 na faixa c do grupo 3 -> medio (60-90). Para tabaco Virginia e MO 3,1-4,0%, N=110-120 kg/ha; P2O5 classe baixo=80 kg/ha; K2O classe medio para Virginia=140 kg/ha. A dose de N é intervalo conforme a tabela do Manual.",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-25",
+      "descricao": "Milho, primeiro cultivo: N com antecedente graminea e rendimento acima da referência",
+      "entrada": {
+        "cultura": "milho",
+        "cultivo": 1,
+        "antecedente": "graminea",
+        "mo": 3.5,
+        "argila": 45,
+        "p": 10,
+        "k": 75,
+        "ctc_ph7": 12,
+        "expectativa_rendimento": 8.0
+      },
+      "referencia": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 100,
+        "p2o5": 160,
+        "k2o": 110
+      },
+      "verificacao_cruzada": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 100,
+        "p2o5": 160,
+        "k2o": 110
+      },
+      "memoria_calculo": "N: tabela específica de N do milho, seção 6.1, páginas 116-133 (conforme transcrição graos_adubacao_n.json). MO 2,6-5,0% e antecedente graminea -> dose-base 70 kg N/ha; rendimento de referência 6 t/ha; excedente 8-6=2 t/ha x 15 kg N/t = 30; total 100 kg N/ha. P/K: Tab. 6.1.1 p. 105, Tab. 6.1.2 p. 106 e Tab. 6.1.4 p. 108. Argila 45% -> classe 2; milho grupo P2/K2. P=10 -> medio (Tab. 6.4); K=75 com CTC 12 (faixa b) -> medio (Tab. 6.9). Cultivo 1: P2O5 = correção total media 40 + manutenção 90 + excedente de rendimento (8-6)x15=30 -> 160 kg/ha. K2O = correção total media 30 + manutenção 60 + excedente (8-6)x10=20 -> 110 kg/ha.",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-26",
+      "descricao": "Trigo, segundo cultivo: redução da correção de P e K pela regra da Tabela 6.1.4",
+      "entrada": {
+        "cultura": "trigo",
+        "cultivo": 2,
+        "antecedente": "graminea",
+        "mo": 3.5,
+        "argila": 45,
+        "p": 6,
+        "k": 45,
+        "ctc_ph7": 12,
+        "expectativa_rendimento": 3.0
+      },
+      "referencia": {
+        "classe_p": "baixo",
+        "classe_k": "baixo",
+        "n": 60,
+        "p2o5": 75,
+        "k2o": 50
+      },
+      "verificacao_cruzada": {
+        "classe_p": "baixo",
+        "classe_k": "baixo",
+        "n": 60,
+        "p2o5": 75,
+        "k2o": 50
+      },
+      "memoria_calculo": "N: tabela específica de N do trigo, seção 6.1, páginas 116-133 (conforme transcrição graos_adubacao_n.json). MO 2,6-5,0% e antecedente graminea -> 60 kg N/ha; rendimento de referência 3 t/ha, sem adicional porque produtividade=3. P/K: Tab. 6.1.1 p. 105, Tab. 6.1.2 p. 106 e Tab. 6.1.4 p. 108. Argila 45% -> classe 2; P=6 -> baixo (Tab. 6.4); K=45, CTC 12 faixa b -> baixo (Tab. 6.9). Cultivo 2 em classe baixo: P2O5 = arredondar 1/3 de 80 (=26,67) para dezena mais próxima antes da manutenção -> 30 + manutenção 45 = 75 kg/ha. K2O = 1/3 de 60 = 20 + manutenção 30 = 50 kg/ha.",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-27",
+      "descricao": "Trigo, segundo cultivo: P e K muito altos, saída com qualificador ate para reposição",
+      "entrada": {
+        "cultura": "trigo",
+        "cultivo": 2,
+        "antecedente": "graminea",
+        "mo": 3.5,
+        "argila": 45,
+        "p": 50,
+        "k": 200,
+        "ctc_ph7": 12,
+        "expectativa_rendimento": 3.0
+      },
+      "referencia": {
+        "classe_p": "muito_alto",
+        "classe_k": "muito_alto",
+        "n": 60,
+        "p2o5": {
+          "valor": 30,
+          "qualificador": "ate"
+        },
+        "k2o": {
+          "valor": 18,
+          "qualificador": "ate"
+        }
+      },
+      "verificacao_cruzada": {
+        "classe_p": "muito_alto",
+        "classe_k": "muito_alto",
+        "n": 60,
+        "p2o5": {
+          "valor": 30,
+          "qualificador": "ate"
+        },
+        "k2o": {
+          "valor": 18,
+          "qualificador": "ate"
+        }
+      },
+      "memoria_calculo": "N: tabela específica de N do trigo, seção 6.1, páginas 116-133 (conforme transcrição graos_adubacao_n.json). MO 2,6-5,0% e antecedente graminea -> 60 kg N/ha; rendimento de referência 3 t/ha, sem adicional. P/K: Tab. 6.4 p. 94 e Tab. 6.9 p. 96 para classes; Tab. 6.1.3 p. 107 para exportação nos grãos; Tab. 6.1.4 p. 108 para a regra do segundo cultivo. Argila 45% -> classe 2; P=50 -> muito alto; K=200 com CTC 12 (faixa b) -> muito alto. Para segundo cultivo em classe muito alto, a regra permite reposição a critério técnico, com qualificador ate. Usando a exportação do trigo por tonelada (P2O5=10 kg/t; K2O=6 kg/t) e rendimento 3 t/ha: até 30 kg P2O5/ha e até 18 kg K2O/ha.",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "ADU-28",
+      "descricao": "Cebola: interpretação de K na faixa CTC d (>30 cmolc/dm³)",
+      "entrada": {
+        "cultura": "cebola",
+        "mo": 3.5,
+        "argila": 45,
+        "p": 10,
+        "k": 110,
+        "ctc_ph7": 35,
+        "expectativa_rendimento": 30
+      },
+      "referencia": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 100,
+        "p2o5": 160,
+        "k2o": 120
+      },
+      "verificacao_cruzada": {
+        "classe_p": "medio",
+        "classe_k": "medio",
+        "n": 100,
+        "p2o5": 160,
+        "k2o": 120
+      },
+      "memoria_calculo": "Secao 6.3.9, p. 168-169; interpretacao: Tab. 6.4 p. 94 e Tab. 6.9 p. 96. Argila 45% -> classe 2; cebola grupo P2/K2. P=10 mg/dm3 na classe 2 do grupo 2 -> medio (8-12). CTC 35 cmolc/dm3 -> faixa d (>30); K=110 mg/dm3 na faixa d do grupo 2 -> medio (90-135). Doses para MO 2,6-5,0: N=100 kg/ha; P2O5 classe medio=160 kg/ha; K2O classe medio=120 kg/ha. Produtividade 30 t/ha nao excede o limiar de ajuste (>30 t/ha).",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
+    },
+    {
+      "id": "CAL-12",
+      "descricao": "Cana-de-açúcar: disparo de calagem por pH e dose SMP com correção por PRNT",
+      "entrada": {
+        "cultura": "cana_de_acucar",
+        "sistema_manejo": "convencional",
+        "ph_agua": 5.2,
+        "indice_smp": 5.8,
+        "argila": 45,
+        "mo": 3.5,
+        "ctc_ph7": 10,
+        "prnt": 90,
+        "profundidade_incorporacao_cm": 20
+      },
+      "referencia": {
+        "nc_t_ha": 4.7
+      },
+      "verificacao_cruzada": {
+        "nc_t_ha": 4.7
+      },
+      "memoria_calculo": "Tab. 5.7, p. 86: cana-de-açúcar e tabaco têm pH de referência 6,0, disparo quando pH < 5,5 e dose pelo SMP para alvo 6,0, fator 1,0. pH 5,2 < 5,5, portanto dispara. Tab. 5.2, p. 70: índice SMP 5,8 -> NC de 4,2 t/ha para pH alvo 6,0, PRNT 100%. Conversão por PRNT (Cap. 8, seção 8.1.1, p. 298): 4,2 x 100/90 = 4,666... -> 4,7 t/ha. Profundidade de incorporação 20 cm, sem fator adicional.",
+      "origem_referencia": "Assistente - calculado a partir das transcricoes JSON; conferido pelo autor",
+      "conferido_por_autor_em": "2026-10-10"
     }
   ]
 }

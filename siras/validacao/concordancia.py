@@ -71,6 +71,7 @@ CRITERIO_POR_CASO = {
     "CAL-09": "erva_mate_e_florestais",
     "CAL-10": "graos_pd_com_restricoes",
     "CAL-11": "graos_pd_com_restricoes",
+    "CAL-12": "cana_e_tabaco",
     "ADU-01": "graos_convencional",
 }
 
@@ -201,6 +202,39 @@ def _construir_contexto(entrada: Dict[str, Any]) -> Contexto:
     )
 
 
+#: Campos de `entrada` que o apurador lê para TODO caso, qualquer que seja o grupo:
+#: identificação da cultura, perfil da análise e contexto de calagem.
+_CAMPOS_COMUNS = frozenset(
+    {"cultura", "cultivo", "subsuperficie", "sistema_manejo", "condicao_area",
+     "prnt", "profundidade_incorporacao_cm", "expectativa_rendimento"}
+    | set(_CAMPOS_ANALISE_PADRAO)
+)
+
+
+def campos_nao_lidos(entrada: Dict[str, Any], grupo: str) -> List[str]:
+    """Campos de `entrada` que nenhum caminho do motor consome, para este grupo.
+
+    Existe por causa do caso ADU-23 (2026-10-10): ele trazia `produtividade_estimada`,
+    que é o nome do campo em FRUTÍFERAS, enquanto cana e tabaco leem
+    `produtividade_t_ha`. O apurador montava os argumentos por nome e simplesmente não
+    passava o valor. No ADU-23 isso derrubou o motor e ficou visível; nos casos de
+    cebola, tomate e batata o rendimento caía exatamente no limiar do ajuste, o
+    adicional era zero de qualquer forma, e o campo errado teria passado em silêncio —
+    um caso que diz exercitar a expectativa de rendimento sem exercitar nada.
+
+    Não entra no cálculo: é usada pelo teste de integridade dos casos, porque o que ela
+    protege é o arquivo de casos, não a dose.
+    """
+    conhecidos = _CAMPOS_COMUNS | set(_EXTRAS_POR_GRUPO.get(grupo, ()))
+    # Grãos e erva-mate não passam por `_EXTRAS_POR_GRUPO`: têm ramo próprio em
+    # `_adubacao_do_caso`, e os campos que esse ramo lê entram aqui.
+    if grupo == "graos":
+        conhecidos = conhecidos | {"antecedente"}
+    if grupo == "erva_mate":
+        conhecidos = conhecidos | {"programa"}
+    return sorted(set(entrada) - conhecidos)
+
+
 def _grupo_da_cultura(cultura: str, dados: Dict[str, Any]) -> str:
     entrada = dados["mapa_culturas"]["culturas"].get(cultura)
     if entrada is None:
@@ -217,7 +251,8 @@ def _adubacao_do_caso(
     """Doses de N, P2O5 e K2O pelo caminho do grupo da cultura."""
     if grupo == "graos":
         resultado_n = calcular_nitrogenio(
-            entrada["cultura"], mo=entrada["mo"], antecedente=entrada.get("antecedente")
+            entrada["cultura"], mo=entrada["mo"], antecedente=entrada.get("antecedente"),
+            expectativa_rendimento=entrada.get("expectativa_rendimento"),
         )
         resultado_pk = calcular_fosforo_potassio(
             cultura_id=entrada["cultura"],

@@ -118,8 +118,9 @@ def _dose_numerica(dose: Any) -> Optional[float]:
     """O valor da dose quando ela É um número, e None quando não é.
 
     Mesma regra do total a comprar: o Manual nem sempre publica um número — há teto
-    ("<= manutenção"), intervalo e lacuna declarada (ADR 0004). Dividir qualquer um deles
-    pela garantia de um adubo produziria uma dose com precisão que a fonte não dá.
+    (até a reposição, em Muito alto no 2º cultivo), intervalo e lacuna declarada
+    (ADR 0004). Dividir qualquer um deles pela garantia de um adubo produziria uma dose
+    com precisão que a fonte não dá.
     """
     if isinstance(dose, bool) or not isinstance(dose, (int, float)):
         return None

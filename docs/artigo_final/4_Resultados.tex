@@ -35,7 +35,7 @@ correspondem a três frutíferas cuja adubação de manutenção o Manual define
 foliar, sem correspondência publicada com o teor do solo; são, portanto, limite da fonte
 e não da implementação.
 
-A suíte de testes conta 4.951 casos automatizados, todos passando, organizados em duas
+A suíte de testes conta 5.206 casos automatizados, todos passando, organizados em duas
 camadas: uma rápida, para execução a cada alteração, e uma completa, que acrescenta as
 bancadas de maior volume. Além dela, dois verificadores independentes são executados: a
 validação de todos os arquivos da base contra os respectivos \textit{JSON Schema}, e a
@@ -46,8 +46,8 @@ em 32 classificações.
 
 \section{Correção das recomendações}
 
-A \cref{tab:concordancia} apresenta a concordância entre as saídas do sistema e o oráculo
-calculado manualmente pelo autor.
+A \cref{tab:concordancia} apresenta a concordância entre as saídas do sistema e o
+oráculo, para os 25 casos do conjunto de validação.
 
 \begin{table}[htb]
 \centering
@@ -57,11 +57,14 @@ calculado manualmente pelo autor.
 \toprule
 \textbf{Grupo} & \textbf{Casos} & \textbf{Concordantes} & \textbf{Taxa} & \textbf{IC 95\% (Wilson)} \\
 \midrule
-Grãos        &  9 &  9 & 100,0\% & [70,1\%; 100,0\%] \\
-Frutíferas   &  4 &  4 & 100,0\% & [51,0\%; 100,0\%] \\
-Erva-mate    &  2 &  2 & 100,0\% & [34,2\%; 100,0\%] \\
+Grãos          & 12 & 12 & 100,0\% & [75,8\%; 100,0\%] \\
+Frutíferas     &  4 &  4 & 100,0\% & [51,0\%; 100,0\%] \\
+Hortaliças     &  3 &  3 & 100,0\% & [43,9\%; 100,0\%] \\
+Cana e tabaco  &  3 &  3 & 100,0\% & [43,9\%; 100,0\%] \\
+Erva-mate      &  2 &  2 & 100,0\% & [34,2\%; 100,0\%] \\
+Tubérculos     &  1 &  1 & 100,0\% & [20,7\%; 100,0\%] \\
 \midrule
-\textbf{Global} & \textbf{15} & \textbf{15} & \textbf{100,0\%} & \textbf{[79,6\%; 100,0\%]} \\
+\textbf{Global} & \textbf{25} & \textbf{25} & \textbf{100,0\%} & \textbf{[86,7\%; 100,0\%]} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -70,36 +73,53 @@ Erva-mate    &  2 &  2 & 100,0\% & [34,2\%; 100,0\%] \\
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.95\textwidth]{fig/f7-concordancia}
-\caption{Concordância com o oráculo, por grupo e global, com intervalo de confiança de 95\% de Wilson. Todas as taxas pontuais são de 100\%; o que o intervalo mostra é o efeito do tamanho da amostra, e o limite inferior do intervalo global da recomendação fica abaixo do limiar de 80\% que a hipótese estabelece.}
+\caption{Concordância com o oráculo, por grupo e global, com intervalo de confiança de 95\% de Wilson. Todas as taxas pontuais são de 100\%; o que o intervalo mostra é o efeito do tamanho da amostra. O limite inferior do intervalo global da recomendação fica em 86,7\%, acima do limiar de 80\% que a hipótese estabelece, mas os intervalos por grupo continuam largos --- nenhum grupo isolado sustenta a afirmação sozinho.}
 \label{fig:concordancia}
 \end{figure}
 
 Não houve caso discordante. Toda necessidade de calcário e toda dose de nitrogênio,
-fósforo e potássio coincidiram com o valor calculado à mão, dentro da tolerância de
-arredondamento declarada.
+fósforo e potássio coincidiram com a referência, dentro da tolerância de arredondamento
+declarada. Com 25 casos e concordância integral, o limite inferior do intervalo de
+confiança de 95\% situa-se em \textbf{86,7\%}, acima do patamar de 80\% estabelecido pela
+hipótese H\textsubscript{1.1}.
 
-\textbf{O resultado precisa ser lido com a ressalva que ele próprio impõe.} Com 15 casos
-e concordância integral, o limite inferior do intervalo de confiança de 95\% situa-se em
-\textbf{79,6\%} --- isto é, \textbf{abaixo} do patamar de 80\% que a hipótese
-H\textsubscript{1.1} estabelece. O resultado pontual satisfaz o critério; o intervalo,
-por margem estreita, não. A causa não é erro do sistema, que acertou todos os casos, mas
-o tamanho da amostra: com concordância integral, 16 casos elevariam o limite inferior a
-80,6\% e 20 casos a 83,9\%.
+\textbf{O caminho até esse número é mais informativo que o número.} Numa primeira medição,
+o conjunto tinha 15 casos, dos quais nove eram de calagem e apenas um exercitava o
+algoritmo de adubação de grãos; três dos seis grupos de cultura não tinham caso algum. A
+concordância era igualmente de 100\%, mas o limite inferior ficava em 79,6\%, abaixo do
+limiar. Os dez casos acrescentados em seguida foram escolhidos \textbf{por lacuna de
+cobertura}, e não por repetição do caminho já exercitado --- e \textbf{dois deles
+reprovaram o sistema}.
 
-\pendente{se mais casos forem calculados até a entrega, atualizar a tabela rodando
-\texttt{python scripts/gera\_tabela\_concordancia.py} e reescrever este parágrafo com o
-intervalo novo}
+O primeiro revelou que a dose de nitrogênio não reagia à expectativa de rendimento: o
+adicional por tonelada excedente estava transcrito em 16 das 21 culturas de grãos e
+nenhuma linha de código o lia, enquanto fósforo e potássio reagiam normalmente. O segundo
+revelou que, na classe \textit{Muito alto} em segundo cultivo, o sistema aplicava a dose
+de manutenção onde o Manual prevê reposição do que a colheita exporta. Ambos os defeitos
+existiam desde a implementação do capítulo de adubação e atravessaram a suíte de
+testes --- mais de cinco mil verificações --- sem que nada falhasse, porque nenhum teste
+pedia a combinação de entradas que os revela. As duas correções estão documentadas em
+registro de decisão próprio.
 
-Duas observações sobre a natureza dessa evidência. A primeira é que o conjunto ficou
+O episódio é a melhor evidência disponível sobre o valor do procedimento: uma suíte
+extensa e um conjunto de validação com concordância integral conviviam com dois erros
+agronômicos, e foi o aumento de \textbf{cobertura} --- não de volume --- que os expôs.
+
+Três observações sobre a natureza dessa evidência. A primeira é que o conjunto segue
 abaixo do alvo de 40 a 80 casos declarado no protocolo de validação, por restrição de
-tempo: cada caso exige cálculo manual completo a partir do Manual, incluindo memória de
-cálculo, e é esse custo que limita o conjunto. A segunda, e mais importante, é o
-\textbf{risco de circularidade}: o sistema foi construído a partir do Manual e a
-referência é o Manual aplicado pelo mesmo autor, de modo que o que se mede é a fidelidade
-da implementação à transcrição --- não a adequação agronômica dos critérios. A mitigação
-prevista é a incorporação de casos oriundos de laudos reais, com recomendação elaborada
-por profissional habilitado, e o verificador do Anexo~1 citado na seção anterior é o
-único oráculo hoje genuinamente externo.
+tempo: cada caso exige memória de cálculo completa a partir do Manual, e é esse custo que
+limita o conjunto. A segunda é que os dez casos acrescentados constituem um oráculo mais
+fraco que os quinze originais: naqueles, a referência foi calculada à mão a partir do
+Manual impresso, sem consulta à saída do sistema; nestes, foi derivada das tabelas já
+transcritas na base de conhecimento e depois conferida pelo autor. Os novos demonstram
+que o \textbf{algoritmo} está correto, não que a \textbf{transcrição} esteja, porque
+partem dela --- distinção registrada caso a caso no próprio arquivo de validação. A
+terceira, e mais importante, é o \textbf{risco de circularidade}: o sistema foi construído
+a partir do Manual e a referência é o Manual aplicado pelo mesmo autor, de modo que o que
+se mede é a fidelidade da implementação à transcrição, não a adequação agronômica dos
+critérios. A mitigação prevista é a incorporação de casos oriundos de laudos reais, com
+recomendação elaborada por profissional habilitado, e o verificador do Anexo~1 citado na
+seção anterior é o único oráculo hoje genuinamente externo.
 
 \section{Conformidade do módulo de aptidão edáfica}
 
@@ -124,7 +144,7 @@ e uma era defeito de arredondamento prematuro.
 
 Convém, porém, não apresentar os dois "100\%" como se pesassem igual. A conformidade da
 aptidão apoia-se em 88 casos e verifica a implementação contra uma especificação própria;
-a concordância das recomendações apoia-se em 15 casos e verifica contra o Manual. A
+a concordância das recomendações apoia-se em 25 casos e verifica contra o Manual. A
 segunda é a afirmação mais forte e a de evidência mais estreita.
 
 \section{Comparação com ferramenta existente}

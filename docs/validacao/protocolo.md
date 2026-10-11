@@ -83,11 +83,27 @@ de discordantes com o trace, e saída em Markdown e CSV para a monografia. A apu
 `siras/validacao/concordancia.py` e é exercitada por `testes/unidade/test_concordancia.py` — o
 número publicado sai do mesmo código que a suíte roda.
 
-**Medido em 10/10/2026, e é um problema de tamanho de amostra, não de acerto:** 15/15 casos
-concordantes, 100%, com IC 95% de Wilson **[79,6%; 100,0%]**. O limite inferior fica **abaixo dos
-80%** que a H1.1 declara. Não é o motor que falha — é o n. Com 16 casos e o mesmo acerto o limite
-sobe para 80,6%, e com 20 para 83,9%. **Um caso a mais já sustenta a hipótese pelo critério
-declarado.** A conformidade da aptidão não tem esse problema: 88 casos, 100%, IC [95,8%; 100,0%].
+**Medido em 10/10/2026, de manhã — um problema de tamanho de amostra, não de acerto:** 15/15 casos
+concordantes, 100%, com IC 95% de Wilson **[79,6%; 100,0%]**. O limite inferior ficava **abaixo dos
+80%** que a H1.1 declara. Não era o motor que falhava — era o n.
+
+**Reaberto no mesmo dia, com dez casos novos (ADU-20 a ADU-28 e CAL-12):** 25/25 concordantes,
+100%, IC 95% **[86,7%; 100,0%]**. O limite inferior passa o limiar e a hipótese se sustenta pelo
+critério declarado. Dos dez casos, **dois corrigiram o motor** — ver
+[ADR 0010](../decisoes/0010-adicional-de-n-por-rendimento-e-reposicao-em-muito-alto.md).
+
+Duas coisas precisam ir ao texto junto com esse número, e não depois dele:
+
+1. **O ganho não foi só de n.** Antes dos casos novos, três dos seis grupos de cultura
+   (hortaliças, tubérculos, cana e tabaco) não tinham caso nenhum, e um único caso exercitava o
+   algoritmo de adubação de grãos. O 100% sobre 15 casos media menos do que parecia.
+2. **Os dez casos novos são um oráculo mais fraco.** A referência deles foi derivada das tabelas
+   já transcritas em `dados/` e depois conferida pelo autor, enquanto a dos quinze antigos foi
+   calculada à mão a partir do Manual impresso. Os novos provam o algoritmo; não provam a
+   transcrição, porque partem dela. O campo `origem_referencia` de cada caso registra qual é
+   qual, e [`como-calcular-oraculo.md`](como-calcular-oraculo.md) descreve o procedimento manual.
+
+A conformidade da aptidão nunca teve esse problema: 88 casos, 100%, IC [95,8%; 100,0%].
 
 ## Comparação com ferramenta existente
 

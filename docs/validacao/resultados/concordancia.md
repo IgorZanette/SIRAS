@@ -10,10 +10,13 @@ Um caso é concordante quando **todas** as saídas que a referência declara coi
 |---|---|---|---|---|
 | Erva-mate | 2 | 2 | 100,0% | [34,2%; 100,0%] |
 | Frutíferas | 4 | 4 | 100,0% | [51,0%; 100,0%] |
-| Grãos | 9 | 9 | 100,0% | [70,1%; 100,0%] |
-| **Global** | **15** | **15** | **100,0%** | **[79,6%; 100,0%]** |
+| Grãos | 12 | 12 | 100,0% | [75,8%; 100,0%] |
+| Hortaliças | 3 | 3 | 100,0% | [43,9%; 100,0%] |
+| Cana e tabaco | 3 | 3 | 100,0% | [43,9%; 100,0%] |
+| Tubérculos | 1 | 1 | 100,0% | [20,7%; 100,0%] |
+| **Global** | **25** | **25** | **100,0%** | **[86,7%; 100,0%]** |
 
-Casos com oráculo: **15**. O protocolo declara alvo de 40 a 80 — a diferença precisa ser declarada na monografia, junto do motivo, e não compensada no texto.
+Casos com oráculo: **25**. O protocolo declara alvo de 40 a 80 — a diferença precisa ser declarada na monografia, junto do motivo, e não compensada no texto.
 
 Nenhum caso discordante.
 

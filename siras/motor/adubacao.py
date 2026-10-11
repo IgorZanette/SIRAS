@@ -179,12 +179,26 @@ def calcular_nitrogenio(
     cultura_id: str,
     mo: float,
     antecedente: Optional[str] = None,
+    expectativa_rendimento: Optional[float] = None,
     dados_graos: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Calcula a dose de N (kg/ha) para uma cultura de grãos, por faixa de MO.
 
+    A dose tem duas parcelas: a tabelada por faixa de matéria orgânica e, quando a
+    expectativa de rendimento supera o rendimento de referência da cultura, um adicional
+    por tonelada excedente (`adicional_kg_n_por_t`). Dezesseis das 21 culturas de grãos
+    declaram esse adicional; as cinco que não declaram são leguminosas, de modelo
+    `nao_aplica`, que não recebem N.
+
+    O adicional NÃO se aplica na faixa de MO acima de 5,0%. Ali o Manual publica a dose
+    como teto, e não como valor fixo (`acima_de_5_0_e_maximo`), e somar o adicional
+    ultrapassaria o que o teto admite. Decisão do autor em 2026-10-11, conferida na
+    p. 125 para o milho.
+
     Returns:
-        Dict com "n" (kg/ha) e "faixa_mo" usada (None quando modelo == "nao_aplica").
+        Dict com "n" (kg/ha), "faixa_mo" usada (None quando modelo == "nao_aplica"),
+        "adicional_kg_n_ha" aplicado e "teto" dizendo se a faixa publica a dose como
+        máximo.
 
     Raises:
         ErroAdubacao: cultura não encontrada, modelo desconhecido, ou antecedente
@@ -200,7 +214,8 @@ def calcular_nitrogenio(
     modelo = entrada["modelo"]
 
     if modelo == "nao_aplica":
-        return {"n": 0, "faixa_mo": None, "motivo": entrada["motivo"]}
+        return {"n": 0, "faixa_mo": None, "motivo": entrada["motivo"],
+                "adicional_kg_n_ha": 0.0, "teto": False}
 
     if mo <= 2.5:
         faixa_mo = "mo_ate_2_5"
@@ -222,10 +237,31 @@ def calcular_nitrogenio(
     else:
         raise ErroAdubacao(f"cultura '{cultura_id}': modelo '{modelo}' desconhecido")
 
-    return {"n": dose, "faixa_mo": faixa_mo, "motivo": None}
+    # Adicional por tonelada acima do rendimento de referência (Tab. 6.1.14 e
+    # equivalentes por cultura). Ficou sem efeito até 11/10/2026: o campo estava
+    # transcrito em 16 culturas e nenhuma linha de código o lia, de modo que a dose de
+    # N não reagia à expectativa de rendimento — P e K reagiam. Achado pelo caso ADU-25.
+    teto = faixa_mo == "mo_acima_5_0" and bool(entrada.get("acima_de_5_0_e_maximo"))
+    adicional = 0.0
+    referencia = entrada.get("rendimento_referencia_t_ha")
+    por_tonelada = entrada.get("adicional_kg_n_por_t")
+
+    if (
+        not teto
+        and por_tonelada is not None
+        and referencia is not None
+        and expectativa_rendimento is not None
+        and expectativa_rendimento > referencia
+    ):
+        adicional = (expectativa_rendimento - referencia) * por_tonelada
+        dose = dose + adicional
+
+    return {"n": dose, "faixa_mo": faixa_mo, "motivo": None,
+            "adicional_kg_n_ha": adicional, "teto": teto}
 
 
-def _dose_pk(classe: str, cultivo: int, correcao_nutriente: Optional[float], manutencao_valor: float):
+def _dose_pk(classe: str, cultivo: int, correcao_nutriente: Optional[float],
+             manutencao_valor: float, reposicao_valor: Optional[float] = None):
     """Aplica o algoritmo de dose de graos_adubacao_pk.json (algoritmo_dose.regras)."""
     if classe in ("muito_baixo", "baixo"):
         fracao = (2 / 3) if cultivo == 1 else (1 / 3)
@@ -237,14 +273,27 @@ def _dose_pk(classe: str, cultivo: int, correcao_nutriente: Optional[float], man
     if classe == "alto":
         return manutencao_valor
     if classe == "muito_alto":
-        # Manual: cultivo 1 = 0 (determinístico). Cultivo 2 = "<= manutencao (reposicao,
-        # a criterio do tecnico)" — um TETO, não um valor. Representado no formato de
-        # dose do ADR 0004 (D4.1), a mesma forma usada por hortaliças/frutíferas para
-        # "qualificador: ate" — não um escalar, para não implicar precisão que o Manual
-        # não dá.
+        # Manual: cultivo 1 = 0 (determinístico). Cultivo 2 = adubação de REPOSIÇÃO, a
+        # critério do técnico: repõe-se o que a colheita exporta, e não a manutenção.
+        # A base dá a exportação por tonelada de grãos na Tab. 6.1.3, p. 107, cuja nota
+        # diz "base da adubação de reposição, usada apenas em nível Muito alto".
+        #
+        # Até 11/10/2026 esta linha devolvia a manutenção. A transcrição de
+        # `algoritmo_dose.regras.muito_alto.cultivo_2` dizia "<= manutencao (reposicao,
+        # a criterio do tecnico)", juntando as duas coisas numa frase só, e foi dessa
+        # ambiguidade que o erro nasceu. Decisão do autor em 11/10/2026, conferida na
+        # p. 107: vale a reposição. A frase da base foi reescrita junto.
+        #
+        # O teto do ADR 0004 (D4.1) permanece: o Manual não dá um valor, dá um limite,
+        # e achatá-lo num escalar implicaria precisão que a fonte não tem.
         if cultivo == 1:
             return 0.0
-        return {"valor": manutencao_valor, "qualificador": "ate"}
+        if reposicao_valor is None:
+            raise ErroAdubacao(
+                "classe 'muito_alto' no 2º cultivo exige a exportação nos grãos "
+                "(exportacao_nos_graos), ausente para esta cultura"
+            )
+        return {"valor": reposicao_valor, "qualificador": "ate"}
     raise ErroAdubacao(f"classe de teor '{classe}' desconhecida")
 
 
@@ -272,9 +321,9 @@ def calcular_fosforo_potassio(
 
     Returns:
         Dict com "classe_p", "classe_k", "p2o5", "k2o". "p2o5"/"k2o" são normalmente
-        float; na classe "muito_alto" com cultivo=2, o Manual só dá um teto ("<=
-        manutenção"), não um valor, e o retorno é o objeto de dose do ADR 0004
-        (`{"valor": ..., "qualificador": "ate"}`).
+        float; na classe "muito_alto" com cultivo=2, o Manual só dá um teto (reposição
+        do que a colheita exporta, a critério do técnico), não um valor, e o retorno é o
+        objeto de dose do ADR 0004 (`{"valor": ..., "qualificador": "ate"}`).
 
     Raises:
         ErroAdubacao: cultura/grupo de exigência não encontrados, ou 'cultivo' inválido
@@ -313,8 +362,18 @@ def calcular_fosforo_potassio(
     correcao_p2o5 = correcao_total.get(classe_p, {}).get("p2o5")
     correcao_k2o = correcao_total.get(classe_k, {}).get("k2o")
 
-    p2o5 = _dose_pk(classe_p, cultivo, correcao_p2o5, manutencao_p2o5)
-    k2o = _dose_pk(classe_k, cultivo, correcao_k2o, manutencao_k2o)
+    # Reposição: o que a colheita exporta, usada só em nível Muito alto no 2º cultivo.
+    exportacao = adubacao_pk["exportacao_nos_graos"]["culturas"].get(cultura_id, {})
+    rendimento = expectativa_rendimento if expectativa_rendimento is not None else rendimento_referencia
+    reposicao_p2o5 = exportacao.get("p2o5")
+    reposicao_k2o = exportacao.get("k2o")
+    if reposicao_p2o5 is not None:
+        reposicao_p2o5 = reposicao_p2o5 * rendimento
+    if reposicao_k2o is not None:
+        reposicao_k2o = reposicao_k2o * rendimento
+
+    p2o5 = _dose_pk(classe_p, cultivo, correcao_p2o5, manutencao_p2o5, reposicao_p2o5)
+    k2o = _dose_pk(classe_k, cultivo, correcao_k2o, manutencao_k2o, reposicao_k2o)
 
     return {
         "classe_p": classe_p,

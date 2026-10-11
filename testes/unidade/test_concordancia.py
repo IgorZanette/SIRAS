@@ -13,9 +13,12 @@ fato importa — um apurador que nunca reprova não mede nada.
 import pytest
 
 from siras.validacao.concordancia import (
+    _grupo_da_cultura,
     apurar_aptidao,
     apurar_caso,
     apurar_recomendacao,
+    campos_nao_lidos,
+    carregar_casos,
     wilson,
 )
 from siras.conhecimento.carregador import carregar_dados_comum
@@ -71,6 +74,37 @@ class TestApuracaoDaRecomendacao:
         assert all(r.grupo != "?" for r in apuracao.resultados)
         soma = sum(p.total for p in apuracao.por_grupo().values())
         assert soma == apuracao.total
+
+    def test_o_conjunto_atual_sustenta_a_H1_1(self):
+        """Fecha a pendência P9: o conjunto tinha 15 casos e o limite inferior do IC 95%
+        caía em 79,6%, abaixo dos 80% que a H1.1 declara. Os casos ADU-20 a ADU-28 e
+        CAL-12 (2026-10-10) levaram o conjunto a 25, e o limite inferior a 86,7%.
+
+        O teste é sobre o TAMANHO, não sobre a taxa: se alguém remover casos e voltar
+        abaixo do limiar, o artigo não pode continuar afirmando a hipótese.
+        """
+        apuracao = apurar_recomendacao()
+        inferior, _ = apuracao.intervalo()
+        assert inferior >= 0.80, (
+            f"{apuracao.concordantes}/{apuracao.total} dá limite inferior {inferior:.3f}: "
+            f"abaixo de 0,80, a H1.1 não se sustenta com este conjunto"
+        )
+
+    def test_nenhum_caso_carrega_campo_que_o_motor_ignora(self):
+        """Regressão do ADU-23 (ver campos_nao_lidos() em concordancia.py).
+
+        Um caso que declara exercitar a expectativa de rendimento, mas escreve o campo
+        com o nome de outro grupo, passa sem exercitar nada — e o 100% de concordância
+        passa a incluir um caso vazio.
+        """
+        dados = carregar_dados_comum()
+        sobras = {}
+        for caso in carregar_casos():
+            grupo = _grupo_da_cultura(caso["entrada"]["cultura"], dados)
+            ignorados = campos_nao_lidos(caso["entrada"], grupo)
+            if ignorados:
+                sobras[caso["id"]] = (grupo, ignorados)
+        assert sobras == {}, sobras
 
     def test_detecta_divergencia(self):
         """Um apurador que nunca reprova não mede nada."""

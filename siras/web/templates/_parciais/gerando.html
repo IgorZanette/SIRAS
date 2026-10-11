@@ -31,8 +31,13 @@
    CSS. #}
 {% import "_macros/ico.html" as i %}
 
-<div class="calculando nao-imprime" id="calculando" hidden aria-hidden="true" data-etapa="0">
+{# `data-cena-escopo` agrupa a cena com o veu. A cena so OBSERVA o `data-etapa`
+   que gerando.js ja mantem aqui: nem o ESPERA_MINIMA_MS, nem os passos, nem os
+   textos mudaram para ela entrar (ADR 0012). #}
+<div class="calculando nao-imprime" id="calculando" hidden aria-hidden="true"
+     data-etapa="0" data-cena-escopo>
   <div class="calculando__halo" aria-hidden="true"></div>
+  {% include "_parciais/cena_solo_gerando.html" %}
 
   <div class="calculando__conteudo" role="status" aria-live="polite">
 

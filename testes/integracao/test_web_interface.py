@@ -1508,3 +1508,71 @@ def test_a_assinatura_nao_parte_entre_duas_folhas():
     assert "break-inside: avoid" in regra
     # E a linha continua centrada, que em bloco não vem de graça.
     assert re.search(r"\.assinatura__linha \{[^}]*margin-inline:\s*auto", _TELAS_CSS)
+
+
+# --- acabamento v2 (ADR 0012) -------------------------------------------------
+
+def test_a_pagina_aparece_inteira_sem_javascript():
+    """O defeito mais fácil de introduzir ao animar entrada: esconder o conteúdo no
+    CSS e revelá-lo por JS. Quem estiver sem JavaScript fica com a página em branco.
+
+    A guarda é a classe `tem-js`, posta pelo script que roda antes da primeira
+    pintura. Sem ela, nenhuma regra de revelação se aplica."""
+    regra = re.search(r"\n\[data-revelar\] \{([^}]*)\}", _TELAS_CSS).group(1)
+    assert "opacity: 1" in regra, "o estado inicial esconde sem guarda de JS"
+
+    escondidos = re.findall(r"\n(\.tem-js \[data-revelar\][^{]*)\{[^}]*opacity: 0", _TELAS_CSS)
+    assert escondidos, "a revelação não está mais guardada por .tem-js"
+
+
+def test_quem_pede_menos_movimento_ve_tudo():
+    """Não basta desligar a transição: o estado inicial tem de sumir junto, senão o
+    conteúdo fica invisível para sempre para quem pediu menos movimento."""
+    bloco = re.search(
+        r"@media \(prefers-reduced-motion: reduce\) \{(?:[^{}]|\{[^{}]*\})*data-revelar"
+        r"(?:[^{}]|\{[^{}]*\})*\}", _TELAS_CSS, re.S
+    )
+    assert bloco, "nenhuma regra de menos movimento alcança [data-revelar]"
+    assert "opacity: 1 !important" in bloco.group(0)
+    assert "transform: none !important" in bloco.group(0)
+
+
+def test_o_laudo_impresso_mostra_tudo_mesmo_sem_a_revelacao():
+    """Imprimir antes de rolar a página não pode sair com metade do conteúdo branco.
+
+    A folha tem vários blocos @media print, cada um perto das regras de tela que
+    corrige; a busca é no arquivo inteiro, e não num bloco só."""
+    regra = re.search(
+        r"@media print \{[^@]*?\[data-revelar\][^{]*\{[^}]*opacity: 1 !important",
+        _TELAS_CSS, re.S
+    )
+    assert regra, "a revelação não é desfeita na impressão"
+
+
+def test_existe_um_link_de_pular_para_o_conteudo(cliente):
+    """Primeiro foco da página: quem navega por teclado chega ao conteúdo sem
+    percorrer a barra inteira a cada tela (WCAG 2.4.1)."""
+    html = cliente.get("/").get_data(as_text=True)
+
+    assert 'class="pular-para-conteudo' in html
+    assert 'href="#conteudo"' in html
+    assert 'id="conteudo"' in html
+    # Invisível até receber foco, e visível quando recebe.
+    assert re.search(r"\.pular-para-conteudo:focus-visible \{[^}]*transform:", _TELAS_CSS)
+
+
+def test_tudo_que_recebe_foco_tem_anel_visivel():
+    """Antes cada componente resolvia o foco por conta, e alguns não resolviam."""
+    regra = re.search(
+        r"a:focus-visible, button:focus-visible[^{]*\{([^}]*)\}", _TELAS_CSS
+    )
+    assert regra, "não há regra única de foco visível"
+    assert "outline:" in regra.group(1)
+
+
+def test_a_hero_nao_e_revelada(cliente):
+    """Revelar o que já está na tela ao abrir é piscar sem motivo."""
+    html = cliente.get("/").get_data(as_text=True)
+    hero = re.search(r'<section class="hero"[^>]*>', html).group(0)
+
+    assert "data-revelar" not in hero

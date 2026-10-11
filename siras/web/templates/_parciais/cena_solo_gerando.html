@@ -1,0 +1,61 @@
+{#
+  Cena 3D da tela de espera (Fase 3). NÃO substitui a lógica de gerando.js:
+  a cena só OBSERVA o contrato que já existe (data-etapa="N" e .passou-N).
+
+  data-cena-etapa-de: seletor do elemento onde gerando.js escreve data-etapa.
+  AJUSTAR o seletor ao markup real de _parciais/gerando.html.
+
+  Os passos, as regras do Manual que cada um cita e a etiqueta do que
+  ele consulta CONTINUAM no HTML existente — este parcial só acrescenta o
+  desenho. Inclua-o dentro do mesmo contêiner, com data-cena-escopo.
+#}
+<div class="cena-solo nao-imprime" data-cena-solo="gerando" aria-hidden="true"
+     data-cena-etapa-de="[data-etapa]"
+     data-cena-motor="{{ url_for('static', filename='js/cena-solo/soilScene.js') }}">
+  <img class="cena-solo__fallback" alt="" width="764" height="792" decoding="async"
+       src="{{ url_for('static', filename='img/cena-solo/fallback-estagio-2.webp') }}">
+</div>
+
+{#
+  Cultura selecionada (se a tela já a conhece). A planta da cena é GENÉRICA:
+  a mesma para todas as culturas. A nota deixa isso explícito.
+#}
+{% if cultura_selecionada is defined and cultura_selecionada %}
+<p class="cena-solo-cultura nao-imprime">Aptidão edáfica avaliada para <strong>{{ cultura_selecionada }}</strong>. A planta da ilustração é genérica e não representa a cultura.</p>
+{% endif %}
+
+{#
+  Fechamento com os DOIS cenários de aptidão daquela análise.
+  Os itens vêm de dados REAIS do cálculo (a página do laudo em si não
+  recebe nada de 3D). Duas opções (decidir na Fase 3):
+   a) o servidor renderiza esta lista se a página de espera já conhecer o
+      resultado; ou
+   b) gerando.js, ao receber a resposta de gerar_laudo(), cria os <li> com
+      data-atributo e data-limitacao antes de seguir para o laudo.
+  A cena reage sozinha quando a lista muda. Sem itens, não há pontos.
+#}
+{#
+  Formulação (passo de agrupar N, P, K). data-cena-npk recebe a formulação
+  REAL calculada (ex.: "05-20-20"), se já existir quando a tela é exibida;
+  gerando.js também pode preenchê-lo depois. Vazio = montes iguais e o texto
+  abaixo diz "proporção ilustrativa". AJUSTAR a variável ao nome real.
+#}
+<p class="cena-solo-cultura nao-imprime" data-cena-npk="{{ formulacao_npk|default('') }}">
+  <span data-cena-npk-texto>Montes N, P e K de mesmo tamanho: proporção ilustrativa.</span>
+</p>
+
+<figure class="cena-solo-legenda nao-imprime" data-cena-legenda hidden>
+  <figcaption><span data-cena-cenario>Cenário potencial</span> · pontos de leitura</figcaption>
+  <ul>
+    {% for a in atributos_cena|default([]) %}
+    <li data-atributo="{{ a.id }}" data-limitacao="{{ a.limitacao or '' }}" data-estado="lido">
+      <span class="cena-solo-legenda__icone" aria-hidden="true"></span>
+      <span class="cena-solo-legenda__atributo">{{ a.rotulo }}</span>
+      <span data-cena-estado-texto>lido</span>
+      {%- if a.justificativa %}
+      <span data-cena-justificativa>{{ a.justificativa }}</span>
+      {%- endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</figure>

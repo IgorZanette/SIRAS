@@ -1,0 +1,21 @@
+{#
+  Incluir SÓ nas páginas que têm a cena (início, formulário, espera), no
+  bloco do <head> reservado para isso em base.html, ANTES de qualquer <script>:
+
+    base.html:     <head> ... {% block cabecalho_cena %}{% endblock %} ...scripts...
+    inicio.html:   {% block cabecalho_cena %}{% include "_parciais/cena_solo_cabecalho.html" %}{% endblock %}
+
+  Assim o laudo (e qualquer outra página) sai byte a byte igual a hoje.
+  O import map precisa existir antes do primeiro carregamento de módulo.
+  "three" aponta para o arquivo vendorizado: nenhuma requisição sai do localhost.
+#}
+<script type="importmap">
+  {"imports": {"three": "{{ url_for('static', filename='vendor/three/0.160.0/three.module.min.js') }}"}}
+</script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cena-solo.css') }}">
+<script defer src="{{ url_for('static', filename='js/cena-solo.js') }}"></script>
+{#
+  O script vem junto, com defer (mesmo padrão dos outros JS do projeto).
+  Mesmo se for incluído numa página sem [data-cena-solo], ele sai na primeira
+  linha e o three nunca é baixado.
+#}

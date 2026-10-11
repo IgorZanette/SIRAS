@@ -1,0 +1,7 @@
+three.js 0.160.0 (build ES module minificado)
+Origem: pacote npm "three@0.160.0", arquivo build/three.module.min.js
+Licença: MIT (ver LICENSE nesta pasta)
+Tamanho em disco: 670681 bytes (654 KiB); gzip -9: 166182 bytes
+SHA-256: 3e690ac7d180b0aadf0891bea39eec643e29e2d3e75c99b18689518665f69ba6
+Motivo: cena 3D da página inicial e da tela de espera (decisão registrada em docs/decisoes/ — AJUSTAR caminho).
+Atualizar: substituir o arquivo, a pasta de versão, o import map em _parciais/cena_solo_cabecalho.html e este texto.

@@ -12,6 +12,12 @@
     try {
       var salvo = window.localStorage.getItem("siras-tema");
       if (salvo) { document.documentElement.dataset.tema = salvo; }
+      /* `tem-js` guarda tudo que so faz sentido com JavaScript: a revelacao ao
+         rolar esconde o conteudo ANTES de revela-lo, e sem este marcador quem
+         estiver sem JS veria a pagina em branco. A classe entra aqui, no mesmo
+         script que roda antes da primeira pintura, e nao num defer: um frame com
+         o conteudo visivel e outro sem ele seria pior que nao animar. */
+      document.documentElement.classList.add("tem-js");
     } catch (erro) {}
   })();
 </script>
@@ -39,8 +45,21 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/siras-theme.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/siras-telas.css') }}">
 {% block estilos %}{% endblock %}
+{# Cabeçalho da cena 3D do perfil de solo (ADR 0012).
+
+   Um bloco VAZIO, e não o include direto: a cena existe só nas telas até a geração
+   do laudo, e o laudo precisa sair byte a byte igual ao que sempre foi. Um bloco
+   vazio não muda o HTML de nenhuma página que não o preencha, e há teste disso.
+
+   Fica ANTES dos <script> do fim da página porque o import map precisa existir
+   antes do primeiro carregamento de módulo. #}
+{% block cabecalho_cena %}{% endblock %}
 </head>
 <body class="malha {% block corpo_classe %}{% endblock %}">
+{# Primeiro foco da página: quem navega por teclado chega ao conteúdo sem
+   percorrer a barra inteira a cada tela (WCAG 2.4.1). Fica invisível até
+   receber foco, e some na impressão. #}
+<a class="pular-para-conteudo nao-imprime" href="#conteudo">Pular para o conteúdo</a>
 
 {% import "_macros/ico.html" as i %}
 
@@ -80,11 +99,15 @@
   </div>
 </header>
 
+{# A âncora do link de pular. É um alvo de rolagem, não um contêiner: envolver o
+   conteúdo mudaria o layout de todas as telas. #}
+<div id="conteudo" tabindex="-1"></div>
 {% block conteudo %}{% endblock %}
 
 <script src="{{ url_for('static', filename='js/tema.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/interacoes.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/barra.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/revelar.js') }}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

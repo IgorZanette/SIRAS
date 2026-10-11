@@ -114,6 +114,13 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
 - **Tabelas do Manual** — sete tabelas transcritas, consultáveis na interface, incluindo o pH de
   referência (Tab. 5.1, com o aviso de que não é ela que dispara a calagem) e os grupos de
   exigência de P e K das 141 culturas do Anexo 2.
+- **Interface v2** ([ADR 0012](docs/decisoes/0012-cena-3d-e-acabamento-da-interface.md)) — uma cena
+  3D do perfil de solo na tela inicial e na tela de espera, revelação das seções ao rolar, seção
+  que declara em que pé o trabalho está, "pular para o conteúdo" e anel de foco único. A cena usa
+  three.js **vendorizado** (`static/vendor/`, com licença e hash conferidos por teste): roda
+  offline como o resto do sistema, não participa de decisão agronômica nenhuma e **não existe no
+  laudo** — há teste para isso, em tela e impresso. Sem JavaScript ou sem WebGL, a página aparece
+  inteira.
 - **Indicação de formulação** — o laudo diz qual adubo formulado comprar e em que dose, pelo
   **método do próprio Manual** (§8.3, p. 311): a dose se ancora no nutriente mais deficiente no
   solo, o que falta do outro vira complemento com fertilizante simples e o N restante vai para
@@ -147,18 +154,6 @@ laudo impresso num navegador, que é a última condição para o congelamento.
 
 **A implementação encerra em 12/10/2026**, por definição do orientador. Daí em diante, só testes com
 usuários e redação do artigo ([`docs/artigo_final/`](docs/artigo_final/)).
-
-## Próximo ciclo: interface
-
-Depois da coleta de usabilidade há um plano de reformulação do frontend em
-[`docs/processo/plano-frontend-v2.md`](docs/processo/plano-frontend-v2.md): acabamento da interface
-atual, seção de status do projeto, fluidez entre as telas e a cena 3D do perfil de solo do
-`SIRAS-3D-kit-v4/`.
-
-**Nada disso entra antes do congelamento.** A coleta roda sobre `congelamento-v1`, e mexer na
-interface no meio dela faria os participantes avaliarem sistemas diferentes. O plano registra
-também que a lista priorizada de correções que sair das dez heurísticas é um dado melhor sobre o
-que melhorar do que o próprio plano.
 
 ## Ferramentas de desenvolvimento
 

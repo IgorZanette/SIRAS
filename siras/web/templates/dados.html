@@ -5,6 +5,8 @@
 {% import "_macros/aviso.html" as av %}
 
 {% block titulo %}Análise de solo — SIRAS{% endblock %}
+{# A tela de dados hospeda o veu da tela de espera, que tem cena (ADR 0012). #}
+{% block cabecalho_cena %}{% include "_parciais/cena_solo_cabecalho.html" %}{% endblock %}
 
 {% block conteudo %}
 <main class="env" style="padding-bottom:var(--e-10)">

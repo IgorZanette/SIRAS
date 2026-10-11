@@ -94,7 +94,14 @@
 @media (max-width:760px){ .barra__secundario { display: none; } }
 
 /* --- Hero -------------------------------------------------------------- */
-.hero { position: relative; overflow: hidden; padding: var(--e-10) 0 var(--e-9); }
+/* `isolation: isolate` cria contexto de empilhamento proprio: a cena 3D fica
+   atras do conteudo sem que o z-index dela dispute com a barra ou o veu da tela
+   de espera, que vivem fora da hero (ADR 0012). */
+.hero { position: relative; isolation: isolate; overflow: hidden;
+        padding: var(--e-10) 0 var(--e-9); }
+/* O conteudo sobe para cima da cena. A grade e o halo sao os dois filhos diretos
+   que precisam disso; a cena fica no z-index 0 declarado em cena-solo.css. */
+.hero > .env { position: relative; z-index: 1; }
 /* Um único halo. É o gesto de luz do projeto e não se repete em outras telas. */
 .hero__halo {
   position: absolute; inset: -30% -10% auto 30%; height: 780px;
@@ -2110,3 +2117,130 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
                  letter-spacing: .1em; text-transform: uppercase; color: #5C6F64;
                  padding: 2px 8px; border: 1px solid #D8E2DB; border-radius: 999px;
                  margin-bottom: var(--e-2); }
+
+/* =========================================================================
+   Acabamento v2 (ADR 0012) — revelacao, profundidade e estados
+   -------------------------------------------------------------------------
+   A estrutura da landing ja resistia a comparacao com a referencia: hero,
+   problema, comparativo, como funciona, publico, previa e FAQ ja existiam. O
+   que faltava era ACABAMENTO -- ritmo de leitura, profundidade e resposta ao
+   toque. Nada aqui muda texto, ordem ou funcao de nada.
+   ====================================================================== */
+
+/* --- Pular para o conteudo ---------------------------------------------
+   Primeiro foco da pagina. Invisivel ate receber foco: quem navega por
+   teclado chega ao conteudo sem percorrer a barra a cada tela. */
+.pular-para-conteudo {
+  position: absolute; top: 0; left: 50%; transform: translate(-50%, -140%);
+  z-index: 200; padding: var(--e-3) var(--e-5);
+  background: var(--v-600); color: #fff; font-weight: 700;
+  border-radius: 0 0 var(--r-campo) var(--r-campo);
+  text-decoration: none; transition: transform 160ms ease;
+}
+.pular-para-conteudo:focus-visible { transform: translate(-50%, 0); outline: none;
+                                     box-shadow: var(--glow-v); }
+#conteudo { scroll-margin-top: 80px; }
+
+/* --- Revelacao ao rolar -------------------------------------------------
+   A distancia e curta e a duracao tambem: o conteudo CHEGA, nao desfila.
+   O estado inicial so se aplica quando ha JavaScript (a classe `e-visivel`
+   e posta por revelar.js), senao a pagina aparece inteira como sempre. */
+[data-revelar] { opacity: 1; }
+.tem-js [data-revelar] {
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 420ms cubic-bezier(.2,0,.2,1),
+              transform 420ms cubic-bezier(.2,0,.2,1);
+}
+.tem-js [data-revelar].e-visivel { opacity: 1; transform: none; }
+
+/* Dentro da secao revelada, os cartoes entram em cascata curta. O atraso e por
+   POSICAO e nao por tempo acumulado: quatro cartoes nao podem custar meio
+   segundo de espera ao ultimo. */
+.tem-js [data-revelar] .pilar,
+.tem-js [data-revelar] .previa__item {
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 360ms cubic-bezier(.2,0,.2,1) var(--atraso, 0ms),
+              transform 360ms cubic-bezier(.2,0,.2,1) var(--atraso, 0ms);
+}
+.tem-js [data-revelar].e-visivel .pilar,
+.tem-js [data-revelar].e-visivel .previa__item { opacity: 1; transform: none; }
+.tem-js [data-revelar] .pilar:nth-child(2) { --atraso: 70ms; }
+.tem-js [data-revelar] .pilar:nth-child(3) { --atraso: 140ms; }
+.tem-js [data-revelar] .pilar:nth-child(4) { --atraso: 210ms; }
+
+/* --- Profundidade -------------------------------------------------------
+   A paleta ja tinha --luz-topo e --sombra-doc, e quase so o documento os
+   usava. Cartao que sobe ao passar o ponteiro e o sinal de "isto responde". */
+.pilar { transition: transform 200ms cubic-bezier(.2,0,.2,1),
+                     border-color var(--tr), box-shadow 200ms ease; }
+.pilar:hover { transform: translateY(-3px); box-shadow: var(--luz-topo); }
+.painel { transition: box-shadow 200ms ease, border-color var(--tr); }
+
+/* --- Foco visivel, sempre ----------------------------------------------
+   Um anel so, em tudo que recebe foco por teclado. Antes cada componente
+   resolvia por conta e alguns nao resolviam. */
+a:focus-visible, button:focus-visible, summary:focus-visible,
+input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--v-400); outline-offset: 2px; border-radius: 4px;
+}
+:root[data-tema="claro"] a:focus-visible,
+:root[data-tema="claro"] button:focus-visible,
+:root[data-tema="claro"] summary:focus-visible { outline-color: var(--v-600); }
+
+/* --- Menos movimento: nenhum --------------------------------------------
+   Nao e so desligar a transicao: o estado inicial tem de sumir junto, senao
+   o conteudo fica invisivel para sempre em quem pediu menos movimento. */
+@media (prefers-reduced-motion: reduce) {
+  .tem-js [data-revelar],
+  .tem-js [data-revelar] .pilar,
+  .tem-js [data-revelar] .previa__item {
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
+  .pilar:hover { transform: none; }
+  .pular-para-conteudo { transition: none; }
+}
+
+/* Na impressao nada disso existe: o conteudo sai inteiro. */
+@media print {
+  [data-revelar], [data-revelar] .pilar, [data-revelar] .previa__item {
+    opacity: 1 !important; transform: none !important;
+  }
+}
+
+/* --- Em que pe esta o trabalho (ADR 0012) -------------------------------
+   Linha do tempo vertical, com a situacao de cada etapa. Nao e decoracao: a
+   coluna a esquerda liga as etapas e deixa ver, de relance, onde o trabalho
+   esta -- que e a pergunta que a secao responde. */
+.estado { list-style: none; margin: var(--e-6) 0 0; padding: 0 0 0 var(--e-6);
+          display: grid; gap: var(--e-5); position: relative; }
+.estado::before {
+  content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px;
+  background: linear-gradient(var(--v-600), var(--n-700));
+  border-radius: 999px;
+}
+.estado__item { position: relative; }
+/* O ponto na linha. Cheio no concluido, contornado no que ainda nao comecou:
+   a forma diz o estado, e nao so a cor (WCAG 1.4.1). */
+.estado__item::before {
+  content: ""; position: absolute; left: calc(-1 * var(--e-6) + 2px); top: 6px;
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--v-600); background: var(--v-600);
+}
+.estado__item--andamento::before { background: var(--n-900); }
+.estado__item--proximo::before { background: var(--n-900); border-color: var(--n-600); }
+.estado__selo {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: var(--fs-3xs); font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--v-400);
+}
+.estado__item--andamento .estado__selo { color: var(--sig-ambar); }
+.estado__item--proximo .estado__selo { color: var(--n-500); }
+.estado__nome { font-size: var(--fs-md); margin: 2px 0 var(--e-1); color: var(--n-100); }
+.estado__item .t-aux { max-width: 64ch; }
+:root[data-tema="claro"] .estado__selo { color: var(--v-700); }
+:root[data-tema="claro"] .estado__item--andamento::before,
+:root[data-tema="claro"] .estado__item--proximo::before { background: var(--n-950); }
+
+/* O que o sistema E, dito no alto do hero e nao so no rodape do laudo. */
+.hero__natureza { margin-top: var(--e-3); font-size: var(--fs-xs); color: var(--n-400);
+                  letter-spacing: .01em; }

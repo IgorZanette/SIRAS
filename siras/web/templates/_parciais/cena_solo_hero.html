@@ -1,0 +1,66 @@
+{#
+  Cena 3D da hero. Incluir DENTRO da <section> da hero, DEPOIS do conteúdo
+  (título, descrição, botões), e marcar a section com data-cena-escopo:
+
+    <section class="hero" data-cena-escopo>
+      ...conteúdo existente, sem mudanças...
+      {% include "_parciais/cena_solo_hero.html" %}
+    </section>
+
+  Sem JS ou sem WebGL, só a imagem estática aparece; controles e legenda
+  ficam ocultos (hidden) porque não fariam sentido sem a cena.
+#}
+<div class="cena-solo nao-imprime" data-cena-solo="inicio" aria-hidden="true"
+     data-cena-motor="{{ url_for('static', filename='js/cena-solo/soilScene.js') }}">
+  <img class="cena-solo__fallback" alt="" width="761" height="711" decoding="async"
+       src="{{ url_for('static', filename='img/cena-solo/fallback-estagio-3.webp') }}">
+</div>
+
+<div class="cena-solo-controles nao-imprime" data-cena-controles hidden>
+  <ol aria-label="Etapas da ilustração">
+    <li><button type="button" data-cena-estagio="0" aria-pressed="true"
+        data-descricao="O perfil antes de qualquer interpretação. Cada ponto acima do bloco é um atributo que a análise mede.">O solo como está</button></li>
+    <li><button type="button" data-cena-estagio="1" aria-pressed="false"
+        data-descricao="A leitura percorre o perfil e confronta cada atributo com os critérios do Manual. Os pontos em destaque são limitações identificadas.">O que a análise revela</button></li>
+    <li><button type="button" data-cena-estagio="2" aria-pressed="false"
+        data-descricao="O mesmo solo após as correções que o laudo recomenda. Limitações corrigíveis são tratadas; as permanentes, como CTC e textura, continuam presentes.">Aptidão potencial</button></li>
+  </ol>
+  <p data-cena-descricao aria-live="polite"></p>
+  <button type="button" data-cena-pausar aria-pressed="false">Pausar animação</button>
+</div>
+
+{#
+  Legenda = fonte da verdade da cena. A cena só espelha o que está aqui.
+  AJUSTAR: a lista e a classificação (corrigivel/permanente) devem seguir
+  docs/especificacao/ccae.md §7. Aqui é um EXEMPLO ILUSTRATIVO, sem valores,
+  e o texto diz isso.
+#}
+<figure class="cena-solo-legenda nao-imprime" data-cena-legenda hidden>
+  <figcaption>Pontos de leitura · exemplo ilustrativo, sem valores</figcaption>
+  <ul>
+    {#
+      4º item: justificativa da limitação permanente, exibida só no estágio 3.
+      AJUSTAR: o texto deve vir da MESMA fonte que o laudo usa (ccae.md §7),
+      por exemplo uma constante Python passada ao template. Vazio = não aparece.
+    #}
+    {% set justificativas = cena_justificativas|default({}) %}
+    {% for a in [
+      ("ph", "pH", "corrigivel"),
+      ("fosforo", "Fósforo", "corrigivel"),
+      ("potassio", "Potássio", ""),
+      ("calcio-magnesio", "Cálcio e magnésio", ""),
+      ("materia-organica", "Matéria orgânica", ""),
+      ("ctc", "CTC", "permanente"),
+      ("textura", "Textura", "permanente"),
+    ] %}
+    <li data-atributo="{{ a[0] }}" data-limitacao="{{ a[2] }}" data-estado="lido">
+      <span class="cena-solo-legenda__icone" aria-hidden="true"></span>
+      <span class="cena-solo-legenda__atributo">{{ a[1] }}</span>
+      <span data-cena-estado-texto>lido</span>
+      {%- if a[2] == "permanente" %}
+      <span data-cena-justificativa>{{ justificativas.get(a[0], "") }}</span>
+      {%- endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</figure>

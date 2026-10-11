@@ -1,5 +1,13 @@
 # Plano de frontend v2 — SIRAS como plataforma
 
+> **Executado em 11/10/2026, antes do congelamento.** Este documento foi escrito
+> recomendando integrar depois da coleta; o autor decidiu antecipar, com um argumento
+> melhor que o meu — congelar depois do frontend novo faz os participantes avaliarem o
+> sistema final, e não um estado intermediário dele. O que de fato entrou, e o que ficou
+> de fora, está na [ADR 0012](../decisoes/0012-cena-3d-e-acabamento-da-interface.md).
+>
+> O diagnóstico e a avaliação do kit abaixo continuam valendo como registro do raciocínio.
+
 Documento de **estruturação**, escrito em 11/10/2026 a pedido do autor. Nada aqui foi
 implementado: é o mapa do que fazer, em que ordem e sob quais restrições.
 

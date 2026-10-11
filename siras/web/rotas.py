@@ -23,6 +23,7 @@ from typing import Any, Dict
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_graos
+from siras.dominio.estado import ETAPAS, ROTULO_DA_SITUACAO, SELO_DE_NATUREZA
 from siras.dominio.escopo import (
     TOTAL_DE_CULTURAS_NO_ESCOPO,
     no_escopo_de_recomendacao,
@@ -147,7 +148,15 @@ def inicio():
     """Landing. O total de culturas vem de siras/dominio/escopo.py, e não escrito no
     template: número de vitrine que diverge do escopo real é o tipo de erro que só
     aparece quando alguém da banca conta."""
-    return render_template("inicio.html", total_de_culturas=TOTAL_DE_CULTURAS_NO_ESCOPO)
+    return render_template(
+        "inicio.html",
+        total_de_culturas=TOTAL_DE_CULTURAS_NO_ESCOPO,
+        # O estado do trabalho sai de siras/dominio/estado.py, mantido em sincronia
+        # com docs/processo/roadmap.md por teste — escrito no template, divergiria.
+        etapas_do_projeto=ETAPAS,
+        rotulo_da_situacao=ROTULO_DA_SITUACAO,
+        selo_de_natureza=SELO_DE_NATUREZA,
+    )
 
 
 @bp.get("/tabelas")

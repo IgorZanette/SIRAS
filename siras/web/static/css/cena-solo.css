@@ -1,0 +1,109 @@
+/*
+ * cena-solo.css — estilos da cena 3D, dos controles e da legenda.
+ *
+ * Os tokens sao os do projeto (siras-theme.css), e nao os fallbacks com que o kit
+ * chegou: assim a cena troca de tema junto com o resto da aplicacao, sem segunda
+ * paleta para manter em sincronia.
+ *
+ * O arquivo fica separado de proprio: ele so e carregado nas paginas que tem cena,
+ * pelo bloco cabecalho_cena. Juntar estas regras a siras-telas.css faria o laudo
+ * baixar CSS de uma cena que ele nao tem.
+ *
+ * A hero precisa de:  position: relative; isolation: isolate;
+ * e o conteudo dela de: position: relative; z-index: 1 — ver .hero em siras-telas.css.
+ */
+/* Variáveis compartilhadas pelos três blocos (cena, controles, legenda) */
+.cena-solo, .cena-solo-controles, .cena-solo-legenda {
+  --cs-acento: var(--v-400);
+  --cs-texto: var(--n-100);
+  --cs-suave: var(--n-400);
+  --cs-borda: var(--n-700);
+  /* Os dois sinais de limitacao saem da paleta de diagnostico, que ja foi medida
+     contra os dois fundos em scripts/conferir_contraste.py. */
+  --cs-limitante: var(--sig-ambar);
+  --cs-permanente: var(--sig-laranja);
+}
+.cena-solo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;            /* atrás do conteúdo da hero */
+  pointer-events: none;   /* cliques vão para a página; a cena ouve a janela */
+}
+.cena-solo__canvas { position: absolute; inset: 0; }
+
+/* Fallback: visível sem JS / sem WebGL; some quando a cena assume. */
+.cena-solo__fallback {
+  position: absolute; right: 4%; bottom: 8%;
+  width: min(42vw, 520px); height: auto;
+}
+.cena-solo--ativa .cena-solo__fallback { display: none; }
+
+/* ---------- Controles de estágio (hero) ---------- */
+.cena-solo-controles {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+}
+.cena-solo-controles ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.cena-solo-controles button {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font: inherit; font-size: 0.85rem; line-height: 1.1;
+  color: var(--cs-suave, #a3b6a5);
+  background: transparent;
+  border: 1px solid var(--cs-borda, #23332a); border-radius: 999px; padding: 8px 12px;
+}
+.cena-solo-controles button:hover { color: var(--cs-texto, #eef5ea); }
+.cena-solo-controles button:focus-visible { outline: 2px solid var(--cs-acento, #8ce23f); outline-offset: 3px; }
+.cena-solo-controles [data-cena-estagio]::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor;
+}
+/* estado ativo: borda + ponto preenchido (não só cor) */
+.cena-solo-controles [aria-pressed="true"][data-cena-estagio] { color: var(--cs-texto, #eef5ea); border-color: var(--cs-acento, #8ce23f); }
+.cena-solo-controles [aria-pressed="true"][data-cena-estagio]::before { background: var(--cs-acento, #8ce23f); border-color: var(--cs-acento, #8ce23f); }
+.cena-solo-controles [data-cena-pausar] { border-radius: 8px; }
+.cena-solo-controles [data-cena-descricao] { margin: 0; flex: 1 1 18rem; min-width: 0; color: var(--cs-suave, #a3b6a5); font-size: 0.88rem; }
+
+/* ---------- Legenda dos pontos de leitura (texto real) ---------- */
+.cena-solo-legenda { margin: 0; font-size: 0.85rem; color: var(--cs-suave, #a3b6a5); }
+.cena-solo-legenda figcaption { font-weight: 600; color: var(--cs-texto, #eef5ea); margin-bottom: 6px; }
+.cena-solo-legenda ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 4px 16px; }
+.cena-solo-legenda li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; min-width: 0; }
+.cena-solo-legenda__atributo { color: var(--cs-texto, #eef5ea); font-weight: 600; white-space: nowrap; }
+.cena-solo-legenda [data-cena-estado-texto] { min-width: 0; }
+/* Ícone com a MESMA forma do ponto na cena: anel, círculo, check, losango */
+.cena-solo-legenda__icone { flex: none; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--cs-suave, #a3b6a5); transform: translateY(1px); }
+.cena-solo-legenda li[data-estado="limitante"] .cena-solo-legenda__icone { background: var(--cs-limitante); border-color: var(--cs-limitante); }
+.cena-solo-legenda li[data-estado="corrigido"] .cena-solo-legenda__icone { background: var(--cs-acento, #8ce23f); border-color: var(--cs-acento, #8ce23f); }
+.cena-solo-legenda li[data-estado="ausente"] .cena-solo-legenda__icone { border-style: dashed; opacity: 0.7; }
+.cena-solo-legenda li[data-estado="ausente"] .cena-solo-legenda__atributo { font-weight: 500; }
+.cena-solo-legenda li[data-estado="permanente"] .cena-solo-legenda__icone { border-radius: 1px; transform: translateY(1px) rotate(45deg) scale(0.85); background: var(--cs-permanente); border-color: var(--cs-permanente); }
+
+/* Por que é permanente: texto vindo do servidor, visível só nesse estado */
+.cena-solo-legenda [data-cena-justificativa] { display: none; flex-basis: 100%; padding-left: 18px; font-size: 0.8rem; }
+.cena-solo-legenda li[data-estado="permanente"] [data-cena-justificativa]:not(:empty) { display: block; }
+
+/* Nota de que a planta é genérica (tela de espera) */
+.cena-solo-cultura { margin: 0; font-size: 0.85rem; color: var(--cs-suave, #a3b6a5); }
+.cena-solo-cultura strong { color: var(--cs-texto, #eef5ea); }
+
+/* Variante painel: no formulário a cena fica AO LADO dos campos, nunca atrás */
+.cena-solo.cena-solo--painel { position: relative; inset: auto; z-index: 0; height: 320px; }
+.cena-solo--painel .cena-solo__fallback { position: static; display: block; width: 100%; max-width: 300px; margin: 0 auto; }
+
+/* No tema claro os sinais ja vem recalibrados pelos tokens --sig-*, que o
+   :root[data-tema="claro"] de siras-telas.css redefine. Nao ha o que repetir aqui:
+   era exatamente a duplicacao que fazia o laudo ter duas aparencias (ADR 0011). */
+
+/* ---------- Celular: a cena sai de trás do texto e ganha espaço próprio ---------- */
+@media (max-width: 720px) {
+  .cena-solo { position: relative; inset: auto; z-index: 0; height: 340px; }
+  .cena-solo__fallback { position: static; display: block; width: 100%; max-width: 340px; margin: 0 auto; }
+}
+
+/* Movimento reduzido: nada de transição nos controles */
+@media (prefers-reduced-motion: reduce) {
+  .cena-solo-controles button { transition: none; }
+}
+
+/* Impressão: a cena e seus controles nunca vão para o papel */
+@media print {
+  .cena-solo, .cena-solo-controles, .cena-solo-legenda { display: none !important; }
+}

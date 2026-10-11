@@ -12,6 +12,10 @@
    fatos do próprio sistema (escopo, trilha, offline, gratuito) e os números que a própria
    pessoa digita (área e preços, na calculadora de custo do laudo). #}
 
+{# Cabeçalho da cena 3D (ADR 0012). Só esta página, a de dados e a de espera o
+   preenchem; o laudo deixa o bloco vazio e sai byte a byte igual. #}
+{% block cabecalho_cena %}{% include "_parciais/cena_solo_cabecalho.html" %}{% endblock %}
+
 {% block barra_nav %}
 <a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">Fazer minha análise</a>
 {% endblock %}
@@ -20,7 +24,7 @@
 <main class="inicio">
 
   {# ——— 1. A promessa ——— #}
-  <section class="hero">
+  <section class="hero" data-cena-escopo>
     {# O único halo do projeto. Não se repete em outra tela: gradiente decorativo
        espalhado por todas as seções é o que faz uma página parecer template. #}
     <div class="hero__halo" aria-hidden="true"></div>
@@ -30,6 +34,10 @@
           {{ i.ico("confere", "ico ico--sm") }}
           Gratuito · Manual de Calagem e Adubação RS/SC · 2016
         </span>
+        {# O que o sistema É, dito antes do que ele faz. A referência põe um rótulo
+           equivalente no alto do hero, e aqui há o que declarar: é TCC, roda local,
+           e é apoio à decisão. Estava só no rodapé do laudo. #}
+        <p class="hero__natureza">{{ selo_de_natureza }}</p>
         <h1 class="t-hero hero__promessa">Calcário e adubo na dose que o seu solo pede. <em>Nem a mais, nem a menos.</em></h1>
         <p class="t-corpo hero__texto">
           Informe a análise de solo e a cultura. O SIRAS diz quanto calcário e quanto
@@ -101,10 +109,15 @@
         </div>
       </div>
     </div>
+
+    {# A cena 3D do perfil de solo fica DEPOIS do conteudo da hero, e atras dele
+       pelo z-index. Sem JavaScript ou sem WebGL so a imagem estatica aparece, e a
+       pagina continua inteira e navegavel (ADR 0012). #}
+    {% include "_parciais/cena_solo_hero.html" %}
   </section>
 
   {# ——— 2. O problema ——— #}
-  <section class="faixa faixa--alt" aria-labelledby="titulo-problema">
+  <section class="faixa faixa--alt" data-revelar aria-labelledby="titulo-problema">
     <div class="env">
       <div class="cab-secao">
         <span class="sobretitulo">O problema</span>
@@ -136,7 +149,7 @@
   </section>
 
   {# ——— 3. Antes e depois ——— #}
-  <section class="faixa" aria-labelledby="titulo-comparativo">
+  <section class="faixa" data-revelar aria-labelledby="titulo-comparativo">
     <div class="env">
       <div class="cab-secao">
         <span class="sobretitulo">A diferença</span>
@@ -191,7 +204,7 @@
   </section>
 
   {# ——— 4. Como funciona ——— #}
-  <section class="faixa faixa--alt" aria-labelledby="titulo-como">
+  <section class="faixa faixa--alt" data-revelar aria-labelledby="titulo-como">
     <div class="env">
       <div class="cab-secao">
         <span class="sobretitulo">Como funciona</span>
@@ -223,7 +236,7 @@
   </section>
 
   {# ——— 5. Para quem ——— #}
-  <section class="faixa" aria-labelledby="titulo-publico">
+  <section class="faixa" data-revelar aria-labelledby="titulo-publico">
     <div class="env">
       <div class="cab-secao">
         <span class="sobretitulo">Para quem</span>
@@ -265,7 +278,7 @@
   {# ——— 6. O laudo ———
      A prévia é a ESTRUTURA do documento, com barras no lugar dos valores: mostrar doses
      aqui seria número agronômico de vitrine. Quem quiser valores reais abre o exemplo. #}
-  <section class="faixa faixa--alt" aria-labelledby="titulo-laudo">
+  <section class="faixa faixa--alt" data-revelar aria-labelledby="titulo-laudo">
     <div class="env vitrine">
       <div>
         <span class="sobretitulo">O resultado</span>
@@ -324,7 +337,7 @@
   </section>
 
   {# ——— 7. Confiança ——— #}
-  <section class="faixa" aria-labelledby="titulo-confianca">
+  <section class="faixa" data-revelar aria-labelledby="titulo-confianca">
     <div class="env">
       <div class="cab-secao">
         <span class="sobretitulo">Por que confiar</span>
@@ -358,7 +371,37 @@
   </section>
 
   {# ——— 8. Perguntas ——— #}
-  <section class="faixa faixa--alt" aria-labelledby="titulo-perguntas">
+  {# ——— Em que pé está o trabalho ———
+     Ideia tirada da seção de status da referência de design. Para uma banca, é o
+     que transforma "um sistema" em "um trabalho com método": mostra o percurso, e
+     não só o produto.
+
+     As etapas vêm de siras/dominio/estado.py, e não escritas aqui: no template elas
+     divergiriam do roadmap na primeira semana. Um teste confere que as duas fontes
+     dizem a mesma coisa. #}
+  <section class="faixa" data-revelar aria-labelledby="titulo-estado">
+    <div class="env">
+      <h2 class="t-tela" id="titulo-estado">Em que pé está o trabalho.</h2>
+      <p class="t-corpo faixa__intro">
+        O SIRAS é um Trabalho de Conclusão de Curso em desenvolvimento. O que está
+        pronto já funciona e está testado; o que falta está declarado aqui.
+      </p>
+      <ol class="estado">
+        {% for etapa in etapas_do_projeto %}
+        {% set rotulo, icone = rotulo_da_situacao[etapa.situacao] %}
+        <li class="estado__item estado__item--{{ etapa.situacao }}">
+          <span class="estado__selo">
+            {{ i.ico(icone, "ico ico--sm") }} {{ rotulo }}
+          </span>
+          <h3 class="estado__nome">{{ etapa.nome }}</h3>
+          <p class="t-aux">{{ etapa.descricao }}</p>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </section>
+
+  <section class="faixa faixa--alt" data-revelar aria-labelledby="titulo-perguntas">
     <div class="env perguntas">
       <div class="cab-secao">
         <span class="sobretitulo">Dúvidas</span>
@@ -399,7 +442,7 @@
   </section>
 
   {# ——— 9. Chamada final ——— #}
-  <section class="faixa chamada">
+  <section class="faixa chamada" data-revelar>
     <div class="env chamada__int">
       <h2 class="t-tela">Sua próxima compra de calcário e adubo começa pela análise de solo</h2>
       <p class="t-corpo">Escolha a cultura, digite o laudo do laboratório e saiba o que aplicar —

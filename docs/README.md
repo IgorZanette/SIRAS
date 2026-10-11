@@ -66,6 +66,7 @@ nenhum dos dois.
 |---|---|
 | [`roadmap.md`](processo/roadmap.md) | Estado de cada etapa, pendências e plano de finalização |
 | [`fluxo-de-trabalho.md`](processo/fluxo-de-trabalho.md) | Convenções de git e como pedir tarefas ao Claude Code |
+| [`plano-frontend-v2.md`](processo/plano-frontend-v2.md) | Reformulação da interface e a cena 3D — o que fazer depois da coleta de usabilidade, e por que não antes |
 
 ## Decisões de arquitetura
 

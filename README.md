@@ -104,7 +104,16 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
   gabaritados à mão pelo autor, em classe, fator determinante e grau de cada fator.
 - **Aplicação web** — as três telas, leitura ao vivo da interpretação enquanto se digita, vários
   talhões num laudo, versão impressa em A4, temas claro e escuro, e calculadora que compara
-  fórmulas NPK com os preços que o usuário informar.
+  fórmulas NPK com os preços que o usuário informar. Dez exemplos de preenchimento cobrem os seis
+  grupos de cultura e chegam com **todos** os campos preenchidos, inclusive os opcionais: dá para
+  gerar um laudo sem digitar nada.
+- **Laudo reorganizado** ([ADR 0011](docs/decisoes/0011-laudo-reorganizado-essencial-e-anexo.md)) —
+  o essencial por talhão, um quadro que põe as áreas lado a lado e os complementos uma vez por
+  documento. Um laudo de seis talhões saía em 27 folhas A4; o texto caiu 53%. O documento é sempre
+  claro, nos dois temas da aplicação, porque é papel branco em qualquer um deles.
+- **Tabelas do Manual** — sete tabelas transcritas, consultáveis na interface, incluindo o pH de
+  referência (Tab. 5.1, com o aviso de que não é ela que dispara a calagem) e os grupos de
+  exigência de P e K das 141 culturas do Anexo 2.
 - **Indicação de formulação** — o laudo diz qual adubo formulado comprar e em que dose, pelo
   **método do próprio Manual** (§8.3, p. 311): a dose se ancora no nutriente mais deficiente no
   solo, o que falta do outro vira complemento com fertilizante simples e o N restante vai para
@@ -112,9 +121,19 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
   as duas procedências ([ADR 0008](docs/decisoes/0008-escolha-de-formula-pelo-metodo-do-manual.md)).
 - **Validação** — `scripts/gera_tabela_concordancia.py` produz a tabela de concordância com IC 95%
   de Wilson, a partir de `siras/validacao/concordancia.py`, que a suíte também exercita. Medido em
-  10/10/2026: recomendação **15/15 = 100%** (IC [79,6%; 100,0%]) e aptidão **88/88 = 100%**
-  (IC [95,8%; 100,0%]).
-- **Suíte** — 5167 testes passando (camada completa, 4 min 50 s).
+  11/10/2026: recomendação **25/25 = 100%** (IC [86,7%; 100,0%]) e aptidão **88/88 = 100%**
+  (IC [95,8%; 100,0%]). O limite inferior do intervalo passou os 80% que a H₁.₁ declara — a
+  hipótese se sustenta pelo critério declarado, e a pendência de tamanho de amostra está fechada.
+
+  Dos 10 casos acrescentados em 11/10, **dois reprovaram o motor** e geraram a
+  [ADR 0010](docs/decisoes/0010-adicional-de-n-por-rendimento-e-reposicao-em-muito-alto.md): a dose
+  de nitrogênio não reagia à expectativa de rendimento, e a classe *Muito alto* em 2º cultivo
+  aplicava manutenção onde o Manual prevê reposição. Os dois defeitos atravessaram a suíte inteira
+  sem falhar, porque nenhum teste pedia a combinação de entradas que os revela — é o achado mais
+  forte da seção de Resultados.
+- **Suíte** — **5306** testes passando na camada completa, **2594** na rápida, nenhum pulado.
+  A contagem não inclui `SIRAS-3D-kit-v4/` nem `_local/`: o primeiro é material de preparo com
+  testes próprios, o segundo não está no repositório.
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
 avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em
@@ -123,12 +142,23 @@ e questionário pós-teste estruturado pelas dez heurísticas de Nielsen, em lug
 na proposta.
 
 **Pendente de terceiros:** recrutamento dos participantes da avaliação de usabilidade e a busca na
-literatura pedida pelo orientador (P4 e P8 no roadmap). Pendente do autor: **ao menos um caso de
-recomendação a mais** (P9) — com 15 casos o limite inferior do IC fica em 79,6%, abaixo dos 80% que
-a H1.1 declara; com 16 passa a 80,6%.
+literatura pedida pelo orientador (P4 e P8 no roadmap). Pendente do autor: conferir a paginação do
+laudo impresso num navegador, que é a última condição para o congelamento.
 
 **A implementação encerra em 12/10/2026**, por definição do orientador. Daí em diante, só testes com
 usuários e redação do artigo ([`docs/artigo_final/`](docs/artigo_final/)).
+
+## Próximo ciclo: interface
+
+Depois da coleta de usabilidade há um plano de reformulação do frontend em
+[`docs/processo/plano-frontend-v2.md`](docs/processo/plano-frontend-v2.md): acabamento da interface
+atual, seção de status do projeto, fluidez entre as telas e a cena 3D do perfil de solo do
+`SIRAS-3D-kit-v4/`.
+
+**Nada disso entra antes do congelamento.** A coleta roda sobre `congelamento-v1`, e mexer na
+interface no meio dela faria os participantes avaliarem sistemas diferentes. O plano registra
+também que a lista priorizada de correções que sair das dez heurísticas é um dado melhor sobre o
+que melhorar do que o próprio plano.
 
 ## Ferramentas de desenvolvimento
 

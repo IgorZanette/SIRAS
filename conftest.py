@@ -29,6 +29,18 @@ motivo real.
 
 import pytest
 
+#: Pastas da raiz que NAO sao do sistema e nao entram na suite.
+#:
+#: `SIRAS-3D-kit-v4/` e material de preparo: um kit de integracao que espelha os caminhos
+#: do repositorio e traz 40 testes proprios. Enquanto ele nao for integrado, esses testes
+#: nao medem o SIRAS — medem o kit —, e deixa-los na coleta inflava a contagem publicada
+#: no README com testes de codigo que o sistema nao executa. Rode-os de dentro do kit:
+#:
+#:     cd SIRAS-3D-kit-v4/SIRAS-3D-kit-v4 && python -m pytest testes/unidade
+#:
+#: `_local/` e `.venv/` seguem o mesmo princípio e ja estavam fora pelo .gitignore.
+collect_ignore_glob = ["SIRAS-3D-kit*", "_local*", ".venv*"]
+
 
 def pytest_addoption(parser):
     parser.addoption(

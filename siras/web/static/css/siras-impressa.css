@@ -226,51 +226,17 @@
 :root body.impressa .btn--contorno { background: #FFFFFF; color: #000000; border-color: #000000; }
 :root body.impressa .btn--primario { background: #000000; color: #FFFFFF; border-color: #000000; }
 
-/* --- Densidade: o mesmo documento em menos folhas -----------------------
-   Medido em 11/10/2026: o laudo de um talhao saia em 5 folhas A4 e o de seis em
-   27. Parte disso era repeticao, e foi resolvida reorganizando o documento (ver
-   _parciais/laudo_anexo.html). O resto e espaco: um documento desenhado para a
-   tela, com respiro de aplicacao, levado ao papel sem ajuste nenhum.
+/* --- Densidade e paginacao: NAO moram aqui ------------------------------
+   Escala, espacamento e quebra de pagina do laudo estao na @media print de
+   siras-telas.css, que e carregada nas DUAS versoes. Esta folha so acrescenta a
+   conversao para preto e branco.
 
-   NENHUMA destas regras esconde conteudo. Elas mexem em escala, espacamento e
-   numero de colunas, e valem SO nesta folha: a tela continua com o respiro que
-   tem hoje, porque la a rolagem e de graca e a folha nao e.
+   A separacao custou uma rodada: as regras nasceram aqui e nao valiam para o
+   "Salvar em PDF", que imprime o laudo em cores sem carregar este arquivo. Um
+   laudo de seis talhoes saia em 18 folhas com o quadro comparativo cortado.
 
-   A ordem dentro do arquivo importa: estas regras vem depois das de cor para
-   nao precisarem competir por especificidade com elas. */
-
-:root body.impressa .doc__corpo { padding: var(--e-5); }
-:root body.impressa .sec { margin-top: var(--e-5); }
-:root body.impressa .sec__cab { margin-bottom: var(--e-3); }
-:root body.impressa .sec__cab h3 { font-size: var(--fs-md); }
-:root body.impressa .sec__intro { margin-bottom: var(--e-3); }
-
-/* As quatro doses em duas colunas: em quatro, cada cartao fica estreito demais e
-   o numero quebra em duas linhas, o que custa mais altura do que economiza. */
-:root body.impressa .veredito { gap: var(--e-3); }
-:root body.impressa .dose { padding: var(--e-3); }
-
-/* Os dois cenarios de aptidao lado a lado tambem no papel. A consulta de 720px
-   da folha de tela os empilhava aqui, porque a largura util de uma A4 retrato
-   cabe dentro dela - era meia pagina a mais por talhao. */
-:root body.impressa .cenarios { grid-template-columns: 1fr auto 1fr; gap: var(--e-4); }
-:root body.impressa .cenarios__seta { transform: none; }
-:root body.impressa .aptidao__leitura { margin-top: var(--e-4); max-width: none; }
-
-/* Nada de cartao, tabela ou cabecalho de talhao partido entre duas folhas: meia
-   regua numa pagina e meia na outra nao se le. */
-:root body.impressa .dose,
-:root body.impressa .limitante,
-:root body.impressa .cenario,
-:root body.impressa .detalhe-adubo__item,
-:root body.impressa .trilha__passo,
-:root body.impressa .tabela-doc tr { break-inside: avoid; }
-:root body.impressa .talhao { break-after: avoid; }
-:root body.impressa .sec__cab { break-after: avoid; }
-
-/* O anexo abre em folha propria: a primeira parte fecha como laudo entregavel, e
-   quem so quer a recomendacao nao precisa do resto. Decisao do autor, 11/10/2026. */
-:root body.impressa .anexo { break-before: page; }
+   O unico ajuste de layout que sobra aqui e o dos dois cenarios de aptidao, que
+   esta mais abaixo e existe porque esta folha tem largura de coluna propria. */
 
 /* --- Impressao propriamente dita ---------------------------------------- */
 @media print {

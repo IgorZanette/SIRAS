@@ -1352,19 +1352,71 @@ def test_a_trilha_de_seis_talhoes_nao_e_seis_trilhas(cliente):
     )
 
 
-def test_o_anexo_abre_em_folha_propria_na_versao_impressa():
-    """Decisão do autor em 11/10/2026: a primeira parte fecha sozinha como laudo
-    entregável, e quem só quer a recomendação não precisa do resto."""
-    impressa = (_ESTATICOS / "css" / "siras-impressa.css").read_text(encoding="utf-8")
+def _bloco_de_impressao() -> str:
+    """O @media print de siras-telas.css — a folha carregada nas DUAS versões.
 
-    assert re.search(r"\.anexo \{[^}]*break-before:\s*page", impressa)
+    É aqui que a paginação do laudo tem de morar, e não em siras-impressa.css: esta
+    última só é carregada em /analise/laudo?formato=impressa, enquanto o botão
+    "Salvar em PDF" chama window.print() sobre o laudo EM CORES. Com as regras só
+    lá, um laudo de seis talhões saía em 18 folhas com a tabela cortada.
+    """
+    telas = _TELAS_CSS
+    inicio = telas.index("@media print")
+    nivel, fim = 0, inicio
+    for pos in range(inicio, len(telas)):
+        if telas[pos] == "{":
+            nivel += 1
+        elif telas[pos] == "}":
+            nivel -= 1
+            if nivel == 0:
+                fim = pos
+                break
+    return telas[inicio:fim]
 
 
-def test_o_laudo_impresso_nao_parte_cartao_ao_meio():
+def test_a_paginacao_do_laudo_vale_tambem_para_o_pdf_em_cores():
+    """Regressão de 11/10/2026, encontrada num PDF real de seis talhões: as regras
+    de quebra e densidade estavam numa folha que o "Salvar em PDF" não carrega."""
+    bloco = _bloco_de_impressao()
+
+    assert re.search(r"\.anexo \{[^}]*break-before:\s*page", bloco), (
+        "o anexo não abre em folha própria no PDF em cores"
+    )
+    assert re.search(r"\.tabela-doc thead \{[^}]*table-header-group", bloco), (
+        "o cabeçalho da tabela não se repete depois da quebra"
+    )
+
+
+def test_a_rolagem_lateral_nao_corta_a_tabela_no_papel():
+    """Um container com overflow:auto não rola numa folha: ele CORTA. Era o que
+    acontecia com o quadro comparativo — as colunas da direita sumiam na borda da
+    A4, com a barra de rolagem impressa junto."""
+    assert re.search(r"\.tabela-rolagem \{[^}]*overflow:\s*visible", _bloco_de_impressao())
+
+
+def test_o_laudo_impresso_nao_parte_bloco_ao_meio():
     """Meia régua numa página e meia na outra não se lê."""
-    impressa = (_ESTATICOS / "css" / "siras-impressa.css").read_text(encoding="utf-8")
-    regra = re.search(r"((?:[^{}]*\.dose,)[^{]*)\{[^}]*break-inside:\s*avoid", impressa)
+    bloco = _bloco_de_impressao()
+    com_avoid = " ".join(
+        m.group(1) for m in re.finditer(r"([^{}]+)\{[^}]*break-inside:\s*avoid", bloco)
+    )
 
-    assert regra, "nenhuma regra de break-inside na folha impressa"
-    for seletor in (".dose", ".cenario", ".trilha__passo", ".tabela-doc tr"):
-        assert seletor in regra.group(1), f"{seletor} pode ser partido entre folhas"
+    for seletor in (".dose", ".cenarios", ".trilha__passo", ".tabela-doc tr",
+                    ".detalhe-adubo__item", ".orientacao"):
+        assert seletor in com_avoid, f"{seletor} pode ser partido entre folhas"
+
+
+def test_o_documento_nao_muda_de_tom_entre_os_temas():
+    """O laudo é papel branco nos dois temas, e vai impresso ou em PDF. Herdava do
+    tema os sinais e, com eles, a rampa diagnóstica inteira: o selo "Aptidão
+    restrita" saía em #FF9F3D no escuro e #D96D00 no claro — o mesmo laudo, dois
+    documentos diferentes, e só um deles medido contra o branco."""
+    tema = (_ESTATICOS / "css" / "siras-theme.css").read_text(encoding="utf-8")
+    abertura = tema.index("\n.doc {")
+    regra = tema[abertura:tema.index("\n}", abertura)]
+
+    for token in ("--sig-coral", "--sig-laranja", "--sig-ambar", "--sig-aqua",
+                  "--d-mb", "--d-b", "--d-m", "--d-a", "--d-ma"):
+        assert token + ":" in regra, (
+            token + " não é fixado em .doc e vem do tema da aplicação"
+        )

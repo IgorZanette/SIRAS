@@ -135,3 +135,66 @@ atacado era a repetição, e ela crescia linearmente.
   seria fingir uma certeza que o mercado não tem. Os três continuam, em colunas.
 - **Nenhum passo do Trace foi filtrado.** O `CLAUDE.md` exige que toda decisão do motor
   deixe rastro, e a exigência continua cumprida.
+
+## Adendo de 11/10/2026 — o que um PDF real mostrou
+
+O autor imprimiu dois laudos e o resultado contradisse a estimativa: **cebola em 4 folhas,
+milho de seis talhões em 18**. A inspeção dos PDFs encontrou quatro defeitos, três deles
+na mesma causa.
+
+### A causa: as regras estavam na folha errada
+
+`siras-impressa.css` só é carregado em `/analise/laudo?formato=impressa`. O botão
+**"Salvar em PDF" chama `window.print()` sobre o laudo EM CORES** — que é o caminho que
+quase todo mundo usa, e o que o autor usou. Ali nenhuma das regras de densidade e quebra
+valia.
+
+Elas foram para o `@media print` de `siras-telas.css`, carregado nas **duas** versões.
+`siras-impressa.css` fica só com o que é exclusivo dela, a conversão para preto e branco.
+É uma fronteira melhor do que a anterior, e o comentário no topo de cada arquivo a declara.
+
+### D11.6 — Rolagem lateral não existe no papel
+
+`.tabela-rolagem` usa `overflow-x: auto`, que em tela rola e **no papel corta**. O quadro
+comparativo saía com as colunas "Classe P", "Classe K" e "Aptidão" decepadas na borda
+direita da A4, com a barra de rolagem impressa junto. No papel o container passa a
+`overflow: visible`.
+
+Junto, a causa de a tabela exceder a folha: `white-space: nowrap` no cabeçalho, com
+títulos de cartão longos ("Nitrogênio (N)", "Fósforo (P₂O₅)") usados como cabeçalho de
+nove colunas. O quadro passou a usar as siglas do Manual — N, P₂O₅, K₂O — e o cabeçalho
+pode quebrar em duas linhas.
+
+### D11.7 — O documento não muda de tom entre os temas
+
+O `.doc` já redefinia a escala de neutros, mas herdava do tema os quatro sinais
+(`--sig-*`) e, com eles, a **rampa diagnóstica inteira**: `--d-mb` a `--d-ma` derivam
+deles. O selo "Aptidão restrita" saía em `#FF9F3D` no tema escuro e `#D96D00` no claro —
+o mesmo laudo, dois documentos, e só um deles medido contra o branco em
+`scripts/conferir_contraste.py`.
+
+O laudo é papel branco em qualquer tema e vai impresso. `.doc` passa a fixar os sinais, a
+rampa e as bordas nos valores do tema **claro**, que são os calibrados contra fundo
+branco. Não há mais o que manter em sincronia entre os dois temas.
+
+### D11.8 — Blocos partidos e cabeçalho que não volta
+
+Os selos de aptidão ficavam no pé de uma folha e as notas que os explicam na seguinte,
+órfãs do que descreviam. A matriz de talhões atravessava a quebra sem repetir o cabeçalho,
+e metade dela não dizia de qual talhão era cada coluna. A legenda da tabela, em
+`caption-side: bottom`, era renderizada partida e saía como meia linha de letras soltas.
+
+Resolvidos por `break-inside: avoid` em `.cenarios`, `.veredito`, `.talhao`,
+`.detalhe-adubo__item`, `.orientacao` e nas linhas de tabela; `display: table-header-group`
+no `thead`; e a legenda movida para o topo no papel.
+
+### D11.9 — A matriz dizia "limitação" 42 vezes
+
+Cada célula da matriz de aptidão trazia "limitação moderada", "limitação nula". A palavra
+não distinguia uma célula de outra, e a linha já se chama "Acidez". Ficou só o grau.
+
+### O que ainda depende de conferência
+
+A contagem de folhas **não foi medida por este trabalho**: a estimativa em caracteres não
+enxerga altura, e o autor é quem tem o navegador. As quatro correções acima atacam
+exatamente o que os PDFs mostraram, mas o número final precisa sair de um Ctrl+P.

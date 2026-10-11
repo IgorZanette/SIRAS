@@ -202,6 +202,19 @@ svg { display: block; }
 
    --n-000 e redeclarado localmente pelo mesmo motivo: dentro de um papel branco,
    maior contraste e escuro -- nos dois temas. */
+/* O DOCUMENTO E SEMPRE CLARO, nos dois temas da aplicacao.
+
+   Ele ja redefinia a escala de neutros localmente, mas herdava do tema os sinais
+   (--sig-*) e, com eles, a rampa diagnostica inteira: --d-mb a --d-ma derivam dos
+   quatro sinais. No tema escuro o selo "Aptidao restrita" saia em #FF9F3D e no
+   claro em #D96D00 -- o mesmo laudo, dois documentos diferentes, e so um deles
+   medido contra o branco em scripts/conferir_contraste.py.
+
+   O laudo e papel branco em qualquer tema, e vai impresso ou em PDF: nao ha
+   motivo para ele ter duas aparencias. Os valores abaixo sao os do tema CLARO,
+   que sao os que foram calibrados contra fundo branco. Fixa-los aqui torna o
+   documento independente do tema, e nao ha mais o que manter em sincronia entre
+   os dois. Decisao do autor em 11/10/2026. */
 .doc {
   background: #FFFFFF;
   color: #0D1410;
@@ -209,6 +222,25 @@ svg { display: block; }
   box-shadow: var(--sombra-doc);
   --n-000: #0D1410;
   --n-100: #0D1410; --n-300: #405146; --n-400: #5C6F64; --n-500: #7A8C82;
+  --n-600: #AEBFB4; --n-700: #D3DED7;
+
+  /* Sinais na calibracao do tema claro: mesma matiz e saturacao, luminosidade
+     menor, todos acima de 3:1 sobre branco. */
+  --sig-coral: #FF451C;
+  --sig-laranja: #D96D00;
+  --sig-ambar: #B28100;
+  --sig-aqua: #179B8A;
+
+  /* A rampa diagnostica acompanha, porque deriva dos sinais. O "Alto" nao usa
+     --v-400 (1,5:1 sobre branco, invisivel): usa o verde legivel. */
+  --d-mb: var(--sig-coral);
+  --d-b:  var(--sig-laranja);
+  --d-m:  var(--sig-ambar);
+  --d-a:  #4E9A2A;
+  --d-ma: var(--sig-aqua);
+
+  --borda: 1px solid rgba(13, 20, 16, .09);
+  --borda-forte: 1px solid rgba(13, 20, 16, .18);
 }
 
 /* Malha de fundo: retícula de 40px, quase invisível, que dá ao fundo escuro a

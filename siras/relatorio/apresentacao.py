@@ -463,7 +463,9 @@ def _resumo_do_passo(passo: Any) -> str:
     """
     saida = passo.saida or {}
     if "rotulo" in saida and "grau" in saida:          # fator de aptidão
-        return f"limitação {_ROTULO_POR_GRAU.get(saida['rotulo'], saida['rotulo']).lower()}"
+        # Só o grau. A palavra "limitação" repetia-se 42 vezes na matriz de seis
+        # talhões sem distinguir uma célula de outra, e a linha já se chama "Acidez".
+        return _ROTULO_POR_GRAU.get(saida["rotulo"], saida["rotulo"])
     if "classe" in saida and "fator_determinante" in saida:   # composição da aptidão
         fator = _NOME_POR_FATOR.get(saida["fator_determinante"], saida["fator_determinante"])
         return f"{_ROTULO_POR_CLASSE_APTIDAO.get(saida['classe'], saida['classe'])} (por {fator})"
@@ -1075,10 +1077,25 @@ def quadro_de_talhoes(blocos: Sequence[Dict[str, Any]]) -> Optional[Dict[str, An
         })
 
     return {
-        "colunas": [item["nome"] for item in blocos[0]["laudo"]["veredito"]],
+        # Rótulo CURTO, e não o do cartão de dose. "Nitrogênio (N)" e "Fósforo
+        # (P2O5)" são títulos de cartão, onde há largura de sobra; como cabeçalho
+        # de nove colunas numa A4 eles empurravam a tabela para fora da folha e as
+        # três últimas colunas saíam cortadas. A unidade vai na linha de baixo.
+        "colunas": [_SIGLA_DA_GRANDEZA.get(item["nome"], item["nome"])
+                    for item in blocos[0]["laudo"]["veredito"]],
         "unidades": [item["unidade"] for item in blocos[0]["laudo"]["veredito"]],
         "linhas": linhas,
     }
+
+
+#: Nome de cartão -> sigla de cabeçalho de tabela. A sigla é a que o próprio Manual
+#: usa, e o cartão logo abaixo traz o nome por extenso.
+_SIGLA_DA_GRANDEZA = {
+    "Calcário": "Calcário",
+    "Nitrogênio (N)": "N",
+    "Fósforo (P<sub>2</sub>O<sub>5</sub>)": "P<sub>2</sub>O<sub>5</sub>",
+    "Potássio (K<sub>2</sub>O)": "K<sub>2</sub>O",
+}
 
 
 def _classe_do_teor(laudo: Dict[str, Any], nutriente: str) -> str:

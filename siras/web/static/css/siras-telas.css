@@ -440,6 +440,70 @@
 
   /* O laudo e entregue, nao navegado: endereco de link nao interessa em papel. */
   a[href]::after { content: none; }
+
+  /* ----------------------------------------------------------------------
+     PAGINACAO DO LAUDO (11/10/2026)
+
+     Estas regras moram AQUI, e nao em siras-impressa.css, por um motivo que
+     custou uma rodada inteira de ajuste: siras-impressa.css so e carregado em
+     /analise/laudo?formato=impressa. O botao "Salvar em PDF" chama
+     window.print() sobre o laudo EM CORES, que e o caminho que quase todo mundo
+     usa -- e ali nenhuma daquelas regras valia. Um laudo de seis talhoes saia em
+     18 folhas com a tabela cortada ao meio.
+
+     Densidade e quebra pertencem a @media print de siras-telas.css, que vale
+     para as duas versoes. siras-impressa.css fica com o que e exclusivo dela: a
+     conversao para preto e branco.
+     ------------------------------------------------------------------- */
+
+  /* A ROLAGEM LATERAL NAO EXISTE NO PAPEL. Um container com overflow:auto nao
+     rola numa folha: ele CORTA. Era o que acontecia com o quadro comparativo --
+     as colunas "Classe P", "Classe K" e "Aptidao" simplesmente sumiam na borda
+     direita da A4, com a barra de rolagem impressa junto. */
+  .tabela-rolagem { overflow: visible !important; }
+  .tabela-doc { font-size: 8.5pt; }
+  .tabela-doc th, .tabela-doc td { padding: 3pt 4pt; }
+  .tabela-doc thead th, .tabela-doc tbody th { white-space: normal; }
+  .tabela-doc__evidencia, .tabela-doc--trilha td { font-size: 7.5pt; }
+
+  /* Cabecalho de tabela que atravessa a quebra volta a aparecer na folha
+     seguinte: sem isto, metade da matriz de talhoes fica sem dizer de qual
+     talhao e cada coluna. */
+  .tabela-doc thead { display: table-header-group; }
+  .tabela-doc tr { break-inside: avoid; }
+  /* A legenda ao pe da tabela era renderizada partida na quebra de pagina, e o
+     que saia impresso era meia linha de letras soltas. */
+  .tabela-doc caption { break-inside: avoid; caption-side: top; margin: 0 0 3pt; }
+
+  /* Os dois cenarios de aptidao e a frase que os explica sao uma peca so: os
+     selos ficavam no pe de uma folha e as notas "Sobre os valores do laudo" na
+     seguinte, orfas do que descreviam. */
+  .cenarios { break-inside: avoid; }
+  .cenarios + .aptidao__leitura { break-before: avoid; }
+  .talhao { break-inside: avoid; break-after: avoid; }
+  .veredito { break-inside: avoid; }
+  .detalhe-adubo__item, .orientacao, .total { break-inside: avoid; }
+
+  /* O anexo abre em folha propria: a primeira parte fecha como laudo
+     entregavel. Decisao do autor em 11/10/2026 (ADR 0011). */
+  .anexo { break-before: page; }
+
+  /* Densidade. Nada aqui esconde conteudo -- sao escala e espacamento, e valem
+     so no papel: em tela a rolagem e de graca, a folha nao e. */
+  .sec { margin-top: var(--e-5); }
+  .sec__cab { margin-bottom: var(--e-3); padding-bottom: 2pt; }
+  .sec__intro { margin-bottom: var(--e-3); }
+  .veredito { gap: var(--e-3); }
+  .dose { padding: var(--e-3); }
+  .orientacao { padding: var(--e-3); }
+  .orientacoes { gap: var(--e-2); }
+  .detalhe-adubo { gap: var(--e-2); }
+  .detalhe-adubo__item { padding: var(--e-2) var(--e-3); }
+  .limitantes { gap: 0; }
+  .aptidao__leitura { margin-top: var(--e-3); max-width: none; }
+  .aptidao__titulo { margin-top: var(--e-3); }
+  .trilha__passo { padding: 1.5pt 0; }
+  .anexo { margin-top: var(--e-5); padding-top: var(--e-4); }
 }
 
 /* =========================================================================

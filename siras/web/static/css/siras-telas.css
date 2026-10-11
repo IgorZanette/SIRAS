@@ -484,9 +484,18 @@
   .veredito { break-inside: avoid; }
   .detalhe-adubo__item, .orientacao, .total { break-inside: avoid; }
 
-  /* O anexo abre em folha propria: a primeira parte fecha como laudo
-     entregavel. Decisao do autor em 11/10/2026 (ADR 0011). */
-  .anexo { break-before: page; }
+  /* O ANEXO SEGUE NO FLUXO, sem quebra forcada.
+
+     A decisao inicial do autor foi abrir o anexo em folha propria, para que a
+     primeira parte fechasse como laudo entregavel. O PDF mostrou o preco: num
+     laudo de um talhao o essencial nao enche a folha, e a quebra deixava 60%
+     dela em branco antes de comecar o anexo de supetao na seguinte. O autor
+     reverteu em 11/10/2026, depois de ver o resultado.
+
+     A fronteira nao se perde: o anexo ja e marcado pela regra horizontal e pelo
+     rotulo "ANEXO", que e separacao visual e nao gasta folha. O que ela precisa
+     e nao ficar orfa no pe de uma pagina, e disso cuida o break-after abaixo. */
+  .anexo__cab { break-after: avoid; }
 
   /* Densidade. Nada aqui esconde conteudo -- sao escala e espacamento, e valem
      so no papel: em tela a rolagem e de graca, a folha nao e. */
@@ -1184,8 +1193,17 @@ main { animation: entrar-tela 320ms cubic-bezier(.2,0,.2,1) both; }
 
 @media print {
   /* Cada talhao comeca em pagina propria: no papel, duas recomendacoes coladas
-     na mesma folha sao lidas como uma so. A primeira nao quebra, ou o documento
-     abriria com uma folha em branco. */
+     na mesma folha sao lidas como uma so, e e justamente o que o laudo de varias
+     areas nao pode permitir.
+
+     Esta quebra FICA, ao contrario da do anexo, que foi removida em 11/10/2026.
+     As duas pareciam o mesmo problema e nao sao: o anexo e uma secao a mais do
+     mesmo documento, enquanto cada talhao e uma recomendacao distinta, com doses
+     proprias, e confundir duas delas tem consequencia agronomica. Aqui a folha
+     parcialmente vazia e o preco de uma separacao que precisa ser inequivoca.
+
+     A primeira nao quebra, ou o documento abriria com uma folha em branco. Com
+     um talhao so o cabecalho nem e renderizado, entao nada disto se aplica. */
   .talhao { break-before: page; }
   .talhao:first-child { break-before: avoid; }
   .totais { grid-template-columns: repeat(4, 1fr); }

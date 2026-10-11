@@ -1379,12 +1379,29 @@ def test_a_paginacao_do_laudo_vale_tambem_para_o_pdf_em_cores():
     de quebra e densidade estavam numa folha que o "Salvar em PDF" não carrega."""
     bloco = _bloco_de_impressao()
 
-    assert re.search(r"\.anexo \{[^}]*break-before:\s*page", bloco), (
-        "o anexo não abre em folha própria no PDF em cores"
-    )
     assert re.search(r"\.tabela-doc thead \{[^}]*table-header-group", bloco), (
         "o cabeçalho da tabela não se repete depois da quebra"
     )
+    assert re.search(r"\.tabela-rolagem \{[^}]*overflow:\s*visible", bloco), (
+        "a tabela continua sendo cortada na borda da folha"
+    )
+
+
+def test_o_anexo_segue_no_fluxo_em_vez_de_abrir_folha_nova():
+    """Decisão inicial do autor: anexo em folha própria, para a primeira parte fechar
+    como laudo entregável. O PDF mostrou o preço — num laudo de um talhão o essencial
+    não enche a folha, e a quebra deixava 60% dela em branco antes de o anexo começar
+    de supetão na seguinte. Revertida em 11/10/2026, depois de ver o resultado.
+
+    A fronteira não se perde: a regra horizontal e o rótulo "ANEXO" já a marcam, e são
+    separação visual que não gasta folha."""
+    bloco = _bloco_de_impressao()
+
+    assert not re.search(r"\.anexo \{[^}]*break-before:\s*page", bloco), (
+        "a quebra forçada voltou, e com ela a folha pela metade"
+    )
+    # Mas o rótulo do anexo não pode ficar órfão no pé de uma página.
+    assert re.search(r"\.anexo__cab \{[^}]*break-after:\s*avoid", bloco)
 
 
 def test_a_rolagem_lateral_nao_corta_a_tabela_no_papel():

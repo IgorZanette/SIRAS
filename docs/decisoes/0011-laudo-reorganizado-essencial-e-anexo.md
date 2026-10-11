@@ -62,11 +62,24 @@ exigia folhear o documento passa a ser uma leitura de cima para baixo.
 Os valores saem do `veredito` já formatado, e não de uma releitura do motor: a tabela e
 o cartão de dose nunca podem divergir no arredondamento.
 
-### D11.2 — O anexo abre em folha própria
+### D11.2 — O anexo abre em folha própria ~~(revertida — ver abaixo)~~
 
 Decisão do autor. A primeira parte fecha sozinha como laudo entregável, e quem só quer a
 recomendação não precisa do resto. Custa uma quebra de página e entrega um documento cuja
 primeira folha basta.
+
+> **Revertida em 11/10/2026, depois de ver o PDF.** Num laudo de um talhão o essencial não
+> enche a folha, e a quebra deixava **60% dela em branco** antes de o anexo começar de
+> supetão na seguinte. O anexo voltou ao fluxo contínuo.
+>
+> A fronteira não se perde: a regra horizontal e o rótulo "ANEXO" já a marcam, e são
+> separação visual que não gasta folha. O que o rótulo precisa é não ficar órfão no pé de
+> uma página, e disso cuida `break-after: avoid` no `.anexo__cab`.
+>
+> Vale o registro de como a decisão se desfez, porque é o padrão destas três rodadas: ela
+> era razoável no papel — "a primeira folha basta" continua sendo um bom princípio — e só
+> ficou errada quando houve um PDF para olhar. Nenhuma das três correções de paginação
+> saiu de raciocínio; as três saíram de um documento impresso.
 
 ### D11.3 — A trilha separa regra de valor
 

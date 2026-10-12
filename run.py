@@ -11,6 +11,7 @@ ativação de venv nem `make` — que não vem instalado no Windows.
     py run.py testes       bancada rápida
     py run.py completa     bancada completa
     py run.py validar      confere a base de conhecimento contra os schemas
+    py run.py parar        encerra o servidor (quando o Ctrl+C não chega)
     py run.py limpar       apaga .venv, caches e saídas geradas
 """
 
@@ -49,14 +50,6 @@ def _versao_minima() -> None:
         )
 
 
-def _dentro_da_venv() -> bool:
-    """Estamos rodando com o Python da venv do projeto?"""
-    try:
-        return Path(sys.executable).resolve() == PYTHON_DA_VENV.resolve()
-    except OSError:
-        return False
-
-
 def _venv_sadia() -> bool:
     """A venv existe e está íntegra?
 
@@ -67,6 +60,41 @@ def _venv_sadia() -> bool:
     return PYTHON_DA_VENV.exists() and (VENV / "pyvenv.cfg").exists()
 
 
+def _site_packages() -> Path:
+    """Onde a venv guarda os pacotes instalados."""
+    if os.name == "nt":
+        return VENV / "Lib" / "site-packages"
+    return next((VENV / "lib").glob("python*/site-packages"))
+
+
+def _ativar() -> None:
+    """Usa os pacotes da venv NESTE processo, em vez de reexecutar noutro.
+
+    É a correção do Ctrl+C, e vale explicar porque não é óbvia.
+
+    A versão anterior fazia `os.execv` para `.venv/Scripts/python.exe`. Esse
+    executável não é o interpretador: é o **venvlauncher** do Windows, que lança o
+    Python real como processo FILHO. Medido nesta máquina com um script que só dorme:
+    pelo python do sistema, um processo; pelo da venv, dois. O terminal controla o
+    launcher, e o servidor vive no filho — e um Ctrl+C que não alcança o filho devolve
+    o prompt deixando a página no ar, que foi exatamente o relato.
+
+    Pôr o `site-packages` da venv no `sys.path` resolve pela raiz: um processo só, o
+    mesmo que o terminal controla. O interpretador é o que criou a venv, então a versão
+    e a ABI batem com as rodas instaladas lá.
+
+    `PYTHONPATH` acompanha para os processos filhos legítimos — o pytest das tarefas de
+    teste, que precisa enxergar os mesmos pacotes.
+    """
+    pacotes = str(_site_packages())
+    if pacotes not in sys.path:
+        sys.path.insert(0, pacotes)
+    anterior = os.environ.get("PYTHONPATH", "")
+    if pacotes not in anterior.split(os.pathsep):
+        os.environ["PYTHONPATH"] = pacotes + (os.pathsep + anterior if anterior else "")
+    os.environ["VIRTUAL_ENV"] = str(VENV)
+
+
 def _preparar_ambiente() -> None:
     """Cria a venv e instala o que falta. Idempotente, e refaz o que estiver quebrado."""
     if VENV.exists() and not _venv_sadia():
@@ -74,7 +102,16 @@ def _preparar_ambiente() -> None:
         shutil.rmtree(VENV, ignore_errors=True)
     if not _venv_sadia():
         print(f"[1/2] Criando o ambiente virtual em {VENV.name}/ ...")
-        venv.EnvBuilder(with_pip=True, clear=True).create(VENV)
+        try:
+            venv.EnvBuilder(with_pip=True, clear=True).create(VENV)
+        except OSError as erro:
+            # Acontece de verdade: um servidor esquecido no ar segura o executável da
+            # venv e o `clear` falha no meio. Sem esta mensagem o usuário recebe um
+            # traceback de dentro da biblioteca padrão, que não diz o que fazer.
+            sys.exit(
+                f"Não consegui preparar {VENV.name}/: {erro}\n"
+                "Normalmente é um servidor do SIRAS ainda rodando. Feche-o e tente de novo."
+            )
     else:
         print(f"[1/2] Ambiente virtual já existe em {VENV.name}/")
 
@@ -96,21 +133,6 @@ def _preparar_ambiente() -> None:
     if concluido.returncode != 0:
         sys.exit("Falha ao instalar as dependências. A saída do pip está acima.")
     SELO.write_text(assinatura, encoding="utf-8")
-
-
-def _reexecutar_na_venv(argumentos: list[str]) -> None:
-    """Reexecuta este script com o Python da venv.
-
-    Necessário: um interpretador já em execução não enxerga pacotes instalados depois
-    que ele começou. `execv` substitui o processo, então Ctrl+C chega ao servidor.
-
-    O flush não é zelo: `execv` descarta o buffer de stdout. Com a saída redirecionada
-    — um pipe, um painel de IDE que não é tty — as linhas de progresso da instalação se
-    perdiam, e numa partida fria isso são treze segundos de terminal em branco.
-    """
-    sys.stdout.flush()
-    sys.stderr.flush()
-    os.execv(str(PYTHON_DA_VENV), [str(PYTHON_DA_VENV), str(Path(__file__).resolve()), *argumentos])
 
 
 # --- as tarefas -------------------------------------------------------------
@@ -148,7 +170,8 @@ def servir() -> int:
 
     endereco = f"http://{HOSPEDEIRO}:{PORTA}"
     print(f"\n  SIRAS no ar em {endereco}")
-    print("  Roda local e offline. Ctrl+C encerra.\n")
+    print("  Roda local e offline. Ctrl+C encerra;")
+    print("  se o terminal não encerrar, rode noutra janela:  py run.py parar\n")
 
     # Só no processo que de fato serve: com o reloader ligado, o pai abriria uma aba
     # a cada reinício.
@@ -169,6 +192,53 @@ def servir() -> int:
     except KeyboardInterrupt:
         _encerrar()
     return 0
+
+
+def parar() -> int:
+    """Encerra o servidor sem depender de o terminal entregar o Ctrl+C.
+
+    Existe porque o Ctrl+C nem sempre chega. No Git Bash (MinTTY) o sinal costuma não
+    ser entregue a programas nativos do Windows, e um terminal que herdou "ignorar
+    Ctrl+C" repassa esse estado a tudo que lança. Em nenhum desses casos há correção
+    possível do lado do Python — o processo simplesmente nunca é avisado.
+
+    Então aqui não se pede nada ao processo: acha-se quem está escutando na porta e
+    encerra-se. Funciona em qualquer terminal, e é o que destrava a demonstração.
+    """
+    achados = _quem_escuta(PORTA)
+    if not achados:
+        print(f"  Nada escutando na porta {PORTA}.")
+        return 0
+    for pid in achados:
+        try:
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)],
+                               capture_output=True, check=False)
+            else:
+                os.kill(pid, signal.SIGTERM)
+            print(f"  Encerrado o processo {pid}.")
+        except OSError as erro:
+            print(f"  Não consegui encerrar {pid}: {erro}")
+            return 1
+    return 0
+
+
+def _quem_escuta(porta: int) -> list[int]:
+    """PIDs escutando na porta, por `netstat` — sem dependência externa."""
+    try:
+        saida = subprocess.run(["netstat", "-ano"], capture_output=True, text=True).stdout
+    except OSError:
+        return []
+    pids = []
+    for linha in saida.splitlines():
+        partes = linha.split()
+        if len(partes) >= 5 and partes[0].upper().startswith("TCP") \
+                and partes[1].endswith(f":{porta}") and "LISTEN" in partes[3].upper():
+            try:
+                pids.append(int(partes[-1]))
+            except ValueError:
+                pass
+    return sorted(set(pids))
 
 
 def _pytest(*argumentos: str) -> int:
@@ -232,6 +302,7 @@ TAREFAS = {
     "completa": completa,
     "validar": validar,
     "limpar": limpar, "clean": limpar,
+    "parar": parar, "stop": parar,
 }
 
 
@@ -242,27 +313,16 @@ def main() -> int:
         print(__doc__)
         return 2
 
-    # Nem `ajuda` nem `limpar` precisam da venv — e `limpar` não pode rodar de dentro
-    # da que ela apaga.
+    # `ajuda` e `limpar` não precisam da venv — e `limpar` apaga justamente a pasta
+    # cujos pacotes `_ativar()` colocaria no caminho.
     if tarefa in ("ajuda", "help", "--help", "-h"):
         return ajuda()
-    # `limpar` não roda de dentro da venv que apaga: no Windows o interpretador em
-    # execução trava os próprios arquivos. `sys.base_prefix` dá o Python que criou a
-    # venv — troca sozinho, sem pedir nada ao usuário (o lançador `py` honra
-    # VIRTUAL_ENV, então exigir "o Python do sistema" seria conselho inútil).
     if tarefa in ("limpar", "clean"):
-        if _dentro_da_venv():
-            base = Path(sys.base_prefix) / _BIN / ("python.exe" if os.name == "nt" else "python3")
-            if not base.exists():
-                base = Path(sys.base_prefix) / ("python.exe" if os.name == "nt" else "bin/python3")
-            if base.exists():
-                os.execv(str(base), [str(base), str(Path(__file__).resolve()), "limpar"])
-            sys.exit("Não achei o Python de fora da venv. Apague a pasta .venv/ à mão.")
         return limpar()
-
-    if not _dentro_da_venv():
-        _preparar_ambiente()
-        _reexecutar_na_venv(sys.argv[1:])  # não retorna
+    if tarefa in ("parar", "stop"):
+        return parar()
+    _preparar_ambiente()
+    _ativar()
 
     return TAREFAS[tarefa]()
 

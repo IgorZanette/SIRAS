@@ -38,14 +38,16 @@ python3 run.py       # Linux e macOS
 | `py run.py testes` | bancada rápida |
 | `py run.py completa` | bancada completa, as duas camadas |
 | `py run.py validar` | confere a base de conhecimento contra os schemas |
+| `py run.py parar` | encerra o servidor, quando o Ctrl+C não chega |
 | `py run.py limpar` | apaga `.venv`, caches e saídas geradas |
 
 Quem tiver `make` pode usar os mesmos atalhos pelo [`Makefile`](Makefile), que só chama o
 `run.py`. A lógica mora num lugar só porque `make` não vem instalado no Windows, e Python
 tem de estar na máquina de qualquer jeito.
 
-Para encerrar, `Ctrl+C`. No **Git Bash** o terminal às vezes não entrega esse sinal a
-programas nativos do Windows; se acontecer, rode `winpty py run.py`, ou use o PowerShell.
+Para encerrar, `Ctrl+C`. Se o terminal não entregar o sinal — acontece no Git Bash
+(MinTTY) com programas nativos do Windows —, abra outra janela e rode `py run.py parar`,
+que encerra pelo processo que está escutando na porta e não depende de sinal nenhum.
 
 O host é fixo em `127.0.0.1`: o SIRAS roda local e offline, sem banco de dados, sem
 autenticação e sem chamada de rede. O fluxo é de três telas — cultura, análise de solo e
@@ -109,8 +111,9 @@ O limite inferior do intervalo passou os 80% que a hipótese H₁.₁ declara.
 **Em andamento:** avaliação de usabilidade e comparação com ferramenta existente (sprints S5 e
 S6). **Pendente de terceiros:** recrutamento dos participantes (P8 no roadmap).
 
-**A implementação encerra em 12/10/2026**, por definição do orientador. Daí em diante, só
-testes com usuários e redação do artigo.
+**A implementação encerrou em 12/10/2026**, no prazo definido pelo orientador, e a versão
+avaliada está na tag `congelamento-v1`. Daí em diante, só testes com usuários e redação do
+artigo.
 
 ## Ferramentas de desenvolvimento
 

@@ -4,6 +4,7 @@
 #   make testes    bancada rápida
 #   make completa  bancada completa
 #   make validar   confere a base de conhecimento contra os schemas
+#   make parar     encerra o servidor (quando o Ctrl+C não chega)
 #   make limpar    apaga .venv, caches e saídas geradas
 #
 # Sem make:  py run.py [tarefa]   (Windows)   ·   python3 run.py [tarefa]
@@ -15,7 +16,7 @@ PY := python3
 endif
 
 .DEFAULT_GOAL := servir
-.PHONY: servir testes completa validar limpar ajuda
+.PHONY: servir testes completa validar parar limpar ajuda
 
 servir:
 	$(PY) run.py servir
@@ -28,6 +29,9 @@ completa:
 
 validar:
 	$(PY) run.py validar
+
+parar:
+	$(PY) run.py parar
 
 limpar:
 	$(PY) run.py limpar

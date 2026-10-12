@@ -22,7 +22,9 @@ _local/
 saida/
 *.log
 
-# Kit 3D entregue na raiz (apresentacao, demos e suite propria). O que o SIRAS
-# usa foi copiado para siras/web/static/js/cena-solo/ e e versionado la; o kit
-# inteiro e material de origem, nao fonte do sistema.
+# Kit 3D de origem, se voltar a ser baixado para ca. O que o SIRAS usa foi copiado
+# para siras/siras/web/static/js/cena-solo/ e e versionado la.
 SIRAS-3D-kit*/
+
+# Marca de que as dependencias da venv ja foram instaladas (run.py).
+.requisitos-instalados

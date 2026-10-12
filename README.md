@@ -18,22 +18,37 @@ Diferencial em relação às ferramentas existentes: integra, a partir de **uma 
 solo**, a recomendação de manejo e a estimativa de aptidão — combinação não encontrada nos sistemas
 disponíveis para o contexto do RS.
 
-A proposta completa está em [`docs/proposta/`](docs/proposta/).
+A proposta completa está em [`trabalho_de_conclusao/proposta/`](trabalho_de_conclusao/proposta/).
 
 ## Executando
 
-Requisitos: Python 3.12 ou superior.
+Requisito único: **Python 3.12 ou superior**. Um comando, em qualquer sistema:
 
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1     # Windows
-# source .venv/bin/activate        # Linux/macOS
-pip install -r requirements.txt
-python app.py
+```bash
+py run.py            # Windows
+python3 run.py       # Linux e macOS
 ```
 
-`python app.py` sobe a aplicação em <http://127.0.0.1:5000>, com host fixo em `127.0.0.1`:
-o SIRAS roda local e offline, sem banco de dados, sem autenticação e sem chamada de rede.
+`run.py` cria o ambiente virtual, instala as dependências, sobe o servidor em
+<http://127.0.0.1:5000> e abre o navegador. Não é preciso ativar venv nem rodar `pip`.
+Na segunda vez ele não reinstala nada e sobe direto.
+
+Quem tiver `make` pode usar os mesmos atalhos pelo [`Makefile`](Makefile) — `make`,
+`make testes`, `make limpar`. O Makefile apenas chama o `run.py`: a lógica mora num
+lugar só porque **`make` não vem instalado no Windows**, e a máquina onde a defesa
+acontece pode não ter nenhum. Python tem de estar lá de qualquer jeito, já que o sistema
+é escrito nele.
+
+| Comando | O que faz |
+|---|---|
+| `py run.py` | sobe o servidor e abre o navegador |
+| `py run.py testes` | bancada rápida |
+| `py run.py completa` | bancada completa, as duas camadas |
+| `py run.py validar` | confere a base de conhecimento contra os schemas |
+| `py run.py limpar` | apaga `.venv`, caches e saídas geradas |
+
+O host é fixo em `127.0.0.1`: o SIRAS roda local e offline, sem banco de dados, sem
+autenticação e sem chamada de rede.
 
 O fluxo é de três telas — escolha da cultura, análise de solo e laudo. A análise pode cobrir
 vários talhões num documento só, e o laudo sai em cores para a tela ou em folha A4 preto e
@@ -45,13 +60,19 @@ A suíte tem duas camadas: a rápida, para rodar a cada alteração, e a complet
 as bancadas de 61 culturas × 10 perfis de solo.
 
 ```bash
-pytest                            # camada rápida
-pytest --completa                 # tudo, incluindo as bancadas
-python scripts/valida_base.py     # valida dados/ contra os schemas
-python scripts/validar_anexo1.py          # classificações de P e K contra o Anexo 1 do Manual
-python scripts/conferir_contraste.py   # contraste da paleta nos dois temas
-python scripts/gera_tabela_concordancia.py   # tabela de concordância da validação
-python scripts/gerar_figuras_artigo.py       # figuras do artigo, em PNG
+py run.py testes      # camada rápida
+py run.py completa    # tudo, incluindo as bancadas
+py run.py validar     # valida dados/ contra os schemas
+```
+
+Os utilitários restantes rodam de dentro de `siras/`, com a venv já criada por `run.py`:
+
+```bash
+cd siras
+../.venv/Scripts/python scripts/validar_anexo1.py           # P e K contra o Anexo 1 do Manual
+../.venv/Scripts/python scripts/conferir_contraste.py       # contraste da paleta nos dois temas
+../.venv/Scripts/python scripts/gera_tabela_concordancia.py # tabela de concordância da validação
+../.venv/Scripts/python scripts/gerar_figuras_artigo.py     # figuras do artigo, em PNG
 ```
 
 A conformidade do módulo de aptidão contra o Caderno de Critérios roda junto da camada
@@ -61,6 +82,26 @@ permaneça independente do código.
 
 ## Organização do repositório
 
+A raiz tem **duas metades**, divididas em 11/10/2026 antes do congelamento. A regra é
+esta: se o documento ou o arquivo descreve o **sistema**, está em `siras/`; se descreve o
+**trabalho sobre o sistema**, está em `trabalho_de_conclusao/`.
+
+```
+SIRAS/
+├── run.py                   # um comando põe tudo no ar
+├── Makefile                 # os mesmos atalhos, para quem tem make
+├── siras/                   # a implementação
+│   ├── siras/               #   o pacote Python
+│   ├── dados/               #   a base de conhecimento, em JSON
+│   ├── testes/              #   a suíte e os casos com gabarito
+│   ├── scripts/             #   utilitários de validação e de geração
+│   ├── docs/                #   decisões, especificação e artes de origem
+│   ├── app.py  conftest.py  requirements.txt
+└── trabalho_de_conclusao/   # a proposta, o artigo, os protocolos e o roadmap
+```
+
+### Dentro de `siras/`
+
 | Caminho | Conteúdo |
 |---|---|
 | `siras/dominio/` | Entidades do domínio (análise de solo, cultura, laudo) |
@@ -68,38 +109,40 @@ permaneça independente do código.
 | `siras/motor/` | Motor de inferência — as regras SE-ENTÃO |
 | `siras/relatorio/` | Montagem do laudo |
 | `siras/web/` | Camada web (Flask) |
-| `dados/comum/` | Tabelas gerais do Manual (SMP, pH de referência, critérios de calagem, interpretação de P/K) |
-| `dados/culturas/<grupo>/` | Tabelas de adubação compartilhadas por grupo de cultura (grãos, hortaliças, tubérculos, outras comerciais, frutíferas, erva-mate) |
-| `dados/mercado/` | **Origem mista, declarada bloco a bloco:** catálogo de fórmulas NPK e arquivo de corretivos de acidez. Cada bloco traz `_fonte` e `_status` — o que é lei vigente, o que é convenção comercial herdada e o que é ficha de fabricante (ver `docs/decisoes/0007` e `0008`) |
 | `siras/validacao/` | Apuração da concordância com o oráculo — alimenta a tabela de Resultados |
+| `dados/comum/` | Tabelas gerais do Manual (SMP, pH de referência, critérios de calagem, interpretação de P/K) |
+| `dados/culturas/<grupo>/` | Tabelas de adubação por grupo de cultura (grãos, hortaliças, tubérculos, outras comerciais, frutíferas, erva-mate) |
+| `dados/mercado/` | **Origem mista, declarada bloco a bloco:** catálogo de fórmulas NPK e corretivos de acidez. Cada bloco traz `_fonte` e `_status` (ver `siras/docs/decisoes/0007` e `0008`) |
 | `testes/casos/` | Casos de teste e valores de referência (oráculo da validação) |
-| `scripts/` | Utilitários: tabela de concordância da validação, conferência de schemas e de contraste, geração dos arquivos da marca, consolidação do questionário de usabilidade |
-| `scripts/validar_anexo1.py` | Confere as classificações de P e K contra o Anexo 1 do Manual (oráculo externo) |
-| `docs/` | Documentação técnica, decisões de projeto e rastreabilidade das fontes |
+| `scripts/` | Utilitários: concordância, schemas, contraste, geração dos arquivos da marca e dos fundos, consolidação do questionário |
+| `docs/` | Decisões de projeto, especificação e as artes originais da marca e dos fundos — índice em [`siras/docs/README.md`](siras/docs/README.md) |
 
-A documentação está organizada por função, com índice em
-[`docs/README.md`](docs/README.md):
+### Dentro de `trabalho_de_conclusao/`
+
+Índice em [`trabalho_de_conclusao/README.md`](trabalho_de_conclusao/README.md).
 
 | Pasta | Para quê |
 |---|---|
-| [`docs/artigo_final/`](docs/artigo_final/) | O artigo do TCC |
-| [`docs/proposta/`](docs/proposta/) | A proposta aprovada |
-| [`docs/especificacao/`](docs/especificacao/) | Caderno de Critérios, arquitetura, base de conhecimento e rastreabilidade ao Manual |
-| [`docs/validacao/`](docs/validacao/) | Protocolo, procedimento do oráculo e resultados medidos |
-| [`docs/usabilidade/`](docs/usabilidade/) | Protocolo do teste com usuários, roteiros e questionário |
-| [`docs/decisoes/`](docs/decisoes/) | Registros de decisão de arquitetura |
-| [`docs/processo/`](docs/processo/) | Roadmap e convenções de trabalho |
+| [`proposta/`](trabalho_de_conclusao/proposta/) | A proposta aprovada |
+| [`artigo_final/`](trabalho_de_conclusao/artigo_final/) | O artigo do TCC |
+| [`validacao/`](trabalho_de_conclusao/validacao/) | Protocolo, procedimento do oráculo e resultados medidos |
+| [`usabilidade/`](trabalho_de_conclusao/usabilidade/) | Protocolo do teste com usuários, roteiros e questionário |
+| [`processo/`](trabalho_de_conclusao/processo/) | Roadmap e convenções de trabalho |
+
+As duas metades são independentes: a implementação roda sem a outra pasta. Os três
+pontos em que o código a alcança — figuras do artigo, instrumento de usabilidade e a
+conferência do roadmap contra a tela de estado — estão listados no índice do trabalho.
 
 ## Estado do projeto
 
-Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/roadmap.md`](docs/processo/roadmap.md).
+Em desenvolvimento. O estado detalhado de cada etapa está em [`trabalho_de_conclusao/processo/roadmap.md`](trabalho_de_conclusao/processo/roadmap.md).
 
 **Pronto** (11/10/2026):
 
 - **Motor** — calagem, adubação e aptidão edáfica para as **61 culturas e grupos de culturas** do
   escopo, com `gerar_laudo()` como ponto de entrada único e uma trilha que registra cada decisão
   com a regra e a tabela do Manual que a produziram.
-- **Aptidão edáfica** — implementada conforme o Caderno de Critérios ([`docs/especificacao/ccae.md`](docs/especificacao/ccae.md),
+- **Aptidão edáfica** — implementada conforme o Caderno de Critérios ([`siras/docs/especificacao/ccae.md`](siras/docs/especificacao/ccae.md),
   versão vigente), com os cenários atual e potencial. Conformidade de **100%** sobre os casos
   gabaritados à mão pelo autor, em classe, fator determinante e grau de cada fator.
 - **Aplicação web** — as três telas, leitura ao vivo da interpretação enquanto se digita, vários
@@ -107,15 +150,15 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
   fórmulas NPK com os preços que o usuário informar. Dez exemplos de preenchimento cobrem os seis
   grupos de cultura e chegam com **todos** os campos preenchidos, inclusive os opcionais: dá para
   gerar um laudo sem digitar nada.
-- **Laudo reorganizado** ([ADR 0011](docs/decisoes/0011-laudo-reorganizado-essencial-e-anexo.md)) —
+- **Laudo reorganizado** ([ADR 0011](siras/docs/decisoes/0011-laudo-reorganizado-essencial-e-anexo.md)) —
   o essencial por talhão, um quadro que põe as áreas lado a lado e os complementos uma vez por
   documento. Um laudo de seis talhões saía em 27 folhas A4; o texto caiu 53%. O documento é sempre
   claro, nos dois temas da aplicação, porque é papel branco em qualquer um deles.
 - **Tabelas do Manual** — sete tabelas transcritas, consultáveis na interface, incluindo o pH de
   referência (Tab. 5.1, com o aviso de que não é ela que dispara a calagem) e os grupos de
   exigência de P e K das 141 culturas do Anexo 2.
-- **Interface v2** ([ADR 0012](docs/decisoes/0012-cena-3d-e-acabamento-da-interface.md) e
-  [ADR 0013](docs/decisoes/0013-integracao-da-cena-3d-e-fundos-mensuraveis.md)) — nova identidade
+- **Interface v2** ([ADR 0012](siras/docs/decisoes/0012-cena-3d-e-acabamento-da-interface.md) e
+  [ADR 0013](siras/docs/decisoes/0013-integracao-da-cena-3d-e-fundos-mensuraveis.md)) — nova identidade
   de marca, escolha de tema em três estados (claro, escuro, seguir o sistema), revelação das
   seções ao rolar, seção que declara em que pé o trabalho está, "pular para o conteúdo" e anel de
   foco único.
@@ -136,7 +179,7 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
   **método do próprio Manual** (§8.3, p. 311): a dose se ancora no nutriente mais deficiente no
   solo, o que falta do outro vira complemento com fertilizante simples e o N restante vai para
   cobertura. O catálogo de fórmulas é dado de mercado, com fonte por entrada, e o laudo declara
-  as duas procedências ([ADR 0008](docs/decisoes/0008-escolha-de-formula-pelo-metodo-do-manual.md)).
+  as duas procedências ([ADR 0008](siras/docs/decisoes/0008-escolha-de-formula-pelo-metodo-do-manual.md)).
 - **Validação** — `scripts/gera_tabela_concordancia.py` produz a tabela de concordância com IC 95%
   de Wilson, a partir de `siras/validacao/concordancia.py`, que a suíte também exercita. Medido em
   11/10/2026: recomendação **25/25 = 100%** (IC [86,7%; 100,0%]) e aptidão **88/88 = 100%**
@@ -144,7 +187,7 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
   hipótese se sustenta pelo critério declarado, e a pendência de tamanho de amostra está fechada.
 
   Dos 10 casos acrescentados em 11/10, **dois reprovaram o motor** e geraram a
-  [ADR 0010](docs/decisoes/0010-adicional-de-n-por-rendimento-e-reposicao-em-muito-alto.md): a dose
+  [ADR 0010](siras/docs/decisoes/0010-adicional-de-n-por-rendimento-e-reposicao-em-muito-alto.md): a dose
   de nitrogênio não reagia à expectativa de rendimento, e a classe *Muito alto* em 2º cultivo
   aplicava manutenção onde o Manual prevê reposição. Os dois defeitos atravessaram a suíte inteira
   sem falhar, porque nenhum teste pedia a combinação de entradas que os revela — é o achado mais
@@ -156,7 +199,7 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
 avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em
-[`docs/usabilidade/protocolo.md`](docs/usabilidade/protocolo.md): três roteiros de teste com usuários do público-alvo
+[`trabalho_de_conclusao/usabilidade/protocolo.md`](trabalho_de_conclusao/usabilidade/protocolo.md): três roteiros de teste com usuários do público-alvo
 e questionário pós-teste estruturado pelas dez heurísticas de Nielsen, em lugar do SUS previsto
 na proposta.
 
@@ -169,14 +212,14 @@ rodadas de correção da interface registradas na ADR 0013 começaram todas por 
 o padrão está anotado lá, porque ele vale para a seção de Resultados.
 
 **A implementação encerra em 12/10/2026**, por definição do orientador. Daí em diante, só testes com
-usuários e redação do artigo ([`docs/artigo_final/`](docs/artigo_final/)).
+usuários e redação do artigo ([`trabalho_de_conclusao/artigo_final/`](trabalho_de_conclusao/artigo_final/)).
 
 ## Ferramentas de desenvolvimento
 
 A implementação do código utiliza assistência de IA (Claude Code). Os **dados agronômicos** — todas
 as tabelas do Manual de Calagem e Adubação e os valores de referência dos casos de teste — foram
 transcritos e conferidos manualmente pelo autor a partir da publicação original, conforme registrado
-em [`docs/especificacao/mapa-do-manual.md`](docs/especificacao/mapa-do-manual.md).
+em [`siras/docs/especificacao/mapa-do-manual.md`](siras/docs/especificacao/mapa-do-manual.md).
 
 ## Aviso
 

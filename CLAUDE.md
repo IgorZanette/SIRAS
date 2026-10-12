@@ -9,7 +9,7 @@ de calagem e adubação e estimativa de aptidão edáfica. Trabalho de Conclusã
 Computação (UPF, 2026), autor Igor Zanette.
 
 **Fonte técnica única das recomendações:** Manual de Calagem e Adubação para os estados do RS e SC,
-CQFS-RS/SC, 11ª edição, 2016. Escopo: 61 culturas e grupos de culturas (ver `docs/processo/roadmap.md`).
+CQFS-RS/SC, 11ª edição, 2016. Escopo: 61 culturas e grupos de culturas (ver `trabalho_de_conclusao/processo/roadmap.md`).
 
 ---
 
@@ -26,10 +26,10 @@ pesquisa de um TCC — inventá-los é fabricação de dados.
 Se um valor faltar: use `null` ou `"PREENCHER"`, avise explicitamente que o campo depende do Manual,
 e **não** proponha um valor "provável" ou "típico", nem em comentário, nem como exemplo.
 
-O mesmo vale para o campo `referencia` dos arquivos em `testes/casos/`: é o oráculo da validação e é
+O mesmo vale para o campo `referencia` dos arquivos em `siras/testes/casos/`: é o oráculo da validação e é
 calculado à mão pelo autor. Você pode criar a estrutura do arquivo; nunca o conteúdo desse campo.
 
-**Nunca altere arquivos em `dados/` para fazer validação, schema ou teste passar.** Os dados são
+**Nunca altere arquivos em `siras/dados/` para fazer validação, schema ou teste passar.** Os dados são
 transcrição conferida do Manual e são a fonte da verdade. Quando um schema ou teste conflitar com os
 dados, o schema ou o teste é que está errado. Se você acreditar que o dado está incorreto, avise e
 pare — não corrija.
@@ -43,12 +43,36 @@ pare — não corrija.
 
 ---
 
+## Estrutura do repositório
+
+A raiz tem **duas metades**, divididas em 11/10/2026. A regra: se descreve o **sistema**,
+vai em `siras/`; se descreve o **trabalho sobre o sistema**, vai em
+`trabalho_de_conclusao/`.
+
+```
+SIRAS/
+├── run.py                   # um comando instala tudo e sobe o servidor
+├── Makefile                 # os mesmos atalhos, para quem tem make
+├── siras/                   # implementação — o pacote em siras/siras/, mais
+│   │                        #   dados/, testes/, scripts/, docs/, app.py, conftest.py
+│   └── docs/                #   decisões (ADRs), especificação, artes de origem
+└── trabalho_de_conclusao/   # proposta, artigo, protocolos de validação e
+                             #   usabilidade, roadmap
+```
+
+**Os comandos rodam da raiz**, por `run.py`: `py run.py`, `py run.py testes`,
+`py run.py completa`, `py run.py validar`, `py run.py limpar`. Ele cria a venv e instala
+as dependências sozinho; não há passo de ativação.
+
+Caminhos neste arquivo são **relativos à raiz**. Dentro de `siras/`, o pacote Python
+continua se importando como `siras.motor`, `siras.web` e assim por diante.
+
 ## Stack e restrições
 
 - **Python 3.12+**, **Flask 3.x**, HTML e CSS. Desenvolvimento em Windows.
 - Base de conhecimento em **JSON**, carregada em tempo de execução.
 - **Sem** bibliotecas externas de inferência (Experta, PyKE): o motor é Python puro e auditável.
-  Decisão metodológica declarada na proposta — ver `docs/decisoes/0001`.
+  Decisão metodológica declarada na proposta — ver `siras/docs/decisoes/0001`.
 - Dependências permitidas: `flask`, `jsonschema`, `pytest`. Antes de sugerir outra, pergunte.
 - **Sem** banco de dados, autenticação ou chamadas de rede. Roda em `localhost`, offline.
 
@@ -69,7 +93,7 @@ pare — não corrija.
 
 ## Regras agronômicas já fixadas (não contrarie)
 
-Extraídas e conferidas do Manual. Detalhes em `dados/comum/` e `docs/especificacao/mapa-do-manual.md`.
+Extraídas e conferidas do Manual. Detalhes em `siras/dados/comum/` e `siras/docs/especificacao/mapa-do-manual.md`.
 
 - A necessidade de calcário é **preferencialmente** estimada pelo **índice SMP** (Tabela 5.2, p. 70),
   que dá a dose de calcário PRNT 100% para elevar o pH da camada 0–20 cm a 5,5 / 6,0 / 6,5. O método
@@ -80,7 +104,7 @@ Extraídas e conferidas do Manual. Detalhes em `dados/comum/` e `docs/especifica
 - **O pH de referência (Tabela 5.1) NÃO dispara a calagem.** O disparo e o pH alvo vêm das Tabelas
   5.3 a 5.7, por grupo de cultura, e frequentemente divergem do pH de referência. Exemplo: grãos têm
   pH de referência 6,0 mas só recebem calcário quando pH < 5,5, com dose para pH 6,0.
-  Ver `dados/comum/criterios_calagem.json` — é essa a tabela que dirige o módulo de calagem.
+  Ver `siras/dados/comum/criterios_calagem.json` — é essa a tabela que dirige o módulo de calagem.
 - Plantio direto consolidado: dose = **1/4** do SMP para pH 6,0, superficial, limitada a 5 t/ha.
 - Solos de baixo poder tampão (SMP > 6,3): usar as equações polinomiais com MO e Al em vez da tabela
   (ver `calagem_smp.json`, campo `ajustes.baixo_poder_tampao`).
@@ -95,10 +119,11 @@ Extraídas e conferidas do Manual. Detalhes em `dados/comum/` e `docs/especifica
 
 1. Antes de escrever código, **apresente o plano** (arquivos a criar ou alterar) e aguarde aprovação.
 2. Uma tarefa por vez. Não amplie o escopo do que foi pedido.
-3. Ao terminar, rode `pytest` e informe o resultado.
+3. Ao terminar, rode `py run.py testes` (da raiz) e informe o resultado.
 4. Explique decisões de design não óbvias — o autor precisa entender e defender cada linha na banca.
 5. Não crie arquivos auxiliares, README ou documentação sem pedido.
-6. Ao concluir uma etapa do `docs/processo/roadmap.md`, atualize o estado dela no arquivo.
+6. Ao concluir uma etapa do `trabalho_de_conclusao/processo/roadmap.md`, atualize o estado
+   dela no arquivo.
 
 ## Convenções de commit
 

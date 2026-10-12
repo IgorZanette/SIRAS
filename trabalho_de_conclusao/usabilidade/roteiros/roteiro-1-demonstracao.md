@@ -39,47 +39,96 @@ franze a testa, o que ela pergunta, o que ela comenta sem ser perguntada.
 
 ## Caso da demonstração
 
-Entrada do caso **ADU-01**, de `testes/casos/casos_recomendacao.json` — soja, primeiro
-cultivo, com o resultado já conferido à mão pelo autor em 22/08/2026. Escolhido por
-exercitar, num caso só, a interpretação de fósforo por classe de argila, a de potássio por
-CTC, uma cultura leguminosa que não recebe nitrogênio e uma situação em que **a calagem
-não é indicada** — que costuma ser a primeira pergunta de quem olha o laudo.
+**Gleba 3 do Anexo 1 do Manual** (Tab. A.1, p. 353), com **milho**. É uma análise de solo
+real e publicada — não um caso montado —, e é o que resolve o problema que esta ficha teve
+desde o começo: o formulário exige Al, Ca, Mg e V%, e os casos de calagem e de adubação não
+os trazem, porque foram montados para verificar um módulo cada.
+
+Escolhida por exercitar, num caso só, a interpretação de fósforo por classe de argila
+(argila 12 % → classe 4), a de potássio por CTC (4,7 → CTC baixa), um solo arenoso que
+aciona o fator de textura, e uma situação em que **a calagem não é indicada** — que costuma
+ser a primeira pergunta de quem olha o laudo.
 
 | Campo | Valor |
 |---|---|
-| Cultura | Soja |
+| Cultura | Milho |
 | Sistema de manejo | Convencional |
 | Cultivo | 1º |
-| Expectativa de rendimento | 3,0 t/ha |
-| pH em água | 6,0 |
-| Índice SMP | 6,2 |
-| Argila | 32 % |
-| Matéria orgânica | 3,0 % |
-| P (Mehlich-1) | 6,0 mg/dm³ |
-| K | 80 mg/dm³ |
-| CTC a pH 7,0 | 9,5 cmolc/dm³ |
+| pH em água | 5,8 |
+| Índice SMP | 5,9 |
+| Argila | 12 % |
+| Matéria orgânica | 1,9 % |
+| P (Mehlich-1) | 12,5 mg/dm³ |
+| K | 25 mg/dm³ |
+| Ca trocável | 2,0 cmolc/dm³ |
+| Mg trocável | 1,1 cmolc/dm³ |
+| Al trocável | 0,0 cmolc/dm³ |
+| CTC a pH 7,0 | 4,7 cmolc/dm³ |
+| Saturação por bases (V%) | 67 % |
 | PRNT do corretivo | 100 % |
 | Profundidade de incorporação | 20 cm |
-| Al trocável | `PREENCHER` |
-| Ca trocável | `PREENCHER` |
-| Mg trocável | `PREENCHER` |
-| Saturação por bases (V%) | `PREENCHER` |
 
-> **Nota sobre os quatro campos em branco.** Os valores acima vêm do caso ADU-01, que foi
-> montado para verificar calagem e adubação e não traz Al, Ca, Mg e V%. Esses quatro são
-> exigidos pelo formulário porque alimentam a aptidão edáfica. Não foram preenchidos por
-> antecipação de propósito: teor inventado sai facilmente incoerente com a CTC e a
-> saturação, e um agrônomo percebe isso em dois segundos — o que arruinaria a credibilidade
-> da sessão logo no primeiro contato. **Preencher com um laudo real anonimizado**, que é a
-> mesma fonte que o protocolo de validação já indica para reduzir a circularidade de H1.1.
+**Seleções no formulário**, para o pesquisador não hesitar na frente do participante:
+*Cultura* = Milho · *Sistema de manejo* = Convencional · *Condição da área* = "todos os
+casos" · *Cultivo* = 1º.
 
-**Resultado esperado** (referência conferida do ADU-01, para o pesquisador saber se a tela
-está certa durante a demonstração):
+**Campos de cenário, à escolha do pesquisador** — não são análise de solo e não têm
+referência: *cultura antecedente* (o formulário exige; define a dose de N junto com a MO) e
+*expectativa de rendimento* (opcional; em branco, o laudo manda todo o nitrogênio para
+cobertura, o que é comportamento documentado e não erro).
 
-- calcário: **0,0 t/ha** — pH acima do disparo
-- classe de P: **muito baixo**; classe de K: **médio**
-- N: **0 kg/ha** (leguminosa, fixação biológica)
-- P₂O₅: **155 kg/ha**; K₂O: **105 kg/ha**
+**Procedência de cada linha.** Os onze valores da análise são a transcrição da Gleba 3 da
+Tab. A.1 (p. 353), em `testes/casos/entradas_aptidao.json`, caso `ANX-G3-MILH`. O V% de 67 %
+é publicado na própria Tab. A.1, e `scripts/validar_anexo1.py` confere que ele fecha com Ca,
+Mg, K e CTC da mesma linha. **Nenhum valor foi inventado.**
+
+## Resultado esperado
+
+Três níveis de referência, com procedências diferentes. O pesquisador precisa saber qual é
+qual, porque só os dois primeiros são oráculo.
+
+**1. Classes de P e K — oráculo externo, publicado no Manual** (Tab. A.2 e A.3; milho é
+grupo 2 em P e em K). `scripts/validar_anexo1.py` verifica que o SIRAS reproduz as classes
+publicadas, sem divergência:
+
+- classe de P: **Baixo**
+- classe de K: **Baixo**
+
+**2. Aptidão edáfica — gabarito conferido pelo autor** em 09/09/2026
+(`testes/casos/gabarito_aptidao.csv`, linha `ANX-G3-MILH`):
+
+| | |
+|---|---|
+| V% / m% | 67,32 % / 0 % |
+| Classe de argila / de CTC | 4 / baixa |
+| F1 acidez | ligeiro |
+| F2 fósforo | forte |
+| F3 potássio | forte |
+| F4 Ca e Mg | ligeiro |
+| F5 CTC | moderado |
+| F6 matéria orgânica | moderado |
+| F7 textura | moderado |
+| **Classe** | **Restrita** |
+| **Fator determinante** | **F2 — fósforo** |
+
+**3. Calagem — derivada do critério, não de gabarito.** Milho é grão: o disparo é
+`pH < 5,5` (Tab. 5.3, p. 75), e aqui o pH é **5,8**. A calagem **não é indicada**, e a dose
+sai **0,0 t/ha**. Note que isso não torna a acidez irrelevante — o gabarito acima dá F1 como
+*ligeiro*, e é um bom momento da demonstração para mostrar que "sem calcário" e "sem
+limitação" não são a mesma coisa.
+
+**Conferido contra o sistema em 11/10/2026.** O motor foi executado com esta entrada e
+devolveu exatamente o acima: calcário 0,0 t/ha com motivo `ph_acima_do_disparo` pelo
+critério `graos_convencional`, P baixo, K baixo, e aptidão **Restrita** com determinante
+**F2_fosforo**. A conferência é verificação, e não a fonte: o oráculo continua sendo o
+Manual (classes) e o gabarito do autor (aptidão).
+
+> **Doses de N, P₂O₅ e K₂O: `PREENCHER`.** Esta gleba não tem referência de adubação
+> calculada à mão — as que existem (ADU-*) são de outros solos. Enquanto não houver, **o
+> pesquisador não cobre acerto nas doses** durante a demonstração; percorre a tela
+> normalmente e confere apenas as classes e a aptidão, que têm oráculo. Para fechar este
+> item basta calcular à mão a adubação do milho para P Baixo e K Baixo, 1º cultivo, e
+> registrar aqui com a memória de cálculo, como nos demais casos.
 
 ## Passo a passo da demonstração
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import venv
@@ -108,10 +109,36 @@ def _reexecutar_na_venv(argumentos: list[str]) -> None:
 
 # --- as tarefas -------------------------------------------------------------
 
+def _encerrar(_sinal=None, _quadro=None) -> None:
+    """Sai na hora, sem esperar thread nenhuma.
+
+    `os._exit` pula o encerramento ordenado do interpretador — e é esse o ponto. Um
+    servidor local não tem nada a gravar, e qualquer thread ainda viva aqui só serviria
+    para atrasar a saída que o usuário acabou de pedir.
+    """
+    print("\n  Encerrado.")
+    sys.stdout.flush()
+    os._exit(0)
+
+
 def servir() -> int:
     """Sobe o servidor e abre o navegador."""
     sys.path.insert(0, str(IMPLEMENTACAO))
     from siras.web import criar_app  # noqa: E402 — só existe depois da venv pronta
+
+    # Ctrl+C precisa encerrar na primeira vez. Duas coisas o impediam:
+    #
+    #  1. O `threading.Timer` abaixo nasce NÃO-daemon, e uma thread não-daemon pendente
+    #     segura o interpretador mesmo depois de a main sair — medido: o processo
+    #     sobrevivia ao KeyboardInterrupt e ao sys.exit(0). Agora é daemon.
+    #  2. Mesmo sem ela, depender de o KeyboardInterrupt subir limpo pela pilha do
+    #     Werkzeug deixa a saída à mercê de qualquer thread que o servidor tenha criado.
+    #     O handler explícito tira isso do caminho.
+    signal.signal(signal.SIGINT, _encerrar)
+    if hasattr(signal, "SIGBREAK"):  # Windows: Ctrl+Break
+        signal.signal(signal.SIGBREAK, _encerrar)
+    if hasattr(signal, "SIGTERM"):
+        signal.signal(signal.SIGTERM, _encerrar)
 
     endereco = f"http://{HOSPEDEIRO}:{PORTA}"
     print(f"\n  SIRAS no ar em {endereco}")
@@ -122,9 +149,14 @@ def servir() -> int:
     if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
         import threading
         import webbrowser
-        threading.Timer(1.2, lambda: webbrowser.open(endereco)).start()
+        abrir = threading.Timer(1.2, lambda: webbrowser.open(endereco))
+        abrir.daemon = True
+        abrir.start()
 
-    criar_app().run(host=HOSPEDEIRO, port=PORTA, debug=False)
+    try:
+        criar_app().run(host=HOSPEDEIRO, port=PORTA, debug=False)
+    except KeyboardInterrupt:
+        _encerrar()
     return 0
 
 

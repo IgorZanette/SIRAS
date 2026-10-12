@@ -44,6 +44,9 @@ Quem tiver `make` pode usar os mesmos atalhos pelo [`Makefile`](Makefile), que s
 `run.py`. A lógica mora num lugar só porque `make` não vem instalado no Windows, e Python
 tem de estar na máquina de qualquer jeito.
 
+Para encerrar, `Ctrl+C`. No **Git Bash** o terminal às vezes não entrega esse sinal a
+programas nativos do Windows; se acontecer, rode `winpty py run.py`, ou use o PowerShell.
+
 O host é fixo em `127.0.0.1`: o SIRAS roda local e offline, sem banco de dados, sem
 autenticação e sem chamada de rede. O fluxo é de três telas — cultura, análise de solo e
 laudo —, a análise pode cobrir vários talhões num documento só, e o laudo sai em cores para a

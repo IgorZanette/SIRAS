@@ -1,35 +1,17 @@
 #!/usr/bin/env python3
-"""Põe o SIRAS no ar com UM comando, em qualquer máquina.
+"""Põe o SIRAS no ar com um comando.
 
-    python run.py              # ou  py run.py  (Windows)  ou  python3 run.py
+    py run.py              Windows
+    python3 run.py         Linux e macOS
 
-É o arquivo que existe para a defesa não depender de nada estar preparado na máquina
-onde ela acontece. Ele cria o ambiente virtual, instala as dependências, sobe o servidor
-e abre o navegador. Não pede ativação de venv, não pede `make`, não pede `pip` no PATH.
+Cria a venv, instala as dependências, sobe o servidor e abre o navegador. Não pede
+ativação de venv nem `make` — que não vem instalado no Windows.
 
-POR QUE UM SCRIPT E NÃO SÓ O MAKEFILE
-
-O `Makefile` ao lado faz o mesmo, e é o atalho de quem já tem `make`. Só que `make` não
-vem no Windows, e esta máquina não o tem. Um Makefile sozinho transformaria a
-demonstração em "primeiro instale o make" — exatamente o tipo de passo que não se quer
-descobrir na frente da banca. Já o Python tem de estar instalado de qualquer jeito, pois
-o sistema é escrito nele: usar o próprio Python como instalador não acrescenta
-requisito nenhum.
-
-COMO ELE SE REEXECUTA
-
-Na primeira passada ele roda com o Python do sistema, cria `.venv` e instala o que falta.
-Depois chama a si mesmo com o Python de DENTRO da venv (`os.execv`), e é essa segunda
-passada que importa o Flask e sobe o servidor. O desvio é necessário porque um
-interpretador já em execução não enxerga pacotes instalados depois que ele começou.
-
-COMANDOS
-
-    python run.py             sobe o servidor (padrão)
-    python run.py testes      bancada rápida
-    python run.py completa    bancada completa, as duas camadas
-    python run.py validar     confere a base de conhecimento contra os schemas
-    python run.py limpar      apaga .venv, caches e saídas geradas
+    py run.py              sobe o servidor
+    py run.py testes       bancada rápida
+    py run.py completa     bancada completa
+    py run.py validar      confere a base de conhecimento contra os schemas
+    py run.py limpar       apaga .venv, caches e saídas geradas
 """
 
 from __future__ import annotations
@@ -46,12 +28,11 @@ IMPLEMENTACAO = RAIZ / "siras"
 VENV = RAIZ / ".venv"
 REQUISITOS = IMPLEMENTACAO / "requirements.txt"
 
-#: Onde cada sistema operacional põe os executáveis da venv.
+#: Onde cada sistema põe os executáveis da venv.
 _BIN = "Scripts" if os.name == "nt" else "bin"
 PYTHON_DA_VENV = VENV / _BIN / ("python.exe" if os.name == "nt" else "python")
 
-#: Marca o que já foi instalado. Comparar com o requirements.txt evita reinstalar a cada
-#: execução — a diferença é de segundos, e numa demonstração segundos aparecem.
+#: Assinatura do requirements.txt já instalado: evita reinstalar a cada execução.
 SELO = VENV / ".requisitos-instalados"
 
 HOSPEDEIRO = "127.0.0.1"
@@ -76,16 +57,11 @@ def _dentro_da_venv() -> bool:
 
 
 def _venv_sadia() -> bool:
-    """A venv existe E está íntegra?
+    """A venv existe e está íntegra?
 
-    `pyvenv.cfg` é o que o interpretador procura para saber que está num ambiente
-    virtual. Sem ele, o python da pasta existe e morre com "failed to locate
-    pyvenv.cfg" — um erro que não diz o que fazer.
-
-    Isso acontece de verdade: uma remoção interrompida, por um servidor ainda no ar
-    segurando o executável, deixa a casca da pasta para trás. Conferir aqui transforma
-    esse caso num recomeço silencioso, em vez de uma mensagem críptica cinco minutos
-    antes da defesa.
+    Sem `pyvenv.cfg` o python da pasta existe e morre com "failed to locate
+    pyvenv.cfg". Acontece quando uma remoção é interrompida — um servidor no ar
+    segurando o executável deixa a casca da pasta. Conferir aqui refaz em silêncio.
     """
     return PYTHON_DA_VENV.exists() and (VENV / "pyvenv.cfg").exists()
 
@@ -122,10 +98,10 @@ def _preparar_ambiente() -> None:
 
 
 def _reexecutar_na_venv(argumentos: list[str]) -> None:
-    """Troca este processo pelo mesmo script rodando com o Python da venv.
+    """Reexecuta este script com o Python da venv.
 
-    `execv` substitui o processo em vez de criar um filho: assim Ctrl+C chega direto ao
-    servidor, e não sobra um processo pai segurando o terminal.
+    Necessário: um interpretador já em execução não enxerga pacotes instalados depois
+    que ele começou. `execv` substitui o processo, então Ctrl+C chega ao servidor.
     """
     os.execv(str(PYTHON_DA_VENV), [str(PYTHON_DA_VENV), str(Path(__file__).resolve()), *argumentos])
 
@@ -141,8 +117,8 @@ def servir() -> int:
     print(f"\n  SIRAS no ar em {endereco}")
     print("  Roda local e offline. Ctrl+C encerra.\n")
 
-    # Só abre o navegador no processo que de fato serve: com o reloader do Flask ligado,
-    # o processo pai reinicia o filho a cada alteração e abriria uma aba por vez.
+    # Só no processo que de fato serve: com o reloader ligado, o pai abriria uma aba
+    # a cada reinício.
     if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
         import threading
         import webbrowser
@@ -183,9 +159,8 @@ def limpar() -> int:
         if not alvo.exists():
             continue
         shutil.rmtree(alvo, ignore_errors=True)
-        # `ignore_errors` engole a falha, e dar por limpo um alvo meio removido é pior
-        # que um erro: quebra o arranque seguinte sem dizer por quê. Conferir custa uma
-        # linha, e foi assim que uma venv pela metade apareceu nesta própria máquina.
+        # `ignore_errors` engole a falha, e dar por limpo um alvo meio removido quebra
+        # o arranque seguinte sem dizer por quê.
         if alvo.exists():
             resistiram.append(alvo)
         else:
@@ -228,14 +203,10 @@ def main() -> int:
     # da que ela apaga.
     if tarefa in ("ajuda", "help", "--help", "-h"):
         return ajuda()
-    # `limpar` não pode rodar de dentro da venv que ela apaga: no Windows os arquivos
-    # do interpretador em execução ficam travados e a remoção falha pela metade.
-    #
-    # A primeira versão deste guard mandava o usuário "rodar com o Python do sistema", e
-    # era um conselho ruim: o lançador `py` honra VIRTUAL_ENV, então quem tivesse a venv
-    # ativa na shell batia na mensagem mesmo tendo feito exatamente o que ela pedia.
-    # `sys.base_prefix` aponta para o interpretador que criou a venv — dá para trocar
-    # para ele sozinho, sem pedir nada.
+    # `limpar` não roda de dentro da venv que apaga: no Windows o interpretador em
+    # execução trava os próprios arquivos. `sys.base_prefix` dá o Python que criou a
+    # venv — troca sozinho, sem pedir nada ao usuário (o lançador `py` honra
+    # VIRTUAL_ENV, então exigir "o Python do sistema" seria conselho inútil).
     if tarefa in ("limpar", "clean"):
         if _dentro_da_venv():
             base = Path(sys.base_prefix) / _BIN / ("python.exe" if os.name == "nt" else "python3")

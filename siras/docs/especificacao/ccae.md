@@ -636,6 +636,43 @@ Toda escolha não determinada pelas fontes. É a lista que vai ao auditor e à b
 | A-10 | Resolvido: sem correção de valor. A aparente sobreposição da Tab. 6.5, coluna argila classe 1 (Muito baixo ≤ 1,5; Baixo "1,5 – 3,0") é artefato de arredondamento do PDF, não erro de transcrição. Sob a convenção de classificação por limite superior (`de < valor ≤ ate`, já em uso em `dados/comum/interpretacao_p.json`, conferido pelo autor em 2026-08-22), 1,5 cai em Muito baixo e Baixo passa a valer, na prática, de 1,5 (exclusive) a 3,0 (inclusive) — sem sobreposição. Não foi necessário adotar 1,6 nem alterar nenhum valor transcrito | Convenção de classificação por limite superior (Seção 2 do ccae-implementacao.md), já aplicada a todas as tabelas de interpretação do SIRAS | Baixa — resolvido sem alteração de dado | — |
 | A-11 | Ler como limite mínimo (`≥`) o operador que as notas da exceção Ca/Mg trazem como igualdade (`=`) na camada de texto do Manual: Tab. 5.6, nota (2); Tab. 5.4, nota (6); Tab. 5.3, nota (8). Vale também para a exceção `V ≥ 65%` da nota (1) da Tab. 5.4 | Cinco evidências convergentes, detalhadas em B-7: (i) o artefato de glifo perdido está medido e documentado no próprio projeto (`docs/especificacao/nota-extracao-pdf.md` — o `≤` do PDF não existe na camada de texto e "às vezes some, às vezes vira `=`"); (ii) o `<` da mesma frase sobrevive, o que localiza a perda nos glifos `≥`/`≤`, não na redação; (iii) o artefato aparece também na prosa da p. 77, e não só em célula de tabela; (iv) o Anexo 1 (p. 354) aplica a exceção como limiar, ao dispensar a Gleba 4 por `Ca < 4,0` "embora tenha teor de Mg maior que 1,0"; (v) sob igualdade exata sobre variável contínua a regra praticamente nunca dispararia, e a exceção existe porque o suprimento de Ca e Mg já é suficiente — um teor maior a satisfaz com mais razão | Baixa — leitura já implementada e sem caso dependente no conjunto (`CONF-RB-04`: `Ca = 3,6`) | `F1_acidez.sem_ph_referencia.excecao` em `criterios_aptidao.json` |
 
+### Correspondências na literatura, para A-2, A-7 e A-8 (2026-10-11)
+
+Não é uma décima segunda decisão: é procedência externa para três das que a tabela
+acima já lista. Por isso fica abaixo dela, e não dentro.
+
+> **Adendo posterior ao congelamento da v1.3.** Não altera decisão, limiar, parâmetro
+> nem redação de critério: acrescenta procedência externa às decisões já registradas
+> acima, como o orientador pediu no e-mail de 10/09/2026 (pendência P4 do roadmap). O
+> congelamento da v1.3 e a tag `criterios-v1.3` permanecem válidos — a conformidade de
+> 100% foi apurada sob exatamente os mesmos critérios de antes deste texto.
+
+Atendendo à recomendação de buscar na literatura parâmetros equivalentes às decisões de
+julgamento registradas no Apêndice A, foram localizadas as seguintes correspondências.
+Os limites de 30% e 50% de saturação por alumínio adotados na decisão A-8 coincidem com
+limites de classe publicados pela Comissão de Fertilidade do Solo do Estado de Minas
+Gerais (ALVAREZ V. et al., 1999), embora a convenção de inclusão do valor 30,0% seja
+distinta. Para a decisão A-2, o tratamento da deficiência de cálcio e magnésio como
+corrigível na própria calagem é compatível com métodos de recomendação que dimensionam a
+dose de calcário para suprir esses nutrientes (SOUSA et al., 1989), sem que essa fonte
+estabeleça o grau de limitação adotado. Para a decisão A-7, não foi localizado na
+literatura consultada um teto de dose equivalente. As referências encontradas tratam do
+parcelamento da aplicação a partir de 5 t/ha, e não de limite máximo. As correspondências
+indicam que parte das decisões não se apoia exclusivamente no Manual. Elas não
+constituem validação agronômica dos critérios, que permanecem decisões do autor,
+conforme as limitações já declaradas neste trabalho.
+
+**Referências (ABNT)**
+
+ALVAREZ V., V. H. et al. Interpretação dos resultados das análises de solos. In:
+RIBEIRO, A. C.; GUIMARÃES, P. T. G.; ALVAREZ V., V. H. (Ed.). **Recomendações para o uso
+de corretivos e fertilizantes em Minas Gerais: 5ª aproximação.** Viçosa: Comissão de
+Fertilidade do Solo do Estado de Minas Gerais, 1999. p. 25-32.
+
+SOUSA, D. M. G. de; MIRANDA, L. N. de; LOBATO, E.; CASTRO, L. H. R. Métodos para
+determinar as necessidades de calagem em solos dos cerrados. **Revista Brasileira de
+Ciência do Solo**, Campinas, v. 13, n. 2, p. 193-198, 1989.
+
 ## Apêndice B — Registro de divergências de conformidade
 
 | # | Caso | Esperado | Obtido | Causa | Correção | Data |

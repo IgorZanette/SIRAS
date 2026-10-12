@@ -23,14 +23,14 @@
 (function () {
   "use strict";
 
-  /* 12 s. O numero andou: 4,2 s no comeco, 6 s para dar tempo de ler a regra de cada
-     passo, 24 s quando a cena 3D entrou e as coreografias nao cabiam, e 12 s agora --
-     24 s era espera exaustiva, e uma tela que demora demais passa falta de desempenho,
-     que e o oposto do que ela deveria passar.
+  /* 10,7 s. O numero andou: 4,2 s no comeco, 6 s para dar tempo de ler a regra de cada
+     passo, 24 s quando a cena 3D entrou e as coreografias nao cabiam, 12 s quando 24 s
+     se mostrou exaustivo, e 10,7 s no acerto fino. Uma tela que demora demais passa
+     falta de desempenho, que e o oposto do que ela deveria passar.
 
      E PAUSA DELIBERADA, e nao progresso simulado: o motor responde em dezenas de
      milissegundos. Esta tela existe para ser vista. */
-  var ESPERA_MINIMA_MS = 12000;
+  var ESPERA_MINIMA_MS = 10700;
 
   /* O TEMPO NAO E DIVIDIDO POR IGUAL, e e isso que deixa 12 s bastarem.
 
@@ -43,8 +43,11 @@
      e a aptidao e uma alternancia que se entende no primeiro ciclo. Dar a elas o mesmo
      tempo das outras tres era alongar a espera sem acrescentar nada para ver.
 
-     Os pesos sao relativos: mexer em ESPERA_MINIMA_MS redistribui tudo sozinho. */
-  var PESOS_DAS_ETAPAS = [0.72, 1.3, 1.3, 1.3, 0.88];
+     Os pesos sao relativos: mexer em ESPERA_MINIMA_MS redistribui tudo sozinho. E e
+     por serem relativos que o ajuste de 11/10/2026 -- 10% a menos em todas as etapas,
+     e 25% na primeira -- mexeu em um peso so: os 10% uniformes saem do TOTAL, e o que
+     muda a proporcao e apenas o corte extra da primeira (0,72 x 0,75/0,90 = 0,60). */
+  var PESOS_DAS_ETAPAS = [0.6, 1.3, 1.3, 1.3, 0.88];
 
   /* A confirmacao ocupa a ultima fatia: o broto precisa de um instante para abrir
      a folha final antes de a pagina trocar. */

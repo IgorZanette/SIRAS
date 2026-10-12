@@ -31,9 +31,13 @@ WebP com perda a 70 resolve: a mesma imagem sai com cerca de um décimo do taman
 diferença visível a 10% de opacidade é zero. A largura cai de 1672 para 1600 px, que é
 o que uma faixa full-bleed usa num monitor comum.
 
-TODAS SÃO GERADAS, mesmo com três em uso hoje. Elas são opções do autor: trocar o fundo
-de uma tela é mudar um nome numa linha de CSS, e isso só é verdade se todas estiverem
-lá. A algumas dezenas de KB cada, as de reserva custam menos que o PNG de uma.
+TODAS SÃO GERADAS, e as que o CSS não cita são APAGADAS DE `static/` na revisão de
+pré-congelamento. Não é contradição: gerar é barato e o script é o registro de como cada
+arquivo servido foi produzido, mas um `static/` com arquivos que ninguém baixa é ruído
+num repositório que vai ser congelado e lido por outras pessoas.
+
+Para experimentar outra arte: rode o script, aponte o CSS para ela, e deixe em `static/`
+só a que ficou.
 
 Pillow é dependência DESTE script, não do sistema: o SIRAS continua rodando só com
 flask, jsonschema e pytest (CLAUDE.md). Rode uma vez, versione a saída, e o script

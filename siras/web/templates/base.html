@@ -31,7 +31,10 @@
     } catch (erro) {}
   })();
 </script>
-<title>{% block titulo %}SIRAS — interpretação e recomendação agronômica de solo{% endblock %}</title>
+{# A aba diz só "SIRAS", em todas as telas. O descritivo e o nome da tela saíram: com
+   várias abas abertas o que se lê é o começo do título, e "SIRAS — interpret…" repetido
+   cinco vezes identifica menos do que o ícone sozinho já identificava. #}
+<title>SIRAS</title>
 
 {# Fontes auto-hospedadas. O sistema roda offline em localhost: nenhuma requisição a
    CDN, nem a fonts.googleapis.com. Um participante do teste SUS que veja fonte de

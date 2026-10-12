@@ -94,7 +94,7 @@ A documentação está organizada por função, com índice em
 
 Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/roadmap.md`](docs/processo/roadmap.md).
 
-**Pronto** (10/10/2026):
+**Pronto** (11/10/2026):
 
 - **Motor** — calagem, adubação e aptidão edáfica para as **61 culturas e grupos de culturas** do
   escopo, com `gerar_laudo()` como ponto de entrada único e uma trilha que registra cada decisão
@@ -114,13 +114,24 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
 - **Tabelas do Manual** — sete tabelas transcritas, consultáveis na interface, incluindo o pH de
   referência (Tab. 5.1, com o aviso de que não é ela que dispara a calagem) e os grupos de
   exigência de P e K das 141 culturas do Anexo 2.
-- **Interface v2** ([ADR 0012](docs/decisoes/0012-cena-3d-e-acabamento-da-interface.md)) — uma cena
-  3D do perfil de solo na tela inicial e na tela de espera, revelação das seções ao rolar, seção
-  que declara em que pé o trabalho está, "pular para o conteúdo" e anel de foco único. A cena usa
-  three.js **vendorizado** (`static/vendor/`, com licença e hash conferidos por teste): roda
-  offline como o resto do sistema, não participa de decisão agronômica nenhuma e **não existe no
-  laudo** — há teste para isso, em tela e impresso. Sem JavaScript ou sem WebGL, a página aparece
-  inteira.
+- **Interface v2** ([ADR 0012](docs/decisoes/0012-cena-3d-e-acabamento-da-interface.md) e
+  [ADR 0013](docs/decisoes/0013-integracao-da-cena-3d-e-fundos-mensuraveis.md)) — nova identidade
+  de marca, escolha de tema em três estados (claro, escuro, seguir o sistema), revelação das
+  seções ao rolar, seção que declara em que pé o trabalho está, "pular para o conteúdo" e anel de
+  foco único.
+
+  **As dez cenas 3D** da apresentação estão em uso: três nos estágios da tela inicial, uma como
+  cabeçalho da leitura ao vivo — onde cada atributo preenchido acende o seu ponto e é nomeado num
+  inventário —, cinco na tela de espera (uma coreografia por módulo do motor) e a décima em texto,
+  dizendo o que a ilustração não é. A cena usa three.js **vendorizado** (`static/vendor/`, com
+  licença e hash conferidos por teste): roda offline como o resto do sistema, não participa de
+  decisão agronômica nenhuma e **não existe no laudo** — há teste para isso, em tela e impresso.
+  Sem JavaScript ou sem WebGL, a página aparece inteira.
+
+  **Os fundos de paisagem** entram onde não há texto por cima: atrás do monólito e nas calhas fora
+  da coluna de conteúdo. O limite não foi de gosto, foi medido — o teto de luminância que sustenta
+  o texto terciário a 4,5:1 é 0,027, e a arte em mesclagem cheia chega a 0,57. Cada tema tem a sua
+  família de artes, e `scripts/gerar_fundos.py` as converte para WebP: 13 MB de PNG viram 226 KB.
 - **Indicação de formulação** — o laudo diz qual adubo formulado comprar e em que dose, pelo
   **método do próprio Manual** (§8.3, p. 311): a dose se ancora no nutriente mais deficiente no
   solo, o que falta do outro vira complemento com fertilizante simples e o N restante vai para
@@ -138,9 +149,10 @@ Em desenvolvimento. O estado detalhado de cada etapa está em [`docs/processo/ro
   aplicava manutenção onde o Manual prevê reposição. Os dois defeitos atravessaram a suíte inteira
   sem falhar, porque nenhum teste pedia a combinação de entradas que os revela — é o achado mais
   forte da seção de Resultados.
-- **Suíte** — **5306** testes passando na camada completa, **2594** na rápida, nenhum pulado.
-  A contagem não inclui `SIRAS-3D-kit-v4/` nem `_local/`: o primeiro é material de preparo com
-  testes próprios, o segundo não está no repositório.
+- **Suíte** — **5389** testes passando na camada completa, **2677** na rápida.
+  O único pulado é a conferência da página da defesa, que vive fora do repositório. A contagem não
+  inclui o kit 3D entregue na raiz nem `_local/`: o primeiro é material de origem com testes
+  próprios (e está no `.gitignore`), o segundo não está no repositório.
 
 **Em andamento:** validação e análise de discordâncias, comparação com ferramenta existente e
 avaliação de usabilidade — sprints S5 e S6. O protocolo da usabilidade está em
@@ -149,8 +161,12 @@ e questionário pós-teste estruturado pelas dez heurísticas de Nielsen, em lug
 na proposta.
 
 **Pendente de terceiros:** recrutamento dos participantes da avaliação de usabilidade e a busca na
-literatura pedida pelo orientador (P4 e P8 no roadmap). Pendente do autor: conferir a paginação do
-laudo impresso num navegador, que é a última condição para o congelamento.
+literatura pedida pelo orientador (P4 e P8 no roadmap).
+
+**Pendente do autor, antes do congelamento:** conferir num navegador a paginação do laudo impresso
+e a interface v2 nos dois temas. Nenhuma das duas é verificável por teste automatizado, e as três
+rodadas de correção da interface registradas na ADR 0013 começaram todas por alguém olhar a tela —
+o padrão está anotado lá, porque ele vale para a seção de Resultados.
 
 **A implementação encerra em 12/10/2026**, por definição do orientador. Daí em diante, só testes com
 usuários e redação do artigo ([`docs/artigo_final/`](docs/artigo_final/)).

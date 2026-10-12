@@ -193,16 +193,17 @@ def _ritmo_da_espera():
 def test_a_espera_nao_e_exaustiva():
     """A duração desta tela é decisão do autor, e mudou quatro vezes: 4,2 s no começo,
     6 s para dar tempo de ler a regra de cada passo, 24 s quando a cena 3D entrou e as
-    coreografias não cabiam, e 12 s agora.
+    coreografias não cabiam, 12 s quando 24 s se mostrou exaustivo, e 10,7 s no acerto
+    fino (-10% em todas as etapas, -25% na primeira).
 
-    O 24 s era espera exaustiva. O objetivo da tela é passar robustez de recomendação, e
-    uma tela que demora demais passa o contrário — falta de desempenho.
+    O objetivo da tela é passar robustez de recomendação, e uma tela que demora demais
+    passa o contrário — falta de desempenho.
 
     É pausa deliberada, não progresso simulado: o motor responde em dezenas de
     milissegundos."""
     total, _ = _ritmo_da_espera()
 
-    assert total == 12000
+    assert total == 10700
 
 
 def test_o_tempo_vai_para_as_etapas_que_tem_coreografia():

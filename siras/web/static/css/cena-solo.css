@@ -168,9 +168,6 @@
   color: var(--cs-suave, #a3b6a5); font-size: var(--fs-3xs);
 }
 
-.cena-solo-cultura { margin: 0; font-size: 0.85rem; color: var(--cs-suave, #a3b6a5); }
-.cena-solo-cultura strong { color: var(--cs-texto, #eef5ea); }
-
 /* Variante painel: no formulário a cena fica AO LADO dos campos, nunca atrás */
 /* 320px de monolito no topo do painel empurravam a interpretacao -- o conteudo pelo
    qual a tela existe -- para fora da primeira dobra. A cena aqui ILUSTRA o que ja foi

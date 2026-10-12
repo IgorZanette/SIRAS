@@ -309,6 +309,60 @@ meio da primeira etapa era a outra metade da sensação de travamento.
 
 ---
 
+## Revisão de pré-congelamento
+
+Última rodada antes de a versão ir aos usuários: ajuste fino do ritmo, título da aba, e
+uma varredura de código morto.
+
+### O que saiu
+
+| | |
+|---|---|
+| 40 seletores de CSS | o bloco da formulação anterior à ADR 0011, o alternador de tema de dois estados, a nota da cultura na cena |
+| ~150 linhas de CSS | as que animavam o SVG 2D da tela de espera, mais dez tokens de cor |
+| 2 fundos de `static/` | `op-2` e `op-4`, que nenhum CSS cita (os originais ficam em `docs/fundos/`) |
+| 8 `.gitkeep` | de pastas que já têm conteúdo real |
+
+Cada grupo de CSS tem **procedência conhecida** — uma mudança documentada que o deixou
+para trás —, e não é fruto de uma varredura automática. A distinção importa: a varredura
+produziu 55 candidatos, e a maior parte era falso positivo.
+
+### Por que a varredura automática não serve sozinha
+
+Três armadilhas, todas encontradas nesta revisão:
+
+1. **Nome montado em tempo de execução.** `class="estado__item estado__item--{{ etapa.situacao }}"`
+   não contém nenhum nome de classe pesquisável.
+2. **HTML construído em JavaScript.** `custo.js` monta o cálculo de custo por concatenação
+   (`'<div class="custo__linha' + ...`): o atributo fica aberto na string, e um detector
+   que procura `class="…"` fechado não vê nenhuma delas.
+3. **A palavra existe em prosa.** "camada" e "grupo" aparecem em comentários e em nomes de
+   variável, e o primeiro detector deu as duas como vivas quando ambas estavam mortas.
+
+O que funcionou foi medir contra o **HTML realmente renderizado**: 18 páginas, incluindo
+os laudos de um e de vários talhões em cor e em preto e branco. Ainda assim, os
+candidatos que sobraram ficaram registrados e **não** foram removidos — sem navegador
+para conferir, apagar uma regra por suspeita custa mais do que os bytes que ela ocupa.
+
+### Nenhum código Python morto
+
+As duas funções que a varredura apontou eram `laudo_sem_dados` (rota Flask, registrada
+pelo decorador) e `tem_erro_numerico` (`@property` lida em `dados.html`). As demais eram
+funções registradas por referência num dicionário.
+
+### Ajustes de acabamento
+
+- **O título da aba** passou a ser só "SIRAS", em todas as telas. Com várias abas abertas
+  o que se lê é o começo do título, e "SIRAS — interpret…" cinco vezes identifica menos
+  que o ícone sozinho. **Consequência a notar:** o título é o nome que o navegador sugere
+  ao salvar o laudo em PDF, que passa de "Laudo de recomendação — Soja — SIRAS.pdf" para
+  "SIRAS.pdf". Quem salvar vários laudos vai ter de renomeá-los.
+- **A espera caiu para 10,7 s** (−10% em todas as etapas, −25% na primeira). Por serem
+  pesos relativos, o ajuste mexeu em **um** peso: os 10% uniformes saem do total, e o que
+  muda a proporção é só o corte extra da primeira (0,72 × 0,75/0,90 = 0,60).
+
+---
+
 ## O que isto não resolve
 
 As duas verificações que só a tela dá, e que a suíte não substitui:

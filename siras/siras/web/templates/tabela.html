@@ -31,7 +31,7 @@
   {# A tabela rola dentro do próprio contêiner: a interpretação de P tem nove colunas e
      em telas estreitas a página inteira é que rolaria de lado (WCAG 1.4.10). #}
   <div class="painel tabela-envelope">
-    <table class="tabela-dados">
+    <table class="tabela-dados{{ ' tabela-dados--texto' if tabela.texto_longo }}">
       <thead>
         <tr>{% for coluna in tabela.colunas %}<th scope="col">{{ coluna }}</th>{% endfor %}</tr>
       </thead>

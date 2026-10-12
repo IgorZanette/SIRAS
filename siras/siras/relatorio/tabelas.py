@@ -34,6 +34,14 @@ class Tabela:
     notas: List[str] = field(default_factory=list)
     #: destacado acima da tabela quando a leitura depende de saber disto
     aviso: Optional[str] = None
+    #: True quando as células trazem PROSA ou LISTAS, e não valores curtos.
+    #:
+    #: A folha de estilo impede quebra de linha nas tabelas por um bom motivo: nas
+    #: tabelas de classificação, partir um intervalo como "1,5 – 3,0" ao meio atrapalha
+    #: mais do que a rolagem. Mas duas transcrições não são de valores — os critérios de
+    #: calagem trazem frases, e o pH de referência lista 79 culturas numa célula. Nelas
+    #: a mesma regra produzia uma barra de rolagem horizontal e a tabela saindo da tela.
+    texto_longo: bool = False
 
 
 def _faixa_legivel(faixa: Dict[str, Any], unidade: str = "") -> str:
@@ -121,6 +129,7 @@ def tabela_criterios_calagem(dados: Dict[str, Any]) -> Tabela:
         ])
     return Tabela(
         titulo="Critérios de calagem por grupo de cultura",
+        texto_longo=True,
         fonte="Manual 2016, Tabelas 5.3 a 5.7",
         descricao=dados["criterios_calagem"].get("descricao", ""),
         colunas=["Critério", "Manejo", "Condição da área", "Dispara quando",
@@ -234,6 +243,7 @@ def tabela_ph_referencia(dados: Dict[str, Any]) -> Tabela:
     notas = [rotacao] if isinstance(rotacao, str) else []
     return Tabela(
         titulo="pH de referência das culturas",
+        texto_longo=True,
         fonte=_fonte(bloco),
         descricao=bloco.get("descricao", ""),
         colunas=["pH de referência", "Culturas", "Quais"],

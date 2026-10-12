@@ -624,6 +624,24 @@
                          color: var(--n-100); }
 .tabela-dados tbody td { font-family: var(--ff-display); color: var(--n-300); }
 .tabela-dados tbody tr:hover { background: rgba(140,226,63,.05); }
+
+/* Tabelas de PROSA: critérios de calagem e pH de referência.
+   O `nowrap` acima serve às tabelas de classificação, onde partir "1,5 – 3,0" ao meio é
+   pior que rolar. Nestas duas o conteúdo é texto — frases de condição, e uma célula com
+   79 nomes de cultura —, e o mesmo `nowrap` empurrava a tabela para fora da tela.
+
+   Sem `table-layout: fixed`: com ele as oito colunas dos critérios ficariam todas da
+   mesma largura, e "Fator" — um dígito — ganharia o mesmo espaço que "Condição da
+   área". Deixando no automático, o navegador distribui pelo conteúdo, e o `width: 100%`
+   herdado garante que nada ultrapasse o contêiner: a barra de rolagem não aparece. */
+.tabela-dados--texto { white-space: normal; }
+.tabela-dados--texto th, .tabela-dados--texto td {
+  vertical-align: top; overflow-wrap: anywhere; hyphens: auto;
+}
+/* A primeira coluna é o nome da linha e não deve quebrar em sílabas. */
+.tabela-dados--texto tbody th { overflow-wrap: normal; hyphens: none; }
+/* A célula de lista fica menor que o corpo: são nomes a varrer, não texto a ler. */
+.tabela-dados--texto td:last-child { font-size: var(--fs-xs); line-height: 1.5; }
 .tabela-dados tbody tr:last-child th,
 .tabela-dados tbody tr:last-child td { border-bottom: 0; }
 

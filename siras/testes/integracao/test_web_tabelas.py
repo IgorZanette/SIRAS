@@ -6,6 +6,8 @@ a base transcreveu. Uma tabela de conferência que discorde da base é pior que 
 o técnico confere o número contra ela e conclui que o laudo está errado.
 """
 
+import pathlib
+import pathlib
 import re
 
 import pytest
@@ -85,6 +87,37 @@ def test_a_tabela_rola_dentro_do_proprio_envelope(cliente):
     html = cliente.get("/tabelas/interpretacao-p").get_data(as_text=True)
 
     assert re.search(r'class="painel tabela-envelope"', html)
+
+
+def test_so_as_tabelas_de_prosa_quebram_linha(cliente):
+    """Duas transcrições não são de valores, e por isso quebram linha.
+
+    A folha de estilo impede quebra nas tabelas por um bom motivo: nas de classificação,
+    partir um intervalo como "1,5 - 3,0" ao meio atrapalha mais que a rolagem. Mas os
+    critérios de calagem trazem frases de condição em oito colunas, e o pH de referência
+    lista 79 culturas numa célula — nessas duas a mesma regra produzia barra de rolagem
+    horizontal e a tabela saindo da tela.
+
+    O teste fixa os dois lados: quais quebram, e que as demais continuam sem quebrar."""
+    de_prosa, de_valores = [], []
+    for item in CATALOGO:
+        html = cliente.get(f"/tabelas/{item['id']}").get_data(as_text=True)
+        (de_prosa if "tabela-dados--texto" in html else de_valores).append(item["id"])
+
+    assert sorted(de_prosa) == ["criterios-calagem", "ph-referencia"], de_prosa
+    assert de_valores, "nenhuma tabela de valores restou"
+
+
+def test_a_quebra_nao_parte_o_nome_da_linha():
+    """`overflow-wrap: anywhere` corta no meio da palavra, e é isso que faz a célula de
+    79 nomes caber. Na primeira coluna partiria "graos pd consolidado" em pedaços, e ela
+    é o nome da linha — tem de continuar legível de relance."""
+    css = (pathlib.Path(__file__).parents[2] / "siras" / "web" / "static" / "css"
+           / "siras-telas.css").read_text(encoding="utf-8")
+
+    assert re.search(r"\.tabela-dados--texto tbody th \{[^}]*overflow-wrap: normal", css)
+    assert re.search(r"\.tabela-dados--texto th, \.tabela-dados--texto td \{"
+                     r"[^}]*overflow-wrap: anywhere", css, re.S)
 
 
 def test_o_menu_leva_as_tabelas_de_qualquer_tela(cliente):

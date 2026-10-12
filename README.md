@@ -104,7 +104,7 @@ Medido em 11/10/2026:
 |---|---|
 | Concordância da recomendação | 25/25 = 100% · IC 95% de Wilson [86,7%; 100,0%] |
 | Conformidade da aptidão | 88/88 = 100% em classe e em fator |
-| Suíte | 5389 testes na camada completa, 2677 na rápida |
+| Suíte | 5391 testes na camada completa, 2679 na rápida |
 
 O limite inferior do intervalo passou os 80% que a hipótese H₁.₁ declara.
 

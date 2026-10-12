@@ -103,7 +103,13 @@ def _reexecutar_na_venv(argumentos: list[str]) -> None:
 
     Necessário: um interpretador já em execução não enxerga pacotes instalados depois
     que ele começou. `execv` substitui o processo, então Ctrl+C chega ao servidor.
+
+    O flush não é zelo: `execv` descarta o buffer de stdout. Com a saída redirecionada
+    — um pipe, um painel de IDE que não é tty — as linhas de progresso da instalação se
+    perdiam, e numa partida fria isso são treze segundos de terminal em branco.
     """
+    sys.stdout.flush()
+    sys.stderr.flush()
     os.execv(str(PYTHON_DA_VENV), [str(PYTHON_DA_VENV), str(Path(__file__).resolve()), *argumentos])
 
 
@@ -154,7 +160,12 @@ def servir() -> int:
         abrir.start()
 
     try:
-        criar_app().run(host=HOSPEDEIRO, port=PORTA, debug=False)
+        # `use_reloader=False` explicito, e nao herdado de `debug`: o reloader forka um
+        # processo filho, e dois processos com o mesmo nome e a mesma linha de comando
+        # sao o que sobra no gerenciador de tarefas quando algo falha em encerrar.
+        # Recarregar ao editar nao serve a quem so quer usar o sistema.
+        criar_app().run(host=HOSPEDEIRO, port=PORTA, debug=False,
+                        use_reloader=False, threaded=True)
     except KeyboardInterrupt:
         _encerrar()
     return 0

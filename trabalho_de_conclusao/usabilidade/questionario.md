@@ -2,6 +2,7 @@
 
 **Para colar no Google Forms.** Cada bloco numerado abaixo é uma **seção** do formulário.
 Texto em citação (`>`) é o que o participante lê; o resto são instruções para o autor.
+**Não cole nada que não esteja em `>`.**
 
 Protocolo em [`protocolo`](protocolo.md). O enunciado de cada heurística está
 em linguagem de agrônomo e adaptado ao SIRAS, seguindo a orientação do orientador — não é
@@ -20,10 +21,22 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 | Ordem embaralhada | **Desligado** | As heurísticas têm ordem canônica e devem sair na mesma ordem para todos |
 | Barra de progresso | **Ligada** | Dez seções sem barra parecem não acabar, e a taxa de abandono sobe |
 
-> **Sem termo de consentimento.** Decisão do orientador em 10/10/2026: a avaliação não
-> requer submissão ao CEP (pendência P2) e **não exige termo assinado** — basta o
-> participante responder ao formulário. O rascunho de TCLE que existia foi removido do
-> repositório; o histórico do Git o preserva, caso a banca pergunte.
+**Sem termo de consentimento.** Decisão do orientador em 10/10/2026: a avaliação não
+requer submissão ao CEP (pendência P2) e **não exige termo assinado** — basta o
+participante responder ao formulário. O rascunho de TCLE que existia foi removido do
+repositório; o histórico do Git o preserva, caso a banca pergunte. A abertura do
+formulário diz, mesmo assim, que a participação é voluntária e pode ser interrompida: isso
+não é termo, é o mínimo que se diz a quem dá o próprio tempo.
+
+### Duas regras que o script de consolidação depende de que sejam seguidas
+
+1. **Todo enunciado de pergunta é único.** O Forms usa o enunciado como nome da coluna do
+   CSV. Se as dez heurísticas tivessem a mesma pergunta, o CSV teria dez colunas de mesmo
+   nome — e o leitor de CSV guardaria só a última, transformando dez heurísticas em uma.
+   Por isso as perguntas A, B e C de cada heurística levam o prefixo **`H1 —` a `H10 —`**.
+   Não o remova. O script recusa, com mensagem explicando, um CSV com colunas repetidas.
+2. **Nas perguntas abertas finais, evite as palavras "gravidade", "descreve", "deu errado"
+   e "diferente".** São elas que o script usa para reconhecer as colunas das heurísticas.
 
 ---
 
@@ -43,8 +56,9 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 > **O que me serve é a crítica.** Nota baixa não me magoa; nota alta que esconde um
 > problema me faz entregar um sistema pior. Se alguma coisa te irritou, escreve.
 >
-> Tu não precisas te identificar: nenhuma resposta será publicada com teu nome. As
-> primeiras perguntas servem só para descrever o perfil do grupo que avaliou.
+> A participação é voluntária: tu podes parar a qualquer momento, sem precisar explicar
+> por quê. Tu não precisas te identificar, e nenhuma resposta será publicada com teu nome.
+> As primeiras perguntas servem só para descrever o perfil do grupo que avaliou.
 >
 > ---
 >
@@ -55,25 +69,28 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 > - **2** — Problema leve: atrapalha pouco, dá para contornar.
 > - **3** — Problema grave: atrapalha muito e atrasa o trabalho.
 > - **4** — Catástrofe: impede de usar, ou faz sair informação errada.
+>
+> Se tu não passaste pela situação de algum bloco, marca **Não observei** — é diferente
+> de dar zero.
 
-> **Caracterização do participante.** As cinco perguntas abaixo estavam numa ficha de
-> papel à parte e foram trazidas para dentro do formulário em 10/10/2026, por orientação
-> do orientador: um instrumento só, sem burocracia em volta. São elas que permitem ler
-> as notas com contexto — severidade alta vinda de quem usa ferramenta digital todo dia
-> significa coisa diferente da mesma nota vinda de quem nunca usou.
+*Nota para o autor, não colar:* as perguntas de caracterização abaixo estavam numa ficha
+de papel à parte e foram trazidas para dentro do formulário em 10/10/2026, por orientação
+do orientador: um instrumento só, sem burocracia em volta. São elas que permitem ler as
+notas com contexto — severidade alta vinda de quem usa ferramenta digital todo dia
+significa coisa diferente da mesma nota vinda de quem nunca usou.
 
 **Pergunta 1.1** — *Resposta curta, obrigatória*
 
 > Código do participante (eu te passo na hora do teste — P1, P2, ...)
 
-**Pergunta 1.2** — *Múltipla escolha, obrigatória*
+**Pergunta 1.2** — *Múltipla escolha, obrigatória, com a opção "Outro" (texto) ligada*
 
 > Qual a tua formação/atuação?
 
 - Engenheiro(a) agrônomo(a)
 - Técnico(a) agrícola
 - Estudante de agronomia
-- Outra
+- Outro: ______
 
 **Pergunta 1.3** — *Múltipla escolha, obrigatória*
 
@@ -85,15 +102,18 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 - 6 a 10 anos
 - Mais de 10 anos
 
-**Pergunta 1.4** — *Múltipla escolha, obrigatória*
+**Pergunta 1.4** — *Caixas de seleção, obrigatória*
 
-> Como tu fazes a recomendação hoje?
+> Como tu fazes a recomendação hoje? Marca todas as que se aplicam.
 
 - À mão, com o Manual
 - Planilha própria
 - Software de cooperativa ou revenda
 - Sistema do laboratório
 - Não faço recomendação
+
+*Caixas de seleção, e não múltipla escolha, porque é comum usar mais de um método — o
+laboratório interpreta, o técnico confere no Manual.*
 
 **Pergunta 1.5** — *Múltipla escolha, obrigatória*
 
@@ -112,28 +132,57 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 - Presencialmente, no computador do pesquisador
 - Remotamente, com controle da tela
 
+**Pergunta 1.7** — *Múltipla escolha, obrigatória*
+
+> Tu já conhecias o SIRAS antes deste teste?
+
+- Não
+- Sim, já tinha visto ou usado
+
+*Confirma o critério de exclusão do protocolo (§3). Uma resposta "Sim" não é descartada
+automaticamente: é anotada e decidida caso a caso, e a decisão vai declarada.*
+
 ---
 
 ## Seções 2 a 11 — as dez heurísticas
 
-**Estrutura idêntica em todas as dez.** Substitua apenas o título, a descrição e o
-enunciado da pergunta A.
+**Estrutura idêntica em todas as dez.** Substitua o título, a descrição e o número do
+prefixo `Hn —` nas três perguntas.
 
-- **Pergunta A** — *Escala linear de 0 a 4, obrigatória*
-  Rótulo do 0: `Não é problema` · Rótulo do 4: `Catástrofe`
-  Enunciado: `Qual a gravidade dos problemas que tu encontraste neste aspecto?`
+**Ao final de cada descrição, cole este lembrete:**
+
+> Se tu deste 3 ou 4, por favor descreve na pergunta seguinte — sem a descrição eu não
+> consigo corrigir.
+
+- **Pergunta A** — *Múltipla escolha, obrigatória*
+  Enunciado: `Hn — Qual a gravidade dos problemas que tu encontraste neste aspecto?`
+  Opções, exatamente nesta ordem e com o número no início:
+  - `0 — Não é problema`
+  - `1 — Problema estético: incomoda, mas não atrapalha o uso`
+  - `2 — Problema leve: atrapalha pouco, dá para contornar`
+  - `3 — Problema grave: atrapalha muito e atrasa o trabalho`
+  - `4 — Catástrofe: impede de usar, ou faz sair informação errada`
+  - `Não observei — não passei por essa situação`
 - **Pergunta B** — *Parágrafo, opcional*
-  `Descreve o que deu errado e em que tela aconteceu.`
+  `Hn — Descreve o que deu errado e em que tela aconteceu.`
 - **Pergunta C** — *Parágrafo, opcional*
-  `O que tu farias diferente?`
+  `Hn — O que tu farias diferente?`
 
-> **Sobre "opcional" em B e C.** Vale para as notas 0 e 1. Configure **B como obrigatória
-> quando a nota for 3 ou 4** — no Google Forms isso se faz com uma pergunta separada,
-> visível por ramificação de seção, ou com um lembrete na descrição. Nota alta sem
-> descrição é o pior resultado possível: sabe-se que há um problema grave e não se sabe
-> qual. Se preferir não ramificar, use este texto na descrição de cada seção:
-> *"Se tu deste 3 ou 4, por favor descreve na pergunta seguinte — sem a descrição eu não
-> consigo corrigir."*
+> **Por que múltipla escolha, e não escala linear.** Por dois motivos. A escala linear
+> não tem lugar para "Não observei", e sem ela quem não passou pela situação é empurrado
+> para o 0 — que é uma afirmação ("não é problema"), e puxaria a média para baixo. É o
+> caso típico da H7 (quem não lançou vários talhões) e da H9 (quem não errou nenhum campo
+> não viu mensagem de erro). E a múltipla escolha deixa o rótulo da nota à vista em cada
+> bloco, sem obrigar a pessoa a voltar à Seção 1 para lembrar o que é "2".
+>
+> O script lê o número no início da opção e ignora o rótulo; "Não observei" fica fora da
+> média e é contado à parte, na coluna *Não observou* do relatório.
+>
+> **Por que B não é obrigatória para nota 3 ou 4.** O Forms só desvia de seção a partir de
+> múltipla escolha, e B está na mesma seção que A: tornar B condicional exigiria uma seção
+> extra por heurística — vinte seções em vez de dez, e a barra de progresso andando pela
+> metade. O lembrete na descrição faz o mesmo papel sem o custo. Nota alta sem descrição
+> continua sendo o pior resultado possível, e é por isso que o lembrete está em todas.
 
 ### Seção 2 — Heurística 1: Visibilidade do status do sistema
 
@@ -177,10 +226,18 @@ enunciado da pergunta A.
 
 ### Seção 8 — Heurística 7: Flexibilidade e eficiência de uso
 
-> Pensando em usar isso **toda semana**, e não uma vez só: o sistema tem atalhos? Lançar
-> vários talhões de uma vez funciona bem? Falta alguma facilidade que te pouparia tempo —
-> repetir uma análise anterior, salvar um manejo que tu sempre usas, importar dados do
-> laboratório?
+> Pensando em usar isso **toda semana**, e não uma vez só: o sistema te deixa trabalhar
+> rápido? Lançar vários talhões no mesmo laudo funciona bem? Corrigir um número e gerar o
+> laudo de novo, sem redigitar a análise inteira, é rápido? Alguma etapa te pareceu lenta
+> ou repetitiva demais para quem faz isso todo dia?
+>
+> *O que falta no sistema — um recurso que não existe — vai na última seção. Aqui, avalia
+> o que existe.*
+
+*Por que a ressalva:* a versão anterior desta pergunta sugeria recursos que o SIRAS não
+tem (repetir análise anterior, salvar manejo, importar do laboratório). Isso transformava a
+nota de gravidade numa lista de desejos e duplicava a 12.4. Os desejos continuam
+bem-vindos — na 12.4, onde não contaminam a severidade.
 
 ### Seção 9 — Heurística 8: Estética e design minimalista
 
@@ -197,8 +254,9 @@ enunciado da pergunta A.
 ### Seção 11 — Heurística 10: Ajuda e documentação
 
 > Se te desse uma dúvida sobre como usar alguma função, dava para achar ajuda dentro do
-> próprio sistema? As explicações que existem — as notas dos campos, as tabelas do Manual,
-> a trilha de onde vem cada número — foram suficientes?
+> próprio sistema? As explicações que existem — a apresentação em três passos que aparece
+> na tela inicial, as notas dos campos, as tabelas do Manual, a trilha de onde vem cada
+> número — foram suficientes?
 
 ---
 
@@ -208,7 +266,7 @@ enunciado da pergunta A.
 
 **Descrição:**
 
-> Quatro perguntas abertas. São as mais importantes do formulário — responde com o que te
+> Quatro perguntas abertas, a terceira em duas partes. São as mais importantes do formulário — responde com o que te
 > vier, sem filtrar.
 
 **Pergunta 12.1** — *Parágrafo, obrigatória*
@@ -219,27 +277,42 @@ enunciado da pergunta A.
 
 > Tu usarias essa ferramenta no teu trabalho? Por quê — ou por que não?
 
-**Pergunta 12.3** — *Parágrafo, obrigatória*
+**Pergunta 12.3a** — *Parágrafo, obrigatória*
 
-> Duas perguntas diferentes, e eu preciso das duas separadas:
-> **(a)** sobre a **ferramenta** — ela é confiável, clara, útil?
-> **(b)** sobre a **recomendação agronômica** que ela gerou — tu concordarias com ela, e
-> assinarias um laudo desses?
+> **Sobre a ferramenta:** ela é confiável, clara, útil?
+
+**Pergunta 12.3b** — *Parágrafo, obrigatória*
+
+> **Sobre a recomendação agronômica** que ela gerou: tu concordas com ela? Recomendarias
+> ao produtor como está?
+
+*Por que 12.3a e 12.3b são campos separados, e não um só:* o participante avalia a interface e a
+recomendação ao mesmo tempo, e as duas coisas são distintas (protocolo, §9, ameaça 6).
+Num campo só, as respostas misturam os dois juízos e cabe ao autor separá-los depois, por
+interpretação — exatamente o que não se quer. Divergência agronômica vai para a auditoria
+do orientador, não para o capítulo de usabilidade. "Recomendarias ao produtor", e não
+"assinarias o laudo": estudante não assina, e técnico agrícola tem atribuição limitada —
+a pergunta precisa servir a toda a amostra.
 
 **Pergunta 12.4** — *Parágrafo, obrigatória*
 
-> Falta alguma coisa no sistema para que ele servisse à tua rotina de verdade? O que?
+> Falta alguma coisa no sistema para que ele servisse à tua rotina de verdade? O quê?
 
 ---
 
 ## Depois da coleta
 
-Exporte as respostas em CSV pela aba **Respostas** e rode:
+Exporte as respostas em CSV pela aba **Respostas** e rode, da raiz do repositório:
 
 ```
-python scripts/consolidar_heuristicas.py respostas.csv --saida docs/validacao/resultados/
+py siras/scripts/consolidar_heuristicas.py respostas.csv --saida trabalho_de_conclusao/validacao/resultados/
 ```
 
-O script produz, por heurística, média, mediana, mínimo, máximo e contagem; o ranking de
-prioridade; e todos os relatos agrupados, identificados pelo código do participante. Saída
-em Markdown e CSV, prontos para a monografia.
+O script produz, por heurística, média, mediana, mínimo, máximo, contagem e quantos
+marcaram "Não observei"; o ranking de prioridade; e todos os relatos agrupados,
+identificados pelo código do participante. Saída em Markdown e CSV, prontos para a
+monografia.
+
+**Antes da primeira sessão real**, responda o formulário uma vez você mesmo, exporte o CSV
+e rode o comando acima. Se o script reclamar de colunas repetidas, algum enunciado ficou
+sem o prefixo `Hn —`.

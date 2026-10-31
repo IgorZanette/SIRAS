@@ -13,11 +13,11 @@ Duas escolhas que o relatório declara, e que valem explicar aqui:
 - **mediana ao lado da média.** Com cinco a oito respostas, um avaliador severo desloca a
   média inteira. Ver os dois números juntos mostra na hora quando isso aconteceu.
 - **sem inferência.** Nada de intervalo de confiança nem teste de hipótese: a amostra é
-  pequena e por conveniência, e a estatística é descritiva. Ver USABILIDADE.md §3.
+  pequena e por conveniência, e a estatística é descritiva. Ver o protocolo, §3.
 
 Uso:
-    python scripts/consolidar_heuristicas.py respostas.csv
-    python scripts/consolidar_heuristicas.py respostas.csv --saida trabalho_de_conclusao/validacao/resultados/
+    py siras/scripts/consolidar_heuristicas.py respostas.csv
+    py siras/scripts/consolidar_heuristicas.py respostas.csv --saida trabalho_de_conclusao/validacao/resultados/
 
 Sem --saida, imprime o relatório em Markdown na tela.
 """
@@ -60,7 +60,8 @@ _PADRAO_CODIGO = re.compile(r"c[óo]digo", re.IGNORECASE)
 #: amostra, e precisam ficar FORA da varredura das heuristicas: "Como tu fazes a
 #: recomendacao hoje?" nao e nota de severidade nem relato de falha.
 _PADRAO_PERFIL = re.compile(
-    r"forma[çc][ãa]o|h[áa] quanto tempo|recomenda[çc][ãa]o hoje|conforto|como tu usaste",
+    r"forma[çc][ãa]o|h[áa] quanto tempo|recomenda[çc][ãa]o hoje|conforto|como tu usaste"
+    r"|j[áa] conhecias",
     re.IGNORECASE,
 )
 
@@ -73,9 +74,9 @@ def _colunas_por_heuristica(cabecalho: List[str]) -> Dict[int, Dict[str, str]]:
     """Mapeia cada heurística às suas três colunas, pela ordem em que aparecem.
 
     O Forms exporta as colunas na ordem das seções, então a n-ésima coluna de severidade é
-    a da n-ésima heurística. Casar por número no enunciado seria mais robusto, mas o
-    instrumento não numera as perguntas — e pedir que numere para agradar ao script seria
-    deixar a ferramenta mandar no método.
+    a da n-ésima heurística. Os enunciados levam o prefixo "H1 —" a "H10 —", mas não por
+    causa deste mapeamento: sem ele as dez perguntas teriam o mesmo texto, e o CSV, dez
+    colunas de mesmo nome (ver ``carregar``).
     """
     heuristicas = [c for c in cabecalho if not _PADRAO_PERFIL.search(c)]
     severidade = [c for c in heuristicas if _PADRAO_SEVERIDADE.search(c)]
@@ -118,25 +119,42 @@ def _coluna_do_codigo(cabecalho: List[str]) -> Optional[str]:
     return None
 
 
+#: A nota no início da resposta. A pergunta de severidade é múltipla escolha, e o Forms
+#: exporta a opção inteira — "3 — Problema grave" —, não só o número; "3" e "3,0" também
+#: casam. O que vem depois do dígito é rótulo e é ignorado.
+_NOTA_NO_INICIO = re.compile(r"^\s*([0-4])(?:[.,]0+)?(?!\d)")
+
+
 def _nota(valor: str) -> Optional[int]:
-    """A nota quando ela é um inteiro de 0 a 4; None quando a pergunta ficou em branco.
+    """A nota quando a resposta começa por um inteiro de 0 a 4; None nos demais casos.
 
     Em branco não vira zero: zero é "não é um problema", uma afirmação, e resposta ausente
-    é ausência de afirmação. Confundir os dois puxaria toda média para baixo.
+    é ausência de afirmação. Confundir os dois puxaria toda média para baixo. O mesmo vale
+    para "Não observei": quem não passou pela situação não afirmou que ela funciona.
     """
-    texto = (valor or "").strip()
-    if not texto:
-        return None
-    try:
-        nota = int(float(texto.replace(",", ".")))
-    except ValueError:
-        return None
-    return nota if 0 <= nota <= 4 else None
+    casamento = _NOTA_NO_INICIO.match(valor or "")
+    return int(casamento.group(1)) if casamento else None
 
 
 def carregar(caminho: Path) -> List[Dict[str, str]]:
     with open(caminho, encoding="utf-8-sig", newline="") as arquivo:
-        linhas = list(csv.DictReader(arquivo))
+        leitor = csv.reader(arquivo)
+        cabecalho = next(leitor, [])
+        corpo = list(leitor)
+
+    # Duas colunas com o mesmo nome não chegam a dar erro no DictReader: a segunda
+    # sobrescreve a primeira em silêncio, e as dez heurísticas viram uma só. O Forms usa o
+    # enunciado como nome da coluna, então isso acontece sempre que duas perguntas têm o
+    # mesmo texto — e é por isso que os enunciados levam "H1 —" a "H10 —".
+    repetidas = sorted({c for c in cabecalho if c and cabecalho.count(c) > 1})
+    if repetidas:
+        raise ErroConsolidacao(
+            f"{caminho}: o CSV tem colunas com o mesmo nome ({'; '.join(repetidas)}). "
+            f"Cada pergunta do formulário precisa de um enunciado único — confira o "
+            f"prefixo \"H1 —\" a \"H10 —\" em trabalho_de_conclusao/usabilidade/questionario.md"
+        )
+
+    linhas = [dict(zip(cabecalho, valores)) for valores in corpo]
     if not linhas:
         raise ErroConsolidacao(f"{caminho}: nenhuma resposta no arquivo")
     return linhas
@@ -151,15 +169,21 @@ def consolidar(linhas: List[Dict[str, str]]) -> Dict[str, Any]:
     for numero, rotulo in HEURISTICAS:
         col = colunas[numero]
         notas: List[int] = []
+        nao_observado = 0
         relatos: List[Dict[str, str]] = []
 
         for i, linha in enumerate(linhas, start=1):
             codigo = (linha.get(coluna_codigo) or "").strip() if coluna_codigo else ""
             codigo = codigo or f"(resposta {i})"
 
-            nota = _nota(linha.get(col["severidade"], ""))
+            resposta = (linha.get(col["severidade"], "") or "").strip()
+            nota = _nota(resposta)
             if nota is not None:
                 notas.append(nota)
+            elif resposta:
+                # Respondeu, mas sem nota: é o "Não observei". Contado à parte, para o
+                # relatório mostrar quantos não passaram pela situação.
+                nao_observado += 1
 
             falha = (linha.get(col["falha"], "") or "").strip() if col["falha"] else ""
             sugestao = (linha.get(col["sugestao"], "") or "").strip() if col["sugestao"] else ""
@@ -175,6 +199,7 @@ def consolidar(linhas: List[Dict[str, str]]) -> Dict[str, Any]:
             "numero": numero,
             "rotulo": rotulo,
             "n": len(notas),
+            "nao_observado": nao_observado,
             "media": statistics.mean(notas) if notas else None,
             "mediana": statistics.median(notas) if notas else None,
             "minimo": min(notas) if notas else None,
@@ -198,7 +223,8 @@ def relatorio_markdown(dados: Dict[str, Any]) -> str:
         "# Consolidação do questionário de usabilidade",
         "",
         f"Respondentes: **{dados['respondentes']}**. Severidade de 0 (não é problema) a "
-        "4 (catástrofe).",
+        "4 (catástrofe). *Não observou* conta quem marcou \"Não observei\": não entra em "
+        "*n* nem nas estatísticas.",
         "",
         "> Estatística **descritiva**. A amostra é pequena e por conveniência: não há "
         "inferência, intervalo de confiança nem teste de hipótese. A escala de Nielsen é "
@@ -207,14 +233,15 @@ def relatorio_markdown(dados: Dict[str, Any]) -> str:
         "",
         "## Severidade por heurística",
         "",
-        "| # | Heurística | Média | Mediana | Mín | Máx | n |",
-        "|---|---|---|---|---|---|---|",
+        "| # | Heurística | Média | Mediana | Mín | Máx | n | Não observou |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for h in dados["heuristicas"]:
         linhas.append(
             f"| {h['numero']} | {h['rotulo']} | {_num(h['media'])} | "
             f"{_num(h['mediana'], 1)} | {h['minimo'] if h['minimo'] is not None else '—'} | "
-            f"{h['maximo'] if h['maximo'] is not None else '—'} | {h['n']} |"
+            f"{h['maximo'] if h['maximo'] is not None else '—'} | {h['n']} | "
+            f"{h['nao_observado']} |"
         )
 
     com_media = [h for h in dados["heuristicas"] if h["media"] is not None]
@@ -260,7 +287,8 @@ def relatorio_markdown(dados: Dict[str, Any]) -> str:
 def escrever_csv(dados: Dict[str, Any], caminho: Path) -> None:
     with open(caminho, "w", encoding="utf-8", newline="") as arquivo:
         escritor = csv.writer(arquivo)
-        escritor.writerow(["numero", "heuristica", "media", "mediana", "minimo", "maximo", "n"])
+        escritor.writerow(["numero", "heuristica", "media", "mediana", "minimo", "maximo", "n",
+                            "nao_observado"])
         for h in dados["heuristicas"]:
             escritor.writerow([
                 h["numero"], h["rotulo"],
@@ -269,6 +297,7 @@ def escrever_csv(dados: Dict[str, Any], caminho: Path) -> None:
                 h["minimo"] if h["minimo"] is not None else "",
                 h["maximo"] if h["maximo"] is not None else "",
                 h["n"],
+                h["nao_observado"],
             ])
 
 

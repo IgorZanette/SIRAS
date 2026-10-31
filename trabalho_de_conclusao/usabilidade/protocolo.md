@@ -71,7 +71,7 @@ gratuita, e justa.
 | Perfil | Agrônomos, técnicos agrícolas e estudantes concluintes de agronomia — o público-alvo declarado na proposta |
 | Critério de inclusão | Ter, na rotina, contato com análise de solo ou recomendação de adubação |
 | Critério de exclusão | Ter participado do desenvolvimento ou já conhecer o SIRAS |
-| Recrutamento | Contato direto do autor; registrado como pendência **P8** no `docs/processo/roadmap.md` |
+| Recrutamento | Contato direto do autor; registrado como pendência **P8** no `trabalho_de_conclusao/processo/roadmap.md` |
 | Compensação | Nenhuma |
 
 **Por que 5 a 8.** Nielsen e Landauer (1993) mostram que cerca de cinco participantes
@@ -146,7 +146,7 @@ Tempo de tarefa **não** é métrica primária. Com amostra desta dimensão e pr
 guiado, tempo mede mais a conversa do que a interface. Anota-se, e não se conclui dele.
 
 **No questionário:** severidade de 0 a 4 por heurística; descrição livre das falhas e da
-tela em que ocorrem; sugestões de melhoria; e quatro perguntas abertas finais.
+tela em que ocorrem; sugestões de melhoria; e quatro perguntas abertas finais, a terceira em duas partes (ferramenta e recomendação, em campos separados — ameaça 6). Severidade inclui a opção "Não observei", que fica fora da média.
 
 ## 8. Congelamento da versão avaliada
 
@@ -173,7 +173,7 @@ Declaradas aqui para irem ao texto, e não descobertas na arguição.
 | 2 | **R1 treina o participante** antes de R2 e R3 | Declarada como escolha de desenho: mede-se adoção assistida, não descoberta autônoma |
 | 3 | **Severidade por heurística, respondida por usuário**, não é a severidade de Nielsen | Adaptação declarada na §2; resultados apresentados como percepção, não como índice |
 | 4 | **Amostra pequena e por conveniência** | Sem inferência estatística; resultados descritivos e qualitativos |
-| 5 | **A heurística 10 (ajuda e documentação) tende a pontuar alto** num sistema sem seção de ajuda, e isso pode inflar a média geral de severidade | Relatar por heurística, nunca só a média global |
+| 5 | **A heurística 10 (ajuda e documentação) tende a pontuar alto** num sistema sem seção de ajuda dedicada — há só a apresentação de três passos da tela inicial e as notas dos campos —, e isso pode inflar a média geral de severidade | Relatar por heurística, nunca só a média global |
 | 6 | **O participante avalia a recomendação agronômica junto com a interface** — e as duas são coisas distintas | A pergunta aberta final separa explicitamente os dois juízos; divergências agronômicas vão para a auditoria do orientador (CCAE §10), não para o capítulo de usabilidade |
 
 ## 10. Análise dos resultados

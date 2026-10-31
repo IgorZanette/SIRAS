@@ -44,7 +44,7 @@ autor, o teste mede apenas se a implementação corresponde à transcrição.
   elaborada por profissional habilitado.
 - **H1.2:** risco maior e ainda **não resolvido**. As faixas de aptidão são definidas pelo autor; se
   o oráculo derivar dessas mesmas faixas, a concordância é 100% por construção e o teste não mede
-  nada. Encaminhamento necessário — ver `docs/processo/roadmap.md`, pendência P1:
+  nada. Encaminhamento necessário — ver `trabalho_de_conclusao/processo/roadmap.md`, pendência P1:
   1. faixas construídas a partir de fonte **independente** do Manual; e
   2. subconjunto de casos classificado às cegas por um agrônomo.
 

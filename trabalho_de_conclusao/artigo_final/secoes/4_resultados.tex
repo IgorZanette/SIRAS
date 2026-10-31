@@ -1,0 +1,172 @@
+\section{Resultados e Discussão}\label{sec:resultados}
+
+Esta seção apresenta, para cada dimensão avaliada, o resultado obtido e a sua interpretação: a
+concordância das recomendações, os defeitos que a validação revelou, a conformidade da aptidão
+edáfica e sua sensibilidade às decisões do autor, a avaliação de usabilidade e as limitações.
+
+\subsection{Concordância das recomendações}\label{sec:res_concordancia}
+
+Os 25 casos de validação foram concordantes, com taxa de 100\% e intervalo de confiança de 95\%
+de [86,7\%; 100,0\%] (\autoref{tab:concordancia}). Como o limite inferior do intervalo supera os
+80\% fixados na hipótese, a hipótese foi aceita. O dado mais importante, porém, não é a taxa, e
+sim o intervalo: com os 15 casos que o conjunto tinha até 10/10/2026, a taxa já era de 100\%,
+mas o intervalo era de [79,6\%; 100,0\%], com o limite inferior abaixo da meta. O problema não
+era de acerto, e sim de tamanho de amostra, e foi resolvido com dez casos novos.
+
+\begin{table}[htb]
+\centering
+\caption{Concordância das recomendações de calagem e adubação por grupo de culturas.}
+\label{tab:concordancia}
+\footnotesize
+\begin{tabular}{lccc}
+\toprule
+\textbf{Grupo} & \textbf{Casos} & \textbf{Concord.} & \textbf{IC 95\% (Wilson)} \\
+\midrule
+Grãos          & 12 & 12 & [75,8\%; 100\%] \\
+Frutíferas     &  4 &  4 & [51,0\%; 100\%] \\
+Hortaliças     &  3 &  3 & [43,9\%; 100\%] \\
+Cana e tabaco  &  3 &  3 & [43,9\%; 100\%] \\
+Erva-mate      &  2 &  2 & [34,2\%; 100\%] \\
+Tubérculos     &  1 &  1 & [20,7\%; 100\%] \\
+\midrule
+\textbf{Total} & \textbf{25} & \textbf{25} & \textbf{[86,7\%; 100\%]} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Dois pontos limitam a leitura desse resultado. Primeiro, o conjunto ficou abaixo dos 40 casos
+previstos na proposta: cada caso exige o cálculo à mão de todas as saídas, com memória
+registrada, e os casos foram escolhidos por lacuna de cobertura, e não por quantidade. Os
+intervalos por grupo, largos, mostram o que isso custa: a evidência é forte para o conjunto e
+para os grãos, e fraca para os grupos com um a quatro casos. Segundo, sistema e oráculo partem do
+mesmo Manual. A concordância atesta que a transcrição e a implementação reproduzem os critérios
+publicados, e não que esses critérios sejam agronomicamente adequados a uma área específica.
+
+O Anexo~1 do Manual oferece uma verificação que não depende do autor: ele publica a análise de
+quatro glebas e as classes de P e K resultantes para alho, milho, trigo e eucalipto. O motor do
+SIRAS reproduziu as 32 classificações publicadas, sem divergência, e a tabela SMP transcrita
+reproduziu as três doses de calcário que o texto do anexo calcula.
+
+\subsection{Defeitos revelados pela validação}\label{sec:res_defeitos}
+
+Os dez casos acrescentados para estreitar o intervalo cobriram grupos e situações que o conjunto
+inicial não exercitava --- dos 15 casos originais, nove eram de calagem e um só passava pelo
+algoritmo de adubação dos grãos. Dois deles divergiram do sistema, e nos dois a falha era do
+sistema, não do caso. Na adubação nitrogenada, o adicional de N por rendimento esperado estava
+transcrito na base para todas as culturas a que se aplica, mas nenhuma linha de código o lia: a
+dose de N não variava com a expectativa de rendimento, enquanto a de P e K variava. Na classe
+\emph{muito alto} de P e K, no segundo cultivo, o sistema aplicava a dose de manutenção onde o
+Manual indica a de reposição, porque o texto transcrito juntava as duas numa mesma frase.
+
+Os dois defeitos estavam no sistema desde a implementação e haviam passado por mais de cinco mil
+testes automatizados sem que nenhum falhasse, porque nenhum teste combinava as entradas que os
+revelam. É o resultado mais instrutivo da validação: uma taxa de 100\% sobre um conjunto
+concentrado no caminho mais exercitado não media o que parecia medir. O valor do oráculo
+calculado à mão está em que ele é escrito a partir do Manual, e não do código, e por isso pode
+discordar do código.
+
+\subsection{Conformidade da aptidão edáfica}\label{sec:res_aptidao}
+
+A implementação reproduziu o CCAE nos 88 casos com classe definida, tanto na classe quanto no
+fator determinante, e os quatro casos de dado ausente resultaram, como especificado, no estado
+indeterminado. O resultado atesta a correção e a rastreabilidade da implementação, e não a
+adequação agronômica dos critérios, que não foram validados por especialistas independentes nem em
+campo.
+
+Para medir quanto a classe depende das decisões do autor, o conjunto foi executado em quatro
+configurações (\autoref{tab:sensibilidade}). A regra de rebaixamento por acúmulo, a decisão de
+maior fragilidade do caderno, é também a de maior efeito: ativada, mudaria 12 dos 88 casos, quase
+todos de \emph{restrita} para \emph{inapta sem correção prévia}, e dobraria essa última classe.
+Todas as mudanças ocorreriam no cenário atual, nunca no potencial, porque após a correção restam
+apenas os fatores permanentes. Esse efeito justifica mantê-la desativada no resultado oficial.
+Os fatores permanentes pesam pouco: retirar a textura, ou a textura e a CTC, muda dois e cinco
+casos, todos de \emph{apta com restrições} para \emph{apta}.
+
+\begin{table}[htb]
+\centering
+\caption{Distribuição das classes de aptidão nos 88 casos, por configuração.}
+\label{tab:sensibilidade}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Configuração} & \textbf{A} & \textbf{AR} & \textbf{R} & \textbf{I} & \textbf{Mudam} \\
+\midrule
+Sistema (fator mais limitante) & 29 & 30 & 18 & 11 & --- \\
+Com rebaixamento por acúmulo   & 29 & 29 &  8 & 22 & 12 \\
+Sem textura (F7)               & 31 & 28 & 18 & 11 &  2 \\
+Sem CTC e textura (F5 e F7)    & 34 & 25 & 18 & 11 &  5 \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\raggedright\scriptsize A: apta; AR: apta com restrições; R: restrita; I: inapta sem correção prévia.
+\end{table}
+
+A comparação entre cenários é a parte da aptidão que integra os dois módulos do sistema. No caso
+da Gleba~4 com milho (\autoref{fig:aptidao}), a área é \emph{restrita} hoje, limitada pelo
+potássio, e passa a \emph{apta} após a correção recomendada pelo próprio SIRAS, quando a única
+limitação remanescente é a CTC, que não se corrige com insumos. O laudo deixa assim de dizer
+apenas quanto aplicar e passa a dizer o que a aplicação muda.
+
+\subsection{Avaliação de usabilidade}\label{sec:res_usabilidade}
+\pendente{perfil dos participantes; desempenho nos três roteiros (concluíram sozinhos, com ajuda
+ou não concluíram; onde travaram); severidade por heurística, com média e mediana; problemas
+priorizados; juízo sobre a recomendação separado do juízo sobre a ferramenta. Fonte:
+\texttt{scripts/consolidar\_heuristicas.py} sobre o CSV do formulário e as anotações das sessões}
+
+\subsection{Comparação com ferramenta existente}\label{sec:res_comparacao}
+O SIRAS foi posicionado frente ao FertFácil \citep{Tiecher2016, FertFacil2026}, a ferramenta de
+recomendação de calagem e adubação mais difundida no RS, adotada pela Emater/RS. A
+\autoref{tab:fertfacil} resume a comparação funcional, feita a partir da documentação pública e de
+um laudo de exemplo do FertFácil.
+
+\begin{table}[htb]
+\centering
+\caption{Comparação funcional entre o FertFácil e o SIRAS.}
+\label{tab:fertfacil}
+\footnotesize
+\begin{tabularx}{\columnwidth}{lXX}
+\toprule
+ & \textbf{FertFácil} & \textbf{SIRAS} \\
+\midrule
+Base técnica & Manuais RS/SC (2016) e PR (2019) & Manual RS/SC (2016) \\
+Escopo & todas as culturas dos dois manuais & 61 culturas e grupos \\
+Calagem e adubação & sim & sim \\
+Indicação do adubo & uma fórmula, com dose e complemento & fórmula ideal, catálogo e mistura de simples \\
+Aptidão edáfica & não & atual e potencial \\
+Origem de cada valor & não exibida & regra e tabela do Manual \\
+Laudo & sintético, imprimível & essencial e anexo explicativo, imprimível \\
+Execução & on-line & local, sem internet \\
+Maturidade & em uso desde 2015 & protótipo acadêmico \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+As duas ferramentas convergem no núcleo --- recomendar calagem e adubação pelo Manual RS/SC --- e
+divergem no que entregam em torno dele. O FertFácil cobre mais: dois manuais completos, e não um
+recorte de 61 culturas, além de um módulo que compara 11 manuais para a soja. É também uma
+ferramenta madura, em uso profissional há mais de uma década. O SIRAS acrescenta três coisas que
+o FertFácil não oferece: a estimativa de aptidão edáfica, com o efeito da correção sobre ela; a
+indicação da origem de cada número do laudo; e um laudo que, além da recomendação, explica a
+interpretação de cada atributo e o caminho até cada dose. O FertFácil entrega a receita; o SIRAS
+entrega a receita com a justificativa. As diferenças de escopo e de maturidade são esperadas entre
+um produto consolidado e um trabalho de conclusão de curso, e a integração entre recomendação e
+aptidão, ausente nas ferramentas analisadas, é a contribuição que este trabalho se propôs a fazer.
+
+A proposta previa também submeter um subconjunto dos casos de validação ao FertFácil e comparar as
+saídas. A comparação não foi realizada, porque o acesso ao sistema, que exige cadastro, não pôde ser
+obtido no período da avaliação. A perda é limitada: as duas ferramentas implementam o mesmo Manual,
+e a correção numérica do SIRAS já foi medida contra o oráculo calculado à mão. A comparação
+numérica permanece como trabalho futuro, útil sobretudo para localizar pontos de leitura
+divergente do Manual entre as duas implementações.
+
+\subsection{Limitações}\label{sec:res_limitacoes}
+
+A aptidão é exclusivamente edáfica: não considera relevo, clima, drenagem nem erosão, e seus
+critérios, embora ancorados no Manual e no sistema oficial, foram definidos pelo autor e não
+foram validados por especialistas independentes nem em campo. O oráculo das recomendações deriva
+do mesmo Manual que o sistema implementa, o que limita a validação à fidelidade aos critérios
+publicados. O conjunto de casos é menor que o previsto e desigual entre os grupos. A avaliação de
+usabilidade usa amostra pequena e por conveniência, e as notas de severidade exprimem percepção
+dos usuários, não gravidade técnica. Por fim, o SIRAS é ferramenta de apoio à decisão e não
+substitui a responsabilidade técnica de profissional habilitado.

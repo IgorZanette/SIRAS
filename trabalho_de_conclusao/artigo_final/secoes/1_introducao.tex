@@ -1,0 +1,48 @@
+\section{Introdução}\label{sec:intro}
+
+A interpretação da análise química e física do solo é a etapa que transforma um laudo de
+laboratório em decisão de manejo: quanto calcário aplicar, quanto de nitrogênio, fósforo e
+potássio fornecer e se a área está em condições de receber a cultura pretendida. O processo
+exige conhecimento técnico e atenção rigorosa, porque erros de interpretação têm custo direto
+para o produtor --- seja pelo uso desnecessário de insumos, seja pela perda de produtividade
+decorrente de correções insuficientes. Sua complexidade advém da multiplicidade de variáveis
+envolvidas, como pH, índice SMP, teores de fósforo e potássio, capacidade de troca de cátions
+(CTC), saturação por bases e textura, e da necessidade de cruzá-las com as exigências de cada
+cultura \citep{Embrapa2011, ManualCalagem2016}.
+
+No Rio Grande do Sul e em Santa Catarina, esses critérios estão consolidados no \textit{Manual
+de Calagem e Adubação} da Comissão de Química e Fertilidade do Solo \citep{ManualCalagem2016},
+que organiza a recomendação em dezenas de tabelas condicionadas ao grupo de cultura, ao sistema
+de manejo, ao histórico da área e à expectativa de rendimento. Aplicá-lo à mão é trabalhoso e
+sujeito a erro; e, na prática do crédito rural, observa-se que projetos agrícolas submetidos a
+instituições financeiras podem apresentar recomendações inconsistentes, sem que haja um
+instrumento objetivo e rastreável para conferi-las --- constatação que motivou este trabalho,
+a partir da experiência do autor na assistência técnica a produtores e no atendimento bancário
+a carteiras de crédito rural.
+
+Há ferramentas que automatizam parte desse processo. O FertFácil \citep{Tiecher2016}
+recomenda calagem e adubação pelos critérios do Manual e é amplamente usado no estado, e o
+AdubaTec \citep{AdubaTec2021} faz o mesmo para manuais do Nordeste. Em outra escala, o Sistema
+de Avaliação da Aptidão Agrícola das Terras \citep{RamalhoFilhoBeek1995, EmbrapaAptidao2025}
+classifica o potencial das terras em levantamentos regionais, mas não se presta à avaliação
+de uma área individual a partir de sua análise de solo \citep{Hofig2015}. Existem, portanto,
+sistemas que recomendam a correção do solo e métodos que avaliam a aptidão em escala regional,
+mas não uma ferramenta acessível ao técnico gaúcho que integre as duas perspectivas a partir de
+uma análise individual --- e que mostre, para cada número emitido, de que regra e de que
+tabela ele veio.
+
+Este trabalho teve por objetivo desenvolver e avaliar o \textbf{SIRAS} --- Sistema de
+Interpretação e Recomendação Agronômica de Solo ---, um sistema especialista baseado em regras
+que interpreta a análise de solo, recomenda calagem e adubação para 61 culturas e grupos de
+culturas segundo o Manual \citep{ManualCalagem2016} e estima a aptidão edáfica da área para a
+cultura escolhida, antes e depois da correção recomendada. A hipótese avaliada foi a de que o
+SIRAS gera recomendações de calagem e adubação com taxa de concordância igual ou superior a
+80\% em relação a valores de referência calculados de forma independente a partir do Manual.
+A estimativa de aptidão, cujos critérios foram definidos pelo autor, foi verificada quanto à
+conformidade da implementação com a especificação previamente congelada, e a interface foi
+avaliada em teste com usuários do público-alvo.
+
+O restante do artigo está organizado da seguinte forma: a \autoref{sec:revisao} apresenta os
+fundamentos e os trabalhos relacionados; a \autoref{sec:metodos} descreve o método, os
+instrumentos de avaliação e o sistema desenvolvido; a \autoref{sec:resultados} apresenta e
+discute os resultados; e a \autoref{sec:conclusao} encerra o trabalho.

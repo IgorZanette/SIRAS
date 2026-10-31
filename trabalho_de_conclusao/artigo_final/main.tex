@@ -1,0 +1,96 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Artigo final de Trabalho de Conclusão de Curso             %
+% Curso de Ciência da Computação -- Universidade de Passo Fundo
+% Autor: Igor Zanette -- Orientador: Prof. Rafael Rieder     %
+%                                                            %
+% Classe CC-EC_TF-TC (modelo oficial do curso).              %
+% Corpo do texto: 10 a 15 páginas, sem contar apêndices.     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[alpha-refs,brazilian]{CC-EC_TF-TC}
+
+\setlength {\marginparwidth }{2cm}
+\AtBeginDocument{\renewcommand{\harvardand}{e}}
+
+%%% Pacotes adicionais
+\usepackage{lmodern}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{epstopdf}
+\usepackage{todonotes}
+\usepackage{multirow}
+\usepackage{nicefrac}
+
+%%% As figuras moram fora do artigo, em trabalho_de_conclusao/figuras/, porque são
+%%% produzidas no Figma e reaproveitadas na apresentação. Exportar em PDF vetorial.
+\graphicspath{{../figuras/}}
+
+%%% Figura ainda não exportada: em vez de quebrar a compilação, desenha um quadro com o
+%%% nome do arquivo esperado. Assim o texto pode ser revisado antes das figuras existirem.
+%%% Aceita PDF (preferido, vetorial) ou PNG.
+\newcommand{\figura}[2]{%
+  \IfFileExists{../figuras/#1.pdf}%
+    {\includegraphics[width=#2]{#1.pdf}}%
+    {\IfFileExists{../figuras/#1.png}%
+      {\includegraphics[width=#2]{#1.png}}%
+      {\fbox{\parbox[c][3cm][c]{\dimexpr #2-2\fboxsep-2\fboxrule}{\centering\footnotesize
+        \textcolor{red}{Figura ainda não exportada do Figma}\\[2pt]\texttt{figuras/#1.pdf}}}}}%
+}
+
+%%% Trecho que depende de dado ainda não coletado. Fica visível no PDF de propósito:
+%%% um número de resultado nunca é escrito antes de existir.
+\newcommand{\pendente}[1]{\textcolor{red}{[\textbf{PENDENTE:} #1]}}
+
+%%% Hifenização de termos técnicos recorrentes
+\hyphenation{
+  apti-dão edá-fica frutí-feras espe-cia-lista con-cor-dân-cia infe-rência
+  reco-men-dação inter-pre-tação Embra-pa fer-tili-dade adu-bação cala-gem
+  rastre-abi-li-dade}
+
+%%% Título provisório -- trocar aqui e no \titulores abaixo
+\title{SIRAS: sistema especialista baseado em regras para recomendação de calagem e
+adubação e estimativa de aptidão edáfica a partir da análise de solo}
+
+\titleother{SIRAS: a rule-based expert system for liming and fertilization recommendation
+and edaphic suitability estimation from soil analysis}
+
+\author[1]{Igor Zanette}
+\author[1]{Rafael Rieder}
+
+\affil[1]{Universidade de Passo Fundo, Instituto de Tecnologia, Curso de Ciência da Computação}
+
+\runningauthor{Zanette e Rieder, 2026}
+\titulores{SIRAS: recomendação de calagem e adubação e aptidão edáfica}
+
+\papercat{Trabalho de Conclusão de Curso}
+
+\jyear{2026}
+\jmonth{Dezembro}
+\jcourse{Ciência da Computação}
+
+\setcounter{page}{1}
+\firstpage{1}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\maketitle
+\thispagestyle{empty}
+
+\input{secoes/0_resumo}
+
+\end{frontmatter}
+\clearpage
+
+\input{secoes/1_introducao}
+\input{secoes/2_revisao}
+\input{secoes/3_materiais_metodos}
+\input{secoes/4_resultados}
+\input{secoes/5_conclusao}
+
+\bibliography{referencias}
+
+\input{secoes/6_apendice}
+
+\end{document}

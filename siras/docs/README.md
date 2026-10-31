@@ -12,7 +12,6 @@ documento descreve o sistema, está aqui; se descreve o trabalho sobre o sistema
 | conhecer os critérios e a arquitetura | [`especificacao/`](especificacao/) |
 | entender por que uma decisão foi tomada assim | [`decisoes/`](decisoes/) |
 | as artes originais da marca e dos fundos | [`marca/`](marca/) e [`fundos/`](fundos/) |
-| entender o que o sistema faz e por quê | [`../../trabalho_de_conclusao/artigo_final/`](../../trabalho_de_conclusao/artigo_final/) |
 | saber o que foi prometido no início | [`../../trabalho_de_conclusao/proposta/`](../../trabalho_de_conclusao/proposta/) |
 | saber se o sistema acerta, e como isso foi medido | [`../../trabalho_de_conclusao/validacao/`](../../trabalho_de_conclusao/validacao/) |
 | conduzir ou analisar o teste com usuários | [`../../trabalho_de_conclusao/usabilidade/`](../../trabalho_de_conclusao/usabilidade/) |

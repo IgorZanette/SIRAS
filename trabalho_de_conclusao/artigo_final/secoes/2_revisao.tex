@@ -1,0 +1,116 @@
+\section{Revisão de Literatura}\label{sec:revisao}
+
+Esta seção reúne o necessário para compreender a solução: como a análise de solo é
+interpretada, como o Manual de Calagem e Adubação transforma a interpretação em recomendação,
+como se avalia a aptidão das terras e o que caracteriza um sistema especialista baseado em
+regras. Ao final, posiciona-se o trabalho frente às ferramentas existentes.
+
+\subsection{Análise de solo e sua interpretação}\label{sec:rev_analise}
+
+A análise de solo é o principal instrumento de diagnóstico da fertilidade. Nela se determinam
+o pH em água, que condiciona a disponibilidade da maioria dos nutrientes; os teores de fósforo
+(P) e potássio (K) disponíveis; os teores trocáveis de cálcio (Ca), magnésio (Mg) e alumínio
+(Al), este associado à toxidez em solos ácidos; a CTC, que expressa a capacidade do solo de
+reter cátions; a saturação por bases (V\%); o teor de matéria orgânica (MO), relacionado ao
+suprimento de nitrogênio; e o teor de argila, principal atributo físico considerado na
+recomendação \citep{Embrapa2011, ManualCalagem2016}.
+
+Os valores, isoladamente, não dizem nada: a interpretação os compara a faixas de referência
+que dependem do tipo de solo e da cultura \citep{EmbrapaDoc206}. No Manual RS/SC, os teores de
+P e K são enquadrados em cinco classes de disponibilidade --- muito baixo, baixo, médio, alto
+e muito alto ---, e cada classe corresponde a uma faixa de rendimento relativo da cultura; o
+limite superior da classe médio é o teor crítico, acima do qual se obtém rendimento próximo
+ao máximo econômico \citep{ManualCalagem2016}. As faixas não são universais: a interpretação
+do fósforo depende da classe de teor de argila do solo, e a do potássio, da CTC a pH 7,0. Um
+mesmo teor de P pode, assim, ser baixo em um solo argiloso e alto em um arenoso.
+
+\subsection{Calagem e adubação no RS e em SC}\label{sec:rev_manual}
+
+O Manual de Calagem e Adubação para os estados do Rio Grande do Sul e de Santa Catarina
+\citep{ManualCalagem2016} é a referência técnica para correção e fertilização do solo na
+região. A necessidade de calcário é estimada preferencialmente pelo \textbf{índice SMP}, que
+indica a dose de calcário com PRNT 100\% necessária para elevar o pH da camada de 0 a 20~cm a
+5,5, 6,0 ou 6,5; o método da saturação por bases é previsto como alternativa. Dois pontos
+tornam essa recomendação menos direta do que uma consulta a tabela. Primeiro, o pH que dispara
+a calagem e o pH alvo da dose não são dados pelo pH de referência da cultura, e frequentemente
+divergem dele: são definidos por grupo de culturas e por sistema de manejo --- grãos em sistema convencional, por exemplo, só recebem
+calcário quando o pH é inferior a 5,5, com dose para pH 6,0. Segundo, a dose é ajustada ao
+contexto: em plantio direto consolidado aplica-se um quarto da dose, em superfície e limitada
+a 5~t/ha; solos de baixo poder tampão usam equações com MO e Al em lugar da tabela; e a dose
+é corrigida pelo PRNT do corretivo efetivamente disponível \citep{ManualCalagem2016}.
+
+A adubação fosfatada e potássica é dimensionada pela classe de disponibilidade e, para várias
+culturas, pela expectativa de rendimento; a nitrogenada, pelo teor de MO e pela cultura
+antecedente, e é dispensada nas leguminosas, que fixam nitrogênio biologicamente. O Manual
+publica tabelas próprias para cada cultura ou grupo, com estruturas distintas: grãos separam
+adubação de correção e de manutenção, frutíferas distinguem pré-plantio, crescimento e
+produção, e a erva-mate e o tabaco exigem variáveis específicas de manejo e de tipo
+\citep{ManualCalagem2016}.
+
+\subsection{Aptidão das terras e o recorte edáfico}\label{sec:rev_aptidao}
+
+O Sistema de Avaliação da Aptidão Agrícola das Terras \citep{RamalhoFilhoBeek1995} classifica
+as terras pelo grau de limitação --- nulo, ligeiro, moderado, forte e muito forte --- que cada
+fator impõe, considerando deficiência de fertilidade, deficiência hídrica, excesso de água,
+suscetibilidade à erosão e impedimentos à mecanização. A classe resulta do fator mais
+limitante, avaliado nas condições atuais e após a aplicação de práticas de melhoria
+\citep{Hofig2015}. É o sistema empregado no mapeamento nacional \citep{EmbrapaAptidao2025}.
+Sua escala, porém, é regional: \cite{Hofig2015} observam que ele não indica práticas de manejo
+e requer adaptações para o planejamento de propriedades individuais.
+
+Uma alternativa é restringir a avaliação aos atributos que a própria análise de solo informa,
+cruzados com as exigências da cultura, sem relevo e sem clima. Neste trabalho, essa estimativa
+é chamada de \textbf{aptidão edáfica}, para que não seja confundida com a aptidão agrícola das
+terras: ela herda a arquitetura de graus de limitação e de fator mais limitante, mas não
+reproduz o sistema oficial nem equivale a ele.
+
+\subsection{Sistemas especialistas baseados em regras}\label{sec:rev_se}
+
+Sistemas especialistas reproduzem o raciocínio de um especialista humano em um domínio
+restrito \citep{SantosEtAl1994}. São compostos por uma \textbf{base de conhecimento}, que
+armazena fatos e regras do domínio; um \textbf{motor de inferência}, que aplica as regras aos
+dados de entrada para derivar conclusões; e uma \textbf{interface} com o usuário. Na forma mais
+difundida, o conhecimento é representado por regras SE-ENTÃO, e o motor percorre a base para
+identificar as condições satisfeitas pelos dados \citep{Lanzer2010}. A representação explícita
+das regras é o que permite ao sistema \emph{explicar} uma conclusão --- característica central
+em domínios nos quais a recomendação precisa ser justificada a terceiros.
+
+Na agricultura, \cite{Lanzer2010} aplicou representação hierárquica do conhecimento à
+classificação do uso e manejo das terras e observou que, quando os estados do domínio já estão
+definidos em sistemas de classificação publicados --- como as tabelas do Manual ---, a
+construção da base é facilitada. \cite{Shahzadi2016}, em outro domínio, alimentaram regras
+especialistas com dados de sensores para recomendar o manejo de pragas e doenças, evidenciando a
+aplicabilidade da abordagem ao suporte à decisão agronômica.
+
+\subsection{Trabalhos relacionados}\label{sec:rev_relacionados}
+
+O \textbf{FertFácil} \citep{Tiecher2016} é um sistema on-line e gratuito que recomenda calagem
+e adubação pelos critérios do Manual para mais de cem cultivos do RS, SC, MS e Paraguai, adotado
+pela Emater/RS. O \textbf{AdubaTec} \citep{AdubaTec2021}, da Embrapa Mandioca e Fruticultura e da
+UFRB, recomenda calagem e adubação para mandioca e fruteiras tropicais com arquitetura
+parametrizável, a partir de manuais do Nordeste. O \textbf{Sistema de Avaliação da Aptidão
+Agrícola das Terras} \citep{RamalhoFilhoBeek1995, EmbrapaAptidao2025} classifica o potencial
+das terras em escala exploratória. A \autoref{tab:relacionados} sintetiza o posicionamento: os
+sistemas existentes tratam separadamente a recomendação de manejo e a avaliação de aptidão, e
+nenhum integra as duas a partir de uma análise individual de solo sob os critérios do RS e SC.
+
+\begin{table}[htb]
+\centering
+\caption{Posicionamento do SIRAS frente aos trabalhos relacionados.}
+\label{tab:relacionados}
+\footnotesize
+\begin{tabular}{lcccc}
+\toprule
+ & \textbf{Critérios} & \textbf{Escala} & \textbf{Calagem e} & \textbf{Aptidão} \\
+ & & & \textbf{adubação} & \\
+\midrule
+FertFácil  & RS/SC & área     & sim & não \\
+AdubaTec   & Nordeste & área  & sim & não \\
+SAAAT      & nacional & regional & não & sim \\
+\textbf{SIRAS} & \textbf{RS/SC} & \textbf{área} & \textbf{sim} & \textbf{sim (edáfica)} \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\raggedright\scriptsize SAAAT: Sistema de Avaliação da Aptidão Agrícola das Terras.
+\end{table}

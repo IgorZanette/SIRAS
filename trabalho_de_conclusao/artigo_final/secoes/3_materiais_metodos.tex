@@ -1,0 +1,278 @@
+\section{Materiais e Métodos}\label{sec:metodos}
+
+Esta seção caracteriza a pesquisa, descreve a construção da base de conhecimento e dos
+critérios de aptidão, os procedimentos de validação e de avaliação de usabilidade e, por fim,
+o sistema desenvolvido.
+
+\subsection{Caracterização da pesquisa}\label{sec:caracterizacao}
+
+A pesquisa é aplicada e descritiva: estrutura um conjunto de critérios técnicos consolidados e
+os aplica na construção e na avaliação de um artefato computacional \citep{Wazlawick2014}.
+Quanto ao estilo, enquadra-se na apresentação de um produto, estilo que, segundo
+\cite{Wazlawick2014}, exige comparação com alguma referência, pois a mera demonstração de
+funcionamento tem baixa aceitação científica. Por isso, as saídas do SIRAS foram confrontadas
+com um oráculo calculado de forma independente da implementação, e a interface foi submetida a
+usuários do público-alvo. A validação das recomendações é quantitativa; a avaliação de
+usabilidade, descritiva e qualitativa.
+
+\subsection{Base de conhecimento e escopo}\label{sec:base}
+
+A fonte única das recomendações é o Manual de Calagem e Adubação \citep{ManualCalagem2016}.
+Suas tabelas de interpretação, de calagem e de adubação foram transcritas manualmente pelo autor
+para 20 arquivos JSON, organizados em dados comuns --- critérios de calagem, tabela SMP,
+interpretação de P e K, pH de referência, critérios de aptidão --- e em um diretório por grupo de
+culturas. Cada arquivo registra a tabela e a página de origem e é verificado, a cada carga, por um
+esquema JSON Schema próprio, de modo que um valor fora do domínio ou um campo ausente impede a
+execução em vez de produzir uma recomendação silenciosamente errada.
+
+O escopo compreende as \textbf{61 culturas e grupos de culturas} para os quais o Manual publica
+tabelas completas de adubação, em seis grupos (\autoref{fig:escopo}): grãos (21), hortaliças
+(18), tubérculos (2), frutíferas (17), erva-mate (1) e outras culturas comerciais --- cana-de-açúcar
+e tabaco (2). A contagem segue a organização do Manual: culturas que compartilham uma tabela,
+como melancia e melão, formam uma entrada. Ficaram fora do escopo de recomendação o arroz
+irrigado, a mandioca e as espécies florestais, cuja lógica de calagem difere do modelo adotado,
+e, por delimitação, forrageiras, plantas medicinais e ornamentais e sistemas especiais de
+produção.
+
+\begin{figure*}[htb]
+\centering
+\figura{F3-escopo}{\textwidth}
+\caption{Escopo do SIRAS: os seis grupos de culturas, as particularidades de recomendação de
+cada um e o que ficou fora do escopo.}
+\label{fig:escopo}
+\end{figure*}
+
+A transcrição é o ponto mais sensível do trabalho, porque um número errado na base contamina
+todas as recomendações que dependem dele. Além da conferência manual, os grupos de exigência
+de P e K de cada cultura foram transcritos três vezes, por caminhos distintos e em momentos
+distintos, e um teste automatizado exige que as três transcrições concordem.
+
+\subsection{Critérios de aptidão edáfica}\label{sec:ccae}
+
+O Manual não define classes de aptidão. Os critérios foram, portanto, construídos pelo autor e
+reunidos em uma especificação própria, o \textbf{Caderno de Critérios de Aptidão Edáfica}
+(CCAE), segundo três princípios: nenhum limiar numérico é criado pelo autor --- todos provêm das
+tabelas de interpretação do Manual \citep{ManualCalagem2016} ou de \cite{EmbrapaDoc206}, com
+tabela e página registradas; a arquitetura de graus de limitação e de fator mais limitante vem
+do sistema oficial \citep{RamalhoFilhoBeek1995}, conforme descrito por \cite{Hofig2015}; e toda
+escolha não determinada pelas fontes é isolada como decisão do autor, registrada e implementada
+como parâmetro configurável.
+
+Para três dessas decisões buscou-se respaldo na literatura. Os limites de saturação por alumínio
+adotados coincidem com os de \cite{Alvarez1999}, e tratar Ca e Mg como corrigíveis pela própria
+calagem é compatível com \cite{Sousa1989}. Para o teto de dose que define quando a correção da
+acidez é exequível em uma safra não se encontrou equivalente: a literatura trata do
+parcelamento, e não de um limite máximo. Esse resultado negativo é declarado, e a decisão
+permanece do autor.
+
+O CCAE foi versionado: cada versão foi aprovada pelo orientador e congelada com marcação no
+repositório, e alterações posteriores geraram versão nova, com o motivo registrado. O gabarito
+dos casos de teste foi produzido aplicando a versão vigente à mão, sem consultar o código; só
+assim a verificação mede se a implementação reproduz a especificação, e não se o código
+concorda consigo mesmo.
+
+\subsection{Validação das recomendações}\label{sec:validacao}
+
+A hipótese do trabalho foi avaliada pela \textbf{concordância} entre as recomendações do SIRAS e
+valores de referência. Um caso é concordante quando \emph{todas} as saídas declaradas na
+referência --- necessidade de calcário (t/ha) e doses de N, P\textsubscript{2}O\textsubscript{5}
+e K\textsubscript{2}O (kg/ha) --- coincidem com as do sistema, admitida apenas a tolerância de
+arredondamento: calcário com uma casa decimal e nutrientes em quilogramas inteiros. Acertar três
+de quatro saídas é discordância.
+
+Os valores de referência constituem o \textbf{oráculo} e foram calculados pelo autor, à mão,
+aplicando diretamente as tabelas do Manual, sem executar o sistema
+(\autoref{fig:oraculo}). Sem essa independência, a validação mediria apenas a consistência do
+código consigo mesmo. O conjunto final reuniu 25 casos distribuídos pelos seis grupos,
+escolhidos para cobrir as classes de interpretação e os casos especiais --- plantio direto
+consolidado, baixo poder tampão, fases das frutíferas, erva-mate e tipos de tabaco. Como o
+sistema é determinístico, a análise consiste na proporção de casos concordantes, com intervalo
+de confiança de 95\% pelo método de \cite{Wilson1927}, adequado a proporções próximas de 100\% e
+a amostras pequenas. A hipótese seria aceita com taxa igual ou superior a 80\%.
+
+\begin{figure}[htb]
+\centering
+\figura{F13-oraculo}{\columnwidth}
+\caption{Independência do oráculo: o Manual alimenta dois caminhos separados --- o cálculo à mão
+e a implementação ---, que só se encontram na comparação.}
+\label{fig:oraculo}
+\end{figure}
+
+A aptidão edáfica não integra a hipótese: como seus critérios foram definidos pelo autor, medir
+concordância com eles seria circular. Ela foi submetida a \textbf{verificação de conformidade}
+--- se a implementação reproduz o CCAE congelado --- sobre 92 casos com gabarito produzido à mão,
+dos quais 88 com classe definida e 4 que devem resultar em estado indeterminado por dado
+ausente. Doze desses casos usam as glebas reais publicadas no Anexo~1 do Manual, cujas classes de
+P e K o próprio Manual divulga e servem, assim, de oráculo externo para a etapa de interpretação.
+
+O processo de desenvolvimento foi apoiado por testes automatizados (5.404 ao final), que
+incluem os casos de validação; por um registro de decisões de arquitetura (13 decisões
+documentadas, com contexto e alternativas); e por versionamento em Git.
+
+\subsection{Avaliação de usabilidade}\label{sec:usabilidade}
+
+A interface foi avaliada em teste com 5 a 8 usuários do público-alvo --- agrônomos, técnicos
+agrícolas e estudantes concluintes de agronomia com contato com análise de solo ---, precedido
+de um piloto fora da amostra. O tamanho segue \cite{NielsenLandauer1993}, segundo os quais cerca
+de cinco participantes revelam a maior parte dos problemas de uma interface. Cada sessão, de
+cerca de 35 minutos, percorreu três roteiros: uma demonstração conduzida pelo pesquisador sobre
+uma análise real do Anexo~1 do Manual; um cenário fechado, entregue em ficha impressa e
+executado pelo participante sozinho, cujas três perguntas têm resposta conhecida; e o uso livre,
+com cultura e dados escolhidos pelo participante (\autoref{fig:sessao}).
+
+Depois da sessão, sem a presença do pesquisador, o participante respondeu a um questionário
+estruturado pelas dez heurísticas de \cite{Nielsen1994}, atribuindo a cada uma a gravidade dos
+problemas encontrados, de 0 (não é problema) a 4 (catástrofe), ou indicando que não passou pela
+situação, e descrevendo as falhas e a tela em que ocorreram. Quatro perguntas abertas encerram
+o instrumento e separam o juízo sobre a ferramenta do juízo sobre a recomendação agronômica.
+
+O instrumento substituiu o \textit{System Usability Scale} \citep{Brooke1996} previsto na proposta,
+porque o SUS produz um escore único, e esta etapa precisava de um diagnóstico que localizasse os
+problemas e os ordenasse por gravidade. Não se trata de avaliação heurística no sentido de
+\cite{NielsenMolich1990}, que é inspeção por especialistas sem usuários: as notas são atribuídas
+por usuários a heurísticas e exprimem percepção de gravidade, analisada por estatística
+descritiva. A versão avaliada foi congelada antes da primeira sessão e mantida até a última.
+
+\subsection{O sistema desenvolvido}\label{sec:siras}
+
+Do ponto de vista do usuário, o SIRAS tem três telas: escolher a cultura, informar a análise e
+ler o laudo. A simplicidade é deliberada e esconde a maior parte do sistema
+(\autoref{fig:iceberg}): cada laudo resulta da resolução de critérios por grupo, de dezenas de
+tabelas transcritas, de dois cenários de aptidão e de um registro de cada decisão tomada.
+
+\begin{figure*}[htb]
+\centering
+\figura{F1-iceberg}{\textwidth}
+\caption{O que o usuário vê e o que o sistema faz: as três telas da interface sobre as camadas
+de conhecimento, inferência e verificação que produzem o laudo.}
+\label{fig:iceberg}
+\end{figure*}
+
+\subsubsection{Arquitetura e tecnologias}
+
+O sistema foi implementado em Python~3.12 com o microframework Flask~3 para a camada
+web\footnote{Disponíveis em \url{https://www.python.org} e
+\url{https://flask.palletsprojects.com}.}, com HTML, CSS e JavaScript na interface e as
+bibliotecas \texttt{jsonschema} e \texttt{pytest} para validação e testes. Não há banco de dados,
+autenticação nem chamada de rede: a aplicação roda localmente, no navegador, e é iniciada por um
+único comando que prepara o ambiente e sobe o servidor.
+
+A arquitetura segue a separação clássica dos sistemas especialistas
+\citep{SantosEtAl1994, Lanzer2010}. A \textbf{base de conhecimento} são os arquivos JSON; o
+\textbf{motor de inferência} é um pacote em Python puro que não depende do Flask e pode ser
+executado e testado isoladamente; e a \textbf{interface} é uma camada fina que apenas coleta os
+dados e apresenta o laudo. O motor foi escrito sem bibliotecas de inferência, como Experta ou
+PyKE, para que cada regra permanecesse legível e auditável. Todo o motor é acessado por uma
+única função, pura e determinística, que recebe a análise, a cultura e o contexto de manejo e
+devolve o laudo. As camadas e suas dependências estão na \autoref{fig:arquitetura}, no
+apêndice.
+
+\subsubsection{Fluxo de inferência e rastreabilidade}
+
+A \autoref{fig:pipeline} apresenta o percurso de uma análise pelo motor. Os dados são validados
+quanto ao domínio de cada variável; os teores de P e K são classificados pela classe de argila e
+pela CTC (\autoref{fig:interpretacao}, no apêndice); a calagem, a adubação e a formulação do adubo são calculadas; e a aptidão é avaliada
+em dois cenários. Cada passo registra, em uma \textbf{trilha de inferência}, a regra aplicada,
+as entradas, a saída e a fonte no Manual, com tabela e página. É essa trilha que o laudo
+apresenta ao usuário na seção ``de onde vem cada número'' (\autoref{fig:trilha}), e é ela que
+permitiu localizar a causa de cada divergência durante a validação.
+
+\begin{figure*}[htb]
+\centering
+\figura{F4-pipeline}{\textwidth}
+\caption{Percurso de uma análise de solo pelo motor de inferência. Cada etapa registra na
+trilha a regra aplicada, as entradas, a saída e a fonte no Manual.}
+\label{fig:pipeline}
+\end{figure*}
+
+\subsubsection{Calagem}
+
+A calagem não é uma consulta direta à tabela SMP (\autoref{fig:calagem}). A cultura, o sistema
+de manejo e a condição da área determinam primeiro um \textbf{critério}, entre os definidos nas
+Tabelas 5.3 a 5.7 do Manual, que fixa a condição de disparo, o pH alvo da dose e o fator
+aplicado. Só então o índice SMP é consultado (Tabela 5.2), e a dose recebe os ajustes: fator do
+manejo, correção pelo PRNT do corretivo ($\mathit{dose} = \mathit{NC} \times 100 /
+\mathit{PRNT}$), profundidade e limite de aplicação superficial. Os solos de baixo poder tampão
+seguem as equações do Manual em lugar da tabela, e a erva-mate, sem pH de referência, segue o
+critério de saturação por bases. Fora da faixa tabelada do índice SMP, o sistema recusa a
+entrada em vez de extrapolar.
+
+\begin{figure}[htb]
+\centering
+\figura{F5-calagem}{\columnwidth}
+\caption{Árvore de decisão da calagem, com o caso da Gleba~4 do Anexo~1 do Manual em plantio
+direto consolidado: 6,8~t/ha pela Tabela~5.2, 1,7~t/ha pelo fator de um quarto e 2,3~t/ha com
+calcário de PRNT~75\%.}
+\label{fig:calagem}
+\end{figure}
+
+\subsubsection{Adubação e formulação do adubo}
+
+As doses de N, P\textsubscript{2}O\textsubscript{5} e K\textsubscript{2}O seguem dois caminhos.
+Os grãos têm algoritmo próprio, que combina adubação de correção e de manutenção, o número do
+cultivo, a expectativa de rendimento e, para o nitrogênio, o teor de MO e a cultura antecedente.
+Os demais grupos recebem a dose publicada por classe de teor, parametrizada pelas variáveis que
+cada um exige: a fase das frutíferas, o programa e o manejo da erva-mate, o tipo de tabaco e o
+ciclo da cana (\autoref{fig:adubacao}).
+
+Atendendo a pedido do orientador, o laudo indica também \emph{qual adubo comprar}. Como não há
+catálogo oficial das formulações comercializadas, o sistema apresenta três respostas
+complementares: a \textbf{fórmula ideal}, na proporção exata da recomendação, pelo método do
+Manual; as \textbf{melhores fórmulas de um catálogo} de 38 formulações comerciais, cada uma com
+sua dose e os complementos necessários; e a \textbf{mistura de adubos simples}, sempre exata.
+Para cada fórmula do catálogo, a dose é escolhida entre os pontos em que ela atende exatamente
+o P\textsubscript{2}O\textsubscript{5} ou o K\textsubscript{2}O recomendado; como a função que
+penaliza excesso, falta e operações de complemento é convexa por partes, seu mínimo está
+necessariamente em um desses pontos, e um deles é a regra do Manual. O resultado, portanto,
+nunca é pior que o do Manual sob o critério adotado. Os pesos dessa função são decisão do
+autor e estão declarados como tal. A \autoref{fig:formulacao} ilustra os três caminhos e a
+escolha da dose.
+
+\subsubsection{Aptidão edáfica}
+
+A aptidão é avaliada por sete fatores de limitação --- acidez, fósforo, potássio, cálcio e
+magnésio, CTC, matéria orgânica e textura ---, cada um com grau de nulo a muito forte
+(\autoref{fig:aptidao}). A classe resulta do fator mais limitante, como no sistema oficial:
+apta, apta com restrições, restrita ou inapta sem correção prévia. O caderno prevê ainda uma
+regra de rebaixamento quando três ou mais fatores são ao menos moderados, mas, por não ter
+respaldo nas fontes, ela foi implementada desativada e serve apenas à análise de sensibilidade.
+Dado obrigatório ausente nunca é imputado: produz o estado indeterminado.
+
+A avaliação é feita em dois cenários: o \textbf{atual}, sobre a análise como está, e o
+\textbf{potencial}, após a aplicação integral das recomendações emitidas pelo próprio SIRAS.
+Fatores corrigíveis, como acidez, fósforo e potássio, deixam de limitar no cenário potencial se a
+correção for exequível; fatores permanentes, como CTC e textura, não mudam. A diferença entre os
+dois cenários mede o ganho atribuível à recomendação, e é nela que os dois módulos do sistema se
+integram.
+
+\begin{figure*}[htb]
+\centering
+\figura{F9-aptidao}{\textwidth}
+\caption{Estimativa de aptidão edáfica: sete fatores, graus de limitação, fator mais limitante e
+os cenários atual e potencial, ilustrados pela Gleba~4 do Anexo~1 do Manual com milho (classe
+restrita, determinada pelo potássio).}
+\label{fig:aptidao}
+\end{figure*}
+
+\subsubsection{Interface e laudo}
+
+O fluxo de uso está na \autoref{fig:fluxo}, no apêndice. Na escolha da cultura, as 61 opções aparecem por grupo. No
+formulário, a classe de cada teor é exibida enquanto o usuário digita, os campos condicionais
+surgem conforme a cultura escolhida, e várias áreas podem ser informadas em um mesmo laudo,
+compartilhando cultura e manejo. Enquanto o laudo é gerado, uma tela de espera mostra as etapas
+que o motor percorre.
+
+O laudo (\autoref{fig:laudo}) foi organizado em duas partes depois que uma medição mostrou que,
+na primeira versão, 71\% do texto de um laudo de uma área eram complementos, e que um laudo de seis
+áreas ocupava 27 folhas. A parte essencial traz o quadro comparativo das áreas, as quatro doses,
+a interpretação dos atributos, a aptidão e o total a comprar; o anexo traz a formulação do adubo,
+a forma de aplicação e a trilha de inferência, com cada regra listada uma única vez. O documento
+pode ser impresso ou salvo em PDF pelo navegador, e a análise pode ser editada e o laudo gerado
+de novo sem redigitação.
+
+\begin{figure*}[htb]
+\centering
+\figura{F11-laudo}{\textwidth}
+\caption{Estrutura do laudo emitido pelo SIRAS: parte essencial e anexo.}
+\label{fig:laudo}
+\end{figure*}

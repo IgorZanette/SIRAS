@@ -86,7 +86,8 @@ SIRAS/
 | Dentro de `trabalho_de_conclusao/` | |
 |---|---|
 | [`proposta/`](trabalho_de_conclusao/proposta/) | A proposta aprovada |
-| [`artigo_final/`](trabalho_de_conclusao/artigo_final/) | O artigo |
+| [`artigo_final/`](trabalho_de_conclusao/artigo_final/) | O artigo final |
+| [`figuras/`](trabalho_de_conclusao/figuras/) | As figuras do artigo (Figma) |
 | [`validacao/`](trabalho_de_conclusao/validacao/) | Protocolo e procedimento do oráculo |
 | [`usabilidade/`](trabalho_de_conclusao/usabilidade/) | Protocolo e questionário do teste com usuários |
 | [`processo/`](trabalho_de_conclusao/processo/) | Roadmap e convenções de trabalho |

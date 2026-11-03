@@ -21,6 +21,17 @@ from typing import Any, Callable, Dict, List, Optional
 
 from siras.relatorio.apresentacao import formatar_enxuto, formatar_numero
 
+#: O fator da dose como o Manual o escreve (Tab. 5.3 a 5.7). formatar_enxuto() arredonda a
+#: uma casa, e 0,25 saía "0,2" — o fator do plantio direto consolidado, que é 1/4, aparecia
+#: na tela como um quinto. O cálculo nunca foi afetado: só esta exibição.
+_FATOR_COMO_NO_MANUAL = {1.0: "1", 0.5: "½", 0.25: "¼"}
+
+
+def _fator(valor: Optional[float]) -> str:
+    if valor is None:
+        return "—"
+    return _FATOR_COMO_NO_MANUAL.get(float(valor)) or formatar_numero(valor, 2)
+
 
 @dataclass(frozen=True)
 class Tabela:
@@ -123,7 +134,7 @@ def tabela_criterios_calagem(dados: Dict[str, Any]) -> Tabela:
             criterio.get("condicao_area", "—"),
             gatilho,
             alvo,
-            formatar_enxuto(fator) if fator is not None else "—",
+            _fator(fator),
             criterio.get("modo_aplicacao", "—"),
             criterio.get("fonte", "—"),
         ])

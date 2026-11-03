@@ -108,18 +108,41 @@ def test_so_as_tabelas_de_prosa_quebram_linha(cliente):
     assert de_valores, "nenhuma tabela de valores restou"
 
 
-def test_a_quebra_nao_parte_o_nome_da_linha():
+def test_a_quebra_no_meio_da_palavra_fica_so_na_celula_da_lista():
     """`overflow-wrap: anywhere` corta no meio da palavra, e é isso que faz a célula de
-    79 nomes caber. Na primeira coluna partiria "graos pd consolidado" em pedaços, e ela
-    é o nome da linha — tem de continuar legível de relance."""
+    79 nomes caber. Mas aplicado a todas as células ele deixa o navegador calcular a
+    largura mínima de cada coluna como uma letra, e o layout automático espreme o resto
+    para dar espaço à lista: em 02/11/2026 o cabeçalho "Culturas" saía partido letra a
+    letra e o número "79" em dois andares.
+
+    Por isso a regra vale só para a última coluna, a da lista. O nome da linha, o
+    cabeçalho e as colunas curtas quebram apenas nos espaços."""
     css = (pathlib.Path(__file__).parents[2] / "siras" / "web" / "static" / "css"
            / "siras-telas.css").read_text(encoding="utf-8")
+    regras = {seletor.strip(): corpo for seletor, corpo in
+              re.findall(r"([^{}]+)\{([^}]*)\}", re.sub(r"/\*.*?\*/", "", css, flags=re.S))}
 
-    assert re.search(r"\.tabela-dados--texto tbody th \{[^}]*overflow-wrap: normal", css)
-    assert re.search(r"\.tabela-dados--texto th, \.tabela-dados--texto td \{"
-                     r"[^}]*overflow-wrap: anywhere", css, re.S)
+    lista = regras.get(".tabela-dados--texto td:last-child", "")
+    assert "overflow-wrap: anywhere" in lista
+
+    outras = [s for s, corpo in regras.items()
+              if "tabela-dados--texto" in s and s != ".tabela-dados--texto td:last-child"
+              and "anywhere" in corpo]
+    assert not outras, f"quebra no meio da palavra fora da célula da lista: {outras}"
 
 
 def test_o_menu_leva_as_tabelas_de_qualquer_tela(cliente):
     for rota in ("/", "/analise", "/analise/dados?cultura_id=soja", "/tabelas"):
         assert "Tabelas do Manual" in cliente.get(rota).get_data(as_text=True)
+
+
+def test_o_fator_da_dose_aparece_como_no_manual():
+    """O plantio direto consolidado aplica 1/4 da dose. formatar_enxuto() arredondava 0,25
+    a uma casa, e a tabela mostrava "0,2" — um quinto, e não um quarto. O cálculo nunca
+    usou o valor arredondado; a falha era só da exibição, e é ela que este teste trava."""
+    tabela = construir("criterios-calagem", carregar_dados_comum())
+    col = tabela.colunas.index("Fator")
+    fatores = {linha[0]: linha[col] for linha in tabela.linhas}
+
+    assert fatores["graos pd consolidado"] == "¼"
+    assert "0,2" not in fatores.values()

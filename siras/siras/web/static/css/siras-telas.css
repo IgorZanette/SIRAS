@@ -635,14 +635,15 @@
    área". Deixando no automático, o navegador distribui pelo conteúdo, e o `width: 100%`
    herdado garante que nada ultrapasse o contêiner: a barra de rolagem não aparece. */
 .tabela-dados--texto { white-space: normal; }
-.tabela-dados--texto th, .tabela-dados--texto td {
-  vertical-align: top; overflow-wrap: anywhere; hyphens: auto;
-}
-/* A primeira coluna é o nome da linha e não deve quebrar em sílabas. */
-.tabela-dados--texto tbody th { overflow-wrap: normal; hyphens: none; }
-/* A célula de lista fica menor que o corpo: são nomes a varrer, não texto a ler. */
-.tabela-dados--texto td:last-child { font-size: var(--fs-xs); line-height: 1.5; }
-.tabela-dados tbody tr:last-child th,
+.tabela-dados--texto th, .tabela-dados--texto td { vertical-align: top; }
+/* Quebra dentro da palavra SÓ na última coluna, a da lista longa. Aplicada a todas as
+   células, ela deixava o navegador calcular a largura mínima de cada coluna como uma
+   letra: o layout automático então espremia o cabeçalho e as colunas curtas para dar
+   espaço à lista, e "Culturas" saía partido letra a letra, e "79" em dois andares.
+   Nas demais células a quebra volta a ser só nos espaços. */
+.tabela-dados--texto td:last-child {
+  overflow-wrap: anywhere; hyphens: auto; font-size: var(--fs-xs); line-height: 1.5;
+}.tabela-dados tbody tr:last-child th,
 .tabela-dados tbody tr:last-child td { border-bottom: 0; }
 
 .notas { margin: var(--e-5) 0 0; padding-left: var(--e-5); max-width: var(--largura-leitura);

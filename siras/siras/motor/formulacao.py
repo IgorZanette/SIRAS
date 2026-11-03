@@ -97,8 +97,13 @@ AVISOS = (
     "homogeneizar (Manual, Fig. 8.2).",
 )
 
-#: Formato aceito para a fórmula que o usuário informa (D11).
-_FORMATO_FORMULA = re.compile(r"^\s*(\d{1,2})\s*-\s*(\d{1,2})\s*-\s*(\d{1,2})\s*$")
+#: Formato aceito para a fórmula que o usuário informa (D11). O separador pode ser hífen,
+#: espaço, ponto ou barra — no piloto, "5 25 25" era recusado e a pessoa não entendia
+#: por quê. Seis dígitos colados ("052525") também valem: são três pares sem ambiguidade.
+_FORMATO_FORMULA = re.compile(
+    r"^\s*(\d{1,2})\s*[-\s./]\s*(\d{1,2})\s*[-\s./]\s*(\d{1,2})\s*$"
+)
+_FORMATO_FORMULA_COLADO = re.compile(r"^\s*(\d{2})(\d{2})(\d{2})\s*$")
 
 #: Mínimos legais de soma NPK da IN 39/2018, art. 9. Abaixo disso é aviso, não erro: pode
 #: ser organomineral, cujo mínimo é menor.
@@ -136,19 +141,19 @@ def interpretar_formula_do_usuario(texto: str) -> Dict[str, Any]:
     Raises:
         ErroFormulacao: texto fora do formato N-P-K.
     """
-    casamento = _FORMATO_FORMULA.match(texto or "")
+    casamento = _FORMATO_FORMULA.match(texto or "") or _FORMATO_FORMULA_COLADO.match(texto or "")
     if not casamento:
         raise ErroFormulacao(
             f"'{texto}' não está no formato de uma fórmula. Escreva as três garantias do "
-            f"rótulo separadas por hífen, como em 05-20-20"
+            f"rótulo, como em 05-20-20"
         )
     n, p, k = (int(g) for g in casamento.groups())
     soma = n + p + k
     avisos: List[str] = []
     if soma > 100:
         raise ErroFormulacao(
-            f"as garantias de '{texto}' somam {soma}% — são porcentagens em massa do "
-            f"mesmo produto e não podem passar de 100%"
+            f"{n:02d}-{p:02d}-{k:02d} soma {soma}%. As três garantias são porcentagens do "
+            f"mesmo saco de adubo, então juntas não passam de 100%. Confira o rótulo"
         )
     if soma <= 0:
         raise ErroFormulacao(f"'{texto}' não entrega N, P2O5 nem K2O")
@@ -432,20 +437,29 @@ def recomendar_formulacao(
 
     # --- caminho B
     do_catalogo = [
-        ("catalogo", f) for f in ((catalogo.get("formulas") or {}).get("itens") or [])
+        f for f in ((catalogo.get("formulas") or {}).get("itens") or [])
         if uso in (f.get("uso") or [])
     ]
+    avaliadas = [
+        opcao for opcao in (_montar_opcao("catalogo", f, rec, simples) for f in do_catalogo)
+        if opcao is not None
+    ]
+    melhores = sorted(avaliadas, key=_chave_de_ordem)[:TOP_DO_CATALOGO]
+
+    # --- as fórmulas que o usuário tem (ADR 0014, que revê a D11 da 0009)
+    # Avaliadas pelo mesmo método, mas FORA do ranking: aparecem sempre, todas, na ordem
+    # informada. Disputando com as 38 do catálogo, elas sumiam do laudo justamente quando
+    # eram piores — e é aí que o usuário mais precisa saber o que acontece se usá-las.
+    informadas: List[OpcaoAdubacao] = []
+    informadas_sem_uso: List[str] = []
     for texto in formulas_usuario:
         entrada = interpretar_formula_do_usuario(texto)
         avisos.extend(entrada.pop("_avisos", []))
-        do_catalogo.append(("usuario", entrada))
-
-    avaliadas = [
-        opcao for opcao in (
-            _montar_opcao(tipo, f, rec, simples) for tipo, f in do_catalogo
-        ) if opcao is not None
-    ]
-    melhores = sorted(avaliadas, key=_chave_de_ordem)[:TOP_DO_CATALOGO]
+        opcao = _montar_opcao("usuario", entrada, rec, simples)
+        if opcao is None:
+            informadas_sem_uso.append(entrada["id"])
+        else:
+            informadas.append(opcao)
 
     # A trilha registra os pontos de quebra SÓ das fórmulas que o laudo mostra. Registrar
     # as 38 avaliadas encheria o documento impresso com a varredura inteira, e a
@@ -453,7 +467,7 @@ def recomendar_formulacao(
     # números de uma delas com a contagem de todas, que é pior do que não registrar.
     # Quantas foram avaliadas fica dito no passo R-FOR-01, logo abaixo.
     if trace is not None:
-        for opcao in melhores:
+        for opcao in [*melhores, *informadas]:
             trace.registrar(
                 regra=f"R-FOR-02 ({opcao.formula_id}): pontos de quebra",
                 entradas={"tipo": opcao.tipo,
@@ -479,6 +493,8 @@ def recomendar_formulacao(
                 "ideais": [o.formula_id for o in ideais],
                 "catalogo": [o.formula_id for o in melhores],
                 "melhor_custo": melhores[0].custo if melhores else None,
+                "informadas": [o.formula_id for o in informadas],
+                "informadas_sem_uso": informadas_sem_uso,
                 "mistura": bool(mistura),
             },
             fonte=(
@@ -491,6 +507,7 @@ def recomendar_formulacao(
     return ResultadoFormulacao(
         ideais=ideais, catalogo=melhores, mistura=mistura, avisos=avisos,
         sem_n_de_plantio=sem_n, criterio=CRITERIO,
+        informadas=informadas, informadas_sem_uso=informadas_sem_uso,
     )
 
 

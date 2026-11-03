@@ -151,8 +151,10 @@
         <legend>Fórmulas que a sua revenda tem</legend>
         <p class="t-aux">
           Até três, copiadas do rótulo — os três números do saco, como
-          <b>05-20-20</b>. Elas entram na comparação ao lado das do catálogo do SIRAS,
-          que não é lista oficial: lista oficial de fórmulas comercializadas não existe.
+          <b>05-20-20</b>. Digite só os números: o hífen entra sozinho. O laudo diz
+          quanto aplicar de cada uma, o que falta completar, e se ela atende tão bem
+          quanto as do catálogo do SIRAS — que não é lista oficial: lista oficial de
+          fórmulas comercializadas não existe.
         </p>
         <div class="grade">
           {% set informadas = leitura.valores.get("formula_usuario") or [] %}
@@ -375,4 +377,5 @@
 <script src="{{ url_for('static', filename='js/talhoes.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/envio.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/documento.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/formulas.js') }}" defer></script>
 {% endblock %}

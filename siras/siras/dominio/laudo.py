@@ -137,8 +137,15 @@ class ResultadoFormulacao:
 
     #: caminho A: uma opção por alvo de concentração (ADR 0009, D10)
     ideais: List[OpcaoAdubacao] = field(default_factory=list)
-    #: caminho B: as melhores do catálogo, já incluídas as que o usuário informou
+    #: caminho B: as melhores do catálogo do SIRAS
     catalogo: List[OpcaoAdubacao] = field(default_factory=list)
+    #: as fórmulas que o usuário informou, TODAS, na ordem em que ele as escreveu.
+    #: Antes elas disputavam o ranking do catálogo e sumiam quando não ficavam entre as
+    #: três melhores — quem diz "tenho 05-25-25" quer saber quanto aplicar DESSA.
+    informadas: List[OpcaoAdubacao] = field(default_factory=list)
+    #: fórmulas informadas que não trazem nenhum nutriente pedido (ex.: 45-00-00 quando
+    #: a recomendação é só de P e K): sem ponto de quebra não há dose a propor
+    informadas_sem_uso: List[str] = field(default_factory=list)
     #: caminho C: ureia, superfosfato triplo e cloreto de potássio
     mistura: Optional[OpcaoAdubacao] = None
     #: avisos fixos do laudo (ADR 0009, D12)

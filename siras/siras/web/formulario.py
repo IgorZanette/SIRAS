@@ -1024,7 +1024,11 @@ def _ler_formulas_do_usuario(form, leitura) -> tuple:
         try:
             interpretar_formula_do_usuario(texto)
         except ErroFormulacao as erro:
-            leitura.invalidos.append(f"Fórmula disponível: {erro}")
+            mensagem = f"Fórmula disponível: {erro}"
+            leitura.invalidos.append(mensagem)
+            # Não é erro de medida: sem isto a tela emendava "confira a unidade no laudo
+            # do laboratório", que não faz sentido para um rótulo de adubo.
+            leitura.invalidos_de_escolha.append(mensagem)
             leitura.campos_com_erro.append("formula_usuario")
             continue
         lidas.append(texto)

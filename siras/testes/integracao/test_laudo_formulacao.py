@@ -135,12 +135,14 @@ def test_o_n_de_semeadura_do_usuario_chega_a_formula_ideal(com_catalogo):
     assert com.ideais
 
 
-def test_a_formula_do_usuario_entra_no_ranking(com_catalogo):
+def test_a_formula_do_usuario_chega_ao_laudo_em_bloco_proprio(com_catalogo):
+    """ADR 0014: fora do ranking do catálogo, e sempre presente."""
     com_catalogo(_f("05-20-05", 5, 20, 5))
 
     f = _laudo(formulas_usuario=("00-20-20",)).formulacao
 
-    assert any(o.tipo == "usuario" for o in f.catalogo)
+    assert [o.formula_id for o in f.informadas] == ["00-20-20"]
+    assert all(o.tipo == "catalogo" for o in f.catalogo)
 
 
 def test_a_trilha_registra_a_escolha_e_os_pontos_de_quebra(com_catalogo):

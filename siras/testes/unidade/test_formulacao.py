@@ -338,18 +338,59 @@ def test_t14_entre_custos_iguais_vence_a_de_menor_massa_total():
 # --- T16, T17: fórmula informada pelo usuário ---------------------------------------------
 
 class TestFormulaDoUsuario:
-    def test_t16_a_formula_do_usuario_entra_no_ranking_e_pode_vencer(self):
+    """ADR 0014: a fórmula informada aparece SEMPRE, fora do ranking do catálogo.
+
+    Na D11 original ela disputava as três vagas com o catálogo e sumia quando perdia. No
+    piloto de 02/11/2026, quem informou 05-25-25 viu o laudo indicar 05-20-20 e entendeu
+    que o sistema tinha trocado a fórmula dele."""
+
+    def test_t16_a_formula_melhor_que_o_catalogo_aparece_com_dose_exata(self):
         r = recomendar_formulacao(
             rec(n=0, p2o5=60, k2o=90),
             catalogo(formula("05-20-20", 5, 20, 20)),
             formulas_usuario=("00-20-30",),
         )
 
-        primeira = r.catalogo[0]
-        assert primeira.formula_id == "00-20-30"
-        assert primeira.tipo == "usuario"
-        assert round(primeira.dose_kg_ha) == 300
-        assert primeira.custo == pytest.approx(0.0)
+        assert [o.formula_id for o in r.informadas] == ["00-20-30"]
+        informada = r.informadas[0]
+        assert informada.tipo == "usuario"
+        assert round(informada.dose_kg_ha) == 300
+        assert informada.custo == pytest.approx(0.0)
+        # e não ocupa vaga do catálogo
+        assert all(o.tipo == "catalogo" for o in r.catalogo)
+
+    def test_a_formula_pior_que_o_catalogo_aparece_mesmo_assim(self):
+        """O caso do piloto: a informada perde para o catálogo e, antes, sumia."""
+        r = recomendar_formulacao(
+            rec(n=0, p2o5=60, k2o=90),
+            catalogo(formula("00-20-30", 0, 20, 30)),
+            formulas_usuario=("18-18-18",),
+        )
+
+        assert [o.formula_id for o in r.informadas] == ["18-18-18"]
+        assert r.informadas[0].custo > r.catalogo[0].custo
+
+    def test_todas_as_informadas_aparecem_na_ordem_escrita(self):
+        r = recomendar_formulacao(
+            rec(n=0, p2o5=60, k2o=90),
+            catalogo(formula("00-20-30", 0, 20, 30)),
+            formulas_usuario=("18-18-18", "05-25-25", "00-20-30"),
+        )
+
+        assert [o.formula_id for o in r.informadas] == ["18-18-18", "05-25-25", "00-20-30"]
+
+    def test_informada_sem_o_nutriente_pedido_e_declarada_e_nao_some(self):
+        r = recomendar_formulacao(
+            rec(n=0, p2o5=60, k2o=0), catalogo(), formulas_usuario=("00-00-60",)
+        )
+
+        assert r.informadas == []
+        assert r.informadas_sem_uso == ["00-00-60"]
+
+    @pytest.mark.parametrize("texto", ["5 25 25", "5-25-25", "05-25-25", "5.25.25",
+                                       "5/25/25", "052525", " 05 - 25 - 25 "])
+    def test_aceita_os_formatos_que_as_pessoas_escrevem(self, texto):
+        assert interpretar_formula_do_usuario(texto)["id"] == "05-25-25"
 
     def test_t17_formato_invalido_e_erro(self):
         with pytest.raises(ErroFormulacao, match="formato"):

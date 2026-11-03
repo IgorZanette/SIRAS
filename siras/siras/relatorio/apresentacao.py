@@ -959,16 +959,28 @@ def _formulacao(laudo: Laudo) -> Dict[str, Any]:
     resultado = laudo.formulacao
     if resultado is None:
         return {"tem": False, "motivo": None, "criterio": "", "ideais": [],
-                "catalogo": [], "mistura": None, "avisos": [], "sem_n_de_plantio": False}
+                "catalogo": [], "mistura": None, "avisos": [], "sem_n_de_plantio": False,
+                "informadas": [], "informadas_sem_uso": []}
 
     ideais = [_opcao_adubacao(o) for o in resultado.ideais]
     do_catalogo = [_opcao_adubacao(o) for o in resultado.catalogo]
     mistura = _opcao_adubacao(resultado.mistura) if resultado.mistura else None
+    melhor = resultado.catalogo[0] if resultado.catalogo else None
+    informadas = []
+    for opcao in getattr(resultado, "informadas", []):
+        item = _opcao_adubacao(opcao)
+        # A comparação com a melhor do catálogo usa o MESMO custo que ordena o catálogo
+        # (excesso, falta e produtos de complemento). Não é preço: é quanto a fórmula se
+        # afasta da recomendação. Diz-se em palavras, sem o número, que não tem unidade.
+        if melhor is not None and opcao.formula_id != melhor.formula_id:
+            item["comparada_a"] = melhor.formula_id
+            item["tao_boa_quanto_a_melhor"] = opcao.custo <= melhor.custo + 1e-9
+        informadas.append(item)
 
     return {
         # Basta UM caminho existir para a seção valer a pena: a mistura de simples sozinha
         # já responde "o que aplicar", mesmo sem catálogo e sem fórmula ideal.
-        "tem": bool(ideais or do_catalogo or mistura),
+        "tem": bool(ideais or do_catalogo or mistura or informadas),
         "motivo": resultado.motivo_sem_indicacao,
         "criterio": resultado.criterio,
         "ideais": ideais,
@@ -976,6 +988,8 @@ def _formulacao(laudo: Laudo) -> Dict[str, Any]:
         "mistura": mistura,
         "avisos": resultado.avisos,
         "sem_n_de_plantio": resultado.sem_n_de_plantio,
+        "informadas": informadas,
+        "informadas_sem_uso": list(getattr(resultado, "informadas_sem_uso", [])),
     }
 
 
@@ -1078,6 +1092,11 @@ def _formulacoes_sugeridas(blocos: Sequence[Any]) -> List[Dict[str, Any]]:
         for resultado in (getattr(bloco.laudo, "formulacao", None) for bloco in blocos)
         if resultado is not None
     ]
+    # As que o usuário informou vêm primeiro: são as que ele pode comprar de fato, e a
+    # calculadora existe para comparar o que ele tem com o que o SIRAS indica.
+    for resultado in resultados:
+        for opcao in getattr(resultado, "informadas", []):
+            acrescentar(opcao)
     for posicao in range(3):
         for resultado in resultados:
             if posicao < len(resultado.catalogo):
@@ -1235,6 +1254,7 @@ def formulacao_comparada(blocos: Sequence[Dict[str, Any]]) -> List[Dict[str, Any
             linhas.append({
                 "rotulo": bloco["rotulo"], "motivo": formulacao["motivo"],
                 "ideal": None, "catalogo": None, "mistura": None, "avisos": [],
+                "informadas": [], "informadas_sem_uso": [],
             })
             continue
         linhas.append({
@@ -1246,6 +1266,8 @@ def formulacao_comparada(blocos: Sequence[Dict[str, Any]]) -> List[Dict[str, Any
             "outras": formulacao["catalogo"][1:],
             "mistura": formulacao["mistura"],
             "avisos": formulacao["avisos"],
+            "informadas": formulacao.get("informadas", []),
+            "informadas_sem_uso": formulacao.get("informadas_sem_uso", []),
         })
     return linhas
 

@@ -91,6 +91,59 @@
       </table>
     </div>
 
+    {# ——— As fórmulas que o usuário informou ———
+       Sempre todas, e em bloco próprio (ADR 0014). Antes elas disputavam o ranking do
+       catálogo e sumiam quando não ficavam entre as três melhores: no piloto, quem
+       informou 05-25-25 viu o laudo indicar 05-20-20 e entendeu que o sistema trocou a
+       fórmula dele. Quem informa a fórmula que tem quer saber quanto aplicar DESSA. #}
+    {% set com_informadas = formulacoes|selectattr("informadas")|list %}
+    {% set sem_uso = formulacoes|map(attribute="informadas_sem_uso")|sum(start=[])|unique|list %}
+    {% if com_informadas or sem_uso %}
+    <div class="detalhe-adubo detalhe-adubo--informadas">
+      <h4 class="t-rotulo">As fórmulas que você informou</h4>
+      {% for linha in com_informadas %}
+      {% for op in linha.informadas %}
+      <div class="detalhe-adubo__item">
+        <div class="detalhe-adubo__tit">
+          {% if blocos|length > 1 %}{{ linha.rotulo }} · {% endif %}{{ op.id }}:
+          {{ op.dose }} kg/ha
+        </div>
+        <p class="t-aux">
+          Entrega {{ op.entrega_n }} de N, {{ op.entrega_p2o5 }} de
+          P<sub>2</sub>O<sub>5</sub> e {{ op.entrega_k2o }} de K<sub>2</sub>O.
+          {% if op.tem_excesso %}Excede
+            {{ op.excesso_p2o5 }} de P<sub>2</sub>O<sub>5</sub>,
+            {{ op.excesso_k2o }} de K<sub>2</sub>O e {{ op.excesso_n }} de N.{% endif %}
+          {% if op.complementos %}
+          Completar com
+          {% for c in op.complementos %}
+          {{ c.dose }} kg/ha de {{ c.produto }}
+          {%- if c.momento == "cobertura" %} em cobertura{% else %} junto da fórmula{% endif %}
+          {%- if not loop.last %}; {% else %}.{% endif %}
+          {% endfor %}
+          {% endif %}
+          {% if op.comparada_a %}
+          {% if op.tao_boa_quanto_a_melhor %}
+          Atende a recomendação tão bem quanto a melhor do catálogo ({{ op.comparada_a }}).
+          {% else %}
+          Atende, mas com mais sobra, falta ou complemento que a melhor do catálogo
+          ({{ op.comparada_a }}).
+          {% endif %}
+          {% endif %}
+        </p>
+      </div>
+      {% endfor %}
+      {% endfor %}
+      {% if sem_uso %}
+      <p class="t-aux">
+        {{ sem_uso|join(", ") }}: não traz o fósforo nem o potássio que esta recomendação
+        pede, e é por eles que a dose de um adubo de base se calcula. Pode servir como
+        complemento, não como base.
+      </p>
+      {% endif %}
+    </div>
+    {% endif %}
+
     {# O detalhe — excesso, falta e complementos — só da opção do catálogo, que é a que
        alguém vai de fato comprar. A ideal não tem excesso por construção, e a mistura
        fecha exata: detalhar as três repetiria "0 kg/ha de excesso" duas vezes por área. #}

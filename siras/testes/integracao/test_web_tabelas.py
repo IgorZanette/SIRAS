@@ -144,5 +144,5 @@ def test_o_fator_da_dose_aparece_como_no_manual():
     col = tabela.colunas.index("Fator")
     fatores = {linha[0]: linha[col] for linha in tabela.linhas}
 
-    assert fatores["graos pd consolidado"] == "¼"
+    assert fatores["grãos pd consolidado"] == "¼"
     assert "0,2" not in fatores.values()

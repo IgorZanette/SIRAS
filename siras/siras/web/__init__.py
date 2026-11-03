@@ -36,9 +36,11 @@ def criar_app(config: Optional[Dict[str, Any]] = None) -> Flask:
 
     # A vírgula decimal é do domínio, não de um template: registrada como filtro, ela
     # vale em qualquer lugar que formate número, sem cada template reinventá-la.
-    from siras.relatorio.apresentacao import formatar_enxuto
+    from siras.relatorio.apresentacao import formatar_enxuto, texto_pt
 
     app.jinja_env.filters["numero"] = formatar_enxuto
+    # Acentos que a transcrição da base omitiu. Só em texto exibido, nunca em `value=`.
+    app.jinja_env.filters["pt"] = texto_pt
 
     if config:
         app.config.update(config)

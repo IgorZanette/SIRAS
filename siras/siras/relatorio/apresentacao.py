@@ -18,6 +18,98 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from siras.dominio.laudo import Laudo
 
+# --- Acentuação do texto que vem da base ------------------------------------------------
+#
+# A base de conhecimento foi transcrita sem acentos, por convenção do autor: "calcario",
+# "restricoes", "Feijao". Parte desses textos é CHAVE — o motor compara a condição da área
+# e o identificador da cultura —, e por isso a base não é reescrita. A acentuação acontece
+# só aqui, na hora de mostrar, e só para texto de leitura: valores de formulário (que
+# voltam ao servidor) nunca passam por esta função.
+#
+# A lista tem apenas palavras SEM ambiguidade: cada uma, sem acento, não existe em
+# português. Por isso "e"/"é", "esta"/"está" e "ha"/"há" (hectare!) ficam de fora — não
+# há como decidir sem entender a frase, e trocar errado seria pior que não trocar.
+# O limite de palavra (\b) não atravessa "_", então identificadores como
+# "interpretacao_geral.json" ou "graos_pd_consolidado" passam intactos.
+_ACENTOS = {
+    "nao": "não", "sao": "são", "estao": "estão", "entao": "então", "apos": "após",
+    "ate": "até", "tambem": "também", "so": "só", "unica": "única", "unico": "único",
+    "minimo": "mínimo", "minima": "mínima", "maximo": "máximo", "maxima": "máxima",
+    "area": "área", "areas": "áreas", "especie": "espécie", "especies": "espécies",
+    "frutifera": "frutífera", "frutiferas": "frutíferas", "olericola": "olerícola",
+    "olericolas": "olerícolas", "hortalica": "hortaliça", "hortalicas": "hortaliças",
+    "tuberculo": "tubérculo", "tuberculos": "tubérculos", "graos": "grãos",
+    "calcario": "calcário", "calcarios": "calcários", "dolomitico": "dolomítico",
+    "calcitico": "calcítico", "calcio": "cálcio", "magnesio": "magnésio",
+    "potassio": "potássio", "fosforo": "fósforo", "aluminio": "alumínio",
+    "nitrogenio": "nitrogênio", "materia": "matéria", "organica": "orgânica",
+    "indice": "índice", "referencia": "referência", "referencias": "referências",
+    "condicao": "condição", "condicoes": "condições", "restricao": "restrição",
+    "restricoes": "restrições", "implantacao": "implantação", "rotacao": "rotação",
+    "excecao": "exceção", "excecoes": "exceções", "decisao": "decisão",
+    "aplicacao": "aplicação", "aplicacoes": "aplicações", "reaplicacao": "reaplicação",
+    "saturacao": "saturação", "correcao": "correção", "recomendacao": "recomendação",
+    "recomendacoes": "recomendações", "incorporacao": "incorporação", "producao": "produção",
+    "manutencao": "manutenção", "formacao": "formação", "instalacao": "instalação",
+    "aracao": "aração", "adubacao": "adubação", "fertilizacao": "fertilização",
+    "germinacao": "germinação", "floracao": "floração", "brotacao": "brotação",
+    "colheita": "colheita", "superficie": "superfície", "nivel": "nível",
+    "deficiencia": "deficiência", "disponivel": "disponível", "sensivel": "sensível",
+    "exigencia": "exigência", "classificacao": "classificação",
+    "interpretacao": "interpretação", "criterio": "critério", "criterios": "critérios",
+    "analise": "análise", "analises": "análises", "solucao": "solução",
+    "tecnico": "técnico", "agronomica": "agronômica", "inicio": "início",
+    "cabecas": "cabeças", "cabeca": "cabeça", "transcricao": "transcrição",
+    "graminea": "gramínea", "gramineas": "gramíneas", "consorciacao": "consorciação",
+    "virginia": "Virgínia", "feijao": "feijão", "painco": "painço", "tremoco": "tremoço",
+    "pimentao": "pimentão", "melao": "melão", "almeirao": "almeirão",
+    "chicoria": "chicória", "rucula": "rúcula", "abobora": "abóbora",
+    "brocolis": "brócolis", "acucar": "açúcar", "jucara": "juçara",
+    "pregerminado": "pré-germinado", "necessaria": "necessária", "necessarias": "necessárias",
+    "necessario": "necessário", "necessarios": "necessários", "agua": "água",
+    "catalogo": "catálogo", "cientifico": "científico", "sinonimos": "sinônimos",
+    "estacao": "estação", "estacoes": "estações", "consorciacoes": "consorciações",
+}
+
+#: Os casos ambíguos ("e"/"é", "tem"/"têm", "vem"/"vêm", "da"/"dá") NÃO entram na lista
+#: de palavras: decidir exige entender a frase. Entram aqui como FRASES EXATAS, cada uma
+#: conferida no texto da base em que aparece — nunca como regra geral.
+_FRASES = (
+    ("NÃO e suficiente", "NÃO é suficiente"),
+    ("pH alvo da dose vem das Tabelas", "pH alvo da dose vêm das Tabelas"),
+    ("grãos tem pH ref", "grãos têm pH ref"),
+    ("O Anexo 2 da SOMENTE", "O Anexo 2 dá SOMENTE"),
+    ("Não da pH de referência", "Não dá pH de referência"),
+    ("a mesma pergunta e pior que", "a mesma pergunta é pior que"),
+    (" -> ", " → "),
+)
+_PALAVRA_SEM_ACENTO = re.compile(
+    r"\b(" + "|".join(sorted(_ACENTOS, key=len, reverse=True)) + r")\b", re.IGNORECASE
+)
+
+
+def _com_acento(m: "re.Match[str]") -> str:
+    original, acentuada = m.group(0), _ACENTOS[m.group(0).lower()]
+    if original.isupper() and len(original) > 1:
+        return acentuada.upper()
+    if original[0].isupper():
+        return acentuada[0].upper() + acentuada[1:]
+    return acentuada
+
+
+def texto_pt(texto: Optional[str]) -> Optional[str]:
+    """O texto da base com os acentos que a transcrição omitiu. Só para exibição."""
+    if not texto or not isinstance(texto, str):
+        return texto
+    texto = _PALAVRA_SEM_ACENTO.sub(_com_acento, texto)
+    texto = re.sub(r"\bpre-", "pré-", texto)
+    texto = re.sub(r"\bPre-", "Pré-", texto)
+    texto = re.sub(r"\b([Nn])ogueira[ -]peca\b", r"\1ogueira-pecã", texto)
+    for errada, certa in _FRASES:
+        texto = texto.replace(errada, certa)
+    return texto
+
+
 #: Ordem canônica das cinco classes de disponibilidade do Manual. É a ordem da régua.
 CLASSES_TEOR = ("muito_baixo", "baixo", "medio", "alto", "muito_alto")
 
@@ -185,7 +277,7 @@ def humanizar_evidencia(texto: str) -> str:
     humanizado = re.sub(r"(\d)\.(\d)", r"\1,\2", texto).replace("->", "→")
     for cru, legivel in _VOCABULARIO_DA_EVIDENCIA:
         humanizado = humanizado.replace(cru, legivel)
-    return humanizado
+    return texto_pt(humanizado)
 
 
 def indice_da_classe(classe: str) -> int:
@@ -231,6 +323,24 @@ def posicao_na_regua(
     return round((indice_da_classe(classe) + fracao) * largura_da_faixa, 2)
 
 
+#: Entradas que reúnem várias culturas numa tabela só. O identificador junta os nomes por
+#: "_", e legibilizá-lo dava "Alface almeirao chicoria rucula salsa", sem vírgula nem "e".
+#: A grafia é a da proposta (Seção 4.2.1), que segue a do Manual.
+_NOME_DE_TELA = {
+    "abobora_abobrinha_moranga": "Abóbora, abobrinha e moranga",
+    "alface_almeirao_chicoria_rucula_salsa": "Alface, almeirão, chicória, rúcula e salsa",
+    "beterraba_cenoura": "Beterraba e cenoura",
+    "brocolis_couve_flor": "Brócolis e couve-flor",
+    "melancia_melao": "Melancia e melão",
+    "nabo_rabanete": "Nabo e rabanete",
+    "mandioquinha_salsa": "Mandioquinha-salsa",
+    "ervilha_seca_e_forrageira": "Ervilha seca e ervilha forrageira",
+    "pessegueiro_nectarineira": "Pessegueiro e nectarineira",
+    "nogueira_peca": "Nogueira-pecã",
+    "cana_de_acucar": "Cana-de-açúcar",
+}
+
+
 def nome_de_exibicao(cultura_id: str, dados: Dict[str, Any]) -> str:
     """Nome da cultura como o Manual a escreve (Anexo 2, campo nome_exibicao).
 
@@ -240,8 +350,8 @@ def nome_de_exibicao(cultura_id: str, dados: Dict[str, Any]) -> str:
     """
     entrada = dados["catalogo_anexo2"]["culturas"].get(cultura_id)
     if entrada and entrada.get("nome_exibicao"):
-        return entrada["nome_exibicao"]
-    return cultura_id.replace("_", " ").capitalize()
+        return _NOME_DE_TELA.get(cultura_id) or texto_pt(entrada["nome_exibicao"])
+    return _NOME_DE_TELA.get(cultura_id) or texto_pt(cultura_id.replace("_", " ").capitalize())
 
 
 def _observacao_da_calagem(laudo: Laudo) -> str:
@@ -325,7 +435,7 @@ def _veredito(laudo: Laudo) -> List[Dict[str, Any]]:
             "nome": "Calcário",
             "valor": formatar_numero(laudo.calagem.nc_t_ha, 1),
             "unidade": "t/ha",
-            "observacao": _observacao_da_calagem(laudo),
+            "observacao": texto_pt(_observacao_da_calagem(laudo)),
             "sigla": None,
             "destaque": True,
         },
@@ -546,8 +656,8 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
         item = {
             "modulo": modulo(passo.regra),
             "rotulo": rotulo(passo.regra),
-            "regra": humanizar_evidencia(evidencia) if evidencia else passo.regra,
-            "fonte": passo.fonte,
+            "regra": humanizar_evidencia(evidencia) if evidencia else texto_pt(passo.regra),
+            "fonte": texto_pt(passo.fonte),
             "entradas": passo.entradas,
             "saida": passo.saida,
             # O que a regra DECIDIU, em poucas palavras. Serve à matriz de comparação
@@ -770,7 +880,7 @@ def _orientacoes(laudo: Laudo) -> List[Dict[str, Any]]:
                 "texto": restricao.get("observacao") or "",
                 "tipo": "restricao",
             })
-    return [item for item in itens if item["texto"]]
+    return [{**item, "texto": texto_pt(item["texto"])} for item in itens if item["texto"]]
 
 
 #: Nome de leitura dos fertilizantes simples. O id da base é identificador; "ureia" com

@@ -339,6 +339,8 @@ def opcoes_de_manejo(dados: Dict[str, Any], grupo: str = "graos") -> List[Tuple[
     combinação escolhida na tela pode deixar de resolver. Critérios que as próprias notas
     marcam fora do escopo do SIRAS (arroz irrigado) não entram na lista.
     """
+    from siras.relatorio.apresentacao import texto_pt  # mesmo motivo da importação acima
+
     opcoes = []
     for criterio in dados["criterios_calagem"]["criterios"]:
         if criterio["grupo"] != grupo:
@@ -348,7 +350,7 @@ def opcoes_de_manejo(dados: Dict[str, Any], grupo: str = "graos") -> List[Tuple[
         manejo = criterio["sistema_manejo"].replace("_", " ").capitalize()
         condicao = criterio["condicao_area"]
         rotulo = manejo if condicao in ("-", "todos os casos") else f"{manejo} — {condicao}"
-        opcoes.append((criterio["id"], rotulo))
+        opcoes.append((criterio["id"], texto_pt(rotulo)))
     return opcoes
 
 

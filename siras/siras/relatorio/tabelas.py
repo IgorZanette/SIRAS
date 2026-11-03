@@ -16,15 +16,22 @@ Manual.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Dict, List, Optional
 
-from siras.relatorio.apresentacao import formatar_enxuto, formatar_numero
+from siras.relatorio.apresentacao import formatar_enxuto, formatar_numero, texto_pt
 
 #: O fator da dose como o Manual o escreve (Tab. 5.3 a 5.7). formatar_enxuto() arredonda a
 #: uma casa, e 0,25 saía "0,2" — o fator do plantio direto consolidado, que é 1/4, aparecia
 #: na tela como um quinto. O cálculo nunca foi afetado: só esta exibição.
 _FATOR_COMO_NO_MANUAL = {1.0: "1", 0.5: "½", 0.25: "¼"}
+
+
+def _camada(profundidade: Any) -> str:
+    """A camada como intervalo legível: [0, 20] -> "0–20"; 20 -> "0–20"."""
+    if isinstance(profundidade, (list, tuple)) and len(profundidade) == 2:
+        return f"{formatar_enxuto(profundidade[0])}–{formatar_enxuto(profundidade[1])}"
+    return f"0–{formatar_enxuto(profundidade) if profundidade is not None else '20'}"
 
 
 def _fator(valor: Optional[float]) -> str:
@@ -96,9 +103,12 @@ def tabela_smp(dados: Dict[str, Any]) -> Tabela:
         descricao=bloco.get("descricao", ""),
         colunas=["Índice SMP", "pH 5,5", "pH 6,0", "pH 6,5"],
         linhas=linhas,
+        # A base já traz a unidade completa ("t/ha de calcario PRNT 100%") e a camada como
+        # intervalo ([0, 20]). Escrever "de calcário PRNT 100%" de novo e interpolar a
+        # lista dava "...PRNT 100% de calcário PRNT 100%, para a camada de 0–[0, 20] cm".
         aviso=(
-            f"Doses em {bloco.get('unidade', 't/ha')} de calcário PRNT 100%, para a camada "
-            f"de 0–{bloco.get('profundidade_cm', 20)} cm. A dose do corretivo real sai de "
+            f"Doses em {bloco.get('unidade', 't/ha de calcário PRNT 100%')}, para a camada "
+            f"de {_camada(bloco.get('profundidade_cm'))} cm. A dose do corretivo real sai de "
             f"NC × 100 ÷ PRNT."
         ),
         notas=[
@@ -382,7 +392,18 @@ _POR_ID: Dict[str, Dict[str, Any]] = {item["id"]: item for item in CATALOGO}
 def construir(identificador: str, dados: Dict[str, Any]) -> Optional[Tabela]:
     """A tabela pedida, ou None quando o identificador não existe."""
     item = _POR_ID.get(identificador)
-    return item["construtor"](dados) if item else None
+    if not item:
+        return None
+    tabela = item["construtor"](dados)
+    # A base foi transcrita sem acentos; a tela não. Ver texto_pt() em apresentacao.py.
+    return replace(
+        tabela,
+        titulo=texto_pt(tabela.titulo),
+        descricao=texto_pt(tabela.descricao),
+        aviso=texto_pt(tabela.aviso),
+        notas=[texto_pt(n) for n in tabela.notas],
+        linhas=[[texto_pt(c) for c in linha] for linha in tabela.linhas],
+    )
 
 
 __all__ = ["CATALOGO", "Tabela", "construir"]

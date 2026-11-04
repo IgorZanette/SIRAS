@@ -544,11 +544,30 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
 _ALERTA_SEM_PH_REFERENCIA = re.compile(r"cultura '[^']+' não encontrada em ph_referencia\.json")
 
 
+_ALERTA_PH_DIVERGENTE = re.compile(
+    r"cultura '[^']+': os nomes correspondentes na Tabela 5\.1 têm pH de referência "
+    r"diferentes \(([^)]*)\)"
+)
+
+
 def _alerta_legivel(alerta: str) -> str:
-    if _ALERTA_SEM_PH_REFERENCIA.fullmatch(alerta.strip()):
+    alerta = alerta.strip()
+    if _ALERTA_SEM_PH_REFERENCIA.fullmatch(alerta):
         return ("O pH de referência desta cultura não foi localizado na Tabela 5.1 "
                 "transcrita (Manual 2016, p. 68). Sem ele, o SIRAS não classifica a "
                 "aptidão, em vez de estimá-la.")
+    divergente = _ALERTA_PH_DIVERGENTE.fullmatch(alerta)
+    if divergente:
+        valores = " e ".join(v.strip().replace(".", ",") for v in divergente.group(1).split(","))
+        return ("As espécies deste agrupamento têm pH de referência diferentes na Tabela 5.1 "
+                f"(Manual 2016, p. 68): {valores}. O SIRAS não escolhe entre valores do "
+                "Manual e deixa a aptidão sem classificar.")
+    # Qualquer outra mensagem do motor que cite arquivo da base é para o log, não para
+    # o laudo: o leitor recebe o que ela significa, e o detalhe fica na trilha.
+    if ".json" in alerta:
+        return ("Um dado de referência desta cultura não foi localizado na base "
+                "transcrita do Manual. Sem ele, o SIRAS não classifica a aptidão, em vez "
+                "de estimá-la.")
     return texto_pt(alerta)
 
 

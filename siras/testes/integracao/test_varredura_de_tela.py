@@ -61,16 +61,17 @@ def test_o_botao_de_ajuda_nao_anuncia_o_identificador_do_campo(cliente):
 
 
 def test_aptidao_indeterminada_nao_mostra_mensagem_interna(cliente):
-    """A aveia branca não resolve o pH de referência (ADR 0005, D5.7): a aptidão sai
-    INDETERMINADA. A tela dizia "cultura 'aveia_branca' não encontrada em
-    ph_referencia.json" e, logo acima, que "o que limita a área não se corrige"."""
-    html = _laudo_do_exemplo(cliente, "aveia_branca")
+    """O agrupamento da alface tem a salsa no grupo de pH 5,5 da Tabela 5.1 e as demais
+    espécies no de 6,0: a aptidão sai INDETERMINADA de propósito (ver
+    test_correspondencias_tabela_5_1.py). A tela já disse "cultura 'x' não encontrada
+    em ph_referencia.json" e, logo acima, que "o que limita a área não se corrige"."""
+    html = _laudo_do_exemplo(cliente, "alface_almeirao_chicoria_rucula_salsa")
 
-    assert "ph_referencia.json" not in html
-    assert "não encontrada em" not in html
+    assert ".json" not in html.split('class="trilha"')[0]
     assert "o que limita a área não se corrige" not in html
     assert "A aptidão não pôde ser classificada" in html
-    assert "Tabela 5.1" in html
+    assert "pH de referência diferentes na Tabela 5.1" in html
+    assert "5,5 e 6,0" in html
     # Sem a classe de argila (vem dos derivados da aptidão), a nota não exibe "—".
     assert "classe de argila —" not in html
 

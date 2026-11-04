@@ -2159,22 +2159,25 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
    `margin-right: auto` a cola na logo e empurra a navegacao para a direita, dentro
    do `space-between` da barra. */
 .selo-dev {
-  flex: none; margin-right: auto; display: inline-flex; align-items: center; gap: .4rem;
-  padding: .3rem .65rem; border-radius: var(--r-pilula);
-  border: 1px solid rgba(255, 201, 61, .45); background: rgba(255, 201, 61, .12);
-  color: var(--sig-ambar); font-size: var(--fs-3xs); font-weight: 800;
-  letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; line-height: 1;
+  flex: none; margin-right: auto; display: inline-flex; align-items: center; gap: .5rem;
+  padding: .4rem .8rem; border-radius: var(--r-pilula);
+  border: 1px solid rgba(233, 240, 235, .12); background: rgba(233, 240, 235, .05);
+  color: var(--n-200); font-size: var(--fs-2xs); font-weight: 600;
+  letter-spacing: 0; white-space: nowrap; line-height: 1;
 }
-.selo-dev::before { content: ""; width: 6px; height: 6px; border-radius: 50%;
-                    background: currentColor; }
-:root[data-tema="claro"] .selo-dev { color: #7A5800; background: #FFF4D1;
-                                     border-color: rgba(178, 129, 0, .45); }
+/* O ponto ambar e o que da o aviso; o texto fica neutro, como na referencia. */
+.selo-dev::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%;
+                    background: #F5A524; box-shadow: 0 0 0 3px rgba(245, 165, 36, .18),
+                                                 0 0 8px rgba(245, 165, 36, .55); }
+:root[data-tema="claro"] .selo-dev { color: #2A3A30; background: #FFFFFF;
+                                     border-color: rgba(13, 20, 16, .12); }
+:root[data-tema="claro"] .selo-dev::before { background: #D98A00; }
 /* No telefone nao cabe ao lado: desce para baixo da palavra SIRAS, menor. */
 @media (max-width: 560px) {
   .barra__int { position: relative; }
   .selo-dev { position: absolute; left: calc(var(--e-4) + var(--marca-icone) + .75rem);
-              bottom: 6px; padding: .15rem .45rem; font-size: 8px; letter-spacing: .05em; }
-  .selo-dev::before { width: 4px; height: 4px; }
+              bottom: 5px; padding: .18rem .5rem; gap: .35rem; font-size: 9px; }
+  .selo-dev::before { width: 5px; height: 5px; box-shadow: 0 0 0 2px rgba(245, 165, 36, .18); }
 }
 @media print { .selo-dev { display: none !important; } }
 

@@ -177,12 +177,32 @@ def _nomes_candidatos(cultura_id: str, dados: Dict[str, Any]) -> Tuple[str, ...]
     return tuple(nome for nome in nomes if not (nome in vistos or vistos.add(nome)))
 
 
+def _correspondencias_na_tabela_5_1(cultura_id: str, dados: Dict[str, Any]) -> Tuple[str, ...]:
+    """Os nomes sob os quais a Tabela 5.1 traz o pH desta cultura, quando nenhum nome
+    dela resolve sozinho — agrupamentos do Manual ("melancia_melao") e denominação
+    genérica ("aveia" para aveia branca e preta). Declarados pelo autor em
+    aliases_culturas.json; vazio para as demais culturas."""
+    canonico = normalizar_nome_cultura(cultura_id)
+    for item in dados["aliases_culturas"].get("correspondencias_na_tabela_5_1", ()):
+        if normalizar_nome_cultura(item["cultura"]) == canonico:
+            return tuple(item["nomes_na_tabela"])
+    return ()
+
+
 def _resolver_ph_referencia(
-    cultura_id: str, dados_ph_ref: Dict[str, Any], candidatos: Tuple[str, ...] = ()
+    cultura_id: str,
+    dados_ph_ref: Dict[str, Any],
+    candidatos: Tuple[str, ...] = (),
+    correspondencias: Tuple[str, ...] = (),
 ) -> Optional[float]:
     """None é um valor válido (ramo b, culturas tolerantes a Al) — distinto de cultura
     não encontrada em nenhum grupo, que levanta _CulturaOuDadoIndeterminado. Por isso o
-    índice é consultado com `in`, nunca por valor-verdade do .get()."""
+    índice é consultado com `in`, nunca por valor-verdade do .get().
+
+    As `correspondencias` só são consultadas depois que todos os `candidatos` falham, e
+    o valor só é aceito se TODOS os nomes correspondentes concordarem: com valores
+    diferentes na Tabela 5.1, escolher um seria decidir pelo Manual. Aí a cultura fica
+    INDETERMINADA (falha fechada, CCAE P5)."""
     indice: Dict[str, Optional[float]] = {}
     for grupo in dados_ph_ref["grupos"]:
         for cultura in grupo["culturas"]:
@@ -192,6 +212,16 @@ def _resolver_ph_referencia(
         chave = normalizar_nome_cultura(nome)
         if chave in indice:
             return indice[chave]
+
+    chaves = [normalizar_nome_cultura(nome) for nome in correspondencias]
+    if chaves and all(chave in indice for chave in chaves):
+        valores = {indice[chave] for chave in chaves}
+        if len(valores) == 1:
+            return valores.pop()
+        raise _CulturaOuDadoIndeterminado(
+            f"cultura '{cultura_id}': os nomes correspondentes na Tabela 5.1 têm pH de "
+            f"referência diferentes ({', '.join(sorted(map(str, valores)))})"
+        )
 
     raise _CulturaOuDadoIndeterminado(
         f"cultura '{cultura_id}' não encontrada em ph_referencia.json"
@@ -220,6 +250,10 @@ def _resolver_grupo_p_ou_k(cultura_id: str, eixo: str, dados: Dict[str, Any]) ->
     2) grupo_exigencia() de motor/adubacao.py (catálogo do Anexo 2 + fallback de grãos),
        só quando (1) não encontra a cultura.
     Cada camada é tentada com todas as grafias de _nomes_candidatos().
+
+    Só quando as duas falham entram as correspondências da Tabela 5.1 (agrupamentos do
+    Manual, como "melancia_melao"): cada nome é procurado na camada 1, e o grupo só é
+    aceito se todos concordarem — a mesma regra do pH de referência.
     """
     candidatos = _nomes_candidatos(cultura_id, dados)
 
@@ -233,6 +267,14 @@ def _resolver_grupo_p_ou_k(cultura_id: str, eixo: str, dados: Dict[str, Any]) ->
             return grupo_exigencia(nome, dados["mapa_culturas"], dados["catalogo_anexo2"], eixo)
         except ErroAdubacao as e:
             ultimo_erro = e
+
+    correspondencias = _correspondencias_na_tabela_5_1(cultura_id, dados)
+    if correspondencias:
+        grupos = [_buscar_grupo_exigencia_transcrito((nome,)) for nome in correspondencias]
+        if all(grupo is not None for grupo in grupos):
+            valores = {grupo[eixo] for grupo in grupos}
+            if len(valores) == 1:
+                return f"grupo_{valores.pop()}"
     raise _CulturaOuDadoIndeterminado(str(ultimo_erro)) from ultimo_erro
 
 
@@ -294,7 +336,8 @@ def _avaliar_f1_acidez(
     crit_f1 = criterios["F1_acidez"]
 
     ph_referencia = _resolver_ph_referencia(
-        cultura_id, dados["ph_referencia"], _nomes_candidatos(cultura_id, dados)
+        cultura_id, dados["ph_referencia"], _nomes_candidatos(cultura_id, dados),
+        _correspondencias_na_tabela_5_1(cultura_id, dados),
     )
 
     if ph_referencia is not None:

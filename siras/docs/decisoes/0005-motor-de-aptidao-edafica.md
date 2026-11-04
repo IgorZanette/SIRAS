@@ -236,3 +236,38 @@ normalizada contorna acento, hífen e sublinhado, mas não resolve sinônimos, q
 `aliases_culturas.json`.
 
 **Atualização de 13/09/2026, depois do adendo.** `testes/casos/casos_aptidao.json` e seu runner foram removidos a pedido do autor: o conjunto oficial de aptidão é `entradas_aptidao.json` + `gabarito_aptidao.csv`, agora com 92 casos (8 conferidos à mão pelo autor nesta data), e é sobre eles que a equivalência v1.1/v1.2 roda. A exequibilidade de D5.4 passou a ler a NC antes do arredondamento (CCAE v1.3, §7.2, decisão A do autor): `motor/calagem.py` devolve `nc_bruta_t_ha` junto do resultado, fora da saída do Trace, porque a trilha exibe a saída e a NC de decisão não é exibida.
+
+## Adendo — 03/11/2026: correspondências com a Tabela 5.1 para agrupamentos e nomes genéricos
+
+**Contexto.** A varredura de tela de 03/11/2026 mediu que 10 das 61 culturas do escopo saíam
+com aptidão INDETERMINADA por nome, e não por falta de dado — o caso que D5.7 deixou para o
+autor decidir. Eram dois padrões: **agrupamentos do Manual** (`melancia_melao`,
+`beterraba_cenoura`, `brocolis_couve_flor`, `nabo_rabanete`, `abobora_abobrinha_moranga`,
+`pessegueiro_nectarineira`, `ervilha_seca_e_forrageira`, `alface_almeirao_chicoria_rucula_salsa`),
+que o Manual trata numa seção de adubação só e a Tabela 5.1 lista por espécie; e **nome genérico**
+(`aveia_branca` e `aveia_preta` contra "Aveia"). Por decisão do autor, resolvidos nesta data.
+
+**Decisão.** Uma seção nova em `aliases_culturas.json`, `correspondencias_na_tabela_5_1`, e não
+novos grupos de sinônimos. Sinônimo é a mesma cultura com outro nome e vale nos dois sentidos;
+`melancia_melao` não é outro nome de "melancia". Tratar como sinônimo faria a melancia herdar
+qualquer coisa declarada para o agrupamento.
+
+Três regras, todas no motor (`_resolver_ph_referencia`, `_resolver_grupo_p_ou_k`):
+
+1. **Precedência.** A correspondência só é lida depois que o nome exato, o normalizado e os
+   sinônimos falham. Nenhuma cultura que já resolvia muda de resultado — o teste exige que só
+   culturas sem resolução própria tenham correspondência.
+2. **Concordância.** O valor só é aceito se TODOS os nomes correspondentes tiverem o mesmo pH na
+   Tabela 5.1 (e o mesmo grupo de P ou K, na camada 1 de D5.7). Se divergirem, a cultura continua
+   INDETERMINADA, com o motivo (falha fechada, CCAE P5). O sistema nunca escolhe entre dois
+   valores do Manual.
+3. **Nenhum número no arquivo.** A correspondência declara nomes; os valores continuam vindo de
+   `ph_referencia.json` e do `grupo_exigencia` já transcrito em cada arquivo de adubação — o mesmo
+   que o módulo de adubação já usa para essas culturas.
+
+**Resultado.** 60 das 61 culturas passam a ter aptidão classificada. A exceção é
+`alface_almeirao_chicoria_rucula_salsa`: na Tabela 5.1 a salsa está no grupo de pH 5,5 e as outras
+quatro no de 6,0. Pela regra 2 o agrupamento fica INDETERMINADO, e o laudo diz por quê. **Decisão
+pendente do autor:** qual pH de referência vale para o agrupamento (o da maioria, o da salsa, ou
+manter indeterminado). Os 92 casos de `entradas_aptidao.json` não usam nenhuma das dez culturas, e
+o gabarito não muda.

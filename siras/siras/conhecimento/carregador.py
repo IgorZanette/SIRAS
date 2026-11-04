@@ -620,6 +620,18 @@ class Carregador:
                     )
                 origem[chave] = indice
 
+        # Uma cultura com duas correspondências na Tabela 5.1 teria o pH decidido pela
+        # ordem do arquivo — a mesma ambiguidade que a regra acima impede nos sinônimos.
+        vistas: set = set()
+        for item in dados.get("correspondencias_na_tabela_5_1", ()):
+            chave = normalizar_nome_cultura(item["cultura"])
+            if chave in vistas:
+                raise ErroCarregamento(
+                    f"aliases_culturas.json: a cultura '{item['cultura']}' tem mais de uma "
+                    f"correspondência na Tabela 5.1"
+                )
+            vistas.add(chave)
+
     def validar_graos_adubacao_n(self, dados: Dict) -> None:
         """
         Valida invariantes de graos_adubacao_n.json contra o checksum já transcrito:

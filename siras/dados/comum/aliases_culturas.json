@@ -32,5 +32,58 @@
       "nomes": ["arroz-de-sequeiro", "arroz"],
       "nota": "Tab. 5.1 usa 'Arroz de sequeiro'; Anexo 2 usa 'Arroz'. NAO alcanca o arroz irrigado por alagamento, que e outro nome e esta fora de escopo (CCAE Sec. 1.3)."
     }
+  ],
+  "nota_correspondencias": "correspondencias_na_tabela_5_1 liga um id de cultura do sistema aos nomes sob os quais a Tab. 5.1 (p. 68) traz o pH de referencia. Nao e sinonimia: e usada so para o pH de referencia, e so depois que o nome exato e os sinonimos falham (nunca altera cultura que ja resolvia). REGRA DE CONCORDANCIA: o pH so e aceito se TODOS os nomes listados tiverem o mesmo valor na Tab. 5.1; se divergirem, a cultura fica INDETERMINADA (falha fechada, CCAE P5) - o sistema nunca escolhe entre valores do Manual. Nenhum numero e escrito aqui. Declarado em 03/11/2026 a pedido do autor (ADR 0005, D5.7).",
+  "correspondencias_na_tabela_5_1": [
+    {
+      "cultura": "abobora_abobrinha_moranga",
+      "nomes_na_tabela": ["abobora", "abobrinha", "moranga"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente."
+    },
+    {
+      "cultura": "alface_almeirao_chicoria_rucula_salsa",
+      "nomes_na_tabela": ["alface", "almeirao", "chicoria", "rucula", "salsa"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente. ATENCAO: na Tab. 5.1 a salsa esta no grupo de pH 5,5 e as demais no de 6,0; pela regra de concordancia o agrupamento continua INDETERMINADO ate decisao do autor."
+    },
+    {
+      "cultura": "aveia_branca",
+      "nomes_na_tabela": ["aveia"],
+      "nota": "A Tab. 5.1 traz 'Aveia', sem distinguir especie; o sistema separa branca e preta porque o Manual as separa na adubacao."
+    },
+    {
+      "cultura": "aveia_preta",
+      "nomes_na_tabela": ["aveia"],
+      "nota": "A Tab. 5.1 traz 'Aveia', sem distinguir especie; o sistema separa branca e preta porque o Manual as separa na adubacao."
+    },
+    {
+      "cultura": "beterraba_cenoura",
+      "nomes_na_tabela": ["beterraba", "cenoura"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente."
+    },
+    {
+      "cultura": "brocolis_couve_flor",
+      "nomes_na_tabela": ["brocolis", "couve-flor"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente."
+    },
+    {
+      "cultura": "ervilha_seca_e_forrageira",
+      "nomes_na_tabela": ["ervilha", "ervilha-forrageira"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente. 'Ervilha seca' corresponde a 'Ervilha' da Tab. 5.1."
+    },
+    {
+      "cultura": "melancia_melao",
+      "nomes_na_tabela": ["melancia", "melao"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente."
+    },
+    {
+      "cultura": "nabo_rabanete",
+      "nomes_na_tabela": ["nabo", "rabanete"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente."
+    },
+    {
+      "cultura": "pessegueiro_nectarineira",
+      "nomes_na_tabela": ["pessegueiro", "nectarineira"],
+      "nota": "Agrupamento do Manual (uma secao de adubacao para o conjunto); a Tab. 5.1 lista as especies separadamente. Secao 6.5.16, conjunta para as duas especies."
+    }
   ]
 }

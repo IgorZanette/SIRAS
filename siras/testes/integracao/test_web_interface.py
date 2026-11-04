@@ -531,10 +531,35 @@ def test_o_tema_salvo_e_aplicado_antes_da_primeira_pintura(cliente):
 
 
 def test_o_modo_claro_nao_usa_branco_puro_de_fundo():
-    """#FFFFFF puro lê como tela de formulário. O off-white carrega a mesma matiz
-    levemente verde dos neutros escuros e lê como papel."""
-    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-900:\s*#F6F8F5', _TELAS_CSS)
+    """#FFFFFF puro lê como tela de formulário e, em área grande, ofusca — o autor
+    relatou que o claro "doía" o olho (04/11/2026). Nenhuma superfície da interface
+    é branca; o texto continua o mesmo."""
+    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-900:\s*#E3E7E0', _TELAS_CSS)
     assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-100:\s*#0D1410', _TELAS_CSS)
+    bloco = re.search(r':root\[data-tema="claro"\]\s*\{([^}]*)\}', _TELAS_CSS).group(1)
+    for token in ("--n-950", "--n-900", "--n-850", "--n-800"):
+        valor = re.search(token + r":\s*(#[0-9A-Fa-f]{6})", bloco).group(1)
+        assert valor.upper() != "#FFFFFF", token
+    for classe in (".painel", ".btn--contorno", ".etapa", ".cultura", ".pergunta"):
+        regra = re.search(r':root\[data-tema="claro"\] ' + re.escape(classe) + r" \{([^}]*)\}",
+                          _TELAS_CSS).group(1)
+        assert "#FFFFFF" not in regra.upper(), classe
+
+
+def test_o_texto_terciario_passa_em_toda_superficie_clara():
+    """O tom das superfícies é limitado pelo texto: escurecer além disto reprova o AA.
+    Os sinais têm o teste próprio (piso de componente, 3:1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
+    from conferir_contraste import contraste
+
+    bloco = re.search(r':root\[data-tema="claro"\]\s*\{([^}]*)\}', _TELAS_CSS).group(1)
+
+    def tom(token):
+        return re.search(token + r":\s*(#[0-9A-Fa-f]{6})", bloco).group(1)
+
+    for superficie in ("--n-900", "--n-880", "--n-850"):
+        assert contraste(tom("--n-400"), tom(superficie)) >= 4.5, superficie
 
 
 def test_a_malha_de_fundo_sobrevive_no_modo_claro():

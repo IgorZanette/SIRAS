@@ -795,32 +795,43 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 
    O verde de acao tambem muda de papel: --v-400 sobre claro fica em 1,5:1 e nao
    serve para texto nem para icone. Onde ele era texto, o claro usa --v-700
-   (5,64:1, acima do piso AA de 4,5:1).
+   (4,82:1 sobre o fundo, acima do piso AA de 4,5:1).
+
+   SEM BRANCO PURO NAS SUPERFICIES (04/11/2026). O autor relatou que o claro "doia"
+   o olho, como um clarao: o culpado era a AREA de branco -- fundo a 93% de
+   luminancia e todos os paineis, campos e botoes em #FFFFFF, que somados cobriam
+   quase a tela inteira. As superficies desceram um tom; o texto nao mudou uma cor.
+   O quanto desceram nao e gosto, e conta. So com as superficies mais escuras o brilho
+   medio da tela caia 3% -- pouco para um clarao --, porque o texto terciario e os
+   sinais batiam no piso de contraste. Eles desceram junto, sem mudar de matiz: o cinza
+   terciario 6% (imperceptivel), os sinais de 5 a 11%. Com isso o fundo chega a #E3E7E0
+   com todos os pares acima do piso: texto terciario em 4,74:1, sinais em 3,03:1 ou mais. Medido em scripts/conferir_contraste.py. O laudo NAO entra: e a
+   folha que vai para o papel, e continua branca.
    ====================================================================== */
 :root[data-tema="claro"] {
-  --n-950: #FFFFFF;
-  --n-900: #F6F8F5;   /* fundo da aplicacao: off-white com a matiz da marca */
-  --n-880: #EDF2EE;   /* secao alternada                                   */
-  --n-850: #FFFFFF;   /* superficie de painel                              */
-  --n-800: #FFFFFF;   /* campo                                             */
-  --n-750: #F1F5F2;   /* campo em foco                                     */
+  --n-950: #F3F5F0;   /* o mais claro da interface; o branco puro e so do laudo */
+  --n-900: #E3E7E0;   /* fundo da aplicacao: off-white com a matiz da marca */
+  --n-880: #DFE3DC;   /* secao alternada (texto terciario em 4,55:1)        */
+  --n-850: #ECEFE9;   /* superficie de painel                              */
+  --n-800: #F3F5F0;   /* campo: um tom acima do painel, para se ler vazio  */
+  --n-750: #F7F8F5;   /* campo em foco: o unico que clareia, e por isso se nota */
   --n-700: #D3DED7;
   --n-600: #AEBFB4;
   --n-500: #7A8C82;
-  --n-400: #5C6F64;   /* texto terciario  - 5,03:1 sobre o fundo           */
-  --n-300: #3B4A41;   /* texto secundario - 8,77:1                         */
+  --n-400: #56685E;   /* texto terciario  - 4,74:1 sobre o fundo (era #5C6F64) */
+  --n-300: #3B4A41;   /* texto secundario - 7,48:1                         */
   --n-200: #1E2A23;
-  --n-100: #0D1410;   /* texto primario   - 17,48:1                        */
+  --n-100: #0D1410;   /* texto primario   - 14,91:1                        */
   --n-050: #0A0F0C;
   /* --n-000 e a cor de MAIOR contraste com o fundo, nao branco: o marcador da
      regua precisa ser escuro aqui para continuar visivel. */
   --n-000: #0D1410;
 
   /* Sinais recalibrados. Mesma matiz, mesma saturacao, luminosidade menor. */
-  --sig-coral: #FF451C;
-  --sig-laranja: #D96D00;
-  --sig-ambar: #B28100;
-  --sig-aqua: #179B8A;
+  --sig-coral: #FC2D00;
+  --sig-laranja: #CC6600;
+  --sig-ambar: #A97B00;
+  --sig-aqua: #169383;
 
   --borda: 1px solid rgba(13, 20, 16, .09);
   --borda-forte: 1px solid rgba(13, 20, 16, .18);
@@ -831,11 +842,11 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 
 /* Superficie: sombra suave no lugar da borda fina, para dar profundidade sem peso. */
 :root[data-tema="claro"] .painel {
-  background: #FFFFFF;
-  border-color: rgba(13, 20, 16, .07);
+  background: var(--n-850);
+  border-color: rgba(13, 20, 16, .08);
   box-shadow: 0 1px 2px rgba(13,20,16,.04), 0 10px 28px -20px rgba(13,20,16,.22);
 }
-:root[data-tema="claro"] .barra { background: rgba(246, 248, 245, .88);
+:root[data-tema="claro"] .barra { background: rgba(227, 231, 224, .9);
                                   border-bottom-color: rgba(13,20,16,.08); }
 /* A malha permanece: e ela que da a leitura de superficie de instrumento. */
 :root[data-tema="claro"] .malha {
@@ -843,7 +854,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
     linear-gradient(rgba(13,20,16,.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(13,20,16,.045) 1px, transparent 1px);
 }
-:root[data-tema="claro"] .hero__halo { opacity: .55; }
+:root[data-tema="claro"] .hero__halo { opacity: .35; }
 
 /* --- Verde como texto ou icone: --v-400 reprova sobre claro ---------------- */
 :root[data-tema="claro"] .hero h1 em,
@@ -866,7 +877,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 :root[data-tema="claro"] .linha--destaque .linha__val { color: var(--v-700); }
 
 /* --- Controles ------------------------------------------------------------ */
-:root[data-tema="claro"] .btn--contorno { background: #FFFFFF;
+:root[data-tema="claro"] .btn--contorno { background: var(--n-850);
                                           border-color: rgba(13,20,16,.16); }
 :root[data-tema="claro"] .btn--fantasma { color: var(--n-300); }
 :root[data-tema="claro"] .campo__caixa { border-color: rgba(13,20,16,.16);
@@ -875,9 +886,9 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
                                            border-left-color: rgba(13,20,16,.09); }
 :root[data-tema="claro"] .campo__caixa select { color-scheme: light; }
 :root[data-tema="claro"] .campo__caixa select option { background: #FFFFFF; color: #0D1410; }
-:root[data-tema="claro"] .etapa { background: #FFFFFF; }
+:root[data-tema="claro"] .etapa { background: var(--n-850); }
 :root[data-tema="claro"] .grupo,
-:root[data-tema="claro"] .cultura { background: #FFFFFF; }
+:root[data-tema="claro"] .cultura { background: var(--n-800); }
 
 /* --- HOVER E FOCO ---------------------------------------------------------
    Este bloco existe por um defeito real: :root[data-tema="claro"] .cultura tem
@@ -907,7 +918,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 :root[data-tema="claro"] .btn--fantasma:hover { color: var(--v-700); }
 :root[data-tema="claro"] .pilar--link:hover { border-color: rgba(78,154,42,.4); }
 :root[data-tema="claro"] .tabela-dados tbody tr:hover { background: rgba(78,154,42,.08); }
-:root[data-tema="claro"] .tabela-dados thead th { background: #FFFFFF; }
+:root[data-tema="claro"] .tabela-dados thead th { background: var(--n-850); }
 
 /* --- Regua e ficha: vivem de opacidade baixa ------------------------------ */
 :root[data-tema="claro"] .regua__faixa { opacity: .55; }
@@ -919,7 +930,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 :root[data-tema="claro"] .aviso { background: color-mix(in srgb, var(--cor) 11%, #fff); }
 
 /* --- Tela de calculo ------------------------------------------------------ */
-:root[data-tema="claro"] .calculando { background: rgba(246, 248, 245, .96); }
+:root[data-tema="claro"] .calculando { background: rgba(227, 231, 224, .96); }
 :root[data-tema="claro"] .passo { background: rgba(13,20,16,.03); }
 :root[data-tema="claro"] .passo__ico { background: rgba(13,20,16,.05); }
 :root[data-tema="claro"] .passo.is-ativo { background: rgba(78,154,42,.12);
@@ -1551,7 +1562,7 @@ body,
    broto, semente. O SVG saiu e eles sairam com ele. Sobrou `--leitura`, que nao era
    do desenho: e o verde do "Voce sabia?" e do traco que corre sob o passo ativo. */
 .calculando { --leitura: var(--v-400); }
-:root[data-tema="claro"] .calculando { --leitura: var(--v-600); }
+:root[data-tema="claro"] .calculando { --leitura: var(--v-700); }
 
 /* --- Assinatura ---------------------------------------------------------- */
 .calculando__assinatura { display: flex; align-items: center; gap: .6rem; }
@@ -1932,7 +1943,7 @@ body,
 :root[data-tema="claro"] .custo__cab > .ico,
 :root[data-tema="claro"] .custo__linha--total strong { color: var(--v-700); }
 :root[data-tema="claro"] .comparativo-rolagem,
-:root[data-tema="claro"] .pergunta { background: #FFFFFF; border-color: rgba(13, 20, 16, .08); }
+:root[data-tema="claro"] .pergunta { background: var(--n-850); border-color: rgba(13, 20, 16, .08); }
 :root[data-tema="claro"] .comparativo td.comparativo__siras { background: rgba(78, 154, 42, .08); }
 :root[data-tema="claro"] .comparativo thead .comparativo__siras { background: rgba(78, 154, 42, .12); }
 :root[data-tema="claro"] .como__n { color: rgba(78, 154, 42, .32); }
@@ -1942,7 +1953,7 @@ body,
 :root[data-tema="claro"] .previa__folha { box-shadow: 0 30px 50px -30px rgba(13, 20, 16, .35),
                                                       0 0 0 1px rgba(13, 20, 16, .08); }
 :root[data-tema="claro"] .chamada { background: radial-gradient(ellipse at 50% 0%, rgba(78, 154, 42, .1), transparent 60%); }
-:root[data-tema="claro"] .custo__caixa { background: #FFFFFF; border-color: rgba(13, 20, 16, .16); }
+:root[data-tema="claro"] .custo__caixa { background: var(--n-800); border-color: rgba(13, 20, 16, .16); }
 :root[data-tema="claro"] .custo__caixa:focus-within { border-color: var(--v-700); }
 :root[data-tema="claro"] .custo__saida { background: rgba(78, 154, 42, .06); border-color: rgba(78, 154, 42, .25); }
 :root[data-tema="claro"] .custo__aviso { color: #8A5A00; }
@@ -1975,7 +1986,7 @@ body,
 .formula__falta, .formula__nao { color: #E8B04A; }
 .formula__nao { margin: 0; font-size: var(--fs-xs); }
 
-:root[data-tema="claro"] .formula { background: #FFFFFF; border-color: rgba(13, 20, 16, .1); }
+:root[data-tema="claro"] .formula { background: var(--n-800); border-color: rgba(13, 20, 16, .1); }
 :root[data-tema="claro"] .formula--melhor { border-color: var(--v-700); }
 :root[data-tema="claro"] .formula__selo { background: var(--v-700); color: #FFFFFF; }
 :root[data-tema="claro"] .formula__falta,
@@ -2098,7 +2109,7 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 }
 :root[data-tema="claro"] a:focus-visible,
 :root[data-tema="claro"] button:focus-visible,
-:root[data-tema="claro"] summary:focus-visible { outline-color: var(--v-600); }
+:root[data-tema="claro"] summary:focus-visible { outline-color: var(--v-700); }
 
 /* --- Menos movimento: nenhum --------------------------------------------
    Nao e so desligar a transicao: o estado inicial tem de sumir junto, senao
@@ -2169,7 +2180,7 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 .selo-dev::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%;
                     background: #F5A524; box-shadow: 0 0 0 3px rgba(245, 165, 36, .18),
                                                  0 0 8px rgba(245, 165, 36, .55); }
-:root[data-tema="claro"] .selo-dev { color: #2A3A30; background: #FFFFFF;
+:root[data-tema="claro"] .selo-dev { color: #2A3A30; background: var(--n-850);
                                      border-color: rgba(13, 20, 16, .12); }
 :root[data-tema="claro"] .selo-dev::before { background: #D98A00; }
 /* No telefone nao cabe ao lado: desce para baixo da palavra SIRAS, menor. */
@@ -2236,8 +2247,10 @@ body::before {
 :root[data-tema="claro"] body::before {
   background-image: url("../img/background/claro-1.webp");
   mix-blend-mode: normal;
-  filter: none;
-  opacity: .85;
+  /* O ceu de neblina da arte clara chega a 95% de luminancia: nas calhas de um monitor
+     largo era a maior area clara da tela. Escurece o pico e baixa a presenca. */
+  filter: brightness(.9);
+  opacity: .5;
 }
 
 /* A CHAMADA FINAL fecha a pagina, e ali a paisagem sobe: a secao inteira, e nao so as
@@ -2256,7 +2269,7 @@ body::before {
 }
 :root[data-tema="claro"] .chamada.fundo-horizonte::before {
   background-image:
-    linear-gradient(180deg, rgba(246,248,245,.92), rgba(246,248,245,.62)),
+    linear-gradient(180deg, rgba(227,231,224,.94), rgba(227,231,224,.7)),
     url("../img/background/claro-2.webp");
   background-position: center 70%;
 }
@@ -2320,7 +2333,7 @@ body::before {
                             text-transform: uppercase; color: var(--n-500); margin-bottom: 2px; }
   .comparativo td.comparativo__siras::before { color: var(--v-400); }
   .comparativo tbody tr:last-child > * { border-bottom: 0; }
-  :root[data-tema="claro"] .comparativo tr { background: #FFFFFF; border-color: rgba(13, 20, 16, .08); }
+  :root[data-tema="claro"] .comparativo tr { background: var(--n-850); border-color: rgba(13, 20, 16, .08); }
   :root[data-tema="claro"] .comparativo td.comparativo__siras::before { color: var(--v-700); }
 }
 

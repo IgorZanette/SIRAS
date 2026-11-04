@@ -31,16 +31,16 @@ SINAIS_ESCURO = {
     "--sig-ambar": "#FFC93D", "--sig-aqua": "#2BE0C8",
 }
 SINAIS_CLARO = {
-    "--sig-coral": "#FF451C", "--sig-laranja": "#D96D00",
-    "--sig-ambar": "#B28100", "--sig-aqua": "#179B8A",
+    "--sig-coral": "#FC2D00", "--sig-laranja": "#CC6600",
+    "--sig-ambar": "#A97B00", "--sig-aqua": "#169383",
 }
 ESCURO = {
     "fundo": "#0A0F0C", "painel": "#121B16", "campo": "#18231D",
     "texto": "#E9F0EB", "texto-2": "#A9BCB1", "texto-3": "#82998C",
 }
 CLARO = {
-    "fundo": "#F6F8F5", "painel": "#FFFFFF", "campo": "#FFFFFF",
-    "texto": "#0D1410", "texto-2": "#3B4A41", "texto-3": "#5C6F64",
+    "fundo": "#E3E7E0", "painel": "#ECEFE9", "campo": "#F3F5F0",
+    "texto": "#0D1410", "texto-2": "#3B4A41", "texto-3": "#56685E",
 }
 
 

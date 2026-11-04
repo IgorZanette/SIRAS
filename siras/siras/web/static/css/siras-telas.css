@@ -979,6 +979,8 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 /* Sem regra separando do campo de nitrogenio: o titulo do bloco e o <legend> ja dizem
    onde um assunto termina e o outro comeca, e o tracejado so acrescentava ruido. */
 .formulas-usuario { margin: var(--e-4) 0 0; padding: var(--e-3) 0 0; border: 0; }
+/* O parágrafo encostava no rótulo "Fórmula 1" (varredura de 03/11/2026). */
+.formulas-usuario__intro { margin-bottom: var(--e-4); }
 .formulas-usuario legend { padding: 0; font-size: var(--fs-2xs); font-weight: 800;
                            text-transform: uppercase; letter-spacing: .04em; }
 .bloco__opcional { font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase;
@@ -1276,7 +1278,8 @@ body,
 
 /* --- Quantidade total a comprar ------------------------------------------ */
 .totais { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--e-4); }
-@media (max-width:860px){ .totais { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width:860px){ .totais { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width:560px){ .totais .total { padding: var(--e-3); } }
 .total { padding: var(--e-4); border-radius: var(--r-doc); background: #FAFCFA;
          border: 1px solid #E3EAE5; }
 .total__nome { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .04em;
@@ -2151,9 +2154,29 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 :root[data-tema="claro"] .estado__item--andamento::before,
 :root[data-tema="claro"] .estado__item--proximo::before { background: var(--n-950); }
 
-/* O que o sistema E, dito no alto do hero e nao so no rodape do laudo. */
-.hero__natureza { margin-top: var(--e-3); font-size: var(--fs-xs); color: var(--n-400);
-                  letter-spacing: .01em; }
+/* Etiqueta "Em desenvolvimento", ao lado da logo em todas as telas (v2, 03/11/2026).
+   Ambar de atencao, e nao o verde de acao: e um aviso sobre o sistema, nao um botao.
+   `margin-right: auto` a cola na logo e empurra a navegacao para a direita, dentro
+   do `space-between` da barra. */
+.selo-dev {
+  flex: none; margin-right: auto; display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .65rem; border-radius: var(--r-pilula);
+  border: 1px solid rgba(255, 201, 61, .45); background: rgba(255, 201, 61, .12);
+  color: var(--sig-ambar); font-size: var(--fs-3xs); font-weight: 800;
+  letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; line-height: 1;
+}
+.selo-dev::before { content: ""; width: 6px; height: 6px; border-radius: 50%;
+                    background: currentColor; }
+:root[data-tema="claro"] .selo-dev { color: #7A5800; background: #FFF4D1;
+                                     border-color: rgba(178, 129, 0, .45); }
+/* No telefone nao cabe ao lado: desce para baixo da palavra SIRAS, menor. */
+@media (max-width: 560px) {
+  .barra__int { position: relative; }
+  .selo-dev { position: absolute; left: calc(var(--e-4) + var(--marca-icone) + .75rem);
+              bottom: 6px; padding: .15rem .45rem; font-size: 8px; letter-spacing: .05em; }
+  .selo-dev::before { width: 4px; height: 4px; }
+}
+@media print { .selo-dev { display: none !important; } }
 
 /* --- Fundos de apoio (ADR 0013, revisto em 11/10/2026) ------------------- */
 /* As cinco artes sao paisagens de lavoura ao amanhecer, e todas sao ESCURAS. Duas
@@ -2255,6 +2278,7 @@ body::before {
   .barra__nav .rotulo-largo { display: none; }
   .barra__nav .rotulo-curto { display: inline; }
   .barra__nav .btn { white-space: nowrap; padding: 0 .9rem; }
+  .barra__nav .barra__voltar { width: 46px; padding: 0; }
   /* Logo, tema e botao numa linha em 360px: faltavam ~30px. Cada peca cede um
      pouco; o alvo de toque do tema continua com 28px de largura e 30px de altura. */
   .barra { --marca-icone: 34px; --marca-palavra: 19px; }
@@ -2317,4 +2341,72 @@ body::before {
   .previa__folha { width: min(240px, 100%); padding: 20px 22px; }
   .confianca { grid-template-columns: 1fr 1fr; gap: var(--e-5) var(--e-4); }
   .confianca__item strong { font-size: var(--fs-md); }
+}
+
+/* No telefone o formulario tem uma coluna so, e o balao de 280px centrado no gatilho
+   saia pela direita mesmo fechado - a pagina rolava de lado. Ali ele se ancora no
+   campo inteiro, de borda a borda. */
+@media (max-width: 560px) {
+  .campo { position: relative; }
+  .campo .dica { position: static; }
+  .campo .dica__balao,
+  .grade > .campo:last-child .dica__balao,
+  .grade > .campo:nth-child(3n) .dica__balao {
+    left: 0; right: 0; width: auto; max-width: none; transform: translateY(4px);
+  }
+  .campo .dica:hover .dica__balao,
+  .campo .dica__gatilho:focus-visible ~ .dica__balao,
+  .grade > .campo:last-child .dica:hover .dica__balao,
+  .grade > .campo:nth-child(3n) .dica:hover .dica__balao { transform: translateY(0); }
+}
+
+/* Calculadora de custo no telefone: as trilhas `1fr` da grade nao encolhem abaixo do
+   conteudo minimo, e a calculadora saia 90px para fora da tela, levando a pagina a
+   rolar de lado (varredura de 03/11/2026). `minmax(0, 1fr)` deixa a trilha encolher. */
+.custo, .custo__saida, .custo__entradas, .formula { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 900px) { .custo__grade { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) {
+  .custo { padding: var(--e-4); }
+  .custo__insumo { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .formula { padding: var(--e-3); }
+  .formula__tabela th, .formula__tabela td { padding-left: var(--e-1); }
+  .formula__cab { flex-wrap: wrap; }
+  /* Quatro colunas de numero nao cabem em 360px: a tabela rola dentro do cartao. */
+  .formula__tabela { display: block; overflow-x: auto; }
+  /* O valor da linha ("380 kg/ha · 7,6 sacos") nao quebrava e empurrava o cartao. */
+  .custo__linha strong { white-space: normal; text-align: right; }
+}
+
+/* Aptidao no telefone: os dois selos empilham, e a seta girava 90 graus junto com o
+   texto "com este laudo", que saia na vertical. Gira so o icone; os selos perdem a
+   altura minima de 150px, pensada para a coluna larga. */
+@media screen and (max-width: 720px) {
+  .cenarios__seta { transform: none; grid-auto-flow: column; align-items: center; }
+  .cenarios__seta .ico { transform: rotate(90deg); }
+  .cenarios__seta span { max-width: none; }
+  .cenario .aptidao__selo { min-height: 0; max-width: 260px; padding: var(--e-4); }
+}
+
+/* Fatores de limitacao no telefone: com quatro colunas, a Evidencia ficava fora da
+   tela e, mesmo invisivel, esticava cada linha a seis linhas de altura. Ali cada
+   fator vira um bloco: o nome, os dois cenarios lado a lado e a evidencia embaixo.
+   So na tela -- no papel a tabela continua tabela. */
+@media screen and (max-width: 560px) {
+  .tabela-doc--fatores thead { position: absolute; width: 1px; height: 1px;
+                               overflow: hidden; clip: rect(0 0 0 0); }
+  .tabela-doc--fatores, .tabela-doc--fatores tbody { display: block; }
+  .tabela-doc--fatores tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                            gap: var(--e-1) var(--e-3); padding: var(--e-3) 0;
+                            border-bottom: 1px solid #E3EAE5; }
+  .tabela-doc--fatores th, .tabela-doc--fatores td { display: block; padding: 0; border: 0; }
+  .tabela-doc--fatores th { grid-column: 1 / -1; }
+  .tabela-doc--fatores td[data-rotulo]::before {
+    content: attr(data-rotulo); display: block; margin-bottom: 2px;
+    font-size: var(--fs-3xs); font-weight: 800; letter-spacing: .06em;
+    text-transform: uppercase; color: #7A8C82;
+  }
+  .tabela-doc--fatores .tabela-doc__evidencia { grid-column: 1 / -1; }
+  .tabela-doc--fatores .tabela-doc__vazio { grid-column: 1 / -1; }
 }

@@ -80,8 +80,21 @@ def _faixa_legivel(faixa: Dict[str, Any], unidade: str = "") -> str:
     return f"> {formatar_enxuto(de)} a {formatar_enxuto(ate)}{sufixo}"
 
 
+#: Nomes de tela das classes e dos atributos que os arquivos guardam como chave. "medio"
+#: e "ctc_ph7" chegavam como "Medio" e "Ctc ph7" (varredura de 03/11/2026); "media" não
+#: entra em texto_pt() porque, solta numa frase, pode ser o verbo.
+_ROTULO_DE_CHAVE = {
+    "muito_baixo": "Muito baixo", "baixo": "Baixo", "medio": "Médio", "alto": "Alto",
+    "muito_alto": "Muito alto", "baixa": "Baixa", "media": "Média", "alta": "Alta",
+    "muito_alta": "Muito alta",
+    "argila": "Argila", "materia_organica": "Matéria orgânica", "ctc_ph7": "CTC a pH 7,0",
+    "calcio": "Cálcio", "magnesio": "Magnésio", "enxofre": "Enxofre", "cobre": "Cobre",
+    "zinco": "Zinco", "boro": "Boro", "manganes": "Manganês",
+}
+
+
 def _rotulo_de_classe(classe: str) -> str:
-    return classe.replace("_", " ").capitalize()
+    return _ROTULO_DE_CHAVE.get(classe) or classe.replace("_", " ").capitalize()
 
 
 def tabela_smp(dados: Dict[str, Any]) -> Tabela:
@@ -224,7 +237,7 @@ def tabela_interpretacao_geral(dados: Dict[str, Any]) -> Tabela:
     for atributo in bloco["atributos"]:
         for faixa in atributo["faixas"]:
             linhas.append([
-                atributo["atributo"].replace("_", " ").capitalize(),
+                _rotulo_de_classe(atributo["atributo"]),
                 _rotulo_de_classe(str(faixa["classe"])),
                 _faixa_legivel(faixa, atributo.get("unidade", "")),
                 atributo.get("fonte", "—"),
@@ -298,9 +311,14 @@ def tabela_grupos_de_exigencia(dados: Dict[str, Any]) -> Tabela:
         )
     ]
     notas = list(bloco.get("lacunas_conhecidas") or [])
-    nao_fornece = bloco.get("o_que_o_anexo_2_nao_fornece")
-    if nao_fornece:
-        notas.insert(0, nao_fornece)
+    # O campo `o_que_o_anexo_2_nao_fornece` do arquivo é nota de MANUTENÇÃO ("Não
+    # acrescente esses campos aqui", nomes de arquivo, grupo_p): chegava inteiro à tela.
+    # O leitor precisa só do que ela diz sobre o Manual, e é isso que sai aqui.
+    if bloco.get("o_que_o_anexo_2_nao_fornece"):
+        notas.insert(0, (
+            "O Anexo 2 dá somente os grupos de exigência de fósforo e potássio. O pH de "
+            "referência vem da Tabela 5.1, e o critério de calagem, das Tabelas 5.3 a 5.7."
+        ))
     return Tabela(
         titulo="Grupos de exigência de fósforo e potássio",
         fonte=bloco.get("fonte", "—"),
@@ -399,9 +417,11 @@ def construir(identificador: str, dados: Dict[str, Any]) -> Optional[Tabela]:
     return replace(
         tabela,
         titulo=texto_pt(tabela.titulo),
+        fonte=texto_pt(tabela.fonte),
         descricao=texto_pt(tabela.descricao),
         aviso=texto_pt(tabela.aviso),
         notas=[texto_pt(n) for n in tabela.notas],
+        colunas=[texto_pt(c) for c in tabela.colunas],
         linhas=[[texto_pt(c) for c in linha] for linha in tabela.linhas],
     )
 

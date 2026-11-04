@@ -32,12 +32,15 @@
    1.4.13). O texto vive no DOM o tempo todo, então leitor de tela o alcança pelo
    aria-describedby, e não depende de o balão estar visível.
 #}
-{% macro opcional(id, motivo=None) -%}
+{# `rotulo` dá nome ao botão para o leitor de tela. Era o `id` do campo, e o leitor
+   anunciava "Por que preencher expectativa_rendimento" (achado na varredura de
+   03/11/2026). #}
+{% macro opcional(id, motivo=None, rotulo=None) -%}
 <span class="campo__opcional">opcional</span>
 {%- if motivo %}
 <span class="dica">
   <button class="dica__gatilho" type="button"
-          aria-label="Por que preencher {{ id }}" aria-describedby="{{ id }}-dica">
+          aria-label="Por que preencher: {{ (rotulo|striptags) if rotulo else 'este campo' }}" aria-describedby="{{ id }}-dica">
     {{ _i.ico("info", "ico ico--sm") }}
   </button>
   <span class="dica__balao" role="tooltip" id="{{ id }}-dica">{{ motivo }}</span>
@@ -74,7 +77,7 @@
   <label class="campo{% if erro %} campo--erro{% endif %}{% if valor %} campo--preenchido{% endif %}"
          for="{{ id }}">
     <span class="campo__label">
-      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% else %} {{ opcional(id, motivo) }}{% endif %}
+      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% else %} {{ opcional(id, motivo, rotulo) }}{% endif %}
     </span>
     <span class="campo__caixa">
       {# Os espaços antes de cada {% raw %}{% if %}{% endraw %} são necessários: trim_blocks remove a quebra de
@@ -106,7 +109,7 @@
   {% for opcao_valor, _rotulo in opcoes %}{% if opcao_valor == "" %}{% set vazio.possivel = true %}{% endif %}{% endfor %}
   <label class="campo" for="{{ id }}">
     <span class="campo__label">
-      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% elif vazio.possivel %} {{ opcional(id, motivo) }}{% endif %}
+      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% elif vazio.possivel %} {{ opcional(id, motivo, rotulo) }}{% endif %}
     </span>
     <span class="campo__caixa">
       <select id="{{ id }}" name="{{ id }}"
@@ -134,7 +137,7 @@
                      nome=None, erro=False, obrigatorio=False, marcar_opcional=True) %}
   <label class="campo{% if erro %} campo--erro{% endif %}{% if valor %} campo--preenchido{% endif %}" for="{{ id }}">
     <span class="campo__label">
-      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% elif marcar_opcional %} {{ opcional(id, motivo) }}{% endif %}
+      {{ rotulo }}{% if obrigatorio %} <b aria-label="obrigatório">*</b>{% elif marcar_opcional %} {{ opcional(id, motivo, rotulo) }}{% endif %}
     </span>
     <span class="campo__caixa">
       <input type="text" id="{{ id }}" name="{{ nome or id }}" autocomplete="off"{% if valor %} value="{{ valor }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if ajuda %} aria-describedby="{{ id }}-ajuda"{% endif %}>

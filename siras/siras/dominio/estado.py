@@ -77,10 +77,12 @@ ETAPAS: Tuple[Etapa, ...] = (
     ),
 )
 
-#: Declaração de natureza, no alto da página. A referência põe um rótulo equivalente
-#: no topo do hero ("Em desenvolvimento · protótipo navegável"), e o SIRAS tem o que
-#: declarar: é TCC, roda local, e é apoio à decisão e não substituto de ninguém.
-SELO_DE_NATUREZA = "Trabalho de Conclusão de Curso · em desenvolvimento · roda local e offline"
+#: Declaração de natureza, numa etiqueta ao lado da logo em todas as telas. Era uma
+#: frase no hero ("Trabalho de Conclusão de Curso · em desenvolvimento · roda local e
+#: offline"); a v2 (03/11/2026) a reduziu ao que importa a quem usa, por decisão do
+#: autor. "Roda local e offline" também deixou de ser verdade para quem usa a versão
+#: publicada no Render. Que é TCC continua dito no rodapé e na seção do estado.
+SELO_DE_NATUREZA = "Em desenvolvimento"
 
 
 __all__ = ["ETAPAS", "ROTULO_DA_SITUACAO", "SELO_DE_NATUREZA", "Etapa"]

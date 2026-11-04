@@ -134,8 +134,8 @@
         <h3>Adubo que você vai comprar <small class="bloco__opcional">opcional</small></h3>
       </div>
       <p class="t-aux bloco__intro">
-        Nada aqui é obrigatório, e o laudo sai completo sem nada disso. Preenchendo, as
-        sugestões de adubo ficam mais perto do que você encontra na sua revenda.
+        O laudo sai completo sem isto. Preenchendo, a sugestão de adubo fica mais perto
+        da sua revenda.
       </p>
       {% if recebe_nitrogenio %}
       <div class="grade">
@@ -149,12 +149,9 @@
       {% endif %}
       <fieldset class="formulas-usuario">
         <legend>Fórmulas que a sua revenda tem</legend>
-        <p class="t-aux">
-          Até três, copiadas do rótulo — os três números do saco, como
-          <b>05-20-20</b>. Digite só os números: o hífen entra sozinho. O laudo diz
-          quanto aplicar de cada uma, o que falta completar, e se ela atende tão bem
-          quanto as do catálogo do SIRAS — que não é lista oficial: lista oficial de
-          fórmulas comercializadas não existe.
+        <p class="t-aux formulas-usuario__intro">
+          Até três, como no saco: <b>05-20-20</b> (o hífen entra sozinho). O laudo diz
+          quanto aplicar de cada uma e o que falta completar.
         </p>
         <div class="grade">
           {% set informadas = leitura.valores.get("formula_usuario") or [] %}

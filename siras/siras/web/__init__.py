@@ -42,6 +42,12 @@ def criar_app(config: Optional[Dict[str, Any]] = None) -> Flask:
     # Acentos que a transcrição da base omitiu. Só em texto exibido, nunca em `value=`.
     app.jinja_env.filters["pt"] = texto_pt
 
+    # A etiqueta de natureza vive no cabeçalho, que é de todas as telas: entra no
+    # contexto de todo template, e não só no da inicial.
+    from siras.dominio.estado import SELO_DE_NATUREZA
+
+    app.context_processor(lambda: {"selo_de_natureza": SELO_DE_NATUREZA})
+
     if config:
         app.config.update(config)
 

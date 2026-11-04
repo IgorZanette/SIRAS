@@ -3,11 +3,13 @@
 
 
 {% block barra_nav %}
-<a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">Iniciar análise</a>
+<a class="btn btn--primario" href="{{ url_for('siras.cultura') }}">
+  <span class="rotulo-largo">Iniciar análise</span><span class="rotulo-curto" aria-hidden="true">Começar</span>
+</a>
 {% endblock %}
 
 {% block conteudo %}
-<main class="env" style="padding:var(--e-7) 0 var(--e-10)">
+<main class="env" style="padding-block:var(--e-7) var(--e-10)">
   <h1 class="t-tela">Tabelas do Manual, como o SIRAS as transcreveu</h1>
   <p class="t-corpo" style="margin-top:var(--e-3);font-size:var(--fs-md)">
     São os mesmos dados que o motor lê para calcular. Servem para conferir um número do

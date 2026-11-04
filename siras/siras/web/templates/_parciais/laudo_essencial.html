@@ -108,6 +108,11 @@
           {% if laudo.aptidao.houve_ganho %}
           Aplicando a recomendação, a área passa de <b>{{ laudo.aptidao.atual.rotulo }}</b>
           para <b>{{ laudo.aptidao.potencial.rotulo }}</b>.
+          {% elif laudo.aptidao.indeterminada %}
+          {# Sem classe nos dois cenários não há o que comparar: dizer que "o que limita
+             não se corrige" afirmaria uma limitação que o motor não chegou a avaliar. #}
+          A aptidão não pôde ser classificada com os dados de referência disponíveis
+          para esta cultura.
           {% else %}
           A classe não muda com a recomendação: o que limita a área não se corrige com
           calcário nem adubo.
@@ -135,6 +140,7 @@
         {% set _ = depois_por_id.update({fator.id: fator}) %}
         {% endfor %}
 
+        {% if not laudo.aptidao.indeterminada %}
         <h4 class="t-rotulo aptidao__titulo">Fatores de limitação</h4>
         <div class="tabela-rolagem">
           <table class="tabela-doc tabela-doc--fatores">
@@ -151,18 +157,18 @@
               {% set depois = depois_por_id.get(fator.id) %}
               <tr>
                 <th scope="row">{{ fator.nome }}</th>
-                <td>
+                <td data-rotulo="Hoje">
                   <span class="limitante__barra"><i style="width:{{ fator.peso }}%"></i></span>
                   {{ fator.rotulo }}
                 </td>
-                <td>
+                <td data-rotulo="Após a correção">
                   {% if depois %}
                   <span class="limitante__barra"><i style="width:{{ depois.peso }}%"></i></span>
                   {{ depois.rotulo }}{% if depois.grau < fator.grau %}
                     <span class="tabela-doc__ganho" title="limitação reduzida pela recomendação">↓</span>{% endif %}
                   {% else %}—{% endif %}
                 </td>
-                <td class="tabela-doc__evidencia">{{ fator.evidencia }}</td>
+                <td class="tabela-doc__evidencia" data-rotulo="Evidência">{{ fator.evidencia }}</td>
               </tr>
               {% else %}
               <tr>
@@ -179,6 +185,7 @@
           Sem limitação:
           {% for fator in sem_limitacao %}{{ fator.nome }}{% if not loop.last %}, {% endif %}{% endfor %}.
         </p>
+        {% endif %}
         {% endif %}
 
         {% if laudo.aptidao.atual.rebaixamento_aplicado %}

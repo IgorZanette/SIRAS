@@ -4,13 +4,16 @@
 
 
 {% block barra_nav %}
-<a class="btn btn--contorno" href="{{ url_for('siras.tabelas') }}">
-  {{ i.ico("volta", "ico ico--sm") }} Todas as tabelas
+{# No telefone fica só a seta: o rótulo inteiro empurrava a barra para fora da tela,
+   e a própria página repete o caminho de volta logo abaixo. #}
+<a class="btn btn--contorno barra__voltar" href="{{ url_for('siras.tabelas') }}"
+   aria-label="Todas as tabelas">
+  {{ i.ico("volta", "ico ico--sm") }} <span class="rotulo-largo">Todas as tabelas</span>
 </a>
 {% endblock %}
 
 {% block conteudo %}
-<main class="env" style="padding:var(--e-6) 0 var(--e-10)">
+<main class="env" style="padding-block:var(--e-6) var(--e-10)">
   <a class="btn btn--fantasma" href="{{ url_for('siras.tabelas') }}"
      style="padding-left:0;margin-bottom:var(--e-3)">
     {{ i.ico("volta", "ico ico--sm") }} Tabelas do Manual

@@ -72,6 +72,18 @@ _ACENTOS = {
     "estacao": "estação", "estacoes": "estações", "consorciacoes": "consorciações",
     "medio": "médio", "minimos": "mínimos", "maximos": "máximos", "minimas": "mínimas",
     "maximas": "máximas", "basico": "básico", "dolomiticos": "dolomíticos",
+    # Varredura de 03/11/2026, por sufixo, em todas as telas das 61 culturas. Ficaram de
+    # fora os nomes que também são gênero botânico ("Araucaria", "Acacia"): o mesmo
+    # texto traz o nome científico, e acentuá-lo seria erro.
+    "aromatica": "aromática", "aromaticas": "aromáticas", "raizes": "raízes",
+    "braquiarias": "braquiárias", "coloniao": "colonião", "sudao": "sudão", "cha": "chá",
+    "cornichao": "cornichão", "desmodio": "desmódio", "estevia": "estévia",
+    "hemartria": "hemártria", "azevem": "azevém", "orientacao": "orientação",
+    "orientacoes": "orientações", "assistencia": "assistência", "tecnica": "técnica",
+    "tecnicas": "técnicas", "tecnicos": "técnicos", "reducao": "redução",
+    "emergencia": "emergência", "fertirrigacao": "fertirrigação", "botao": "botão",
+    "organico": "orgânico", "organicos": "orgânicos", "organicas": "orgânicas",
+    "diferenciacao": "diferenciação",
 }
 
 #: Os casos ambíguos ("e"/"é", "tem"/"têm", "vem"/"vêm", "da"/"dá") NÃO entram na lista
@@ -108,6 +120,8 @@ def texto_pt(texto: Optional[str]) -> Optional[str]:
     texto = re.sub(r"\bpre-", "pré-", texto)
     texto = re.sub(r"\bPre-", "Pré-", texto)
     texto = re.sub(r"\b([Nn])ogueira[ -]peca\b", r"\1ogueira-pecã", texto)
+    # A base escreve a unidade em ASCII ("cmolc/dm3"); o laudo, com o expoente.
+    texto = re.sub(r"\bdm3\b", "dm³", texto)
     for errada, certa in _FRASES:
         texto = texto.replace(errada, certa)
     return texto
@@ -495,8 +509,13 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
             "posicao": posicao_na_regua(laudo.analise.p, laudo.adubacao.faixas_p,
                                         laudo.adubacao.classe_p),
             "faixas": laudo.adubacao.faixas_p,
-            "nota": f"Interpretado pela classe de argila {derivados.get('classe_argila', '—')} "
-                    f"({formatar_numero(laudo.analise.argila, 0)}%), extrator Mehlich-1.",
+            # A classe vem dos derivados da aptidão, que ficam vazios quando ela é
+            # INDETERMINADA; aí a frase saía "classe de argila — (64%)". Sem a classe, diz
+            # só o teor — classificar aqui cruzaria a fronteira deste módulo.
+            "nota": (f"Interpretado pela classe de argila {derivados['classe_argila']} "
+                     if derivados.get("classe_argila") is not None
+                     else "Interpretado pela classe de argila ")
+                    + f"({formatar_numero(laudo.analise.argila, 0)}%), extrator Mehlich-1.",
         })
 
     if laudo.adubacao.classe_k is not None:
@@ -519,6 +538,20 @@ def _teores(laudo: Laudo) -> List[Dict[str, Any]]:
     return linhas
 
 
+#: Mensagens do motor de aptidão que chegavam cruas ao laudo, com o nome do arquivo da
+#: base e o identificador da cultura. O motor continua dizendo isso — é o que serve ao
+#: log e aos testes —; a tela diz o que significa para quem lê o laudo.
+_ALERTA_SEM_PH_REFERENCIA = re.compile(r"cultura '[^']+' não encontrada em ph_referencia\.json")
+
+
+def _alerta_legivel(alerta: str) -> str:
+    if _ALERTA_SEM_PH_REFERENCIA.fullmatch(alerta.strip()):
+        return ("O pH de referência desta cultura não foi localizado na Tabela 5.1 "
+                "transcrita (Manual 2016, p. 68). Sem ele, o SIRAS não classifica a "
+                "aptidão, em vez de estimá-la.")
+    return texto_pt(alerta)
+
+
 def _aptidao(laudo: Laudo) -> Dict[str, Any]:
     def cenario(resultado) -> Dict[str, Any]:
         cor, icone, atencao = _SELO_POR_CLASSE_APTIDAO.get(
@@ -537,7 +570,7 @@ def _aptidao(laudo: Laudo) -> Dict[str, Any]:
                 resultado.fator_determinante, resultado.fator_determinante
             ),
             "rebaixamento_aplicado": resultado.rebaixamento_aplicado,
-            "alertas": list(resultado.alertas),
+            "alertas": [_alerta_legivel(alerta) for alerta in resultado.alertas],
             "fatores": [
                 {
                     "id": fator.id,
@@ -560,6 +593,7 @@ def _aptidao(laudo: Laudo) -> Dict[str, Any]:
         # CCAE §7: a diferença entre os dois é o ganho atribuível à recomendação deste
         # laudo. Quando não há diferença, dizê-lo é tão informativo quanto o contrário.
         "houve_ganho": atual["classe"] != potencial["classe"],
+        "indeterminada": "INDETERMINADA" in (atual["classe"], potencial["classe"]),
         "versao_criterios": laudo.aptidao_atual.versao_criterios,
     }
 
@@ -627,7 +661,12 @@ def _trilha(laudo: Laudo) -> List[Dict[str, Any]]:
         """Etiqueta curta da coluna da esquerda: o identificador da regra, sem a prosa."""
         if regra in _NOME_POR_FATOR:
             return _NOME_POR_FATOR[regra]
-        return regra.split(":")[0]
+        rotulo = regra.split(":")[0]
+        # A calagem registra como regra o id do critério ('graos_convencional'), que
+        # chegava cru ao laudo. As regras R-XXX-NN ficam como estão: são o identificador.
+        if "_" in rotulo and not rotulo.startswith("R-"):
+            return "Critério " + texto_pt(rotulo.replace("_", " "))
+        return rotulo
 
     # A aptidão roda duas vezes, uma por cenário, e a calagem é recalculada dentro do
     # cenário POTENCIAL para testar a exequibilidade (CCAE §7.2). Os passos repetidos

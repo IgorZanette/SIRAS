@@ -104,8 +104,7 @@
       <div>
         <h2>Laudo de recomendação</h2>
         <div class="doc__meta">
-          {{ laudo.contexto.sistema_manejo|replace("_", " ")|capitalize|pt }} ·
-          PRNT {{ laudo.prnt }}% · incorporação a {{ laudo.profundidade }} cm
+          {{ laudo.cabecalho }}
           <span class="doc__fonte">critério {{ laudo.criterio_calagem.id|replace("_", " ")|pt }},
             {{ laudo.criterio_calagem.fonte }}</span>
         </div>

@@ -222,11 +222,12 @@ def test_a_tela_mostra_os_tres_caminhos_e_separa_metodo_de_catalogo(com_catalogo
     assert "Fórmula ideal" in html
     assert "Melhor do catálogo" in html
     assert "Mistura de simples" in html
-    # As duas procedências, cada uma dita por inteiro.
+    # As duas procedências, condensadas numa nota desde a v2 (03/11/2026): o método é
+    # do Manual, o catálogo não é.
     assert "§8.3, p. 311" in html
-    assert "não publica lista de adubos comerciais" in html
+    assert "lista de mercado" in html and "não do Manual" in html
     # E a limitação que o Manual impõe e o SIRAS não cumpre.
-    assert "não tem preços" in html
+    assert "sem preços" in html
 
 
 def test_sem_catalogo_a_tela_ainda_traz_a_secao(com_catalogo):

@@ -627,12 +627,13 @@ def test_a_trilha_nao_repete_a_mesma_fonte(cliente):
     assert trilha.count("F1_acidez") == 0, "identificador cru na tela"
     assert trilha.count("composicao_aptidao") == 0, "identificador cru na tela"
     assert "Composição da classe" in trilha
-    # Os sete fatores aparecem uma vez cada, e não duas. Os quatro últimos passos são da
-    # formulação do adubo (ADR 0009): um R-FOR-02 por fórmula que o laudo mostra, com os
-    # pontos de quebra que justificam a dose, mais o R-FOR-01 da escolha. As demais
-    # fórmulas avaliadas NÃO entram na trilha — seriam trinta linhas de varredura num
-    # documento impresso, e quantas foram avaliadas o R-FOR-01 já diz.
-    assert trilha.count('class="trilha__passo"') == 16
+    # Os sete fatores aparecem uma vez cada, e não duas. Os dois últimos passos são da
+    # formulação do adubo (ADR 0009): o R-FOR-02 dos pontos de quebra, numa linha só
+    # para todas as fórmulas mostradas (v2, 03/11/2026; eram três linhas com a mesma
+    # fonte), mais o R-FOR-01 da escolha. As demais fórmulas avaliadas NÃO entram na
+    # trilha — quantas foram avaliadas o R-FOR-01 já diz.
+    assert trilha.count('class="trilha__passo"') == 14
+    assert trilha.count(">R-FOR-02<") <= 1
 
 
 def test_todo_modulo_da_trilha_chega_impresso(cliente):

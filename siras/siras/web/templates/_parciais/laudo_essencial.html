@@ -72,17 +72,14 @@
               {% endif %}
             </div>
             <div class="cenario__rotulo">Hoje</div>
-            <p class="cenario__nota">
-              Sobre os valores do laudo, sem intervenção.
-              {%- if laudo.aptidao.atual.fator_determinante %}
-              Fator determinante: <b>{{ laudo.aptidao.atual.fator_determinante }}</b>.
-              {%- endif %}
-            </p>
+            {% if laudo.aptidao.atual.fator_determinante %}
+            <p class="cenario__nota">Limita: <b>{{ laudo.aptidao.atual.fator_determinante }}</b></p>
+            {% endif %}
           </div>
 
           <div class="cenarios__seta" aria-hidden="true">
             {{ i.ico("avanca", "ico ico--lg") }}
-            <span>aplicando este laudo</span>
+            <span>com este laudo</span>
           </div>
 
           <div class="cenario">
@@ -101,25 +98,19 @@
               {% endif %}
             </div>
             <div class="cenario__rotulo">Após a correção</div>
-            <p class="cenario__nota">
-              Com a calagem e a adubação acima aplicadas integralmente.
-              {%- if laudo.aptidao.potencial.fator_determinante %}
-              Fator determinante: <b>{{ laudo.aptidao.potencial.fator_determinante }}</b>.
-              {%- endif %}
-            </p>
+            {% if laudo.aptidao.potencial.fator_determinante %}
+            <p class="cenario__nota">Limita: <b>{{ laudo.aptidao.potencial.fator_determinante }}</b></p>
+            {% endif %}
           </div>
         </div>
 
         <p class="aptidao__leitura">
           {% if laudo.aptidao.houve_ganho %}
-          A recomendação deste laudo leva a área de
-          <b>{{ laudo.aptidao.atual.rotulo }}</b> para
-          <b>{{ laudo.aptidao.potencial.rotulo }}</b> —
-          essa diferença é o ganho atribuível a ela.
+          Aplicando a recomendação, a área passa de <b>{{ laudo.aptidao.atual.rotulo }}</b>
+          para <b>{{ laudo.aptidao.potencial.rotulo }}</b>.
           {% else %}
-          A aptidão permanece <b>{{ laudo.aptidao.potencial.rotulo }}</b> mesmo com as
-          recomendações aplicadas: o que limita esta área não é corrigível por calagem
-          nem por adubação.
+          A classe não muda com a recomendação: o que limita a área não se corrige com
+          calcário nem adubo.
           {% endif %}
         </p>
 

@@ -17,6 +17,7 @@ import re
 from typing import Any, Dict, List, Optional, Sequence
 
 from siras.dominio.laudo import Laudo
+from siras.motor.formulacao import AVISOS as _AVISOS_FIXOS_DO_ADUBO
 
 # --- Acentuação do texto que vem da base ------------------------------------------------
 #
@@ -69,6 +70,8 @@ _ACENTOS = {
     "necessario": "necessário", "necessarios": "necessários", "agua": "água",
     "catalogo": "catálogo", "cientifico": "científico", "sinonimos": "sinônimos",
     "estacao": "estação", "estacoes": "estações", "consorciacoes": "consorciações",
+    "medio": "médio", "minimos": "mínimos", "maximos": "máximos", "minimas": "mínimas",
+    "maximas": "máximas", "basico": "básico", "dolomiticos": "dolomíticos",
 }
 
 #: Os casos ambíguos ("e"/"é", "tem"/"têm", "vem"/"vêm", "da"/"dá") NÃO entram na lista
@@ -388,10 +391,10 @@ def _observacao_da_calagem(laudo: Laudo) -> str:
         partes.append("aplicação em superfície")
     elif criterio.get("modo_aplicacao") == "incorporado":
         partes.append("incorporar")
-    texto = ", ".join(partes) + "."
-    if criterio.get("notas"):
-        texto += " " + " ".join(f"{nota}." for nota in criterio["notas"])
-    return texto
+    # As notas do critério ("amostrar 0-10 e 10-20 cm", "limite de 5 t/ha") saíam aqui E
+    # em "Como aplicar", que as lista uma a uma. No cartão fica só o que qualifica o
+    # número; o modo de fazer fica na seção que existe para isso (v2, 03/11/2026).
+    return ", ".join(partes) + "."
 
 
 def _observacao_do_nitrogenio(laudo: Laudo) -> str:
@@ -960,7 +963,7 @@ def _formulacao(laudo: Laudo) -> Dict[str, Any]:
     if resultado is None:
         return {"tem": False, "motivo": None, "criterio": "", "ideais": [],
                 "catalogo": [], "mistura": None, "avisos": [], "sem_n_de_plantio": False,
-                "informadas": [], "informadas_sem_uso": []}
+                "informadas": [], "informadas_sem_uso": [], "avisos_fixos": []}
 
     ideais = [_opcao_adubacao(o) for o in resultado.ideais]
     do_catalogo = [_opcao_adubacao(o) for o in resultado.catalogo]
@@ -990,6 +993,9 @@ def _formulacao(laudo: Laudo) -> Dict[str, Any]:
         "sem_n_de_plantio": resultado.sem_n_de_plantio,
         "informadas": informadas,
         "informadas_sem_uso": list(getattr(resultado, "informadas_sem_uso", [])),
+        # Os três avisos fixos da ADR 0009 (D12) saem condensados numa nota do template;
+        # os demais avisos (ex.: soma abaixo do mínimo legal) continuam um a um.
+        "avisos_fixos": list(_AVISOS_FIXOS_DO_ADUBO),
     }
 
 
@@ -1272,6 +1278,30 @@ def formulacao_comparada(blocos: Sequence[Dict[str, Any]]) -> List[Dict[str, Any
     return linhas
 
 
+def _pontos_de_quebra_numa_linha(trilha: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Os passos R-FOR-02, um por fórmula avaliada, viram uma linha só na exibição.
+
+    Cada um repetia a mesma fonte ("ADR 0009, D1 — mínimo de função convexa...") com a
+    dose de uma fórmula que o laudo já mostra na seção do adubo. Seis linhas iguais
+    diziam menos que uma: "pontos de quebra de 6 fórmulas". Os passos continuam
+    completos no Trace do motor — só a apresentação os agrupa (v2, 03/11/2026).
+    """
+    quebras = [p for p in trilha if p["rotulo"].startswith("R-FOR-02")]
+    if len(quebras) <= 1:
+        return list(trilha)
+    resultado, inserido = [], False
+    for passo in trilha:
+        if passo["rotulo"].startswith("R-FOR-02"):
+            if not inserido:
+                resultado.append({**passo, "rotulo": "R-FOR-02",
+                                  "resumo": f"pontos de quebra de {len(quebras)} fórmulas",
+                                  "regra": f"pontos de quebra de {len(quebras)} fórmulas"})
+                inserido = True
+            continue
+        resultado.append(passo)
+    return resultado
+
+
 def trilha_consolidada(blocos: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     """A trilha separada no que é REGRA e no que é VALOR.
 
@@ -1293,7 +1323,8 @@ def trilha_consolidada(blocos: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     ordem: List[tuple] = []
     regras: Dict[tuple, Dict[str, Any]] = {}
     for indice, bloco in enumerate(blocos):
-        for passo in bloco["laudo"]["trilha"]:
+        trilha_do_talhao = _pontos_de_quebra_numa_linha(bloco["laudo"]["trilha"])
+        for passo in trilha_do_talhao:
             chave = (passo["modulo"], passo["rotulo"], passo["fonte"])
             if chave not in regras:
                 ordem.append(chave)
@@ -1358,7 +1389,33 @@ def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
         "orientacoes": _orientacoes(laudo),
         "formulacao": _formulacao(laudo),
         "criterio_calagem": laudo.calagem.criterio,
+        "cabecalho": _linha_do_cabecalho(laudo),
     }
+
+
+def _linha_do_cabecalho(laudo: Laudo) -> str:
+    """A linha de contexto sob o título do laudo, só com o que é verdade neste caso.
+
+    Era "Plantio direto · PRNT 75% · incorporação a 20 cm" para TODO laudo — inclusive
+    para o plantio direto consolidado, cuja dose vai em superfície, e o cabeçalho
+    contradizia o cartão de calcário logo abaixo. E na erva-mate saía "Qualquer · PRNT
+    88%", porque o critério não distingue manejo e o rótulo cru ia para a tela.
+    """
+    partes = []
+    manejo = (laudo.contexto.sistema_manejo or "").replace("_", " ")
+    if manejo and manejo.lower() != "qualquer":
+        partes.append(texto_pt(manejo.capitalize()))
+    partes.append(f"PRNT {formatar_enxuto(laudo.contexto.prnt)}%")
+    modo = laudo.calagem.criterio.get("modo_aplicacao")
+    if laudo.calagem.nc_t_ha and laudo.calagem.nc_t_ha > 0:
+        if modo == "superficial":
+            partes.append("calcário em superfície")
+        else:
+            partes.append(
+                f"calcário incorporado a "
+                f"{formatar_enxuto(laudo.contexto.profundidade_incorporacao_cm)} cm"
+            )
+    return " · ".join(partes)
 
 
 __all__ = [

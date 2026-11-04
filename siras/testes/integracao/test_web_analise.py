@@ -131,7 +131,8 @@ def test_laudo_traz_os_dois_cenarios_de_aptidao(cliente):
     assert "Aptidão edáfica" in html
     # Os dois cenários são as duas colunas da tabela de fatores desde 11/10/2026.
     assert "Hoje" in html and "Após a correção" in html
-    assert "ganho atribuível" in html or "permanece" in html
+    # A frase de leitura, encurtada na v2 (03/11/2026): diz se a classe muda ou não.
+    assert "a área passa de" in html or "A classe não muda" in html
 
 
 def test_campos_em_branco_dizem_quais_faltam(cliente):

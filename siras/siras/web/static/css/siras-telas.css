@@ -468,6 +468,14 @@
 
   /* Titulo orfao no pe da pagina e o defeito mais visivel de um laudo impresso. */
   .sec__cab, h2, h3, h4 { break-after: avoid; }
+
+  /* Folha em branco no fim (v2, 03/11/2026): o <main> do laudo traz padding-bottom
+     de tela, e a calculadora de custo, oculta na impressao, ainda deixava a margem
+     dela. Quando o rodape do documento terminava rente ao pe da folha, esse espaco
+     sobrava e o navegador abria uma pagina so para ele. */
+  main.env { padding-bottom: 0 !important; margin-bottom: 0 !important; }
+  .doc { margin-bottom: 0 !important; }
+  .doc__rodape { break-after: avoid; margin-bottom: 0; padding-bottom: 0; }
   .doc__rodape { break-before: avoid; }
   p { orphans: 3; widows: 3; }
 
@@ -2236,4 +2244,77 @@ body::before {
 .cena-solo-limites {
   margin-top: var(--e-4); max-width: 54ch;
   font-size: var(--fs-3xs); line-height: 1.55; color: var(--n-500);
+}
+
+/* =========================================================================
+   Tela inicial, v2 (03/11/2026): menos texto e celular em primeiro lugar
+   ====================================================================== */
+/* Botao da barra: rotulo longo na tela larga, curto no telefone. */
+.rotulo-curto { display: none; }
+@media (max-width: 560px) {
+  .barra__nav .rotulo-largo { display: none; }
+  .barra__nav .rotulo-curto { display: inline; }
+  .barra__nav .btn { white-space: nowrap; padding: 0 .9rem; }
+  /* Logo, tema e botao numa linha em 360px: faltavam ~30px. Cada peca cede um
+     pouco; o alvo de toque do tema continua com 28px de largura e 30px de altura. */
+  .barra { --marca-icone: 34px; --marca-palavra: 19px; }
+  .barra__nav { gap: var(--e-2); }
+  .tema { grid-template-columns: repeat(3, 28px); }
+  .tema::before { width: 28px; }
+  .tema[data-modo="escuro"]::before { transform: translateX(28px); }
+  .tema[data-modo="sistema"]::before { transform: translateX(56px); }
+}
+
+/* Os tres numeros de prova numa linha so, tambem no telefone. */
+@media (max-width: 560px) {
+  .hero__prova { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e-3); }
+  .prova__n { font-size: var(--fs-xl); }
+  .prova__r { max-width: none; }
+  .hero__acoes .btn { flex: 1 1 100%; }
+}
+
+/* Comparativo: abaixo de 640px cada linha vira um cartao, com a etapa no topo e o
+   rotulo da coluna (data-rotulo) antes de cada celula. Some a rolagem lateral. */
+@media (max-width: 640px) {
+  .comparativo-rolagem { overflow: visible; border: 0; background: none; }
+  .comparativo { min-width: 0; }
+  .comparativo thead { position: absolute; width: 1px; height: 1px; overflow: hidden;
+                       clip: rect(0 0 0 0); }
+  .comparativo, .comparativo tbody, .comparativo tr,
+  .comparativo th, .comparativo td { display: block; width: auto; }
+  .comparativo tbody { display: grid; gap: var(--e-3); }
+  .comparativo tr { border: var(--borda); border-radius: var(--r-painel);
+                    background: var(--n-850); overflow: hidden; }
+  .comparativo tbody th { width: auto; padding: var(--e-3) var(--e-4) var(--e-2); }
+  .comparativo td { padding: var(--e-2) var(--e-4); border-bottom: 0; }
+  .comparativo td.comparativo__siras { padding-bottom: var(--e-3); }
+  .comparativo td::before { content: attr(data-rotulo); display: block;
+                            font-size: var(--fs-3xs); font-weight: 800; letter-spacing: .08em;
+                            text-transform: uppercase; color: var(--n-500); margin-bottom: 2px; }
+  .comparativo td.comparativo__siras::before { color: var(--v-400); }
+  .comparativo tbody tr:last-child > * { border-bottom: 0; }
+  :root[data-tema="claro"] .comparativo tr { background: #FFFFFF; border-color: rgba(13, 20, 16, .08); }
+  :root[data-tema="claro"] .comparativo td.comparativo__siras::before { color: var(--v-700); }
+}
+
+/* Em que pe esta o trabalho: fechada, uma linha so ate alguem abrir. */
+.faixa--estreita { padding: var(--e-6) 0; }
+.estado-dobra__cab { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-2) var(--e-4);
+                     cursor: pointer; list-style: none; }
+.estado-dobra__cab::-webkit-details-marker { display: none; }
+.estado-dobra__cab::marker { content: ""; }
+.estado-dobra__cab h2 { font-size: var(--fs-xl); }
+.estado-dobra__cab h2::after { content: "+"; margin-left: var(--e-3); color: var(--v-400); }
+.estado-dobra[open] .estado-dobra__cab h2::after { content: "\2212"; }
+:root[data-tema="claro"] .estado-dobra__cab h2::after { color: var(--v-700); }
+@media (max-width: 380px) {
+  .barra { --marca-icone: 30px; --marca-palavra: 17px; }
+  .barra__nav .btn { padding: 0 .7rem; }
+}
+/* No telefone a ilustracao do laudo encolhe e os quatro motivos de confianca
+   ficam dois a dois: empilhados, os dois ocupavam quase duas telas. */
+@media (max-width: 560px) {
+  .previa__folha { width: min(240px, 100%); padding: 20px 22px; }
+  .confianca { grid-template-columns: 1fr 1fr; gap: var(--e-5) var(--e-4); }
+  .confianca__item strong { font-size: var(--fs-md); }
 }

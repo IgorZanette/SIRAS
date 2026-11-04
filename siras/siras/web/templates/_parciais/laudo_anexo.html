@@ -17,11 +17,7 @@
 <div class="anexo">
   <div class="anexo__cab">
     <span class="anexo__rotulo">Anexo</span>
-    <p class="t-aux">
-      O caminho até os números acima e o que fazer com eles. A recomendação está na
-      primeira parte; aqui ficam a escolha do adubo, o modo de aplicar e a rastreabilidade
-      de cada valor até a tabela do Manual que o gerou.
-    </p>
+    <p class="t-aux">Complemento: qual adubo comprar, como aplicar e a origem de cada número.</p>
   </div>
 
   {# ——— Qual adubo comprar ———
@@ -39,18 +35,14 @@
   <section class="sec">
     <div class="sec__cab">{{ i.ico("adubo") }}<h3>Qual adubo comprar</h3></div>
     <p class="sec__intro">
-      A recomendação está em nutriente; a revenda vende adubo. São três formas de chegar
-      lá, e a escolha é de quem compra:
-      <b>a fórmula ideal</b> é a proporção exata da recomendação, para encomendar;
-      <b>a do catálogo</b> é o que se acha pronto, com o excesso e a falta declarados;
-      <b>a mistura de simples</b> é exata e sempre disponível, e serve de régua para as
-      outras duas.
+      Três formas de levar a recomendação para a revenda:
+      a <b>fórmula ideal</b>, para encomendar; a <b>do catálogo</b>, pronta na prateleira;
+      e a <b>mistura de adubos simples</b>, sempre exata.
     </p>
 
     <div class="tabela-rolagem">
       <table class="tabela-doc tabela-doc--adubo">
-        <caption class="t-aux">Doses em kg/ha. A fórmula do catálogo é a de menor custo
-          entre os pontos de quebra (ADR 0009).</caption>
+        <caption class="t-aux">Doses em kg/ha.</caption>
         <thead>
           <tr>
             {% if blocos|length > 1 %}<th scope="col">Talhão</th>{% endif %}
@@ -71,10 +63,7 @@
               {% else %}—{% endif %}
             </td>
             <td>
-              {% if linha.catalogo %}
-              <b>{{ linha.catalogo.id }}</b>{% if linha.catalogo.do_usuario %}
-                <span class="formulacao__marca">sua</span>{% endif %}<br>
-              {{ linha.catalogo.dose }} kg/ha
+              {% if linha.catalogo %}<b>{{ linha.catalogo.id }}</b><br>{{ linha.catalogo.dose }} kg/ha
               {% else %}—{% endif %}
             </td>
             <td>
@@ -91,116 +80,72 @@
       </table>
     </div>
 
-    {# ——— As fórmulas que o usuário informou ———
-       Sempre todas, e em bloco próprio (ADR 0014). Antes elas disputavam o ranking do
-       catálogo e sumiam quando não ficavam entre as três melhores: no piloto, quem
-       informou 05-25-25 viu o laudo indicar 05-20-20 e entendeu que o sistema trocou a
-       fórmula dele. Quem informa a fórmula que tem quer saber quanto aplicar DESSA. #}
+    {# Uma frase por opção: o que ela entrega e o que falta completar. "Excede 0 de N"
+       e "Entrega X de N, Y de P2O5 e Z de K2O" repetiam o que a tabela e os cartões de
+       dose já dizem (v2, 03/11/2026): fica só o que é próprio da opção. #}
+    {% macro detalhe(op, prefixo) -%}
+      <div class="detalhe-adubo__item">
+        <div class="detalhe-adubo__tit">{{ prefixo }}{{ op.id }} · {{ op.dose }} kg/ha</div>
+        <p class="t-aux">
+          {%- set sobras = [] %}
+          {%- if op.excesso_n != "0" %}{% set _ = sobras.append(op.excesso_n ~ " de N") %}{% endif %}
+          {%- if op.excesso_p2o5 != "0" %}{% set _ = sobras.append(op.excesso_p2o5 ~ " de P<sub>2</sub>O<sub>5</sub>") %}{% endif %}
+          {%- if op.excesso_k2o != "0" %}{% set _ = sobras.append(op.excesso_k2o ~ " de K<sub>2</sub>O") %}{% endif %}
+          {%- if op.complementos %}
+          Completar com
+          {% for c in op.complementos %}{{ c.dose }} kg/ha de {{ c.produto }}
+            {%- if c.momento == "cobertura" %} em cobertura{% endif %}
+            {%- if not loop.last %}; {% endif %}{% endfor %}.
+          {%- else %} Atende a recomendação sem complemento.{% endif %}
+          {%- if sobras %} Sobra {{ sobras|join(", ")|safe }}.{% endif %}
+          {%- if op.comparada_a %}
+            {%- if op.tao_boa_quanto_a_melhor %} Tão boa quanto a melhor do catálogo.
+            {%- else %} Pede mais ajuste que a {{ op.comparada_a }}.{% endif %}
+          {%- endif %}
+        </p>
+      </div>
+    {%- endmacro %}
+
     {% set com_informadas = formulacoes|selectattr("informadas")|list %}
     {% set sem_uso = formulacoes|map(attribute="informadas_sem_uso")|sum(start=[])|unique|list %}
     {% if com_informadas or sem_uso %}
-    <div class="detalhe-adubo detalhe-adubo--informadas">
-      <h4 class="t-rotulo">As fórmulas que você informou</h4>
-      {% for linha in com_informadas %}
-      {% for op in linha.informadas %}
-      <div class="detalhe-adubo__item">
-        <div class="detalhe-adubo__tit">
-          {% if blocos|length > 1 %}{{ linha.rotulo }} · {% endif %}{{ op.id }}:
-          {{ op.dose }} kg/ha
-        </div>
-        <p class="t-aux">
-          Entrega {{ op.entrega_n }} de N, {{ op.entrega_p2o5 }} de
-          P<sub>2</sub>O<sub>5</sub> e {{ op.entrega_k2o }} de K<sub>2</sub>O.
-          {% if op.tem_excesso %}Excede
-            {{ op.excesso_p2o5 }} de P<sub>2</sub>O<sub>5</sub>,
-            {{ op.excesso_k2o }} de K<sub>2</sub>O e {{ op.excesso_n }} de N.{% endif %}
-          {% if op.complementos %}
-          Completar com
-          {% for c in op.complementos %}
-          {{ c.dose }} kg/ha de {{ c.produto }}
-          {%- if c.momento == "cobertura" %} em cobertura{% else %} junto da fórmula{% endif %}
-          {%- if not loop.last %}; {% else %}.{% endif %}
-          {% endfor %}
-          {% endif %}
-          {% if op.comparada_a %}
-          {% if op.tao_boa_quanto_a_melhor %}
-          Atende a recomendação tão bem quanto a melhor do catálogo ({{ op.comparada_a }}).
-          {% else %}
-          Atende, mas com mais sobra, falta ou complemento que a melhor do catálogo
-          ({{ op.comparada_a }}).
-          {% endif %}
-          {% endif %}
-        </p>
-      </div>
-      {% endfor %}
-      {% endfor %}
+    <h4 class="t-rotulo detalhe-adubo__grupo">As fórmulas que você informou</h4>
+    <div class="detalhe-adubo">
+      {% for linha in com_informadas %}{% for op in linha.informadas %}
+      {{ detalhe(op, (linha.rotulo ~ " · ") if blocos|length > 1 else "") }}
+      {% endfor %}{% endfor %}
       {% if sem_uso %}
-      <p class="t-aux">
-        {{ sem_uso|join(", ") }}: não traz o fósforo nem o potássio que esta recomendação
-        pede, e é por eles que a dose de um adubo de base se calcula. Pode servir como
-        complemento, não como base.
-      </p>
+      <p class="t-aux">{{ sem_uso|join(", ") }}: não traz o fósforo nem o potássio que esta
+        recomendação pede; serve como complemento, não como adubo de base.</p>
       {% endif %}
     </div>
     {% endif %}
 
-    {# O detalhe — excesso, falta e complementos — só da opção do catálogo, que é a que
-       alguém vai de fato comprar. A ideal não tem excesso por construção, e a mistura
-       fecha exata: detalhar as três repetiria "0 kg/ha de excesso" duas vezes por área. #}
+    <h4 class="t-rotulo detalhe-adubo__grupo">Melhor do catálogo</h4>
     <div class="detalhe-adubo">
-      {% for linha in formulacoes %}
-      {% if linha.catalogo %}
-      <div class="detalhe-adubo__item">
-        <div class="detalhe-adubo__tit">
-          {% if blocos|length > 1 %}{{ linha.rotulo }} · {% endif %}{{ linha.catalogo.id }},
-          {{ linha.catalogo.dose }} kg/ha
-        </div>
-        <p class="t-aux">
-          Entrega {{ linha.catalogo.entrega_n }} de N, {{ linha.catalogo.entrega_p2o5 }} de
-          P<sub>2</sub>O<sub>5</sub> e {{ linha.catalogo.entrega_k2o }} de K<sub>2</sub>O.
-          {% if linha.catalogo.tem_excesso %}Excede
-            {{ linha.catalogo.excesso_p2o5 }} de P<sub>2</sub>O<sub>5</sub>,
-            {{ linha.catalogo.excesso_k2o }} de K<sub>2</sub>O e
-            {{ linha.catalogo.excesso_n }} de N.{% endif %}
-          {% if linha.catalogo.complementos %}
-          Completar com
-          {% for c in linha.catalogo.complementos %}
-          {{ c.dose }} kg/ha de {{ c.produto }}
-          {%- if c.momento == "cobertura" %} em cobertura{% else %} junto da fórmula{% endif %}
-          {%- if not loop.last %}; {% else %}.{% endif %}
-          {% endfor %}
-          {% endif %}
-        </p>
-        {% if linha.outras %}
-        <p class="t-aux detalhe-adubo__outras">
-          Outras do catálogo:
-          {% for op in linha.outras %}{{ op.id }} ({{ op.dose }} kg/ha){% if not loop.last %}, {% endif %}{% endfor %}.
-        </p>
-        {% endif %}
-      </div>
+      {% for linha in formulacoes %}{% if linha.catalogo %}
+      {{ detalhe(linha.catalogo, (linha.rotulo ~ " · ") if blocos|length > 1 else "") }}
+      {% if linha.outras %}
+      <p class="t-aux detalhe-adubo__outras">
+        Alternativas:
+        {% for op in linha.outras %}{{ op.id }} ({{ op.dose }} kg/ha){% if not loop.last %}, {% endif %}{% endfor %}.
+      </p>
       {% endif %}
-      {% endfor %}
+      {% endif %}{% endfor %}
     </div>
 
-    {# Os avisos de cada talhão, sem repetir o que é igual: `unique` porque "a fórmula
-       excede o P recomendado" sai idêntica em áreas de mesma classe de teor.
-
-       A DECLARAÇÃO DE PROCEDÊNCIA fecha a seção e é a parte que não pode sair: separa o
-       que é método do Manual do que é lista de mercado mantida aqui. Um laudo que
-       sugere uma fórmula comercial sem dizer que o Manual não publica essa lista estaria
-       emprestando ao catálogo uma autoridade que ele não tem. #}
+    {# A DECLARAÇÃO DE PROCEDÊNCIA não pode sair: separa o que é método do Manual do que
+       é lista de mercado mantida aqui. Eram quatro parágrafos; o conteúdo é o mesmo,
+       condensado numa nota. #}
     <div class="formulacao__avisos">
       {% set avisos = formulacoes|map(attribute="avisos")|sum(start=[])|unique|list %}
-      {% for aviso in avisos %}
-      <p class="t-aux">{{ aviso }}</p>
-      {% endfor %}
+      {% set proprios = avisos|reject("in", laudo.formulacao.avisos_fixos)|list %}
+      {% for aviso in proprios %}<p class="t-aux">{{ aviso }}</p>{% endfor %}
       <p class="t-aux">
-        <b>Critério:</b> {{ laudo.formulacao.criterio }}.
-        O <b>método</b> é do Manual de Calagem e Adubação, §8.3, p. 311, e as garantias
-        dos adubos simples são da Tab. 8.4, p. 304. O <b>catálogo</b> de fórmulas é uma
-        lista de mercado mantida no SIRAS, e <b>não</b> do Manual,
-        que não publica lista de adubos comerciais.
-        Confira a garantia no rótulo antes de comprar.
+        Escolha por critério nutricional, sem preços: compare o custo por unidade de NPK na
+        sua revenda. Método do Manual (§8.3, p. 311; Tab. 8.4); o catálogo é lista de mercado
+        do SIRAS, não do Manual. Confira no rótulo a garantia e o enxofre, e a
+        compatibilidade antes de misturar adubos simples.
       </p>
     </div>
   </section>
@@ -213,11 +158,7 @@
   {% if laudo.orientacoes %}
   <section class="sec">
     <div class="sec__cab">{{ i.ico("aplicar") }}<h3>Como aplicar</h3></div>
-    <p class="sec__intro">
-      Depois de saber quanto, a pergunta seguinte é como. O que segue é o que o Manual
-      publica junto das doses para esta cultura, e vale para
-      {% if blocos|length > 1 %}todos os talhões{% else %}esta área{% endif %}.
-    </p>
+    <p class="sec__intro">O que o Manual publica junto das doses desta cultura{% if blocos|length > 1 %}, para todos os talhões{% endif %}.</p>
     <div class="orientacoes">
       {% for item in laudo.orientacoes %}
       <div class="orientacao orientacao--{{ item.tipo }}">

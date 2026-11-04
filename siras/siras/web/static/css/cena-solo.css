@@ -84,6 +84,15 @@
   background-position: center 58%;
 }
 
+/* Na abertura do tema claro, que e "ilha escura" (Atmosfera, em siras-telas.css), a
+   vitrine volta a arte escura: a clara, dentro da ilha, ficaria como um buraco. */
+:root[data-tema="claro"] .ilha-escura .cena-solo--vitrine {
+  background-image:
+    linear-gradient(180deg, rgba(10,15,12,.15), rgba(10,15,12,.72)),
+    url("../img/background/op-3.webp");
+  background-position: center 38%;
+}
+
 .cena-solo--vitrine .cena-solo__fallback {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: contain; right: auto; bottom: auto;

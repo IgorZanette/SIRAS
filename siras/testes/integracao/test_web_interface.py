@@ -534,7 +534,7 @@ def test_o_modo_claro_nao_usa_branco_puro_de_fundo():
     """#FFFFFF puro lê como tela de formulário e, em área grande, ofusca — o autor
     relatou que o claro "doía" o olho (04/11/2026). Nenhuma superfície da interface
     é branca; o texto continua o mesmo."""
-    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-900:\s*#E3E7E0', _TELAS_CSS)
+    assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-900:\s*#E8E6DB', _TELAS_CSS)
     assert re.search(r':root\[data-tema="claro"\]\s*\{[^}]*--n-100:\s*#0D1410', _TELAS_CSS)
     bloco = re.search(r':root\[data-tema="claro"\]\s*\{([^}]*)\}', _TELAS_CSS).group(1)
     for token in ("--n-950", "--n-900", "--n-850", "--n-800"):
@@ -564,10 +564,36 @@ def test_o_texto_terciario_passa_em_toda_superficie_clara():
 
 def test_a_malha_de_fundo_sobrevive_no_modo_claro():
     """A malha é o que dá ao SIRAS a leitura de superfície de instrumento: sumir no modo
-    claro trocaria a identidade por conveniência."""
+    claro trocaria a identidade por conveniência. Desde a Atmosfera (04/11/2026) ela é a
+    primeira camada do fundo em degradê, no marrom da terra."""
     assert re.search(
-        r':root\[data-tema="claro"\] \.malha \{[^}]*rgba\(13,20,16,\.045\)', _TELAS_CSS
+        r':root\[data-tema="claro"\] body\.malha \{[^}]*rgba\(60,45,25,\.03\) 1px', _TELAS_CSS
     )
+
+
+def test_a_atmosfera_tem_degrade_campo_rebaixado_e_ilhas_escuras():
+    """Os cinco princípios da seção Atmosfera, cada um com um ponto de verificação."""
+    atmosfera = _TELAS_CSS[_TELAS_CSS.index("ATMOSFERA (v2"):]
+    # 1. fundo em degradê fixo, nos dois temas
+    assert atmosfera.count("background-attachment: fixed") == 1
+    assert "linear-gradient(180deg, #0B1411 0%, #0F0E0B 100%)" in atmosfera
+    assert "linear-gradient(180deg, #E4EBE2 0%, #E8E6DB 100%)" in atmosfera
+    # 2. campo rebaixado com especificidade baixa: foco e erro continuam vencendo
+    assert ":where(:root[data-tema=\"claro\"]) .campo__caixa {" in atmosfera
+    # 4. desfoque só em tela larga
+    assert re.search(r"@media \(min-width: 900px\) \{\s*@supports", atmosfera)
+    # 5. ilhas escuras redeclaram os tokens do escuro
+    ilha = re.search(r':root\[data-tema="claro"\] \.ilha-escura \{(.*?)\}', atmosfera, re.S).group(1)
+    assert "--n-100: #E9F0EB" in ilha and "--n-900: #0A0F0C" in ilha
+    # o laudo impresso continua branco
+    assert "body:not(.impressa) .doc" in atmosfera and "@media screen" in atmosfera
+
+
+def test_as_ilhas_escuras_estao_marcadas(cliente):
+    html = cliente.get("/").get_data(as_text=True)
+    assert re.search(r'<header class="barra ilha-escura', html)
+    assert re.search(r'<section class="hero ilha-escura', html)
+    assert "chamada fundo-horizonte ilha-escura" in html
 
 
 def test_os_paineis_ganham_profundidade_por_sombra_no_modo_claro():

@@ -76,7 +76,9 @@
 
 {% import "_macros/ico.html" as i %}
 
-<header class="barra nao-imprime">
+{# `ilha-escura`: no tema claro, o cabeçalho continua no visual do escuro (ver
+   "Atmosfera" em siras-telas.css). No tema escuro a classe não muda nada. #}
+<header class="barra ilha-escura nao-imprime">
   <div class="env barra__int">
     {# Assinatura oficial: ícone e palavra recortados do lockup, montados em HTML em vez
        de servidos como uma imagem só. Montados, a palavra pode trocar de cor com o tema

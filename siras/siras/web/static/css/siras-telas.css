@@ -809,14 +809,14 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
    folha que vai para o papel, e continua branca.
    ====================================================================== */
 :root[data-tema="claro"] {
-  --n-950: #F3F5F0;   /* o mais claro da interface; o branco puro e so do laudo */
-  --n-900: #E3E7E0;   /* fundo da aplicacao: off-white com a matiz da marca */
-  --n-880: #DFE3DC;   /* secao alternada (texto terciario em 4,55:1)        */
-  --n-850: #ECEFE9;   /* superficie de painel                              */
-  --n-800: #F3F5F0;   /* campo: um tom acima do painel, para se ler vazio  */
-  --n-750: #F7F8F5;   /* campo em foco: o unico que clareia, e por isso se nota */
-  --n-700: #D3DED7;
-  --n-600: #AEBFB4;
+  --n-950: #F7F5EF;   /* o mais claro da interface; o branco puro e so do laudo */
+  --n-900: #E8E6DB;   /* fundo: areia clara (a base do degrade da Atmosfera) */
+  --n-880: #E6E4D9;   /* secao alternada (texto terciario em 4,6:1)         */
+  --n-850: #F3F0E8;   /* superficie de painel: papel                       */
+  --n-800: #F3F0E8;   /* superficie elevada; o campo tem regra propria     */
+  --n-750: #F7F5EF;   /* campo em foco: o unico que clareia, e por isso se nota */
+  --n-700: #D6D0C2;
+  --n-600: #B7AF9E;
   --n-500: #7A8C82;
   --n-400: #56685E;   /* texto terciario  - 4,74:1 sobre o fundo (era #5C6F64) */
   --n-300: #3B4A41;   /* texto secundario - 7,48:1                         */
@@ -833,28 +833,16 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
   --sig-ambar: #A97B00;
   --sig-aqua: #169383;
 
-  --borda: 1px solid rgba(13, 20, 16, .09);
-  --borda-forte: 1px solid rgba(13, 20, 16, .18);
-  --luz-topo: 0 1px 2px rgba(13, 20, 16, .04), 0 8px 24px -16px rgba(13, 20, 16, .18);
-  --sombra-doc: 0 18px 48px -24px rgba(13, 20, 16, .26);
+  /* Borda e sombra em MARROM, nao em preto: sombra preta sobre papel quente fica
+     cinza e suja; a da terra assenta. */
+  --borda: 1px solid rgba(60, 45, 25, .10);
+  --borda-forte: 1px solid rgba(60, 45, 25, .18);
+  --luz-topo: 0 1px 2px rgba(60, 45, 25, .05), 0 8px 24px -16px rgba(60, 45, 25, .18);
+  --sombra-doc: 0 2px 4px rgba(60, 45, 25, .06), 0 24px 48px -28px rgba(60, 45, 25, .32);
   --glow-v: 0 0 0 1px rgba(78, 154, 42, .4), 0 8px 26px -8px rgba(78, 154, 42, .45);
 }
 
-/* Superficie: sombra suave no lugar da borda fina, para dar profundidade sem peso. */
-:root[data-tema="claro"] .painel {
-  background: var(--n-850);
-  border-color: rgba(13, 20, 16, .08);
-  box-shadow: 0 1px 2px rgba(13,20,16,.04), 0 10px 28px -20px rgba(13,20,16,.22);
-}
-:root[data-tema="claro"] .barra { background: rgba(227, 231, 224, .9);
-                                  border-bottom-color: rgba(13,20,16,.08); }
-/* A malha permanece: e ela que da a leitura de superficie de instrumento. */
-:root[data-tema="claro"] .malha {
-  background-image:
-    linear-gradient(rgba(13,20,16,.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(13,20,16,.045) 1px, transparent 1px);
-}
-:root[data-tema="claro"] .hero__halo { opacity: .35; }
+/* Paineis, barra, malha, fundo e campos do claro: secao "Atmosfera", no fim. */
 
 /* --- Verde como texto ou icone: --v-400 reprova sobre claro ---------------- */
 :root[data-tema="claro"] .hero h1 em,
@@ -880,10 +868,6 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 :root[data-tema="claro"] .btn--contorno { background: var(--n-850);
                                           border-color: rgba(13,20,16,.16); }
 :root[data-tema="claro"] .btn--fantasma { color: var(--n-300); }
-:root[data-tema="claro"] .campo__caixa { border-color: rgba(13,20,16,.16);
-                                         box-shadow: 0 1px 2px rgba(13,20,16,.03); }
-:root[data-tema="claro"] .campo__unidade { background: rgba(13,20,16,.045);
-                                           border-left-color: rgba(13,20,16,.09); }
 :root[data-tema="claro"] .campo__caixa select { color-scheme: light; }
 :root[data-tema="claro"] .campo__caixa select option { background: #FFFFFF; color: #0D1410; }
 :root[data-tema="claro"] .etapa { background: var(--n-850); }
@@ -930,7 +914,7 @@ details.bloco:not([open]) > summary { margin-bottom: 0; padding-bottom: 0; borde
 :root[data-tema="claro"] .aviso { background: color-mix(in srgb, var(--cor) 11%, #fff); }
 
 /* --- Tela de calculo ------------------------------------------------------ */
-:root[data-tema="claro"] .calculando { background: rgba(227, 231, 224, .96); }
+:root[data-tema="claro"] .calculando { background: rgba(232, 230, 219, .96); }
 :root[data-tema="claro"] .passo { background: rgba(13,20,16,.03); }
 :root[data-tema="claro"] .passo__ico { background: rgba(13,20,16,.05); }
 :root[data-tema="claro"] .passo.is-ativo { background: rgba(78,154,42,.12);
@@ -2250,7 +2234,7 @@ body::before {
   /* O ceu de neblina da arte clara chega a 95% de luminancia: nas calhas de um monitor
      largo era a maior area clara da tela. Escurece o pico e baixa a presenca. */
   filter: brightness(.9);
-  opacity: .5;
+  opacity: .35;
 }
 
 /* A CHAMADA FINAL fecha a pagina, e ali a paisagem sobe: a secao inteira, e nao so as
@@ -2269,7 +2253,7 @@ body::before {
 }
 :root[data-tema="claro"] .chamada.fundo-horizonte::before {
   background-image:
-    linear-gradient(180deg, rgba(227,231,224,.94), rgba(227,231,224,.7)),
+    linear-gradient(180deg, rgba(232,230,219,.94), rgba(232,230,219,.7)),
     url("../img/background/claro-2.webp");
   background-position: center 70%;
 }
@@ -2425,4 +2409,172 @@ body::before {
   }
   .tabela-doc--fatores .tabela-doc__evidencia { grid-column: 1 / -1; }
   .tabela-doc--fatores .tabela-doc__vazio { grid-column: 1 / -1; }
+}
+
+/* =========================================================================
+   ATMOSFERA (v2, 04/11/2026)
+   -------------------------------------------------------------------------
+   Por que existe: o autor achou o claro um "branco chapado" -- 88 a 91% de cada
+   tela estava acima de 225 de brilho, tudo numa faixa estreita de tom. O que
+   resolve nao e escurecer mais, e sim ter luz, profundidade e ritmo, que e o que
+   interfaces consagradas fazem e o que o autor apontou como referencia:
+
+   1. NENHUMA SUPERFICIE NEUTRA E CHAPADA. O fundo e um degrade tingido, fixo na
+      janela, com dois brilhos tirados da propria arte do SIRAS: o sol da manha
+      no alto (verde-dourado) e a terra embaixo. O site de referencia faz o mesmo
+      com o anoitecer dele -- o "preto" de la e #1C1C34 descendo a #0D0E1D.
+   2. HIERARQUIA POR TOM, nao so por sombra (Material 3, "surface containers"):
+      fundo < painel < campo em foco. O campo e REBAIXADO -- mais escuro que o
+      painel, com sombra interna --, e por isso deixa de ser um buraco branco.
+   3. SECOES SE EMENDAM SEM LINHA. A faixa alternada e um veu que entra e sai em
+      degrade; a borda dura entre secoes saiu.
+   4. PAINEIS TRANSLUCIDOS, com borda de luz no topo: o tom do fundo atravessa, e
+      nada fica isolado. Desfoque so em tela larga -- em telefone fraco ele pesa.
+   5. RITMO DE CLARO E ESCURO (so no tema claro): cabecalho, abertura e chamada
+      final continuam no visual do escuro -- as "ilhas escuras". Nao e um terceiro
+      tema: os tokens do escuro sao redeclarados dentro dessas pecas.
+
+   O texto nao mudou em nenhum dos temas. Todos os pares conferidos em
+   scripts/conferir_contraste.py, nas duas pontas de cada degrade.
+   ====================================================================== */
+
+/* --- 1. Fundo ------------------------------------------------------------- */
+body.malha {
+  background-color: var(--n-900);
+  background-image:
+    linear-gradient(rgba(233,240,235,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(233,240,235,.028) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 50% at 85% 0%, rgba(140,226,63,.07), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 0% 100%, rgba(150,105,55,.09), transparent 70%),
+    linear-gradient(180deg, #0B1411 0%, #0F0E0B 100%);
+  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+:root[data-tema="claro"] body.malha {
+  background-image:
+    linear-gradient(rgba(60,45,25,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60,45,25,.03) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 50% at 85% 0%, rgba(214,231,180,.55), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 0% 100%, rgba(222,204,170,.45), transparent 70%),
+    linear-gradient(180deg, #E4EBE2 0%, #E8E6DB 100%);
+}
+
+/* --- 3. Secoes ------------------------------------------------------------ */
+.faixa { border-top-color: transparent; }
+.faixa--alt {
+  background: linear-gradient(180deg, transparent, rgba(233,240,235,.025) 22%,
+                              rgba(233,240,235,.025) 78%, transparent);
+}
+:root[data-tema="claro"] .faixa--alt {
+  background: linear-gradient(180deg, transparent, rgba(120,100,60,.06) 22%,
+                              rgba(120,100,60,.06) 78%, transparent);
+}
+
+/* --- 4. Paineis ----------------------------------------------------------- */
+.painel {
+  background: linear-gradient(180deg, rgba(18,27,22,.88), rgba(14,21,18,.84));
+  box-shadow: inset 0 1px 0 rgba(233,240,235,.05),
+              0 1px 2px rgba(0,0,0,.3), 0 18px 40px -28px rgba(0,0,0,.7);
+}
+:root[data-tema="claro"] .painel {
+  background: linear-gradient(180deg, rgba(247,244,237,.88), rgba(243,240,232,.84));
+  border-color: rgba(60,45,25,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55),
+              0 1px 2px rgba(60,45,25,.06), 0 4px 10px -4px rgba(60,45,25,.08),
+              0 18px 36px -24px rgba(60,45,25,.22);
+}
+@media (min-width: 900px) {
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .painel { -webkit-backdrop-filter: blur(12px) saturate(1.12);
+              backdrop-filter: blur(12px) saturate(1.12); }
+  }
+}
+:root[data-tema="claro"] .cultura { box-shadow: 0 1px 2px rgba(60,45,25,.08); }
+:root[data-tema="claro"] .btn--contorno { border-color: rgba(60,45,25,.16); }
+
+/* --- 2. Campos rebaixados --------------------------------------------------
+   `:where()` zera a especificidade do tema: foco, campo preenchido e campo
+   INVALIDO (borda coral) continuam vencendo, como antes. */
+.campo__caixa {
+  background: #0B110E;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.45);
+}
+:where(:root[data-tema="claro"]) .campo__caixa {
+  background: #EAE6DD;
+  border-color: rgba(60,45,25,.14);
+  box-shadow: inset 0 1px 2px rgba(60,45,25,.10);
+}
+:where(:root[data-tema="claro"]) .campo__caixa:focus-within { background: var(--n-750); }
+:where(:root[data-tema="claro"]) .campo__unidade {
+  background: rgba(60,45,25,.06); border-left-color: rgba(60,45,25,.10);
+}
+
+/* --- Laudo na tela: papel, nao tela branca --------------------------------
+   Creme so na TELA, nos dois temas -- o papel continua sem depender do tema. A
+   versao impressa e a impressao continuam brancas. */
+@media screen {
+  body:not(.impressa) .doc { background: #FAF8F2; }
+}
+
+/* --- 5. Ilhas escuras (so no tema claro) ----------------------------------- */
+:root[data-tema="claro"] .ilha-escura {
+  --n-950: #050807; --n-900: #0A0F0C; --n-880: #0E1512; --n-850: #121B16;
+  --n-800: #18231D; --n-750: #1E2B24; --n-700: #26362D; --n-600: #3A4F43;
+  --n-500: #5A7266; --n-400: #82998C; --n-300: #A9BCB1; --n-200: #CFDCD4;
+  --n-100: #E9F0EB; --n-050: #F4F8F5; --n-000: #FFFFFF;
+  --sig-coral: #FF6B4A; --sig-laranja: #FF9F3D; --sig-ambar: #FFC93D; --sig-aqua: #2BE0C8;
+  --d-mb: #FF6B4A; --d-b: #FF9F3D; --d-m: #FFC93D; --d-a: var(--v-400); --d-ma: #2BE0C8;
+  --borda: 1px solid rgba(233, 240, 235, .09);
+  --borda-forte: 1px solid rgba(233, 240, 235, .16);
+  --luz-topo: inset 0 1px 0 rgba(255, 255, 255, .06);
+  color: var(--n-100);
+}
+:root[data-tema="claro"] .hero.ilha-escura,
+:root[data-tema="claro"] .chamada.ilha-escura {
+  background:
+    radial-gradient(ellipse 70% 60% at 80% 0%, rgba(140,226,63,.08), transparent 70%),
+    linear-gradient(180deg, #0B1411 0%, #0D110E 100%);
+}
+:root[data-tema="claro"] .barra.ilha-escura {
+  background: rgba(11, 18, 15, .9); border-bottom-color: rgba(233,240,235,.07);
+}
+/* Dentro da ilha, as regras do claro voltam ao desenho do escuro. */
+:root[data-tema="claro"] .ilha-escura .logo__nome--escuro { display: block; }
+:root[data-tema="claro"] .ilha-escura .logo__nome--claro { display: none; }
+:root[data-tema="claro"] .ilha-escura .tema { background: var(--n-850); }
+:root[data-tema="claro"] .ilha-escura .selo-dev {
+  color: var(--n-200); background: rgba(233,240,235,.05); border-color: rgba(233,240,235,.12);
+}
+:root[data-tema="claro"] .ilha-escura .selo-dev::before { background: #F5A524; }
+:root[data-tema="claro"] .ilha-escura h1 em { color: var(--v-400); }
+:root[data-tema="claro"] .ilha-escura .selo {
+  color: var(--v-300); background: rgba(140,226,63,.08); border-color: rgba(140,226,63,.28);
+}
+:root[data-tema="claro"] .ilha-escura .btn--contorno {
+  background: rgba(233,240,235,.04); color: var(--n-100); border-color: rgba(233,240,235,.16);
+}
+:root[data-tema="claro"] .ilha-escura .btn--contorno:hover {
+  background: rgba(233,240,235,.04); border-color: var(--v-400); color: var(--v-300);
+}
+:root[data-tema="claro"] .ilha-escura .btn--fantasma:hover { color: var(--v-300); }
+:root[data-tema="claro"] .ilha-escura .btn--primario:hover { background: var(--v-300); }
+:root[data-tema="claro"] .ilha-escura .painel {
+  background: linear-gradient(180deg, rgba(18,27,22,.88), rgba(14,21,18,.84));
+  border-color: rgba(233,240,235,.09);
+  box-shadow: inset 0 1px 0 rgba(233,240,235,.05), 0 18px 40px -28px rgba(0,0,0,.7);
+}
+:root[data-tema="claro"] .ilha-escura .regua__faixa { opacity: .3; }
+:root[data-tema="claro"] .ilha-escura .regua__faixa.f-a { opacity: .55; }
+:root[data-tema="claro"] .ilha-escura .regua__faixa.is-atual {
+  opacity: 1; box-shadow: 0 0 14px -2px var(--cor);
+}
+:root[data-tema="claro"] .ilha-escura .ficha {
+  background: color-mix(in srgb, var(--cor) 13%, transparent);
+  border-color: color-mix(in srgb, var(--cor) 45%, transparent); color: var(--cor);
+}
+:root[data-tema="claro"] .chamada.ilha-escura.fundo-horizonte::before {
+  background-image:
+    linear-gradient(180deg, rgba(10,15,12,.97), rgba(10,15,12,.86)),
+    url("../img/background/op-5.webp");
+  background-position: center 65%;
 }

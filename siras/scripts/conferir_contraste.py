@@ -34,12 +34,16 @@ SINAIS_CLARO = {
     "--sig-coral": "#FC2D00", "--sig-laranja": "#CC6600",
     "--sig-ambar": "#A97B00", "--sig-aqua": "#169383",
 }
+#: "degrade-topo" e "degrade-base" sao as duas pontas do fundo da Atmosfera
+#: (siras-telas.css, 04/11/2026): o texto e os sinais passam pelas duas.
 ESCURO = {
-    "fundo": "#0A0F0C", "painel": "#121B16", "campo": "#18231D",
+    "fundo": "#0A0F0C", "painel": "#121B16", "campo": "#0B110E",
+    "degrade-topo": "#0B1411", "degrade-base": "#0F0E0B",
     "texto": "#E9F0EB", "texto-2": "#A9BCB1", "texto-3": "#82998C",
 }
 CLARO = {
-    "fundo": "#E3E7E0", "painel": "#ECEFE9", "campo": "#F3F5F0",
+    "fundo": "#E8E6DB", "painel": "#F3F0E8", "campo": "#EAE6DD",
+    "degrade-topo": "#E4EBE2", "degrade-base": "#E8E6DB",
     "texto": "#0D1410", "texto-2": "#3B4A41", "texto-3": "#56685E",
 }
 
@@ -83,7 +87,7 @@ def main() -> int:
     for tema, paleta in (("ESCURO", ESCURO), ("CLARO", CLARO)):
         pares: List[Tuple[str, str, str, bool]] = []
         for papel in ("texto", "texto-2", "texto-3"):
-            for superficie in ("fundo", "painel"):
+            for superficie in ("fundo", "degrade-topo", "degrade-base", "painel", "campo"):
                 pares.append((
                     f"{papel} sobre {superficie}", paleta[papel], paleta[superficie], False
                 ))
@@ -101,8 +105,9 @@ def main() -> int:
         ("ESCURO", ESCURO, SINAIS_ESCURO), ("CLARO", CLARO, SINAIS_CLARO)
     ):
         pares = [
-            (f"{nome} sobre o fundo", valor, paleta["fundo"], True)
+            (f"{nome} sobre {superficie}", valor, paleta[superficie], True)
             for nome, valor in sinais.items()
+            for superficie in ("fundo", "degrade-topo", "degrade-base")
         ]
         falhas += _tabela(f"Sinais como componente (piso 3:1) — tema {tema}", pares)
 

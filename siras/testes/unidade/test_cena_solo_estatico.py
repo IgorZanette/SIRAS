@@ -258,3 +258,40 @@ def test_potencial_mostra_as_correcoes_como_causa():
     assert "calagem: 1" in hero and "adubacao: 1" in hero
     cen = js[js.index("export const CENARIO_TARGETS"):js.index("};", js.index("export const CENARIO_TARGETS"))]
     assert re.search(r"potencial:.*calagem: 1", cen) and re.search(r"diagnostico:.*calagem: 0", cen)
+
+
+# ---------------------------------------------- transição da imagem estática para o 3D
+# Medido em 04/11/2026 na tela da análise: a imagem estática tinha 279 px de altura numa
+# caixa de 137, transbordava sobre o texto, e o bloco encolhia pela metade quando o 3D
+# subia; o inventário nascia `hidden` e empurrava o painel 125 px para baixo.
+_CENA_CSS = (RAIZ / "siras/web/static/css/cena-solo.css").read_text(encoding="utf-8")
+_CENA_JS = (RAIZ / "siras/web/static/js/cena-solo.js").read_text(encoding="utf-8")
+
+
+def test_a_imagem_do_painel_ocupa_a_mesma_caixa_que_o_canvas():
+    regra = re.search(r"\.cena-solo--painel \.cena-solo__fallback \{(.*?)\}", _CENA_CSS, re.S)
+    assert regra, "a imagem do painel precisa de regra própria"
+    corpo = regra.group(1)
+    assert "position: absolute" in corpo and "inset: 0" in corpo
+    assert "object-fit: contain" in corpo
+
+
+def test_a_imagem_so_sai_quando_a_cena_ja_pintou():
+    """Quem esconde a imagem é `--pronta` (dois quadros depois), não `--ativa`."""
+    assert ".cena-solo--ativa .cena-solo__fallback" not in _CENA_CSS
+    assert re.search(r"\.cena-solo--pronta \.cena-solo__fallback \{[^}]*opacity: 0", _CENA_CSS)
+    assert re.search(r"requestAnimationFrame\(function \(\) \{\s*requestAnimationFrame", _CENA_JS)
+
+
+def test_o_inventario_reserva_o_espaco_em_vez_de_nascer_oculto():
+    html = ler(PARCIAIS / "cena_solo_formulario.html")
+    tag = re.search(r"<figure[^>]*data-cena-legenda[^>]*>", html, re.S).group(0)
+    assert "cena-solo-legenda--aguardando" in tag
+    assert not re.search(r"\shidden(\s|>)", tag)
+    # Sem JavaScript não há quem a mostre: sai do fluxo.
+    assert "html:not(.tem-js) .cena-solo-legenda--aguardando { display: none; }" in _CENA_CSS
+
+
+def test_a_troca_respeita_menos_movimento():
+    bloco = re.search(r"@media \(prefers-reduced-motion: reduce\) \{(.*?)\n\}", _CENA_CSS, re.S).group(1)
+    assert ".cena-solo__canvas" in bloco and "transition: none" in bloco

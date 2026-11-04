@@ -29,14 +29,20 @@
   z-index: -1;            /* atrás do conteúdo da hero */
   pointer-events: none;   /* cliques vão para a página; a cena ouve a janela */
 }
-.cena-solo__canvas { position: absolute; inset: 0; }
+/* O canvas nasce transparente e aparece por esmaecimento quando a cena ja pintou
+   (`--pronta`, posta por cena-solo.js dois quadros depois de criada). Ate la a imagem
+   estatica continua no lugar, do mesmo tamanho: a troca nao muda nada de posicao. */
+.cena-solo__canvas { position: absolute; inset: 0; opacity: 0; transition: opacity 280ms ease-out; }
+.cena-solo--pronta .cena-solo__canvas { opacity: 1; }
 
 /* Fallback: visível sem JS / sem WebGL; some quando a cena assume. */
 .cena-solo__fallback {
   position: absolute; right: 4%; bottom: 8%;
   width: min(42vw, 520px); height: auto;
 }
-.cena-solo--ativa .cena-solo__fallback { display: none; }
+.cena-solo__fallback { transition: opacity 280ms ease-out; }
+.cena-solo--pronta .cena-solo__fallback { opacity: 0; visibility: hidden;
+  transition: opacity 280ms ease-out, visibility 0s linear 280ms; }
 
 /* ---------- Vitrine da hero ----------
    A cena era `absolute; inset: 0` sobre a hero inteira: o canvas tinha a largura da
@@ -78,7 +84,7 @@
   background-position: center 58%;
 }
 
-.cena-solo--vitrine:not(.cena-solo--ativa) .cena-solo__fallback {
+.cena-solo--vitrine .cena-solo__fallback {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: contain; right: auto; bottom: auto;
 }
@@ -179,14 +185,17 @@
   position: relative; inset: auto; z-index: 0;
   height: clamp(120px, 17vh, 185px);
 }
-/* `:not(.cena-solo--ativa)` e o que conserta a DUPLICACAO.
-   Esta regra e a de cima (`.cena-solo--ativa .cena-solo__fallback { display: none }`)
-   tem a mesma especificidade, 0-2-0, e esta vem depois no arquivo -- entao ela vencia,
-   e a imagem estatica continuava na tela depois de o canvas subir. Eram dois blocos de
-   solo, um por cima do outro. O `:not()` nao muda a especificidade, so tira esta regra
-   do caminho quando a cena esta viva. */
-.cena-solo--painel:not(.cena-solo--ativa) .cena-solo__fallback {
-  position: static; display: block; width: 100%; max-width: 300px; margin: 0 auto;
+/* Esta regra so posiciona; quem esconde a imagem e `.cena-solo--pronta` (opacidade e
+   visibilidade, la em cima). Quando era esta que dizia `display`, ela vencia a de
+   esconder pela ordem no arquivo, e ficavam dois blocos de solo, um sobre o outro --
+   por isso posicao e visibilidade moram em regras separadas. */
+/* A IMAGEM CABE NA CAIXA DA CENA. Ela era `static` com ate 300 px de largura -- 279 px
+   de altura numa caixa de 137 --, transbordava sobre o texto de baixo e, quando o canvas
+   subia na caixa de verdade, o bloco encolhia pela metade de uma vez (medido em
+   04/11/2026). Agora as duas ocupam a mesma caixa, e `contain` enquadra como a camera. */
+.cena-solo--painel .cena-solo__fallback {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  margin: 0; object-fit: contain; right: auto; bottom: auto;
 }
 
 /* No tema claro os sinais ja vem recalibrados pelos tokens --sig-*, que o
@@ -196,12 +205,21 @@
 /* ---------- Celular: a cena sai de trás do texto e ganha espaço próprio ---------- */
 @media (max-width: 720px) {
   .cena-solo { position: relative; inset: auto; z-index: 0; height: 340px; }
-  .cena-solo__fallback { position: static; display: block; width: 100%; max-width: 340px; margin: 0 auto; }
+  .cena-solo:not(.cena-solo--painel):not(.cena-solo--vitrine):not(.cena-solo--palco) .cena-solo__fallback {
+    position: static; display: block; width: 100%; max-width: 340px; margin: 0 auto;
+  }
 }
 
-/* Movimento reduzido: nada de transição nos controles */
+/* Inventario reservado: invisivel, mas no fluxo, ate a cena subir (cena-solo.js tira a
+   classe). Sem JavaScript nao ha quem tire: ai ele sai do fluxo de vez. */
+.cena-solo-legenda--aguardando { visibility: hidden; }
+html:not(.tem-js) .cena-solo-legenda--aguardando { display: none; }
+
+/* Movimento reduzido: troca instantanea, sem esmaecimento */
 @media (prefers-reduced-motion: reduce) {
   .cena-solo-controles button { transition: none; }
+  .cena-solo__canvas, .cena-solo__fallback,
+  .cena-solo--pronta .cena-solo__fallback { transition: none; }
 }
 
 /* Impressão: a cena e seus controles nunca vão para o papel */

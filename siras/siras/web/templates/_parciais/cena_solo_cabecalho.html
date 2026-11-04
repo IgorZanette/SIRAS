@@ -12,6 +12,14 @@
 <script type="importmap">
   {"imports": {"three": "{{ url_for('static', filename='vendor/three/0.160.0/three.module.min.js') }}"}}
 </script>
+{# modulepreload: o three e o motor da cena baixam EM PARALELO com a página, e não
+   só depois dela. Antes, a cena só começava a baixar ~670 KB no evento `load` mais o
+   ócio do navegador, e a imagem estática ficava na tela, parecendo travada, durante
+   todo esse tempo. A MONTAGEM continua esperando o ócio (cena-solo.js): baixar não
+   disputa a digitação; montar o WebGL, sim. Depois do import map, que o three usa. #}
+<link rel="modulepreload" href="{{ url_for('static', filename='vendor/three/0.160.0/three.module.min.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/cena-solo/soilScene.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/cena-solo/stages.js') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cena-solo.css') }}">
 <script defer src="{{ url_for('static', filename='js/cena-solo.js') }}"></script>
 {#

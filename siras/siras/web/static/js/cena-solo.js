@@ -272,12 +272,12 @@
     Promise.all([import(urlAbs), import(urlEstagios)]).then(function (mods) {
       const motor = mods[0];
       ctx.mod = mods[1];
-      if (!motor.isWebGLAvailable()) return; // fica a imagem estática
+      if (!motor.isWebGLAvailable()) { recolher(ctx); return; } // fica a imagem estática
       // WebGL só por software (máquina sem aceleração) trava computadores
       // antigos: fica a imagem estática. "?cena-software=1" força a cena
       // (útil para testar em VMs e no navegador headless).
       const forcar = /[?&]cena-software=1\b/.test(location.search) || raiz.hasAttribute("data-cena-permitir-software");
-      if (motor.isSoftwareRenderer() && !forcar) return;
+      if (motor.isSoftwareRenderer() && !forcar) { recolher(ctx); return; }
 
       ctx.estagios = modo === "gerando" ? ctx.mod.PROCESSING_STAGES
         : modo === "formulario" ? [ctx.mod.HERO_STAGES[0]]
@@ -305,11 +305,23 @@
         desligar(ctx);
         return;
       }
-      raiz.classList.add("cena-solo--ativa"); // CSS esconde o fallback
+      raiz.classList.add("cena-solo--ativa");
+      // A imagem estática só sai quando o canvas JÁ pintou: dois quadros depois de
+      // criada a cena. O primeiro quadro é o que compila os shaders e engasga — com a
+      // troca imediata, esse engasgo acontecia à vista, e o bloco parecia travar. O CSS
+      // faz a passagem como esmaecimento (sem ele, com menos movimento).
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          if (ctx.cena) raiz.classList.add("cena-solo--pronta");
+        });
+      });
       if (modo === "formulario") seguirFormulario(ctx, raiz.getAttribute("data-cena-campos"));
       else aoMudarEstagio(ctx, 0);
 
-      if (ctx.legenda) ctx.legenda.hidden = false;
+      if (ctx.legenda) {
+        ctx.legenda.hidden = false;
+        ctx.legenda.classList.remove("cena-solo-legenda--aguardando");
+      }
       if (ctx.controles && modo === "inicio") {
         ctx.controles.hidden = false;
         ctx.controles.addEventListener("click", function (ev) {
@@ -357,7 +369,14 @@
         }));
       }
       ativos.push(ctx);
-    }).catch(function () { /* sem módulos/sem import map: fica o fallback */ });
+    }).catch(function () { recolher(ctx); /* sem módulos/sem import map: fica o fallback */ });
+  }
+
+  /** Sem cena, o inventário reservado não tem pontos a nomear: sai do fluxo. */
+  function recolher(ctx) {
+    if (ctx.legenda && ctx.legenda.classList.contains("cena-solo-legenda--aguardando")) {
+      ctx.legenda.hidden = true;
+    }
   }
 
   function atualizarBotaoPausa(ctx) {
@@ -372,7 +391,7 @@
     ctx.limpezas.forEach(function (fn) { fn(); });
     ctx.limpezas = [];
     if (ctx.cena) { ctx.cena.dispose(); ctx.cena = null; }
-    ctx.raiz.classList.remove("cena-solo--ativa");
+    ctx.raiz.classList.remove("cena-solo--ativa", "cena-solo--pronta");
     const host = ctx.raiz.querySelector(".cena-solo__canvas");
     if (host) host.remove();
     if (ctx.controles) ctx.controles.hidden = true;

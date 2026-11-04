@@ -1589,7 +1589,7 @@ body,
   width: 100%; aspect-ratio: 764 / 792;
   max-height: clamp(260px, 48vh, 540px);
 }
-.cena-solo--palco:not(.cena-solo--ativa) .cena-solo__fallback {
+.cena-solo--palco .cena-solo__fallback {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: contain; right: auto; bottom: auto;
 }

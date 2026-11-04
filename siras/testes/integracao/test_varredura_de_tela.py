@@ -118,3 +118,13 @@ def test_grades_da_calculadora_encolhem_no_telefone():
     assert re.search(r"\.custo, \.custo__saida, \.custo__entradas, \.formula \{ "
                      r"grid-template-columns: minmax\(0, 1fr\); \}", _CSS)
     assert "repeat(2, minmax(0, 1fr))" in _CSS
+
+
+def test_a_etiqueta_no_telefone_tem_linha_propria_na_barra():
+    """Ancorada com `position: absolute` ao rodapé da barra, ela subia por cima da palavra
+    SIRAS quando a barra encolhia ao rolar (05/11/2026). Na grade, acompanha a logo."""
+    bloco = _CSS[_CSS.index("No telefone nao cabe ao lado"):]
+    bloco = bloco[: bloco.index("@media print")]
+    assert 'grid-template-areas: "logo nav" "selo nav"' in bloco
+    assert "grid-area: selo" in bloco
+    assert "position: absolute" not in bloco

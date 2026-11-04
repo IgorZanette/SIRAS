@@ -2167,13 +2167,30 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 :root[data-tema="claro"] .selo-dev { color: #2A3A30; background: var(--n-850);
                                      border-color: rgba(13, 20, 16, .12); }
 :root[data-tema="claro"] .selo-dev::before { background: #D98A00; }
-/* No telefone nao cabe ao lado: desce para baixo da palavra SIRAS, menor. */
+/* No telefone nao cabe ao lado: desce para baixo da palavra SIRAS, menor.
+   LINHA PROPRIA NA GRADE, e nao `position: absolute`. Ancorada ao rodape da barra, ela
+   ficava parada enquanto a barra encolhia ao rolar (.is-reduzida) e subia por cima da
+   palavra SIRAS (achado do autor, 05/11/2026). Na grade ela acompanha a logo em
+   qualquer escala. O recuo e o do icone, para alinhar com a palavra. */
 @media (max-width: 560px) {
-  .barra__int { position: relative; }
-  .selo-dev { position: absolute; left: calc(var(--e-4) + var(--marca-icone) + .75rem);
-              bottom: 5px; padding: .18rem .5rem; gap: .35rem; font-size: 9px; }
+  .barra__int {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "logo nav" "selo nav";
+    align-items: center; column-gap: var(--e-3); row-gap: 1px;
+    padding-block: 6px;
+  }
+  .barra__int > .logo { grid-area: logo; }
+  .barra__nav { grid-area: nav; justify-self: end; }
+  .selo-dev {
+    grid-area: selo; justify-self: start; align-self: start; margin: 0;
+    margin-left: calc(var(--marca-icone) * var(--barra-escala) + .75rem);
+    padding: .18rem .5rem; gap: .35rem; font-size: 9px;
+  }
   .selo-dev::before { width: 5px; height: 5px; box-shadow: 0 0 0 2px rgba(245, 165, 36, .18); }
 }
+/* Abaixo de 380px o recuo do icone empurrava a etiqueta 14px para dentro do seletor de
+   tema: ela comeca sob o icone. */
+@media (max-width: 380px) { .selo-dev { margin-left: 0; } }
 @media print { .selo-dev { display: none !important; } }
 
 /* --- Fundos de apoio (ADR 0013, revisto em 11/10/2026) ------------------- */
@@ -2577,4 +2594,15 @@ body.malha {
     linear-gradient(180deg, rgba(10,15,12,.97), rgba(10,15,12,.86)),
     url("../img/background/op-5.webp");
   background-position: center 65%;
+}
+
+/* Em 320px (telefones menores) logo, etiqueta, tema e botao ainda nao cabiam: o seletor
+   de tema perde 12px e o botao um pouco de respiro. O alvo de toque fica em 24x30. */
+@media (max-width: 340px) {
+  .tema { grid-template-columns: repeat(3, 24px); }
+  .tema::before { width: 24px; }
+  .tema[data-modo="escuro"]::before { transform: translateX(24px); }
+  .tema[data-modo="sistema"]::before { transform: translateX(48px); }
+  .barra__nav .btn { padding: 0 .55rem; }
+  .barra__nav { gap: var(--e-1); }
 }

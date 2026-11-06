@@ -813,9 +813,9 @@ Na mesma reunião o orientador encaminhou dois pontos que não são condição d
 
 | Campo | Valor |
 |---|---|
-| Orientador | PREENCHER (o autor confirma se a aprovação foi do orientador e por qual meio) |
+| Orientador | Prof. Dr. Rafael Rieder (UPF — LABRV, PPGCA, PPGAGRO) |
 | Meio | PREENCHER |
-| Data | 05/11/2026 (aprovação comunicada pelo autor) |
+| Data | 05/11/2026 |
 | Objeto | CCAE v1.4 — §7.2: o teto de exequibilidade segue o modo de aplicação que o laudo manda, pela situação da cultura; decisão A-12 |
 | Resultado | Aprovado. Versão vigente a partir de 05/11/2026, tag `criterios-v1.4` |
 

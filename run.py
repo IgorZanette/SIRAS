@@ -22,6 +22,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import sysconfig
 import venv
 from pathlib import Path
 
@@ -48,6 +49,55 @@ def _versao_minima() -> None:
             f"{sys.version_info.major}.{sys.version_info.minor}.\n"
             "Instale uma versão atual em https://www.python.org/downloads/ e rode de novo."
         )
+
+
+def _python_sem_rodas() -> bool:
+    """Este Python é um dos que o PyPI não atende (MSYS2/MinGW, Cygwin)?
+
+    Achado de 05/11/2026, e não é óbvio. A primeira linha deste arquivo é
+    `#!/usr/bin/env python3`, que serve a Linux e macOS. O `py` do Windows RESPEITA essa
+    linha: procura `python3.exe` no PATH. O instalador do python.org só cria
+    `python.exe`, então quem tem MSYS2 instalado cai no `python3.exe` do MinGW sem
+    perceber, mesmo digitando `py`.
+
+    Esse Python cria a venv com layout Unix (`bin/`, e não `Scripts/`) e, pior, não tem
+    rodas prontas no PyPI: o `jsonschema` depende do `rpds-py`, que é Rust e falha ao
+    compilar. Medido nesta máquina. Ajustar os caminhos não bastaria.
+    """
+    return (
+        sys.platform in ("cygwin", "msys")
+        or sysconfig.get_platform().startswith("mingw")
+    )
+
+
+def _relancar_no_python_oficial() -> int:
+    """Roda este mesmo comando pelo Python oficial, via `py -3`.
+
+    Com a versão EXPLÍCITA o lançador ignora a linha `#!` e escolhe entre os Pythons
+    registrados no Windows, que são os do python.org (o MinGW não se registra).
+
+    Processo filho com espera, e não `os.execv`: no Windows o execv sai do pai na hora,
+    e o terminal devolveria o prompt com o servidor ainda no ar -- o defeito do Ctrl+C
+    descrito em `_ativar()`. O pai ignora o Ctrl+C e só repassa o código de saída; o
+    filho, no mesmo console, recebe o sinal e encerra o servidor.
+    """
+    lancador = shutil.which("py")
+    if os.environ.get("SIRAS_RELANCADO") or not lancador:
+        sys.exit(
+            f"Este Python ({sys.executable}) é do MSYS2/MinGW ou do Cygwin, e o SIRAS "
+            "não consegue instalar as dependências nele.\n"
+            "Instale o Python de https://www.python.org/downloads/ e rode de novo com "
+            "`py -3 run.py`."
+        )
+    print(
+        f"Python do MSYS2/MinGW detectado ({sys.executable}); usando o Python oficial.",
+        flush=True,  # sem isto, a linha sai DEPOIS da saída do filho
+    )
+    ambiente = dict(os.environ, SIRAS_RELANCADO="1")
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    return subprocess.run(
+        [lancador, "-3", str(Path(__file__).resolve()), *sys.argv[1:]], env=ambiente
+    ).returncode
 
 
 def _venv_sadia() -> bool:
@@ -307,6 +357,10 @@ TAREFAS = {
 
 
 def main() -> int:
+    # Antes de tudo, inclusive de `limpar`: a venv que este Python criaria ou apagaria
+    # não é a que o resto do arquivo espera.
+    if os.name == "nt" and _python_sem_rodas():
+        return _relancar_no_python_oficial()
     _versao_minima()
     tarefa = (sys.argv[1] if len(sys.argv) > 1 else "").lower()
     if tarefa not in TAREFAS:

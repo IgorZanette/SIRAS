@@ -59,7 +59,14 @@ bp = Blueprint("siras", __name__)
 #: resumo, porque é ele que diz exatamente o que falta.
 _LIMITE_DECLARADO = (
     "Esta combinação está fora do que o SIRAS recomenda, e não é um erro de "
-    "preenchimento: {motivo}"
+    "preenchimento: {motivo} Para emitir o laudo, escolha outra opção nesse campo; os "
+    "valores digitados foram mantidos."
+)
+
+#: O que fazer depois de uma recusa do motor. O formulário volta preenchido, e dizer
+#: isso evita que a pessoa ache que perdeu o que digitou.
+_PROXIMO_PASSO = (
+    "Os valores digitados foram mantidos: ajuste o campo indicado e gere o laudo de novo."
 )
 
 def _opcoes_do_formulario(cultura_id: str) -> Dict[str, Any]:
@@ -327,8 +334,13 @@ def laudo():
         ]
     except (ErroLaudo, ErroCalagem, ErroAdubacao, ErroAptidao) as erro:
         # Erro de escopo ou de base incompleta, não de digitação: o formulário volta
-        # preenchido e a mensagem do motor aparece inteira, sem tradução que a apague.
-        return _tela_de_dados(cultura_id, leitura, erro_do_motor=str(erro)), 422
+        # preenchido e a mensagem do motor aparece inteira. Só os identificadores viram
+        # os nomes dos campos da tela, e a frase final diz o próximo passo -- sem ela, o
+        # usuário do relato de 05/11/2026 ficou sem saber como chegar ao laudo.
+        return _tela_de_dados(
+            cultura_id, leitura,
+            erro_do_motor=f"{formulario.mensagem_para_tela(erro)} {_PROXIMO_PASSO}",
+        ), 422
     except NotImplementedError as erro:
         # Limite DECLARADO do sistema, e não falha: há fases que o Manual indexa pela
         # análise foliar, sem correspondência publicada com a análise de solo, e o motor
@@ -338,7 +350,8 @@ def laudo():
         # HTTP 500 e rastro de pilha na tela — a tela oferece a fase, e quem a escolhia
         # recebia um erro de programa em vez da explicação de por que não há resposta.
         return _tela_de_dados(
-            cultura_id, leitura, erro_do_motor=_LIMITE_DECLARADO.format(motivo=erro)
+            cultura_id, leitura,
+            erro_do_motor=_LIMITE_DECLARADO.format(motivo=formulario.mensagem_para_tela(erro)),
         ), 422
 
     blocos = [

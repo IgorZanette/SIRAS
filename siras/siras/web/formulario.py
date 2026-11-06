@@ -478,6 +478,30 @@ def _rotular(identificador: str) -> str:
     return identificador.replace("_", " ").capitalize()
 
 
+def mensagem_para_tela(texto: str) -> str:
+    """A recusa do motor nas palavras da tela.
+
+    O motor fala em identificadores ('produtividade_estimada', 'manejo_galho_grosso'),
+    e é certo que fale: a mesma mensagem serve aos testes e à linha de comando. Na tela,
+    porém, o usuário procurava um campo chamado assim e não achava -- foi o relato de
+    05/11/2026: "não sabia como prosseguir". Só os identificadores que a tela conhece
+    são traduzidos; o resto da frase, que é a causa, fica intacto. O prefixo
+    "cultura 'x':" sai porque a tela já é daquela cultura.
+    """
+    texto = re.sub(r"^cultura '[^']+': ", "", str(texto))
+
+    def traduzir(achado: "re.Match[str]") -> str:
+        identificador = achado.group(1)
+        rotulo = _ROTULO_DE_VARIAVEL.get(identificador) or _ROTULO_DE_VALOR.get(identificador)
+        return f"“{rotulo}”" if rotulo else achado.group(0)
+
+    texto = re.sub(r"'([a-z0-9_]+)'", traduzir, texto).rstrip()
+    # A tela emenda o próximo passo depois desta frase; sem o ponto, viravam uma só.
+    if texto and not texto.endswith("."):
+        texto += "."
+    return texto[:1].upper() + texto[1:]
+
+
 def _coletar(no: Any, chave: str, achados: List[str]) -> List[str]:
     """Todos os valores de uma lista `chave`, em qualquer profundidade da cultura."""
     if isinstance(no, dict):

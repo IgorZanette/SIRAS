@@ -12,6 +12,8 @@ CORRETO (classe alto, 120), não o do rascunho.
 
 import pytest
 
+from siras.conhecimento.carregador import carregar_dados_erva_mate
+
 from siras.motor.adubacao import (
     ErroAdubacao,
     calcular_adubacao_erva_mate,
@@ -269,12 +271,57 @@ class TestErvaMate:
         assert resultado["p2o5"] == 190.0
         assert resultado["k2o"] == 245.0
 
-    def test_recuperacao_fora_das_classes_atendidas_levanta_erro(self):
-        with pytest.raises(ErroAdubacao, match="classes_atendidas|não está no programa"):
-            calcular_adubacao_erva_mate(
-                "recuperacao", mo=3.0, argila=55, p_solo=15.0, k_solo=80, ctc_ph7=9.5,
-                manejo_galho_grosso="manejo_1_retido", massa_verde_t_ha=10,
-            )
+    # Até 05/11/2026 a recuperação com P ou K em Alto/Muito alto levantava erro e o laudo
+    # inteiro não saía (relato de usuário). O Manual (p. 244) manda o nutriente fora do
+    # déficit para o regime de produção. Os valores esperados abaixo saem dos
+    # coeficientes da PRÓPRIA BASE: o teste confere qual tabela foi usada, não o número
+    # agronômico, que segue sendo do autor (testes/casos/).
+
+    @staticmethod
+    def _bases():
+        entrada = carregar_dados_erva_mate()["adubacao"]["culturas"]["erva_mate"]
+        return entrada["programa_recuperacao"], entrada["programa_desde_o_plantio"]["producao"]
+
+    def test_recuperacao_so_no_nutriente_deficitario(self):
+        recuperacao, producao = self._bases()
+        manejo, mv = "manejo_1_retido", 10
+        resultado = calcular_adubacao_erva_mate(
+            "recuperacao", mo=3.0, argila=55, p_solo=2.0, k_solo=600.0, ctc_ph7=9.5,
+            manejo_galho_grosso=manejo, massa_verde_t_ha=mv,
+        )
+        assert resultado["classe_p"] in recuperacao["pk"]["classes_atendidas"]
+        assert resultado["classe_k"] not in recuperacao["pk"]["classes_atendidas"]
+        assert resultado["regimes"] == {"n": "recuperacao", "p": "recuperacao", "k": "producao"}
+        assert resultado["k2o"] == producao["pk"]["coeficientes"][manejo]["k"] * mv
+        base_p = recuperacao["pk"]["parametros"][resultado["classe_p"]]["p"]["base"]
+        assert resultado["p2o5"] == base_p + recuperacao["pk"]["coeficientes_por_manejo"][manejo]["p"] * mv
+
+    def test_recuperacao_sem_deficit_segue_producao_inclusive_no_n(self):
+        recuperacao, producao = self._bases()
+        manejo, mv = "manejo_2_retirado", 12
+        resultado = calcular_adubacao_erva_mate(
+            "recuperacao", mo=3.0, argila=55, p_solo=200.0, k_solo=600.0, ctc_ph7=9.5,
+            manejo_galho_grosso=manejo, massa_verde_t_ha=mv,
+        )
+        for eixo in ("classe_p", "classe_k"):
+            assert resultado[eixo] not in recuperacao["pk"]["classes_atendidas"]
+        assert resultado["regimes"] == {"n": "producao", "p": "producao", "k": "producao"}
+        # Mesmas doses do programa de produção, pelo caminho que já existia para ele.
+        esperado = calcular_adubacao_erva_mate(
+            "desde_o_plantio", fase="producao", mo=3.0,
+            manejo_galho_grosso=manejo, massa_verde_t_ha=mv,
+        )
+        for nutriente in ("n", "p2o5", "k2o"):
+            assert resultado[nutriente] == esperado[nutriente], nutriente
+
+    @pytest.mark.parametrize("p_solo", [1.0, 5.0, 10.0, 20.0, 40.0, 90.0, 200.0])
+    @pytest.mark.parametrize("k_solo", [15.0, 40.0, 70.0, 120.0, 200.0, 350.0, 600.0])
+    def test_recuperacao_responde_em_toda_classe_de_p_e_k(self, p_solo, k_solo):
+        resultado = calcular_adubacao_erva_mate(
+            "recuperacao", mo=3.0, argila=55, p_solo=p_solo, k_solo=k_solo, ctc_ph7=9.5,
+            manejo_galho_grosso="manejo_1_retido", massa_verde_t_ha=10,
+        )
+        assert set(resultado["regimes"]) == {"n", "p", "k"}
 
 
 class TestFrutiferasBespoke:
@@ -379,3 +426,11 @@ class TestFrutiferasBespoke:
     def test_videira_exige_tipo_uva(self):
         with pytest.raises(ErroAdubacao, match="tipo_uva"):
             calcular_adubacao_frutiferas("videira", fase="manutencao", produtividade_estimada=18, mo=3.0)
+
+
+def test_figueira_em_crescimento_fora_dos_anos_da_tabela_explica_a_recusa():
+    """Antes de 05/11/2026 o ano 3 chegava à tela como "chave '3' não encontrada
+    (disponíveis: ['1', '2'])". A recusa continua -- a tabela de crescimento não cobre o
+    ano --, mas diz a faixa e para onde ir."""
+    with pytest.raises(ErroAdubacao, match="cobre os anos .* vale a manutenção"):
+        calcular_adubacao_frutiferas("figueira", fase="crescimento", ano=3, mo=3.0)

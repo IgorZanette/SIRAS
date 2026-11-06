@@ -73,7 +73,10 @@ CCAE §7.2 exige checar se a dose de calcário recomendada excede o teto operaci
 (`NC_MAX_INCORPORADO_T_HA`/`NC_MAX_SUPERFICIAL_T_HA`, config_aptidao.json) antes de zerar
 F1 no cenário `POTENCIAL`. Em vez de recalcular NC, `_resolver_f1_potencial()` chama
 `motor.calagem.calcular_calagem_por_cultura()` e olha `modo_aplicacao` do critério
-resolvido para escolher o teto certo. F2, F3, F4 e F6 (`CORRIGIVEL` no CCAE §7.1) viram
+resolvido para escolher o teto certo. Desde a v1.4 do CCAE (05/11/2026), quando a
+cultura declara modo por situação (erva-mate: incorporado na implantação, superficial no
+erval estabelecido), vale o que `motor/aplicacao_calcario.py` resolve — a mesma função
+que dá o modo ao laudo, para a aptidão não projetar a correção pelo modo contrário. F2, F3, F4 e F6 (`CORRIGIVEL` no CCAE §7.1) viram
 `NULO` incondicionalmente — a correção deles não depende de exequibilidade, só a de F1
 depende, porque só a calagem tem teto operacional declarado no CCAE.
 

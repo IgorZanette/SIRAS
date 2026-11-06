@@ -15,6 +15,7 @@
 {% import "_macros/ico.html" as i %}
 {% import "_macros/ficha.html" as f %}
 {% import "_macros/regua.html" as r %}
+{% import "_macros/aviso.html" as av %}
 
       {# ——— 1. Veredito: os quatro números que o usuário veio buscar ——— #}
       <section class="veredito">
@@ -30,6 +31,12 @@
         </div>
         {% endfor %}
       </section>
+
+      {# Logo abaixo das doses, porque mudam a leitura delas: o erval em produção com
+         teor inadequado recebeu doses de um regime que o Manual manda abandonar (p. 243). #}
+      {% for aviso in laudo.avisos %}
+      <div class="sec">{{ av.aviso(aviso.tipo, aviso.titulo, aviso.texto) }}</div>
+      {% endfor %}
 
       {# ——— 2. Interpretação dos atributos ——— #}
       <section class="sec">

@@ -2248,10 +2248,14 @@ body::before {
 :root[data-tema="claro"] body::before {
   background-image: url("../img/background/claro-1.webp");
   mix-blend-mode: normal;
-  /* O ceu de neblina da arte clara chega a 95% de luminancia: nas calhas de um monitor
-     largo era a maior area clara da tela. Escurece o pico e baixa a presenca. */
-  filter: brightness(.9);
-  opacity: .35;
+  /* CALIBRADO CONTRA O ESCURO (05/11/2026). A arte clara ja vem lavada -- a nevoa fica
+     perto do tom do fundo --, e com opacidade .35 a calha variava 5,9 de L* contra 23,4
+     do escuro: a paisagem sumia. `contrast` e `saturate` devolvem colinas e verde que a
+     nevoa apagou; `brightness` segura o ceu para ele nao virar a area mais clara da
+     tela. Medido por simulacao da composicao (que reproduziu a captura real em 0,1 de
+     L*): 19,4 em 1348px e 22,4 em 1920px. Sem texto nas calhas, sem teto de contraste. */
+  filter: brightness(.82) saturate(1.5) contrast(1.6);
+  opacity: .95;
 }
 
 /* A CHAMADA FINAL fecha a pagina, e ali a paisagem sobe: a secao inteira, e nao so as
@@ -2467,10 +2471,14 @@ body.malha {
   background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%, 100% 100%;
   background-attachment: fixed;
 }
+/* A grade do claro tem o DOBRO do alfa da do escuro, e nao o mesmo. Com .03 o traco
+   ficava a 1,96 de L* do fundo, contra 2,76 do escuro, e sumia. Com .06 fica a 3,9:
+   um pouco acima de proposito, porque traco escuro sobre claro se le menos que o
+   inverso. */
 :root[data-tema="claro"] body.malha {
   background-image:
-    linear-gradient(rgba(60,45,25,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(60,45,25,.03) 1px, transparent 1px),
+    linear-gradient(rgba(60,45,25,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60,45,25,.06) 1px, transparent 1px),
     radial-gradient(ellipse 70% 50% at 85% 0%, rgba(214,231,180,.55), transparent 70%),
     radial-gradient(ellipse 60% 45% at 0% 100%, rgba(222,204,170,.45), transparent 70%),
     linear-gradient(180deg, #E4EBE2 0%, #E8E6DB 100%);
@@ -2534,6 +2542,11 @@ body.malha {
 }
 
 /* --- 5. Ilhas escuras (so no tema claro) ----------------------------------- */
+/* Cor propria nos DOIS temas. Sem ela, no escuro o titulo da abertura herdava a cor
+   do `body`, que tem transicao de 240ms: na troca claro -> escuro ele passava pelo
+   texto escuro do claro sobre o fundo escuro e piscava. Com a cor declarada aqui, a
+   ilha nao herda transicao nenhuma, e o valor final e o mesmo de antes. */
+.ilha-escura { color: var(--n-100); }
 :root[data-tema="claro"] .ilha-escura {
   --n-950: #050807; --n-900: #0A0F0C; --n-880: #0E1512; --n-850: #121B16;
   --n-800: #18231D; --n-750: #1E2B24; --n-700: #26362D; --n-600: #3A4F43;

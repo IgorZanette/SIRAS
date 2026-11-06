@@ -80,7 +80,7 @@ _ACENTOS = {
     "cornichao": "cornichão", "desmodio": "desmódio", "estevia": "estévia",
     "hemartria": "hemártria", "azevem": "azevém", "orientacao": "orientação",
     "orientacoes": "orientações", "assistencia": "assistência", "tecnica": "técnica",
-    "tecnicas": "técnicas", "tecnicos": "técnicos", "reducao": "redução",
+    "tecnicas": "técnicas", "tecnicos": "técnicos", "reducao": "redução", "secao": "seção", "recuperacao": "recuperação",
     "emergencia": "emergência", "fertirrigacao": "fertirrigação", "botao": "botão",
     "organico": "orgânico", "organicos": "orgânicos", "organicas": "orgânicas",
     "diferenciacao": "diferenciação",
@@ -402,13 +402,43 @@ def _observacao_da_calagem(laudo: Laudo) -> str:
     if camada:
         partes.append(f"camada de {camada[0]}–{camada[1]} cm")
     if criterio.get("modo_aplicacao") == "superficial":
-        partes.append("aplicação em superfície")
+        # "Em área total" só quando a base declara: o Manual diz isso para a recuperação
+        # de ervais (p. 243), e não para o erval em produção (p. 84, só "superficialmente").
+        if criterio.get("area_aplicacao") == "total":
+            partes.append("aplicação em superfície, em área total")
+        else:
+            partes.append("aplicação em superfície")
     elif criterio.get("modo_aplicacao") == "incorporado":
         partes.append("incorporar")
+    # A fonte do modo, quando ele vem da situação da cultura e não da tabela do critério:
+    # quem conhece a Tab. 5.6 leria "superfície" e acharia que o sistema errou.
+    if criterio.get("fonte_modo_aplicacao"):
+        partes.append(f"modo de aplicação conforme {criterio['fonte_modo_aplicacao']}")
     # As notas do critério ("amostrar 0-10 e 10-20 cm", "limite de 5 t/ha") saíam aqui E
     # em "Como aplicar", que as lista uma a uma. No cartão fica só o que qualifica o
     # número; o modo de fazer fica na seção que existe para isso (v2, 03/11/2026).
     return ", ".join(partes) + "."
+
+
+#: Por que a dose de um nutriente da erva-mate em recuperação saiu pelo regime de
+#: produção. Sem esta frase, o técnico que conhece a tabela de recuperação veria uma dose
+#: de P sem a parcela de elevação do teor e concluiria que o sistema errou.
+_REGIME_DE_PRODUCAO = {
+    "n": (
+        " P e K estão acima do teor crítico: o programa de recuperação não se aplica e o N "
+        "segue o regime de produção (Manual 2016, p. 243)."
+    ),
+    "pk": (
+        " Acima do teor crítico: este nutriente segue o regime de produção, e não o de "
+        "recuperação (Manual 2016, p. 244)."
+    ),
+}
+
+
+def _com_regime(texto: str, laudo: Laudo, nutriente: str) -> str:
+    if laudo.adubacao.regimes.get(nutriente) != "producao":
+        return texto
+    return texto + _REGIME_DE_PRODUCAO["n" if nutriente == "n" else "pk"]
 
 
 def _observacao_do_nitrogenio(laudo: Laudo) -> str:
@@ -460,7 +490,7 @@ def _veredito(laudo: Laudo) -> List[Dict[str, Any]]:
             "nome": "Nitrogênio (N)",
             "valor": formatar_dose(laudo.adubacao.n),
             "unidade": "kg/ha",
-            "observacao": _observacao_do_nitrogenio(laudo),
+            "observacao": _com_regime(_observacao_do_nitrogenio(laudo), laudo, "n"),
             "sigla": None,
             "destaque": False,
         },
@@ -468,7 +498,9 @@ def _veredito(laudo: Laudo) -> List[Dict[str, Any]]:
             "nome": "Fósforo (P<sub>2</sub>O<sub>5</sub>)",
             "valor": formatar_dose(laudo.adubacao.p2o5),
             "unidade": "kg/ha",
-            "observacao": _observacao_da_classe("P", laudo.adubacao.classe_p),
+            "observacao": _com_regime(
+                _observacao_da_classe("P", laudo.adubacao.classe_p), laudo, "p"
+            ),
             "sigla": sigla_da_classe(laudo.adubacao.classe_p) if laudo.adubacao.classe_p else None,
             "destaque": False,
         },
@@ -476,7 +508,9 @@ def _veredito(laudo: Laudo) -> List[Dict[str, Any]]:
             "nome": "Potássio (K<sub>2</sub>O)",
             "valor": formatar_dose(laudo.adubacao.k2o),
             "unidade": "kg/ha",
-            "observacao": _observacao_da_classe("K", laudo.adubacao.classe_k),
+            "observacao": _com_regime(
+                _observacao_da_classe("K", laudo.adubacao.classe_k), laudo, "k"
+            ),
             "sigla": sigla_da_classe(laudo.adubacao.classe_k) if laudo.adubacao.classe_k else None,
             "destaque": False,
         },
@@ -1445,6 +1479,11 @@ def apresentar_laudo(laudo: Laudo, dados: Dict[str, Any]) -> Dict[str, Any]:
         "trilha": trilha,
         "trilha_modulos": _modulos_da_trilha(trilha),
         "orientacoes": _orientacoes(laudo),
+        # Por talhão, e não em "Como aplicar": dependem da análise de cada área.
+        "avisos": [
+            {**aviso, "texto": f"{aviso['texto']} ({texto_pt(aviso['fonte'])}.)"}
+            for aviso in laudo.avisos
+        ],
         "formulacao": _formulacao(laudo),
         "criterio_calagem": laudo.calagem.criterio,
         "cabecalho": _linha_do_cabecalho(laudo),

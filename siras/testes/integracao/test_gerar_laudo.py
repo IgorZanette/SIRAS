@@ -145,7 +145,7 @@ def test_variavel_condicional_ausente_falha_com_mensagem_de_dominio():
         profundidade_incorporacao_cm=entrada["profundidade_incorporacao_cm"],
     )
 
-    with pytest.raises(ErroLaudo, match="informe fase"):
+    with pytest.raises(ErroLaudo, match="informe 'fase'"):
         gerar_laudo(_analise(entrada), "macieira", contexto)
 
 

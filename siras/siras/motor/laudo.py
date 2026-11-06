@@ -20,6 +20,7 @@ despacho só, parametrizado pelas variáveis condicionais que cada um exige.
 
 from __future__ import annotations
 
+import dataclasses
 from typing import Any, Dict, Optional, Tuple
 
 from siras.conhecimento.carregador import (
@@ -46,20 +47,11 @@ from siras.motor.adubacao import (
     classificar_fosforo,
     classificar_potassio,
 )
+from siras.motor.aplicacao_calcario import dados_do_grupo, regra_de_aplicacao
 from siras.motor.aptidao import avaliar_aptidao
 from siras.motor.calagem import calcular_calagem, resolver_criterio_id
 from siras.motor.formulacao import recomendar_formulacao
 from siras.motor.trace import Trace
-
-#: Carregador da adubação de cada grupo.
-_CARREGADOR_POR_GRUPO = {
-    "graos": carregar_dados_graos,
-    "hortalicas": carregar_dados_hortalicas,
-    "tuberculos": carregar_dados_tuberculos,
-    "outras": carregar_dados_outras,
-    "frutiferas": carregar_dados_frutiferas,
-    "erva_mate": carregar_dados_erva_mate,
-}
 
 #: Grupos de mapa_culturas.json que gerar_laudo() sabe adubar.
 _GRUPOS_IMPLEMENTADOS = (
@@ -114,13 +106,38 @@ def _resolver_grupo(cultura_id: str, dados: Dict[str, Any]) -> str:
 
 
 def _calagem(
-    analise: AnaliseSolo, cultura_id: str, contexto: Contexto, trace: Trace, dados: Dict[str, Any]
+    analise: AnaliseSolo, cultura_id: str, contexto: Contexto, trace: Trace,
+    dados: Dict[str, Any],
 ) -> RecomendacaoCalagem:
     criterio_id = resolver_criterio_id(cultura_id, contexto, dados)
     resultado = calcular_calagem(analise, criterio_id, contexto, trace)
     criterio = next(
         c for c in dados["criterios_calagem"]["criterios"] if c["id"] == criterio_id
     )
+
+    # R-CAL-04: o modo de aplicação pela situação da cultura. A DOSE não muda -- ela já
+    # saiu acima, do critério da tabela, e o Manual manda usar "a mesma dose" (p. 243).
+    # Por isso a troca é numa cópia do critério, que o laudo lê; o teto de aplicação
+    # superficial do plantio direto (D9) também não entra: é de outra tabela. A aptidão
+    # resolve pela MESMA função (motor/aplicacao_calcario.py), para o teto da §7.2.
+    regra = regra_de_aplicacao(cultura_id, contexto, dados)
+    if regra is not None:
+        trace.registrar(
+            regra="R-CAL-04: modo de aplicação do calcário pela situação da cultura",
+            entradas={
+                campo: contexto.variaveis.get(campo)
+                for campo in ("programa", "fase", "momento")
+            } | {"modo_na_tabela": criterio.get("modo_aplicacao")},
+            saida={"situacao": regra["situacao"], "modo": regra["modo"], "area": regra["area"]},
+            fonte=regra["fonte"],
+        )
+        criterio = {
+            **criterio,
+            "modo_aplicacao": regra["modo"],
+            "area_aplicacao": regra["area"],
+            "fonte_modo_aplicacao": regra["fonte"],
+        }
+
     return RecomendacaoCalagem(
         nc_t_ha=resultado["nc_t_ha"],
         motivo=resultado["motivo"],
@@ -281,7 +298,7 @@ def _adubacao_de_grupo_publicado(
         faltando = [nome for nome in obrigatorias if nome not in extras]
         if faltando:
             raise ErroLaudo(
-                f"cultura '{cultura_id}': informe {', '.join(faltando)} — "
+                f"cultura '{cultura_id}': informe {', '.join(repr(n) for n in faltando)} — "
                 f"o Manual publica recomendações distintas por {', '.join(faltando)} "
                 f"para este grupo"
             )
@@ -424,7 +441,36 @@ def _adubacao_erva_mate(
         dados_erva_mate=dados_grupo, dados_comuns=dados,
         **extras,
     )
-    return _montar_adubacao(analise, cultura_id, contexto, trace, dados, dados_grupo, resultado)
+    recomendacao = _montar_adubacao(
+        analise, cultura_id, contexto, trace, dados, dados_grupo, resultado
+    )
+    if resultado.get("monitoramento"):
+        recomendacao = dataclasses.replace(
+            recomendacao, monitoramento=dict(resultado["monitoramento"])
+        )
+    regimes = resultado.get("regimes")
+    if not regimes:
+        return recomendacao
+
+    # Passo próprio, e não uma chave a mais no R-ADU-04: "qual tabela dosou cada
+    # nutriente" é a decisão que a banca vai perguntar quando a dose de P de um erval em
+    # recuperação sair sem a parcela de elevação do teor.
+    trace.registrar(
+        regra=(
+            "R-ADU-05/06: na recuperação de erval, só o nutriente abaixo do teor crítico "
+            "segue o programa de recuperação; o outro, e o N quando nenhum está "
+            "deficitário, seguem o regime de produção"
+        ),
+        entradas={
+            "classe_p": resultado.get("classe_p"),
+            "classe_k": resultado.get("classe_k"),
+            "classes_da_recuperacao": dados_grupo["adubacao"]["culturas"]["erva_mate"]
+            ["programa_recuperacao"]["pk"]["classes_atendidas"],
+        },
+        saida=dict(regimes),
+        fonte="Manual 2016, Seção 6.6.5, programa de recuperação de ervais, p. 243-244",
+    )
+    return dataclasses.replace(recomendacao, regimes=dict(regimes))
 
 
 _ADUBACAO_POR_GRUPO = {
@@ -449,19 +495,6 @@ _ADUBACAO_POR_GRUPO = {
     ),
     "erva_mate": _adubacao_erva_mate,
 }
-
-
-def dados_do_grupo(grupo: str) -> Optional[Dict[str, Any]]:
-    """Culturas transcritas na adubação de um grupo, ou None quando o grupo não as
-    indexa por cultura (erva-mate indexa por programa e fase)."""
-    carregar = _CARREGADOR_POR_GRUPO.get(grupo)
-    if carregar is None:
-        return None
-    carregado = carregar()
-    # Grãos são o único grupo com dois arquivos (N e PK) em vez de um: o de N é o que
-    # lista as culturas.
-    bloco = carregado.get("adubacao") or carregado.get("adubacao_n") or {}
-    return bloco.get("culturas")
 
 
 def gerar_laudo(
@@ -534,7 +567,70 @@ def gerar_laudo(
         aptidao_potencial=aptidao_potencial,
         trace=trace,
         formulacao=formulacao,
+        avisos=_avisos_de_monitoramento(adubacao, calagem, trace),
     )
+
+
+def _avisos_de_monitoramento(
+    adubacao: RecomendacaoAdubacao, calagem: RecomendacaoCalagem, trace: Trace
+) -> list:
+    """R-ADU-07: o erval em produção com teor inadequado deve passar à recuperação.
+
+    "Quando forem detectados teores inadequados de Ca e/ou Mg (ver Capítulo 5) ou P e/ou
+    K (ver Capítulo 6), deve-se iniciar o programa de adubação para recuperação de
+    ervais" (Manual 2016, p. 243). As remissões do próprio Manual dão a régua:
+
+      - P e K, pelo Cap. 6: classe abaixo do teor crítico -- as classes que a tabela de
+        recuperação atende. A produção pressupõe o contrário (p. 242).
+      - Ca e Mg, pelo Cap. 5: o critério de calagem da cultura dispara. Para a erva-mate a
+        calagem "visa apenas o suprimento de Ca e Mg", e a p. 84 manda calar quando "os
+        teores de Ca e/ou Mg estão baixos", pelos critérios da Tab. 5.6. Calagem disparada
+        = `motivo` vazio, como em toda a apresentação do laudo.
+
+    É AVISO, e não troca de programa: escolher o programa continua sendo do usuário, e o
+    laudo de produção sai inteiro. A leitura das duas remissões está transcrita em
+    `producao.monitoramento` da base.
+    """
+    monitoramento = adubacao.monitoramento
+    if not monitoramento:
+        return []
+
+    motivos = []
+    if monitoramento["p_abaixo_do_critico"]:
+        motivos.append("fósforo abaixo do teor crítico")
+    if monitoramento["k_abaixo_do_critico"]:
+        motivos.append("potássio abaixo do teor crítico")
+    ca_mg_baixos = calagem.motivo is None
+    if ca_mg_baixos:
+        motivos.append("cálcio e/ou magnésio insuficientes pelo critério de calagem (Tab. 5.6)")
+
+    trace.registrar(
+        regra=(
+            "R-ADU-07: monitoramento do erval em produção — teor inadequado de Ca/Mg ou "
+            "de P/K indica a passagem ao programa de recuperação"
+        ),
+        entradas={
+            "classe_p": monitoramento["classe_p"],
+            "classe_k": monitoramento["classe_k"],
+            "calagem_disparada": ca_mg_baixos,
+        },
+        saida={"indicar_recuperacao": bool(motivos), "motivos": motivos},
+        fonte=f"Manual 2016, {monitoramento['fonte']}",
+    )
+    if not motivos:
+        return []
+    return [{
+        "tipo": "atencao",
+        "titulo": "Este erval deve passar ao programa de recuperação",
+        "texto": (
+            f"A análise mostra {', '.join(motivos)}. O Manual manda, nesse caso, iniciar o "
+            "programa de adubação para recuperação de ervais; as doses acima são as do "
+            "regime de produção, que pressupõe P e K acima do teor crítico. Para a "
+            "recomendação de recuperação, gere o laudo de novo com o programa "
+            "“Recuperação de erval”."
+        ),
+        "fonte": f"Manual 2016, {monitoramento['fonte']}",
+    }]
 
 
 __all__ = ["ErroLaudo", "gerar_laudo"]

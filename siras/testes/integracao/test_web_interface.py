@@ -565,9 +565,11 @@ def test_o_texto_terciario_passa_em_toda_superficie_clara():
 def test_a_malha_de_fundo_sobrevive_no_modo_claro():
     """A malha é o que dá ao SIRAS a leitura de superfície de instrumento: sumir no modo
     claro trocaria a identidade por conveniência. Desde a Atmosfera (04/11/2026) ela é a
-    primeira camada do fundo em degradê, no marrom da terra."""
+    primeira camada do fundo em degradê, no marrom da terra. Em 05/11/2026 o alfa foi de
+    .03 para .06: com .03 o traço ficava a 1,96 de L* do fundo, contra 2,76 do escuro, e
+    na prática sumia."""
     assert re.search(
-        r':root\[data-tema="claro"\] body\.malha \{[^}]*rgba\(60,45,25,\.03\) 1px', _TELAS_CSS
+        r':root\[data-tema="claro"\] body\.malha \{[^}]*rgba\(60,45,25,\.06\) 1px', _TELAS_CSS
     )
 
 
@@ -1866,3 +1868,133 @@ def test_a_hero_nao_e_revelada(cliente):
     hero = re.search(r'<section class="hero[ "][^>]*>', html).group(0)
 
     assert "data-revelar" not in hero
+
+
+# --- Recuperação de erval com P ou K alto (relato de usuário, 05/11/2026) ------------
+
+def _erva_mate_em_recuperacao(cliente, p, k):
+    from werkzeug.datastructures import MultiDict
+    tela = cliente.get("/analise/dados?cultura_id=erva-mate&exemplo=1").get_data(as_text=True)
+    campos = MultiDict(_como_o_navegador_envia(tela))
+    for nome, valor in (("programa", "recuperacao"), ("p", p), ("k", k),
+                        ("manejo_galho_grosso", "manejo_1_retido"), ("massa_verde_t_ha", "10")):
+        campos.setlist(nome, [valor])
+    return cliente.post("/analise/laudo", data=campos)
+
+
+def test_fosforo_muito_alto_nao_impede_o_laudo_da_erva_mate_em_recuperacao(cliente):
+    """O laudo não saía: o P em Muito alto derrubava calagem, K e aptidão junto. Agora o P
+    segue o regime de produção e o cartão da dose diz isso."""
+    resposta = _erva_mate_em_recuperacao(cliente, p="200", k="15")
+
+    assert resposta.status_code == 200
+    html = resposta.get_data(as_text=True)
+    assert "segue o regime de produção" in html
+    assert "R-ADU-05/06" in html  # o passo aparece na trilha
+
+
+def test_sem_deficit_de_p_e_k_o_laudo_avisa_que_a_recuperacao_nao_se_aplica(cliente):
+    resposta = _erva_mate_em_recuperacao(cliente, p="200", k="600")
+
+    assert resposta.status_code == 200
+    assert "o programa de recuperação não se aplica" in resposta.get_data(as_text=True)
+
+
+def test_recusa_do_motor_fala_a_lingua_da_tela_e_diz_o_proximo_passo(cliente):
+    """Quem recebia "'manejo_galho_grosso' e 'massa_verde_t_ha' são obrigatórios" não
+    achava campo com esse nome na tela."""
+    from werkzeug.datastructures import MultiDict
+    tela = cliente.get("/analise/dados?cultura_id=erva-mate&exemplo=1").get_data(as_text=True)
+    campos = MultiDict(_como_o_navegador_envia(tela))
+    campos.setlist("programa", ["recuperacao"])
+    campos.setlist("manejo_galho_grosso", [""])
+
+    resposta = cliente.post("/analise/laudo", data=campos)
+
+    assert resposta.status_code == 422
+    texto = re.sub(r"<[^>]+>", " ", resposta.get_data(as_text=True))
+    assert "Manejo do galho grosso" in texto
+    assert "'manejo_galho_grosso'" not in texto
+    assert "gere o laudo de novo" in texto
+
+
+# --- Modo de aplicação do calcário na erva-mate (05/11/2026) --------------------------
+# A Tab. 5.6 diz "incorporado", e isso é a implantação (p. 82). Com o erval plantado é
+# em superfície (p. 84); na recuperação, em superfície e em área total (p. 243).
+
+def _erva_mate_com_calagem(cliente, **variaveis):
+    from werkzeug.datastructures import MultiDict
+    tela = cliente.get("/analise/dados?cultura_id=erva-mate&exemplo=1").get_data(as_text=True)
+    campos = MultiDict(_como_o_navegador_envia(tela))
+    # Solo que dispara a calagem da Tab. 5.6 (V abaixo do critério, Ca e Mg abaixo da
+    # exceção). Entradas de teste, como um laudo de laboratório.
+    for nome, valor in {"v_percent": "25", "ca": "1.5", "mg": "0.5",
+                        "manejo_galho_grosso": "manejo_1_retido", "massa_verde_t_ha": "10",
+                        **variaveis}.items():
+        campos.setlist(nome, [valor])
+    resposta = cliente.post("/analise/laudo", data=campos)
+    assert resposta.status_code == 200, resposta.status_code
+    return resposta.get_data(as_text=True)
+
+
+def test_calagem_na_recuperacao_de_erval_e_superficial_em_area_total(cliente):
+    html = _erva_mate_com_calagem(cliente, programa="recuperacao")
+
+    assert "aplicação em superfície, em área total" in html
+    assert "R-CAL-04" in html
+
+
+def test_calagem_no_erval_em_producao_e_superficial_sem_afirmar_area(cliente):
+    """A p. 84 diz "superficialmente" e não fala de área: o laudo não acrescenta."""
+    html = _erva_mate_com_calagem(cliente, programa="desde_o_plantio", fase="producao")
+
+    assert "aplicação em superfície" in html
+    assert "em área total" not in html
+
+
+def test_calagem_na_implantacao_do_erval_continua_incorporada(cliente):
+    html = _erva_mate_com_calagem(
+        cliente, programa="desde_o_plantio", fase="plantio_e_crescimento", momento="plantio"
+    )
+
+    assert "incorporar" in html
+    assert "aplicação em superfície" not in html
+
+
+# --- Monitoramento do erval em produção (Manual p. 243, 05/11/2026) ------------------
+# "Quando forem detectados teores inadequados de Ca e/ou Mg (ver Capítulo 5) ou P e/ou K
+# (ver Capítulo 6), deve-se iniciar o programa de adubação para recuperação de ervais."
+
+_PRODUCAO = {"programa": "desde_o_plantio", "fase": "producao"}
+_AVISO = "Este erval deve passar ao programa de recuperação"
+
+
+def test_erval_em_producao_com_fosforo_baixo_recebe_o_aviso(cliente):
+    html = _erva_mate_com_calagem(cliente, p="2", k="600", **_PRODUCAO)
+
+    assert _AVISO in html
+    assert "fósforo abaixo do teor crítico" in html
+    assert "R-ADU-07" in html
+
+
+def test_erval_em_producao_com_ca_mg_insuficientes_recebe_o_aviso(cliente):
+    """P e K altos: só a calagem da Tab. 5.6 dispara, e é ela que o Cap. 5 manda ler."""
+    html = _erva_mate_com_calagem(cliente, p="200", k="600", **_PRODUCAO)
+
+    assert _AVISO in html
+    assert "cálcio e/ou magnésio insuficientes" in html
+    assert "fósforo abaixo" not in html
+
+
+def test_erval_em_producao_com_teores_adequados_nao_recebe_aviso(cliente):
+    html = _erva_mate_com_calagem(
+        cliente, p="200", k="600", v_percent="65", ca="5.0", mg="2.0", **_PRODUCAO
+    )
+
+    assert _AVISO not in html
+
+
+def test_erval_ja_em_recuperacao_nao_recebe_o_aviso(cliente):
+    html = _erva_mate_com_calagem(cliente, p="2", k="15", programa="recuperacao")
+
+    assert _AVISO not in html

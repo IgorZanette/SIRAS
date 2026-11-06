@@ -154,10 +154,52 @@ def test_classe_de_teor_e_faixa_da_regua_vem_da_mesma_leitura():
 
 
 def test_fase_do_pomar_ausente_falha_com_mensagem_de_dominio():
-    with pytest.raises(ErroLaudo, match="informe fase"):
+    with pytest.raises(ErroLaudo, match="informe 'fase'"):
         gerar_laudo(_ANALISE, "citros", _contexto("citros", {}))
 
 
 def test_programa_da_erva_mate_ausente_falha_com_mensagem_de_dominio():
     with pytest.raises(ErroLaudo, match="programa"):
         gerar_laudo(_ANALISE, "erva-mate", _contexto("erva-mate", {}))
+
+
+# --- CCAE v1.4, §7.2: o teto segue o modo que o laudo manda (05/11/2026) -------------
+
+#: Erval com dose de calcário entre os dois tetos (5 t/ha em superfície, 20 incorporado):
+#: V baixo e CTC alta. Entradas de teste, como um laudo de laboratório; a dose sai da
+#: fórmula da Tab. 5.6 e não é conferida aqui -- só o lado do teto em que ela cai.
+_ERVAL_ACIDO = AnaliseSolo(
+    ph_agua=4.5, indice_smp=4.8, argila=55, mo=3.0, p=6, k=20,
+    ctc_ph7=20.0, al=3.0, ca=0.6, mg=0.2, v_percent=4.3,
+)
+
+
+def _f1_potencial(variaveis):
+    laudo = gerar_laudo(_ERVAL_ACIDO, "erva-mate", _contexto("erva-mate", variaveis))
+    nc_bruta = (40 - _ERVAL_ACIDO.v_percent) / 100 * _ERVAL_ACIDO.ctc_ph7
+    config = _DADOS["config_aptidao"]
+    assert config["NC_MAX_SUPERFICIAL_T_HA"] < nc_bruta <= config["NC_MAX_INCORPORADO_T_HA"], (
+        "a análise de teste deixou de cair entre os dois tetos"
+    )
+    f1 = next(f for f in laudo.aptidao_potencial.fatores if f.id == "F1_acidez")
+    return laudo, f1
+
+
+def test_erval_estabelecido_projeta_correcao_plurianual_pelo_teto_superficial():
+    laudo, f1 = _f1_potencial({
+        "programa": "recuperacao",
+        "manejo_galho_grosso": "manejo_1_retido", "massa_verde_t_ha": 6,
+    })
+
+    assert laudo.calagem.criterio["modo_aplicacao"] == "superficial"
+    assert f1.rotulo == "LIGEIRO"
+    assert "superficial" in f1.evidencia
+
+
+def test_implantacao_do_erval_segue_o_teto_da_incorporacao():
+    laudo, f1 = _f1_potencial({
+        "programa": "desde_o_plantio", "fase": "plantio_e_crescimento", "momento": "plantio",
+    })
+
+    assert laudo.calagem.criterio["modo_aplicacao"] == "incorporado"
+    assert f1.rotulo == "NULO"

@@ -1,9 +1,9 @@
 # Caderno de Critérios de Aptidão Edáfica (CCAE)
 
-**Versão:** 1.3
-**Status:** aprovado e congelado — versão vigente. Sucede a v1.2 (tag `criterios-v1.2`)
-**Data de congelamento:** 2026-09-24
-**Tag Git:** `criterios-v1.3`
+**Versão:** 1.4
+**Status:** aprovado — versão vigente. Sucede a v1.3 (tag `criterios-v1.3`); a alteração está na §7.2, no Apêndice A (A-12) e no Apêndice C. Aprovação registrada no Apêndice D.5
+**Data de aprovação:** 2026-11-05
+**Tag Git:** `criterios-v1.4`
 
 > **Versões anteriores.** As v1.0, v1.1 e v1.2 saíram de `docs/` em 10/10/2026, na
 > reorganização da pasta. O Apêndice C abaixo traz o histórico do que mudou entre elas, e
@@ -426,7 +426,11 @@ A fundamentação de F2 e F3 é o próprio objetivo declarado do sistema de reco
 A correção da acidez só é considerada realizável se a dose recomendada não exceder o limite operacional:
 
 - Aplicação **incorporada**: sem limite explícito no Manual. Adotar teto de `NC ≤ 20 t/ha` (PRNT 100%) — a Tabela 5.2 tabula até 29,0 t/ha para índice SMP ≤ 4,4 no pH 6,5, mas doses dessa magnitude não são operacionalmente plausíveis em uma safra.
-- Aplicação **superficial** (plantio direto consolidado, campo natural): `NC ≤ 5 t/ha`, limite explícito nas notas das Tabelas 5.4, 5.5 e 5.6.
+- Aplicação **superficial** (plantio direto consolidado, campo natural): `NC ≤ 5 t/ha`, limite explícito nas notas das Tabelas 5.4, 5.5 e 5.6 (nesta, na nota das frutíferas).
+
+**Qual modo vale (v1.4).** O modo é o que o **laudo manda aplicar**, e não só o que a tabela do critério declara. Hoje isso só difere na erva-mate: a Tab. 5.6 diz "incorporado", e o Manual explica que esse é o modo da **implantação** (p. 82); com o erval já plantado a aplicação é superficial (Seção 5.2.5, p. 84), e na recuperação de ervais, superficial em área total (Seção 6.6.5, p. 243). A situação sai do programa, da fase e do momento informados, pelas regras transcritas em `calagem.modo_aplicacao_por_situacao` da cultura. **Sem programa informado** — caso dos casos de conformidade —, nenhuma regra casa e vale o modo da tabela, exatamente como na v1.3.
+
+> **Decisão do autor (A-12, 2026-11-05):** no erval estabelecido, o teto de exequibilidade é o de 5 t/ha da aplicação superficial. O Manual não publica limite de calagem superficial para as espécies florestais — o da Tab. 5.6 está na nota das frutíferas —; o limite é estendido por analogia operacional: o critério é o mesmo de qualquer calagem sem incorporação, a quantidade que uma aplicação em superfície consegue corrigir. O teto vale só para a exequibilidade da aptidão; a **dose** recomendada não é limitada (o Manual manda "a mesma dose", p. 243).
 
 Se a dose exceder o teto, F1 no cenário `POTENCIAL` permanece um grau acima de `NULO` e o laudo registra `correcao_parcelada = true`, indicando necessidade de correção plurianual. Se F1 já era `NULO` ou `LIGEIRO` no cenário `ATUAL` (isto é, a calagem não chega a ser disparada pelo critério da cultura, porque o pH já está acima de 5,5), não há dose a aplicar e F1 permanece inalterado no cenário `POTENCIAL` — não há correção a projetar quando o próprio Manual não recomenda calcário.
 
@@ -631,6 +635,7 @@ Toda escolha não determinada pelas fontes. É a lista que vai ao auditor e à b
 | A-5 | Existência de F7 como fator autônomo | Inferido do tratamento diferenciado de solos arenosos | **Alta** | `F7_ATIVO` |
 | A-6 | Classe Muito alto não rebaixa a aptidão | Risco ambiental, não limitação produtiva | Baixa | `MUITO_ALTO_REBAIXA` |
 | A-7 | Teto de 20 t/ha para calagem incorporada | Plausibilidade operacional | Média | `NC_MAX_INCORPORADO` |
+| A-12 | Teto de 5 t/ha (superficial) para a exequibilidade da calagem no erval de erva-mate já plantado | O Manual manda a aplicação superficial no erval estabelecido (p. 84, 243), mas não publica limite superficial para florestais; extensão por analogia com o limite das Tabs. 5.4, 5.5 e 5.6 (frutíferas) | Média | `NC_MAX_SUPERFICIAL`, via `calagem.modo_aplicacao_por_situacao` |
 | A-8 | Uso dos limiares de m% de Sobral et al. (2015) | Manual não gradua m%; fonte é do próprio projeto | Média | tabela `F1_M_PERCENT` |
 | A-9 | Escala de quatro classes | Adaptação da escala Boa/Regular/Restrita/Inapta | Baixa | — |
 | A-10 | Resolvido: sem correção de valor. A aparente sobreposição da Tab. 6.5, coluna argila classe 1 (Muito baixo ≤ 1,5; Baixo "1,5 – 3,0") é artefato de arredondamento do PDF, não erro de transcrição. Sob a convenção de classificação por limite superior (`de < valor ≤ ate`, já em uso em `dados/comum/interpretacao_p.json`, conferido pelo autor em 2026-08-22), 1,5 cai em Muito baixo e Baixo passa a valer, na prática, de 1,5 (exclusive) a 3,0 (inclusive) — sem sobreposição. Não foi necessário adotar 1,6 nem alterar nenhum valor transcrito | Convenção de classificação por limite superior (Seção 2 do ccae-implementacao.md), já aplicada a todas as tabelas de interpretação do SIRAS | Baixa — resolvido sem alteração de dado | — |
@@ -711,6 +716,7 @@ Registro para a monografia, porque a distinção importa: **nenhum critério do 
 | 1.1 | 2026-09-09 | Correção do mapeamento de §8.1 já previsto no texto; IDs canônicos de F1–F7; fechamento de A-10 pela convenção de limite superior; ajuste do protocolo §9 para 14 calibração + 62 conformidade; correção dos casos CONF-PT-03 e CONF-PT-04. | Auditoria de consistência do gabarito v1.0 e correção de casos malformados. | Sim — qualquer gabarito anterior à v1.1 é inválido como evidência de conformidade. |
 | 1.2 | 2026-09-10 | §7.1, ramo (b) de F1: a regra passa a derivar da dose (`NC > 0`) em vez do gatilho (`V% ≥ 40`), com a fórmula explicitada e o cálculo local declarado; fontes do ramo corrigidas para as Tabelas 5.4, 5.6 e 5.7; precisão de `NC` para efeito de F1 definida; fechamento de B-5 e B-6. | A conferência cruzada de fontes revelou que a aptidão e a calagem derivavam a mesma conclusão de lugares diferentes, produzindo leituras opostas em `V% = 40` — ponto em que a dose é zero e, portanto, não há contradição no Manual, só na especificação. | **Não.** A v1.2 altera a **derivação** da regra, não a regra: a função de mapeamento entrada → grau é idêntica à da v1.1 em todo o domínio, inclusive na fronteira `V% = 40`, porque `NC > 0` (lido antes do arredondamento) é equivalente a `V% < 40`. Nenhum limiar foi alterado e nenhum valor esperado do gabarito muda; o conjunto executado sob a v1.1 permanece válido como evidência. **Esta afirmação é verificável por execução:** rodar o conjunto sob as duas versões e obter saídas iguais transforma-a de argumento em resultado medido — a fazer depois do refactor, e é uma execução só. |
 | 1.3 | 2026-09-13, congelada em 2026-09-24 | §7.2: a exequibilidade lê `NC` antes do arredondamento (decisão A); §7.1(b): procedência da exceção Ca/Mg e a leitura `≥` fundamentada como decisão A-11; §9.2: retirada a exigência de casos de frutíferas em três fases e de tabaco Virgínia e Burley; 8 casos de conformidade acrescentados; fechamento de B-7 e B-8. | Conferência manual da Tab. 5.4 e dos casos pelo autor; achado da bancada de culturas na faixa de dose arredondada a zero; e o levantamento de 2026-09-24 que atribuiu o `=` das notas ao artefato de glifo do PDF já documentado em `docs/especificacao/nota-extracao-pdf.md`. | **Não, medido.** A §7.2 só muda o `POTENCIAL` quando a dose real e a arredondada ficam de lados diferentes de zero ou do teto; a suíte de conformidade roda os 92 casos, nos dois cenários, sob a v1.3, com 100% de classe, fator determinante e graus. Os 8 casos novos foram gabaritados sob a v1.2 e não caem nessas faixas. A retirada de estratos da §9.2 não altera critério. |
+| 1.4 | 2026-11-05, aprovada no mesmo dia | §7.2: o modo que escolhe o teto de exequibilidade passa a ser o que o laudo manda aplicar, pela situação da cultura (`calagem.modo_aplicacao_por_situacao`), e não só o da tabela do critério; decisão A-12 (teto superficial de 5 t/ha no erval de erva-mate já plantado). | Conferência do autor no Manual (p. 82, 84 e 243): o "incorporado" da Tab. 5.6 é o modo da implantação, e o laudo já mandava aplicar em superfície no erval estabelecido — a aptidão projetava a correção pelo modo contrário ao do próprio laudo. | **Não, medido.** A regra só muda o `POTENCIAL` de erva-mate com programa informado; os dois casos de erva-mate do conjunto (CONF-RB-02 e CONF-RB-06) são avaliados sem programa, e sem programa vale o modo da tabela, como na v1.3. A suíte de conformidade roda os 92 casos, nos dois cenários, sob a v1.4, com 100% de classe, fator determinante e graus, e nenhuma célula do gabarito foi alterada. |
 
 ## Apêndice D — Registro da aprovação do orientador
 
@@ -802,6 +808,18 @@ A alegação de não-circularidade da §9.1 se sustenta sobre o fato de a **espe
 B-7, único item que seguia aberto no rascunho, foi fechado pelo autor **no mesmo dia da aprovação**, com a fundamentação transcrita no Apêndice B e registrada como decisão A-11. A leitura `≥` já era a implementada, de modo que o fechamento é documental: nenhum limiar, nenhuma célula de gabarito e nenhuma linha de motor foram alterados. **Nenhuma cláusula fica pendente nesta versão**, e o Apêndice B fecha sem itens abertos.
 
 Na mesma reunião o orientador encaminhou dois pontos que não são condição da aprovação e seguem registrados no `trabalho_de_conclusao/processo/roadmap.md`: concluir a indicação de formulação do adubo no laudo, e o desenho da avaliação de usabilidade — três roteiros de teste com usuários e questionário estruturado pelas dez heurísticas de Nielsen, em lugar do SUS previsto na proposta (ver `trabalho_de_conclusao/usabilidade/protocolo.md`).
+
+### D.5 Aprovação da v1.4
+
+| Campo | Valor |
+|---|---|
+| Orientador | PREENCHER (o autor confirma se a aprovação foi do orientador e por qual meio) |
+| Meio | PREENCHER |
+| Data | 05/11/2026 (aprovação comunicada pelo autor) |
+| Objeto | CCAE v1.4 — §7.2: o teto de exequibilidade segue o modo de aplicação que o laudo manda, pela situação da cultura; decisão A-12 |
+| Resultado | Aprovado. Versão vigente a partir de 05/11/2026, tag `criterios-v1.4` |
+
+A alteração não mexe em limiar nem no gabarito: o conjunto de conformidade executado sob a v1.3 segue válido, com o resultado medido registrado no Apêndice C.
 
 ---
 

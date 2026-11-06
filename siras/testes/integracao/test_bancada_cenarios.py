@@ -42,7 +42,7 @@ import re
 
 import pytest
 
-from siras.conhecimento.carregador import carregar_dados_comum
+from siras.conhecimento.carregador import carregar_dados_comum, carregar_dados_frutiferas
 from siras.dominio.escopo import TOTAL_DE_CULTURAS_NO_ESCOPO, no_escopo_de_recomendacao
 from siras.web import criar_app
 
@@ -52,6 +52,7 @@ from siras.web import criar_app
 pytestmark = pytest.mark.lenta
 
 _DADOS = carregar_dados_comum()
+_FRUTIFERAS = carregar_dados_frutiferas()["adubacao"]["culturas"]
 _CULTURAS = sorted(
     cultura for cultura in _DADOS["mapa_culturas"]["culturas"]
     if no_escopo_de_recomendacao(cultura)
@@ -211,22 +212,45 @@ def _opcoes_da_tela(html: str) -> dict:
     return opcoes
 
 
+#: Produtividade estimada dos cenários, em t/ha. É ENTRADA de teste — o que o técnico
+#: digitaria —, como os perfis de solo, e não valor do Manual.
+_PRODUTIVIDADE_DE_TESTE = "18"
+
+
+def _anos_do_crescimento(cultura: str):
+    """Os anos que a tabela de crescimento da frutífera cobre, lidos da própria base."""
+    entrada = _FRUTIFERAS.get(cultura) or {}
+    return ((entrada.get("crescimento") or {}).get("n") or {}).get("anos")
+
+
 def _montar(html: str, cultura: str, indice: int) -> dict:
     """Um cenário: o perfil de solo de índice `indice` mais um estado da cultura.
 
     Os estados giram com o índice, então dez cenários percorrem as fases, os momentos e os
-    sistemas de manejo que aquela cultura declara. Os estados de recusa conhecida ficam de
-    fora daqui — eles têm teste próprio, que cobra a recusa explicada."""
+    sistemas de manejo que aquela cultura declara. Só os LIMITES DECLARADOS ficam de fora.
+
+    Até 05/11/2026 ficavam de fora também as fases que exigem um campo próprio (ano,
+    produtividade, manejo do galho grosso), e por isso a recuperação de erval nunca rodou
+    aqui com os campos preenchidos — o P alto que derrubava o laudo passou por esta
+    bancada sem ser visto. Agora o cenário preenche o que a fase exige, como o técnico
+    faria; a recusa por campo faltando continua cobrada no teste próprio, que apaga os
+    campos de propósito."""
     campos = _campos_da_tela(html)
     campos["cultura_id"] = cultura
 
     for seletor, valores in _opcoes_da_tela(html).items():
         disponiveis = [
             valor for valor in valores
-            if (cultura, seletor, valor) not in _RECUSAS_CONHECIDAS
+            if (cultura, seletor, valor) not in _LIMITES_DECLARADOS
         ]
         if disponiveis:
             campos[seletor] = disponiveis[indice % len(disponiveis)]
+
+    if 'id="produtividade_estimada"' in html and not campos.get("produtividade_estimada"):
+        campos["produtividade_estimada"] = _PRODUTIVIDADE_DE_TESTE
+    anos = _anos_do_crescimento(cultura)
+    if campos.get("fase") == "crescimento" and 'id="ano"' in html and anos:
+        campos["ano"] = str(anos[indice % len(anos)])
 
     campos.update(_PERFIS[indice][1])
     campos.update(_SUBSUPERFICIE)
@@ -404,10 +428,13 @@ def test_a_recusa_por_campo_dependente_nomeia_o_campo(
 
     motivo = _motivo(cliente.post("/analise/laudo", data=campos))
 
+    # Desde 05/11/2026 a recusa nomeia o campo pelo RÓTULO da tela, e não pelo
+    # identificador: é o nome que o usuário consegue achar no formulário.
     assert any(
         campo in motivo
-        for campo in ("ano", "produtividade_estimada", "manejo_galho_grosso",
-                      "massa_verde_t_ha", "momento")
+        for campo in ("Ano após o plantio", "Produtividade estimada",
+                      "Manejo do galho grosso", "Massa verde colhida",
+                      "Momento da aplicação")
     ), f"{cultura}: recusa não nomeia o campo que falta — {motivo}"
 
 

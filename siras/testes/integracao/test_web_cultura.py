@@ -129,4 +129,5 @@ def test_fase_ausente_em_frutifera_explica_o_que_falta(cliente):
     resposta = cliente.post("/analise/laudo", data=dados_do_formulario)
 
     assert resposta.status_code == 422
-    assert "informe fase" in resposta.get_data(as_text=True)
+    # Pelo rótulo do campo na tela, e não pelo identificador (05/11/2026).
+    assert "Informe “Fase do pomar”" in resposta.get_data(as_text=True)

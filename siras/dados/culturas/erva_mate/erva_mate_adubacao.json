@@ -56,7 +56,36 @@
       "densidade_referencia": "2.000 plantas/ha",
       "calagem": {
         "criterio": "erva_mate_e_florestais",
-        "observacao": "Especie tolerante a acidez: sem pH de referencia. A calagem visa apenas o suprimento de Ca e Mg (ver Cap. 5)."
+        "observacao": "Especie tolerante a acidez: sem pH de referencia. A calagem visa apenas o suprimento de Ca e Mg (ver Cap. 5).",
+        "modo_aplicacao_por_situacao": {
+          "descricao": "A dose e sempre a do criterio (Tab. 5.6). O que muda e o MODO: o 'incorporado' da Tab. 5.6 se refere a implantacao (p. 82); com o erval ja plantado a aplicacao e superficial (p. 84 e p. 243). A primeira regra cujas condicoes 'quando' casam com as variaveis do laudo vale, na ordem abaixo. Se nenhuma casa (ex.: avaliacao de aptidao sem programa informado), vale o modo da Tab. 5.6. 'area' nulo = o Manual nao especifica.",
+          "regras": [
+            {
+              "situacao": "recuperacao",
+              "quando": { "programa": "recuperacao" },
+              "modo": "superficial",
+              "area": "total",
+              "texto_manual": "No caso da calagem e indicada a aplicacao superficial do corretivo em area total, usando a mesma dose estabelecida para a cultura no Capitulo 5.",
+              "fonte": "Secao 6.6.5, programa 2 (recuperacao de ervais), p. 243"
+            },
+            {
+              "situacao": "implantacao",
+              "quando": { "programa": "desde_o_plantio", "fase": "plantio_e_crescimento", "momento": "plantio" },
+              "modo": "incorporado",
+              "area": null,
+              "texto_manual": "Para as especies florestais, incorporando o calcario no momento do plantio.",
+              "fonte": "Tabela 5.6, p. 83; Secao 5.2.5, p. 82"
+            },
+            {
+              "situacao": "erval_estabelecido",
+              "quando": { "programa": "desde_o_plantio" },
+              "modo": "superficial",
+              "area": null,
+              "texto_manual": "Em qualquer epoca durante o ciclo das culturas florestais, se for realizada analise de solo e for verificado que os teores de Ca e/ou Mg estao baixos, pode ser realizada a calagem, aplicando o calcario superficialmente, seguindo os criterios da Tabela 5.6.",
+              "fonte": "Secao 5.2.5, p. 84"
+            }
+          ]
+        }
       },
       "variavel_adicional": [
         {
@@ -404,7 +433,17 @@
               }
             }
           },
-          "observacao": "Apos a 3a colheita. Fracionar em tres aplicacoes (colheita a cada 18 meses) ou quatro (a cada 24 meses), em janeiro e setembro."
+          "observacao": "Apos a 3a colheita. Fracionar em tres aplicacoes (colheita a cada 18 meses) ou quatro (a cada 24 meses), em janeiro e setembro.",
+          "monitoramento": {
+            "texto_manual": "Quando forem detectados teores inadequados de Ca e/ou Mg (ver Capitulo 5) ou P e/ou K (ver Capitulo 6), deve-se iniciar o programa de adubacao para recuperacao de ervais.",
+            "fonte": "Secao 6.6.5, programa 1, item c (monitoramento da fertilidade do solo), p. 243",
+            "premissa_da_producao": "A adubacao de producao considera que os teores de P e K estejam acima do teor critico para a cultura (p. 242).",
+            "leitura": {
+              "p_k": "inadequado = classe abaixo do teor critico do Cap. 6, isto e, uma das classes atendidas pelo programa de recuperacao (programa_recuperacao.pk.classes_atendidas)",
+              "ca_mg": "inadequado = o criterio de calagem da cultura no Cap. 5 (Tab. 5.6) dispara; para a erva-mate a calagem visa apenas o suprimento de Ca e Mg, e a p. 84 manda calar quando 'os teores de Ca e/ou Mg estao baixos', seguindo os criterios da Tab. 5.6"
+            },
+            "acao": "aviso no laudo; a troca de programa e decisao do usuario"
+          }
         }
       },
       "programa_recuperacao": {

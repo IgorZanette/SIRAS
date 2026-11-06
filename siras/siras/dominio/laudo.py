@@ -67,6 +67,14 @@ class RecomendacaoAdubacao:
     #: observações e restrições da cultura. São transcrição, e são o que o técnico procura
     #: depois de saber quanto aplicar — a pergunta seguinte a "quanto" é sempre "como".
     orientacoes: Dict[str, Any] = field(default_factory=dict)
+    #: Regime que dosou cada nutriente ("recuperacao" ou "producao"), por chave n/p/k.
+    #: Só a erva-mate em recuperação preenche: ali o Manual manda cada nutriente fora do
+    #: déficit para o regime de produção (p. 244), e o laudo precisa dizer qual tabela
+    #: gerou cada número. Vazio nas demais culturas.
+    regimes: Dict[str, str] = field(default_factory=dict)
+    #: Classes de P e K lidas para o monitoramento do erval em produção (p. 243), que não
+    #: definem dose. Vazio nas demais culturas e fases.
+    monitoramento: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -180,6 +188,10 @@ class Laudo:
     #: mistura de simples (ADR 0009). Nunca None — sem catálogo, os outros dois caminhos
     #: seguem, e o laudo continua completo.
     formulacao: Optional["ResultadoFormulacao"] = None
+    #: Avisos que o Manual manda dar sobre ESTA análise, além das doses. Hoje um só: o
+    #: erval em produção com teores inadequados deve passar à recuperação (p. 243). Cada
+    #: aviso é {"tipo", "titulo", "texto", "fonte"}; a decisão de agir é do usuário.
+    avisos: List[Dict[str, str]] = field(default_factory=list)
 
 
 __all__ = [

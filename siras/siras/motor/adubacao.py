@@ -783,6 +783,17 @@ def calcular_adubacao_frutiferas(
         elif tipo_n == "por_classe_mo_e_ano":
             if ano is None:
                 raise ErroAdubacao(f"cultura '{cultura_id}': 'ano' é obrigatório na fase de crescimento")
+            # Mesma conferência da videira, abaixo. Sem ela, um ano fora da tabela (figueira
+            # no 3º ano, que a tabela cobre só até o 2º) caía no _navegar e chegava à tela
+            # como "chave '3' não encontrada (disponíveis: ['1', '2'])".
+            # Comparação como texto: as chaves da tabela são texto, e `ano` chega int da
+            # tela e str dos testes de reprodução -- o mesmo str(ano) da navegação abaixo.
+            anos = n_bloco.get("anos")
+            if anos and str(ano) not in {str(a) for a in anos}:
+                raise ErroAdubacao(
+                    f"cultura '{cultura_id}': a fase de crescimento cobre os anos {anos}, "
+                    f"recebido {ano} — a partir daí vale a manutenção"
+                )
             faixa_mo = _classe_mo(mo, adubacao["classes_mo"][n_bloco["classes_mo"]])
             n = _navegar(n_bloco["doses"], faixa_mo, str(ano))
         elif tipo_n == "por_classe_mo_ano_e_tipo_uva":
@@ -1030,35 +1041,72 @@ def calcular_adubacao_erva_mate(
             coef_pk = bloco_fase["pk"]["coeficientes"][manejo_galho_grosso]
             p2o5 = coef_pk["p"] * massa_verde_t_ha
             k2o = coef_pk["k"] * massa_verde_t_ha
-            return {"n": n, "p2o5": p2o5, "k2o": k2o}
+            resultado = {"n": n, "p2o5": p2o5, "k2o": k2o}
+
+            # R-ADU-07: monitoramento (p. 243). A produção PRESSUPÕE P e K acima do teor
+            # crítico (p. 242); abaixo dele, o Manual manda iniciar a recuperação. A dose
+            # de produção não depende da classe, então a classificação vai para uma chave
+            # própria, e não para classe_p/classe_k -- lá o cartão da dose diria que a
+            # classe definiu um número que ela não definiu. Sem a análise (chamada direta
+            # pelos testes de reprodução de tabela), não há o que monitorar.
+            if None not in (argila, p_solo, k_solo, ctc_ph7):
+                classe_p, classe_k = _classificar_p_e_k(
+                    entrada, "erva_mate", argila, p_solo, k_solo, ctc_ph7, dados_comuns
+                )
+                abaixo = entrada["programa_recuperacao"]["pk"]["classes_atendidas"]
+                resultado["monitoramento"] = {
+                    "classe_p": classe_p,
+                    "classe_k": classe_k,
+                    "p_abaixo_do_critico": classe_p in abaixo,
+                    "k_abaixo_do_critico": classe_k in abaixo,
+                    "fonte": bloco_fase["monitoramento"]["fonte"],
+                }
+            return resultado
 
         raise NotImplementedError(f"fase '{fase}' ainda não implementada")
 
     if programa == "recuperacao":
         bloco = entrada["programa_recuperacao"]
+        producao = entrada["programa_desde_o_plantio"]["producao"]
         if manejo_galho_grosso is None or massa_verde_t_ha is None:
             raise ErroAdubacao("'manejo_galho_grosso' e 'massa_verde_t_ha' são obrigatórios no programa 'recuperacao'")
 
         classe_p, classe_k = _classificar_p_e_k(entrada, "erva_mate", argila, p_solo, k_solo, ctc_ph7, dados_comuns)
-
         faixa_mo = _classe_mo(mo, classes_mo["padrao"])
-        parametros_n = bloco["n"]["parametros"][faixa_mo][manejo_galho_grosso]
-        n = parametros_n["base"] + parametros_n["coeficiente"] * massa_verde_t_ha
-
         classes_atendidas = bloco["pk"]["classes_atendidas"]
 
-        def _dose_recuperacao(classe: str, nutriente: str) -> float:
-            if classe not in classes_atendidas:
-                raise ErroAdubacao(
-                    f"classe '{classe}' não está no programa de recuperação para '{nutriente}' "
-                    f"(fora de {classes_atendidas}) — o nutriente segue o regime normal de produção"
-                )
-            base = bloco["pk"]["parametros"][classe][nutriente]["base"]
-            coeficiente = bloco["pk"]["coeficientes_por_manejo"][manejo_galho_grosso][nutriente]
-            return base + coeficiente * massa_verde_t_ha
+        # R-ADU-05: a recuperacao vale so para o nutriente abaixo do teor critico; o outro
+        # segue o regime normal de producao (Manual 2016, Secao 6.6.5, item 2, p. 244).
+        # A tabela de recuperacao nao tem linhas Alto e Muito alto PORQUE nessas classes
+        # o nutriente nao esta deficitario. Ate 05/11/2026 o motor levantava erro aqui, e
+        # um P alto derrubava o laudo inteiro -- calagem, K e aptidao junto.
+        def _dose_pk(classe: str, nutriente: str) -> Tuple[float, str]:
+            if classe in classes_atendidas:
+                base = bloco["pk"]["parametros"][classe][nutriente]["base"]
+                coeficiente = bloco["pk"]["coeficientes_por_manejo"][manejo_galho_grosso][nutriente]
+                return base + coeficiente * massa_verde_t_ha, "recuperacao"
+            coeficiente = producao["pk"]["coeficientes"][manejo_galho_grosso][nutriente]
+            return coeficiente * massa_verde_t_ha, "producao"
 
-        p2o5 = _dose_recuperacao(classe_p, "p")
-        k2o = _dose_recuperacao(classe_k, "k")
-        return {"classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o}
+        p2o5, regime_p = _dose_pk(classe_p, "p")
+        k2o, regime_k = _dose_pk(classe_k, "k")
+
+        # R-ADU-06: o N da recuperacao tem uma parcela fixa porque "a baixa fertilidade do
+        # solo deve estar limitando a producao" (p. 243) -- e baixa fertilidade, ali, e P
+        # e/ou K abaixo do teor critico. Com os dois acima, a premissa do programa nao se
+        # sustenta e o erval esta no regime normal de producao tambem para o N. Decisao
+        # do autor em 05/11/2026, sobre o texto do Manual.
+        if regime_p == "producao" and regime_k == "producao":
+            n = producao["n"]["coeficientes"][faixa_mo][manejo_galho_grosso] * massa_verde_t_ha
+            regime_n = "producao"
+        else:
+            parametros_n = bloco["n"]["parametros"][faixa_mo][manejo_galho_grosso]
+            n = parametros_n["base"] + parametros_n["coeficiente"] * massa_verde_t_ha
+            regime_n = "recuperacao"
+
+        return {
+            "classe_p": classe_p, "classe_k": classe_k, "n": n, "p2o5": p2o5, "k2o": k2o,
+            "regimes": {"n": regime_n, "p": regime_p, "k": regime_k},
+        }
 
     raise ErroAdubacao(f"'programa' deve ser 'desde_o_plantio' ou 'recuperacao', recebido {programa!r}")

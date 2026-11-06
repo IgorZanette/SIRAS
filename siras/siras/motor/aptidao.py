@@ -46,6 +46,7 @@ from siras.conhecimento.carregador import (
 from siras.dominio.analise import AnaliseSolo, Contexto
 from siras.dominio.nomes import normalizar_nome_cultura
 from siras.motor.adubacao import ErroAdubacao, classificar_faixa, grupo_exigencia
+from siras.motor.aplicacao_calcario import regra_de_aplicacao
 from siras.motor.calagem import ErroCalagem, calcular_calagem_por_cultura, resolver_criterio_id
 from siras.motor.trace import Trace
 
@@ -62,7 +63,7 @@ _CARREGADORES_GRUPO_EXIGENCIA = (
 
 #: Versão do CCAE que este motor implementa. Aparece em ResultadoAptidao.versao_criterios
 #: e é o que o conjunto de conformidade declara ter gabaritado (CCAE §9.1).
-_VERSAO_CRITERIOS = "1.3"
+_VERSAO_CRITERIOS = "1.4"  # v1.4: modo da §7.2 pela situação da cultura (05/11/2026)
 
 
 class _CulturaOuDadoIndeterminado(Exception):
@@ -560,7 +561,13 @@ def _resolver_f1_potencial(
 
     criterio_id = resolver_criterio_id(cultura_id, contexto, dados)
     criterio = next(c for c in dados["criterios_calagem"]["criterios"] if c["id"] == criterio_id)
-    modo = criterio["modo_aplicacao"]
+    # CCAE v1.4, §7.2: o teto segue o modo que o LAUDO manda aplicar, e não só o da
+    # tabela do critério. Erval de erva-mate já plantado recebe calcário em superfície
+    # (Manual p. 84 e 243); projetar a correção como se fosse incorporado declarava
+    # exequível, no POTENCIAL, uma dose que o próprio laudo não manda incorporar. Sem
+    # programa informado nenhuma regra casa e vale a tabela, como até a v1.3.
+    regra = regra_de_aplicacao(cultura_id, contexto, dados)
+    modo = regra["modo"] if regra is not None else criterio["modo_aplicacao"]
     config = dados["config_aptidao"]
     teto = config["NC_MAX_INCORPORADO_T_HA"] if modo == "incorporado" else config["NC_MAX_SUPERFICIAL_T_HA"]
 

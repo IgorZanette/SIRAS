@@ -738,6 +738,39 @@ def indices_de_talhoes(form: Mapping[str, str]) -> List[int]:
     return sorted(achados)
 
 
+#: Rótulo de tela de cada campo numérico da análise, para traduzir as recusas do domínio.
+_ROTULO_DO_CAMPO = {
+    c[0]: c[1]
+    for grupo in (CAMPOS_ACIDEZ, CAMPOS_FERTILIDADE, CAMPOS_SUBSUPERFICIE)
+    for c in grupo
+}
+
+
+def _erro_de_dominio(erro: ValueError) -> Tuple[str, Optional[str]]:
+    """A recusa de `AnaliseSolo` nas palavras da tela, e o campo que a causou.
+
+    O domínio fala em identificadores ("'ph_agua' deve estar em faixa física plausível
+    para pH em água (0 a 14)."), e é certo que fale: a mensagem serve também aos testes e
+    à linha de comando. Na tela, o participante P7 da avaliação de usabilidade
+    (05/11/2026) recebeu exatamente esse texto, com o nome cru e nenhum campo marcado, e
+    relatou que "só aparecia um erro" sem dizer o que faltava. Aqui o identificador vira
+    o rótulo do campo, e o campo volta marcado. A causa e a faixa ficam intactas: elas
+    vêm do domínio, não daqui. "da camada" é a subsuperfície (campo sub_*).
+    """
+    texto = str(erro).strip().rstrip(".")
+    achado = re.search(r"'([a-z0-9_]+)'( da camada)?", texto)
+    if not achado:
+        return texto, None
+    campo = ("sub_" if achado.group(2) else "") + achado.group(1)
+    rotulo = _ROTULO_DO_CAMPO.get(campo)
+    if not rotulo:
+        return texto, None
+    causa = texto[achado.end():].strip()
+    causa = re.sub(r"^deve estar em ", "fora da ", causa)
+    causa = re.sub(r"\s+para\s+" + re.escape(rotulo), "", causa, flags=re.IGNORECASE)
+    return f"{rotulo}: {causa}", campo
+
+
 def _analise_de(numeros: Dict[str, Optional[float]]) -> AnaliseSolo:
     return AnaliseSolo(
         ph_agua=numeros["ph_agua"],
@@ -797,7 +830,10 @@ def _ler_talhao_adicional(
     try:
         analise = _analise_de(numeros)
     except ValueError as erro:
-        leitura.invalidos.append(f"Talhão {identificacao} — {erro}")
+        texto, campo = _erro_de_dominio(erro)
+        leitura.invalidos.append(f"Talhão {identificacao} — {texto}")
+        if campo:
+            leitura.campos_com_erro.append(f"{campo}__{indice}")
         return None
 
     return BlocoDeTalhao(rotulo=rotulo_bruto, area_ha=area, analise=analise)
@@ -982,8 +1018,11 @@ def ler(
     try:
         leitura.analise = _analise_de(numeros)
     except ValueError as erro:
-        # A mensagem vem do próprio domínio e já nomeia o campo e a faixa física.
-        leitura.invalidos.append(str(erro))
+        # A causa e a faixa física vêm do domínio; o nome do campo vem da tela.
+        texto, campo = _erro_de_dominio(erro)
+        leitura.invalidos.append(texto)
+        if campo:
+            leitura.campos_com_erro.append(campo)
         return leitura
 
     try:

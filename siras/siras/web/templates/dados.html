@@ -62,7 +62,7 @@
   <div style="margin-top:var(--e-5)">
     {% set _corpo %}
       {% if leitura.faltando %}Faltam valores em: {{ leitura.faltando|join(", ") }}.{% endif %}
-      {% if leitura.invalidos %} {{ leitura.invalidos|join("; ") }}.{% if leitura.tem_erro_numerico %} Confira a unidade no laudo do laboratório.{% endif %}{% endif %}
+      {% if leitura.invalidos %} {{ leitura.invalidos|map("trim")|map("replace", "..", ".")|join("; ")|trim(".") }}.{% if leitura.tem_erro_numerico %} Confira a unidade no laudo do laboratório.{% endif %}{% endif %}
     {% endset %}
     {{ av.aviso("erro", "O laudo não foi gerado", _corpo) }}
   </div>
@@ -263,7 +263,13 @@
     {# Abre sozinha quando um exemplo foi carregado: o exemplo preenche esta camada, e um
        bloco fechado sobre campos preenchidos faz o recurso passar despercebido —
        justamente o contrário do que o exemplo existe para fazer. #}
-    <details class="painel bloco"{% if exemplo_ativo %} open{% endif %}>
+    {# Abre também quando algum campo dele voltou com erro: fechado, o campo marcado
+       ficava escondido e o aviso apontava para algo que a pessoa não via. #}
+    {% set sub = namespace(erro=false) %}
+    {% for campo_com_erro in leitura.campos_com_erro %}
+      {% if campo_com_erro.startswith("sub_") %}{% set sub.erro = true %}{% endif %}
+    {% endfor %}
+    <details class="painel bloco"{% if exemplo_ativo or sub.erro %} open{% endif %}>
       <summary class="bloco__cab" style="cursor:pointer;list-style:none">
         {{ i.ico("subsolo") }}
         <h3>Subsuperfície, 10–20 cm</h3>

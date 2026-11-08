@@ -109,4 +109,45 @@
     caixa.scrollIntoView({ behavior: "smooth", block: "center" });
     vazios[0].focus({ preventScroll: true });
   }, true);
+
+  /* ENTER PASSA AO PROXIMO CAMPO, E NAO GERA O LAUDO.
+
+     Achado da avaliacao de usabilidade (P5, 04/11/2026): quem transcreve um laudo
+     de laboratorio digita um valor e aperta Enter por reflexo, e o navegador
+     enviava o formulario ali mesmo, com metade dos campos por preencher. Num
+     formulario de transcricao, Enter e "proximo", como numa planilha. O laudo so
+     sai pelo botao "Gerar laudo" -- inclusive pelo teclado: Tab ate ele e Enter.
+
+     Vale so para campos de digitacao. Botoes, selecoes abertas e area de texto
+     seguem o comportamento do navegador, e a composicao de acentos (IME) nao e
+     interrompida. */
+  var DIGITACAO = /^(text|number|search|tel|email|url|)$/;
+
+  function proximoCampo(atual) {
+    var campos = Array.prototype.filter.call(
+      formulario.querySelectorAll("input, select, textarea, button[type=submit]"),
+      function (el) {
+        return !el.disabled && el.type !== "hidden" && el.offsetParent !== null &&
+               el.tabIndex !== -1;
+      }
+    );
+    var i = campos.indexOf(atual);
+    return i >= 0 ? campos[i + 1] || null : null;
+  }
+
+  formulario.addEventListener("keydown", function (evento) {
+    var alvo = evento.target;
+    if (evento.key !== "Enter" || evento.isComposing || evento.shiftKey ||
+        evento.ctrlKey || evento.altKey || evento.metaKey) {
+      return;
+    }
+    if (alvo.tagName !== "INPUT" || !DIGITACAO.test(alvo.type || "")) {
+      return;
+    }
+    evento.preventDefault();
+    var proximo = proximoCampo(alvo);
+    if (proximo) {
+      proximo.focus();
+    }
+  });
 })();

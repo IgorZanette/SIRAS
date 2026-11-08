@@ -577,7 +577,7 @@ def test_a_atmosfera_tem_degrade_campo_rebaixado_e_ilhas_escuras():
     """Os cinco princípios da seção Atmosfera, cada um com um ponto de verificação."""
     atmosfera = _TELAS_CSS[_TELAS_CSS.index("ATMOSFERA (v2"):]
     # 1. fundo em degradê fixo, nos dois temas
-    assert atmosfera.count("background-attachment: fixed") == 1
+    assert re.search(r"body\.malha \{[^}]*background-attachment: fixed", atmosfera)
     assert "linear-gradient(180deg, #0B1411 0%, #0F0E0B 100%)" in atmosfera
     assert "linear-gradient(180deg, #E4EBE2 0%, #E8E6DB 100%)" in atmosfera
     # 2. campo rebaixado com especificidade baixa: foco e erro continuam vencendo
@@ -589,6 +589,20 @@ def test_a_atmosfera_tem_degrade_campo_rebaixado_e_ilhas_escuras():
     assert "--n-100: #E9F0EB" in ilha and "--n-900: #0A0F0C" in ilha
     # o laudo impresso continua branco
     assert "body:not(.impressa) .doc" in atmosfera and "@media screen" in atmosfera
+
+
+def test_a_abertura_no_claro_tem_o_fundo_do_escuro():
+    """No escuro a abertura e transparente e mostra o fundo do `body` -- grade, degrade e
+    paisagem nas calhas. No claro ela e ilha escura e precisa levar essas camadas, fixas
+    como no `body`, ou fica um degrade liso (08/11/2026)."""
+    hero = re.search(r':root\[data-tema="claro"\] \.hero\.ilha-escura \{(.*?)\}', _TELAS_CSS, re.S)
+    assert hero
+    assert "rgba(233,240,235,.028) 1px" in hero.group(1)
+    assert "background-attachment: fixed" in hero.group(1)
+    paisagem = re.search(
+        r':root\[data-tema="claro"\] \.hero\.ilha-escura::before \{(.*?)\}', _TELAS_CSS, re.S
+    )
+    assert paisagem and "op-1.webp" in paisagem.group(1) and "mask-image" in paisagem.group(1)
 
 
 def test_as_ilhas_escuras_estao_marcadas(cliente):

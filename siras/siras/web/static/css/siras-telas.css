@@ -2559,12 +2559,39 @@ body.malha {
   --luz-topo: inset 0 1px 0 rgba(255, 255, 255, .06);
   color: var(--n-100);
 }
-:root[data-tema="claro"] .hero.ilha-escura,
 :root[data-tema="claro"] .chamada.ilha-escura {
   background:
     radial-gradient(ellipse 70% 60% at 80% 0%, rgba(140,226,63,.08), transparent 70%),
     linear-gradient(180deg, #0B1411 0%, #0D110E 100%);
 }
+/* A abertura no claro e a abertura do escuro, camada por camada (08/11/2026): no escuro
+   ela e transparente e mostra o fundo do `body` -- grade, halos, degrade e a paisagem
+   nas calhas --; no claro o `body` e claro, e a ilha so tinha o degrade liso. Aqui ela
+   leva as mesmas camadas, com `fixed` como no `body`, para a grade e a paisagem
+   ficarem no mesmo lugar nos dois temas. */
+:root[data-tema="claro"] .hero.ilha-escura {
+  background-color: #0B1411;
+  background-image:
+    linear-gradient(rgba(233,240,235,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(233,240,235,.028) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 50% at 85% 0%, rgba(140,226,63,.07), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 0% 100%, rgba(150,105,55,.09), transparent 70%),
+    linear-gradient(180deg, #0B1411 0%, #0F0E0B 100%);
+  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+:root[data-tema="claro"] .hero.ilha-escura::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url("../img/background/op-1.webp") center / cover fixed;
+  filter: brightness(.62) saturate(.9);
+  mix-blend-mode: screen;
+  opacity: .78;
+  mask-image: linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
+                              transparent calc(50% + 600px), #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0, transparent calc(50% - 600px),
+                                      transparent calc(50% + 600px), #000 100%);
+}
+@media print { :root[data-tema="claro"] .hero.ilha-escura::before { display: none; } }
 :root[data-tema="claro"] .barra.ilha-escura {
   background: rgba(11, 18, 15, .9); border-bottom-color: rgba(233,240,235,.07);
 }

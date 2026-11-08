@@ -136,7 +136,7 @@ juízo sobre a recomendação agronômica ficaram numa mesma pergunta.
 O instrumento substituiu o \textit{System Usability Scale} \citep{Brooke1996} previsto na proposta,
 porque o SUS produz um escore único, e esta etapa precisava de um diagnóstico que localizasse os
 problemas e os ordenasse por gravidade. Não se trata de avaliação heurística no sentido de
-\cite{NielsenMolich1990}, que é inspeção por especialistas sem usuários: as notas são atribuídas
+\cite{NielsenMolich1990}, que é inspeção feita por avaliadores, sem usuários: as notas são atribuídas
 por usuários a heurísticas e exprimem percepção de gravidade, analisada por estatística
 descritiva. A versão avaliada foi congelada antes da primeira sessão, mantida até a última e
 publicada em um serviço de hospedagem web (Render), o que dispensou a instalação e facilitou a
@@ -169,7 +169,7 @@ próprio computador, sem internet, iniciada por um único comando que prepara o 
 servidor local, ou ser publicada em um servidor web, como na avaliação de usabilidade.
 
 A arquitetura segue a separação clássica dos sistemas especialistas
-\citep{SantosEtAl1994, Lanzer2010}. A \textbf{base de conhecimento} são os arquivos JSON; o
+\citep{Mendes1997, Lanzer2009}. A \textbf{base de conhecimento} são os arquivos JSON; o
 \textbf{motor de inferência} é um pacote em Python puro que não depende do Flask e pode ser
 executado e testado isoladamente; e a \textbf{interface} é uma camada fina que apenas coleta os
 dados e apresenta o laudo. O motor foi escrito sem bibliotecas de inferência, como Experta ou

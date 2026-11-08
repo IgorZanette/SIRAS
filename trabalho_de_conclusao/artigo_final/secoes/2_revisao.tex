@@ -13,7 +13,7 @@ o pH em água, que condiciona a disponibilidade da maioria dos nutrientes; os te
 (Al), este associado à toxidez em solos ácidos; a CTC, que expressa a capacidade do solo de
 reter cátions; a saturação por bases (V\%); o teor de matéria orgânica (MO), relacionado ao
 suprimento de nitrogênio; e o teor de argila, principal atributo físico considerado na
-recomendação \citep{Embrapa2011, ManualCalagem2016}.
+recomendação \citep{Donagema2011, ManualCalagem2016}.
 
 Os valores, isoladamente, não dizem nada: a interpretação os compara a faixas de referência
 que dependem do tipo de solo e da cultura \citep{EmbrapaDoc206}. No Manual RS/SC, os teores de
@@ -67,15 +67,15 @@ reproduz o sistema oficial nem equivale a ele.
 \subsection{Sistemas especialistas baseados em regras}\label{sec:rev_se}
 
 Sistemas especialistas reproduzem o raciocínio de um especialista humano em um domínio
-restrito \citep{SantosEtAl1994}. São compostos por uma \textbf{base de conhecimento}, que
+restrito \citep{Mendes1997}. São compostos por uma \textbf{base de conhecimento}, que
 armazena fatos e regras do domínio; um \textbf{motor de inferência}, que aplica as regras aos
 dados de entrada para derivar conclusões; e uma \textbf{interface} com o usuário. Na forma mais
 difundida, o conhecimento é representado por regras SE-ENTÃO, e o motor percorre a base para
-identificar as condições satisfeitas pelos dados \citep{Lanzer2010}. A representação explícita
+identificar as condições satisfeitas pelos dados \citep{Lanzer2009}. A representação explícita
 das regras é o que permite ao sistema \emph{explicar} uma conclusão --- característica central
 em domínios nos quais a recomendação precisa ser justificada a terceiros.
 
-Na agricultura, \cite{Lanzer2010} aplicou representação hierárquica do conhecimento à
+Na agricultura, \cite{Lanzer2009} aplicou representação hierárquica do conhecimento à
 classificação do uso e manejo das terras e observou que, quando os estados do domínio já estão
 definidos em sistemas de classificação publicados --- como as tabelas do Manual ---, a
 construção da base é facilitada. \cite{Shahzadi2016}, em outro domínio, alimentaram regras
@@ -87,10 +87,11 @@ aplicabilidade da abordagem ao suporte à decisão agronômica.
 O \textbf{FertFácil} \citep{Tiecher2016} é um sistema on-line e gratuito que recomenda calagem
 e adubação pelos critérios do Manual para mais de cem cultivos do RS, SC, MS e Paraguai, adotado
 pela Emater/RS; hoje incorpora também o manual do Paraná \citep{FertFacil2026}. O \textbf{AdubaTec} \citep{AdubaTec2021}, da Embrapa Mandioca e Fruticultura e da
-UFRB, recomenda calagem e adubação para mandioca e fruteiras tropicais com arquitetura
-parametrizável, a partir de manuais do Nordeste. O \textbf{Sistema de Avaliação da Aptidão
+UFRB, recomenda calagem e adubação para mandioca e fruteiras tropicais a partir das recomendações
+publicadas pela própria Embrapa, com arquitetura parametrizável que permite incluir novas culturas
+sem alterar o código. O \textbf{Sistema de Avaliação da Aptidão
 Agrícola das Terras} \citep{RamalhoFilhoBeek1995, EmbrapaAptidao2025} classifica o potencial
-das terras em escala exploratória. A \autoref{tab:relacionados} sintetiza o posicionamento: os
+das terras em escala regional. A \autoref{tab:relacionados} sintetiza o posicionamento: os
 sistemas existentes tratam separadamente a recomendação de manejo e a avaliação de aptidão, e
 nenhum integra as duas a partir de uma análise individual de solo sob os critérios do RS e SC.
 
@@ -104,7 +105,7 @@ nenhum integra as duas a partir de uma análise individual de solo sob os crité
  & \textbf{Critérios} & \textbf{Escala} & \textbf{Calagem e adubação} & \textbf{Aptidão} \\
 \midrule
 FertFácil  & RS/SC e PR & área & sim & não \\
-AdubaTec   & Nordeste & área  & sim & não \\
+AdubaTec   & Embrapa & área  & sim & não \\
 SAAAT      & nacional & regional & não & sim \\
 \textbf{SIRAS} & \textbf{RS/SC} & \textbf{área} & \textbf{sim} & \textbf{sim (edáfica)} \\
 \bottomrule

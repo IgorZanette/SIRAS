@@ -138,9 +138,10 @@ porque o SUS produz um escore único, e esta etapa precisava de um diagnóstico 
 problemas e os ordenasse por gravidade. Não se trata de avaliação heurística no sentido de
 \cite{NielsenMolich1990}, que é inspeção por especialistas sem usuários: as notas são atribuídas
 por usuários a heurísticas e exprimem percepção de gravidade, analisada por estatística
-descritiva. A versão avaliada foi congelada antes da primeira sessão e mantida até a última; as
-sessões foram acompanhadas pelo pesquisador, seis delas remotamente, com o participante
-controlando a tela, e duas presencialmente.
+descritiva. A versão avaliada foi congelada antes da primeira sessão, mantida até a última e
+publicada em um serviço de hospedagem web (Render), o que dispensou a instalação e facilitou a
+participação. Todas as sessões usaram essa versão e foram acompanhadas pelo pesquisador, seis
+delas remotamente e duas presencialmente.
 
 \subsection{O sistema desenvolvido}\label{sec:siras}
 
@@ -163,8 +164,9 @@ O sistema foi implementado em Python (3.12 ou superior) com o \textit{microframe
 web\footnote{Disponíveis em \url{https://www.python.org} e
 \url{https://flask.palletsprojects.com}.}, com HTML, CSS e JavaScript na interface e as
 bibliotecas \texttt{jsonschema} e \texttt{pytest} para validação e testes. Não há banco de dados,
-autenticação nem chamada de rede: a aplicação roda no próprio computador, é usada pelo navegador
-e é iniciada por um único comando, que prepara o ambiente e sobe o servidor local.
+autenticação nem chamada a serviços externos. A aplicação é usada pelo navegador e pode rodar no
+próprio computador, sem internet, iniciada por um único comando que prepara o ambiente e sobe o
+servidor local, ou ser publicada em um servidor web, como na avaliação de usabilidade.
 
 A arquitetura segue a separação clássica dos sistemas especialistas
 \citep{SantosEtAl1994, Lanzer2010}. A \textbf{base de conhecimento} são os arquivos JSON; o

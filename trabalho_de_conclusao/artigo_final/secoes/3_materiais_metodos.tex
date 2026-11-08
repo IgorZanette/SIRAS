@@ -22,7 +22,7 @@ Suas tabelas de interpretação, de calagem e de adubação foram transcritas ma
 para 20 arquivos JSON, organizados em dados comuns --- critérios de calagem, tabela SMP,
 interpretação de P e K, pH de referência, critérios de aptidão --- e em um diretório por grupo de
 culturas. Cada arquivo registra a tabela e a página de origem e é verificado, a cada carga, por um
-esquema JSON Schema próprio, de modo que um valor fora do domínio ou um campo ausente impede a
+esquema próprio, em JSON Schema, de modo que um valor fora do domínio ou um campo ausente impede a
 execução em vez de produzir uma recomendação silenciosamente errada.
 
 O escopo compreende as \textbf{61 culturas e grupos de culturas} para os quais o Manual publica
@@ -34,7 +34,7 @@ irrigado, a mandioca e as espécies florestais, cuja lógica de calagem difere d
 e, por delimitação, forrageiras, plantas medicinais e ornamentais e sistemas especiais de
 produção.
 
-\begin{figure*}[htb]
+\begin{figure*}[!tbp]
 \centering
 \figura{F3-escopo}{\textwidth}
 \caption{Escopo do SIRAS: os seis grupos de culturas, as particularidades de recomendação de
@@ -75,8 +75,9 @@ concorda consigo mesmo.
 
 A hipótese do trabalho foi avaliada pela \textbf{concordância} entre as recomendações do SIRAS e
 valores de referência. Um caso é concordante quando \emph{todas} as saídas declaradas na
-referência --- necessidade de calcário (t/ha) e doses de N, P\textsubscript{2}O\textsubscript{5}
-e K\textsubscript{2}O (kg/ha) --- coincidem com as do sistema, admitida apenas a tolerância de
+referência --- necessidade de calcário (t/ha), doses de N, P\textsubscript{2}O\textsubscript{5}
+e K\textsubscript{2}O (kg/ha) e, quando declaradas, as classes de P e K e o motivo de não haver
+calagem --- coincidem com as do sistema, admitida apenas a tolerância de
 arredondamento: calcário com uma casa decimal e nutrientes em quilogramas inteiros. Acertar três
 de quatro saídas é discordância.
 
@@ -85,12 +86,14 @@ aplicando diretamente as tabelas do Manual, sem executar o sistema
 (\autoref{fig:oraculo}). Sem essa independência, a validação mediria apenas a consistência do
 código consigo mesmo. O conjunto final reuniu 25 casos distribuídos pelos seis grupos,
 escolhidos para cobrir as classes de interpretação e os casos especiais --- plantio direto
-consolidado, baixo poder tampão, fases das frutíferas, erva-mate e tipos de tabaco. Como o
+consolidado, baixo poder tampão, fases das frutíferas, erva-mate e tabaco. Como o
 sistema é determinístico, a análise consiste na proporção de casos concordantes, com intervalo
 de confiança de 95\% pelo método de \cite{Wilson1927}, adequado a proporções próximas de 100\% e
-a amostras pequenas. A hipótese seria aceita com taxa igual ou superior a 80\%.
+a amostras pequenas. Conforme a proposta, a hipótese seria aceita com taxa igual ou superior a
+80\%; adotou-se ainda a exigência de que o limite inferior do intervalo também alcançasse esse
+valor, para que a conclusão não dependesse do tamanho da amostra.
 
-\begin{figure}[htb]
+\begin{figure}[!htbp]
 \centering
 \figura{F13-oraculo}{\columnwidth}
 \caption{Independência do oráculo: o Manual alimenta dois caminhos separados --- o cálculo à mão
@@ -103,9 +106,9 @@ concordância com eles seria circular. Ela foi submetida a \textbf{verificação
 --- se a implementação reproduz o CCAE congelado --- sobre 92 casos com gabarito produzido à mão,
 dos quais 88 com classe definida e 4 que devem resultar em estado indeterminado por dado
 ausente. Doze desses casos usam as glebas reais publicadas no Anexo~1 do Manual, cujas classes de
-P e K o próprio Manual divulga e servem, assim, de oráculo externo para a etapa de interpretação.
+P e K, divulgadas pelo próprio Manual, servem de oráculo externo para a etapa de interpretação.
 
-O processo de desenvolvimento foi apoiado por testes automatizados (5.528 ao final), que
+O processo de desenvolvimento foi apoiado por testes automatizados (5.535 ao final), que
 incluem os casos de validação; por um registro de decisões de arquitetura (14 decisões
 documentadas, com contexto e alternativas); e por versionamento em Git.
 
@@ -113,12 +116,13 @@ documentadas, com contexto e alternativas); e por versionamento em Git.
 
 A interface foi avaliada em teste com oito usuários do público-alvo --- agrônomos, técnicos
 agrícolas e estudantes de agronomia com contato com análise de solo ---, recrutados por
-conveniência, entre 2 e 5 de novembro de 2026, e precedido de um piloto fora da amostra. O tamanho segue \cite{NielsenLandauer1993}, segundo os quais cerca
+conveniência. As sessões ocorreram entre 2 e 5 de novembro de 2026, depois de um piloto com uma
+pessoa de fora da amostra. O tamanho segue \cite{NielsenLandauer1993}, segundo os quais cerca
 de cinco participantes revelam a maior parte dos problemas de uma interface. Cada sessão, de
 cerca de 35 minutos, percorreu três roteiros: uma demonstração conduzida pelo pesquisador sobre
-uma análise real do Anexo~1 do Manual; um cenário fechado, entregue em ficha impressa e
-executado pelo participante sozinho, cujas três perguntas têm resposta conhecida; e o uso livre,
-com cultura e dados escolhidos pelo participante (\autoref{fig:sessao}).
+uma análise real do Anexo~1 do Manual; um cenário fechado, entregue em ficha e executado pelo
+participante sozinho, cujas três perguntas têm resposta conhecida; e o uso livre, com cultura e
+dados escolhidos pelo participante (\autoref{fig:sessao}, no apêndice).
 
 Depois da sessão, sem a presença do pesquisador, o participante respondeu a um questionário
 estruturado pelas dez heurísticas de \cite{Nielsen1994}, atribuindo a cada uma a gravidade dos
@@ -145,7 +149,7 @@ ler o laudo. A simplicidade é deliberada e esconde a maior parte do sistema
 (\autoref{fig:iceberg}): cada laudo resulta da resolução de critérios por grupo, de dezenas de
 tabelas transcritas, de dois cenários de aptidão e de um registro de cada decisão tomada.
 
-\begin{figure*}[htb]
+\begin{figure*}[!tbp]
 \centering
 \figura{F1-iceberg}{\textwidth}
 \caption{O que o usuário vê e o que o sistema faz: as três telas da interface sobre as camadas
@@ -155,12 +159,12 @@ de conhecimento, inferência e verificação que produzem o laudo.}
 
 \subsubsection{Arquitetura e tecnologias}
 
-O sistema foi implementado em Python~3.12 com o microframework Flask~3 para a camada
+O sistema foi implementado em Python (3.12 ou superior) com o \textit{microframework} Flask~3 para a camada
 web\footnote{Disponíveis em \url{https://www.python.org} e
 \url{https://flask.palletsprojects.com}.}, com HTML, CSS e JavaScript na interface e as
 bibliotecas \texttt{jsonschema} e \texttt{pytest} para validação e testes. Não há banco de dados,
-autenticação nem chamada de rede: a aplicação roda localmente, no navegador, e é iniciada por um
-único comando que prepara o ambiente e sobe o servidor.
+autenticação nem chamada de rede: a aplicação roda no próprio computador, é usada pelo navegador
+e é iniciada por um único comando, que prepara o ambiente e sobe o servidor local.
 
 A arquitetura segue a separação clássica dos sistemas especialistas
 \citep{SantosEtAl1994, Lanzer2010}. A \textbf{base de conhecimento} são os arquivos JSON; o
@@ -179,10 +183,10 @@ quanto ao domínio de cada variável; os teores de P e K são classificados pela
 pela CTC (\autoref{fig:interpretacao}, no apêndice); a calagem, a adubação e a formulação do adubo são calculadas; e a aptidão é avaliada
 em dois cenários. Cada passo registra, em uma \textbf{trilha de inferência}, a regra aplicada,
 as entradas, a saída e a fonte no Manual, com tabela e página. É essa trilha que o laudo
-apresenta ao usuário na seção ``de onde vem cada número'' (\autoref{fig:trilha}), e é ela que
+apresenta ao usuário na seção ``de onde vem cada número'' (\autoref{fig:trilha}, no apêndice), e é ela que
 permitiu localizar a causa de cada divergência durante a validação.
 
-\begin{figure*}[htb]
+\begin{figure*}[!tbp]
 \centering
 \figura{F4-pipeline}{\textwidth}
 \caption{Percurso de uma análise de solo pelo motor de inferência. Cada etapa registra na
@@ -202,7 +206,7 @@ seguem as equações do Manual em lugar da tabela, e a erva-mate, sem pH de refe
 critério de saturação por bases. Fora da faixa tabelada do índice SMP, o sistema recusa a
 entrada em vez de extrapolar.
 
-\begin{figure}[htb]
+\begin{figure}[!htbp]
 \centering
 \figura{F5-calagem}{\columnwidth}
 \caption{Árvore de decisão da calagem, com o caso da Gleba~4 do Anexo~1 do Manual em plantio
@@ -218,20 +222,19 @@ Os grãos têm algoritmo próprio, que combina adubação de correção e de man
 cultivo, a expectativa de rendimento e, para o nitrogênio, o teor de MO e a cultura antecedente.
 Os demais grupos recebem a dose publicada por classe de teor, parametrizada pelas variáveis que
 cada um exige: a fase das frutíferas, o programa e o manejo da erva-mate, o tipo de tabaco e o
-ciclo da cana (\autoref{fig:adubacao}).
+ciclo da cana (\autoref{fig:adubacao}, no apêndice).
 
 Atendendo a pedido do orientador, o laudo indica também \emph{qual adubo comprar}. Como não há
 catálogo oficial das formulações comercializadas, o sistema apresenta três respostas
 complementares: a \textbf{fórmula ideal}, na proporção exata da recomendação, pelo método do
 Manual; as \textbf{melhores fórmulas de um catálogo} de 38 formulações comerciais, cada uma com
 sua dose e os complementos necessários; e a \textbf{mistura de adubos simples}, sempre exata.
-Para cada fórmula do catálogo, a dose é escolhida entre os pontos em que ela atende exatamente
-o P\textsubscript{2}O\textsubscript{5} ou o K\textsubscript{2}O recomendado; como a função que
-penaliza excesso, falta e operações de complemento é convexa por partes, seu mínimo está
-necessariamente em um desses pontos, e um deles é a regra do Manual. O resultado, portanto,
-nunca é pior que o do Manual sob o critério adotado. Os pesos dessa função são decisão do
-autor e estão declarados como tal. A \autoref{fig:formulacao} ilustra os três caminhos e a
-escolha da dose.
+Para cada fórmula do catálogo, a dose é escolhida entre dois candidatos --- as doses em que ela
+atende exatamente o P\textsubscript{2}O\textsubscript{5} ou o K\textsubscript{2}O recomendado ---,
+pelo menor valor de uma função que penaliza excesso, falta e produtos de complemento. Um dos
+candidatos é a regra do Manual; por isso, o resultado nunca é pior que o do Manual sob o critério
+adotado. Os pesos dessa função são decisão do autor e estão declarados como tal. A
+\autoref{fig:formulacao}, no apêndice, ilustra os três caminhos e a escolha da dose.
 
 \subsubsection{Aptidão edáfica}
 
@@ -250,7 +253,7 @@ correção for exequível; fatores permanentes, como CTC e textura, não mudam. 
 dois cenários mede o ganho atribuível à recomendação, e é nela que os dois módulos do sistema se
 integram.
 
-\begin{figure*}[htb]
+\begin{figure*}[!tbp]
 \centering
 \figura{F9-aptidao}{\textwidth}
 \caption{Estimativa de aptidão edáfica: sete fatores, graus de limitação, fator mais limitante e
@@ -275,7 +278,7 @@ a forma de aplicação e a trilha de inferência, com cada regra listada uma ún
 pode ser impresso ou salvo em PDF pelo navegador, e a análise pode ser editada e o laudo gerado
 de novo sem redigitação.
 
-\begin{figure*}[htb]
+\begin{figure*}[!tbp]
 \centering
 \figura{F11-laudo}{\textwidth}
 \caption{Estrutura do laudo emitido pelo SIRAS: parte essencial e anexo.}

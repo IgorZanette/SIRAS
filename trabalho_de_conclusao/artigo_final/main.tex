@@ -25,6 +25,24 @@
 %%% compile sozinha num editor on-line (TeXPage, Overleaf). Feitas no Figma, em PDF vetorial.
 \graphicspath{{figuras/}}
 
+%%% Parâmetros de posicionamento das figuras. Com os padrões do LaTeX, uma figura de
+%%% largura total mais alta que 70% da página (a do escopo) não cabia no alto de uma página
+%%% de texto nem podia ir para uma página só de figuras, porque as opções eram [htb]: ficava
+%%% presa até o fim do documento e, como as figuras saem em ordem de número, prendia todas as
+%%% seguintes atrás dela. Na compilação de 08/11/2026 todas as figuras do corpo saíam depois
+%%% das referências. Estes valores deixam as figuras ocuparem mais da página e irem para uma
+%%% página própria quando preciso; a classe do curso fica intacta.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dbltopfraction}{0.9}
+\renewcommand{\dblfloatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\setcounter{dbltopnumber}{2}
+
 %%% Figura ainda não exportada: em vez de quebrar a compilação, desenha um quadro com o
 %%% nome do arquivo esperado. Assim o texto pode ser revisado antes das figuras existirem.
 %%% Aceita PDF (preferido, vetorial) ou PNG.

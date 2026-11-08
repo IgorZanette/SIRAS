@@ -2,13 +2,14 @@
 
 Esta seção apresenta, para cada dimensão avaliada, o resultado obtido e a sua interpretação: a
 concordância das recomendações, os defeitos que a validação revelou, a conformidade da aptidão
-edáfica e sua sensibilidade às decisões do autor, a avaliação de usabilidade e as limitações.
+edáfica e sua sensibilidade às decisões do autor, a avaliação de usabilidade, a comparação com uma
+ferramenta existente e as limitações.
 
 \subsection{Concordância das recomendações}\label{sec:res_concordancia}
 
 Os 25 casos de validação foram concordantes, com taxa de 100\% e intervalo de confiança de 95\%
-de [86,7\%; 100,0\%] (\autoref{tab:concordancia}). Como o limite inferior do intervalo supera os
-80\% fixados na hipótese, a hipótese foi aceita. O dado mais importante, porém, não é a taxa, e
+de [86,7\%; 100,0\%] (\autoref{tab:concordancia}). A taxa supera os 80\% fixados na hipótese, que
+foi aceita, e o limite inferior do intervalo também os supera. O dado mais importante, porém, não é a taxa, e
 sim o intervalo: com os 15 casos que o conjunto tinha até 10/10/2026, a taxa já era de 100\%,
 mas o intervalo era de [79,6\%; 100,0\%], com o limite inferior abaixo da meta. O problema não
 era de acerto, e sim de tamanho de amostra, e foi resolvido com dez casos novos.
@@ -50,8 +51,8 @@ reproduziu as três doses de calcário que o texto do anexo calcula.
 \subsection{Defeitos revelados pela validação}\label{sec:res_defeitos}
 
 Os dez casos acrescentados para estreitar o intervalo cobriram grupos e situações que o conjunto
-inicial não exercitava --- dos 15 casos originais, nove eram de calagem e um só passava pelo
-algoritmo de adubação dos grãos. Dois deles divergiram do sistema, e nos dois a falha era do
+inicial não exercitava --- dos 15 casos originais, onze eram só de calagem e um só passava
+pelo algoritmo de adubação dos grãos. Dois deles divergiram do sistema, e nos dois a falha era do
 sistema, não do caso. Na adubação nitrogenada, o adicional de N por rendimento esperado estava
 transcrito na base para todas as culturas a que se aplica, mas nenhuma linha de código o lia: a
 dose de N não variava com a expectativa de rendimento, enquanto a de P e K variava. Na classe
@@ -87,7 +88,7 @@ casos, todos de \emph{apta com restrições} para \emph{apta}.
 \caption{Distribuição das classes de aptidão nos 88 casos, por configuração.}
 \label{tab:sensibilidade}
 \footnotesize
-\begin{tabular}{lccccc}
+\begin{tabularx}{\columnwidth}{@{}Lccccc@{}}
 \toprule
 \textbf{Configuração} & \textbf{A} & \textbf{AR} & \textbf{R} & \textbf{I} & \textbf{Mudam} \\
 \midrule
@@ -96,7 +97,7 @@ Com rebaixamento por acúmulo   & 29 & 29 &  8 & 22 & 12 \\
 Sem textura (F7)               & 31 & 28 & 18 & 11 &  2 \\
 Sem CTC e textura (F5 e F7)    & 34 & 25 & 18 & 11 &  5 \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 
 \vspace{2pt}
 \raggedright\scriptsize A: apta; AR: apta com restrições; R: restrita; I: inapta sem correção prévia.
@@ -131,9 +132,11 @@ não se aplica: as diferenças entre heurísticas são de uma nota, de um partic
 \caption{Gravidade atribuída pelos participantes a cada heurística ($n=8$).}
 \label{tab:heuristicas}
 \footnotesize
-\begin{tabular}{llccc}
+\begin{tabularx}{\columnwidth}{@{}lLccc@{}}
 \toprule
-\# & Heurística & Nota 0 & Nota 1 & Não observou \\
+ & & \multicolumn{2}{c}{Nota} & \\
+\cmidrule(lr){3-4}
+\# & Heurística & 0 & 1 & N.O. \\
 \midrule
 H1  & Visibilidade do status do sistema      & 7 & 1 & -- \\
 H2  & Correspondência com o mundo real       & 7 & 1 & -- \\
@@ -146,45 +149,47 @@ H8  & Estética e design minimalista          & 7 & 1 & -- \\
 H9  & Ajuda para reconhecer e corrigir erros & 6 & 1 & 1 \\
 H10 & Ajuda e documentação                   & 7 & 1 & -- \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 
 \vspace{2pt}
-\raggedright\scriptsize Escala de 0 (não é problema) a 4 (catástrofe). Nenhuma heurística
-recebeu nota 2, 3 ou 4.
+\raggedright\scriptsize Escala de 0 (não é problema) a 4 (catástrofe); nenhuma heurística
+recebeu nota 2, 3 ou 4. N.O.: o participante indicou não ter passado pela situação.
 \end{table}
 
 Os relatos em texto são mais informativos que as notas. Dois descrevem a mesma falha, de
 prevenção e recuperação de erro no formulário: P5 observou que a tecla Enter gera o laudo mesmo
-com dados incompletos e sugeriu uma confirmação; P7, que de início não informou um campo e recebeu
-apenas uma mensagem de erro, sem indicação do que faltava, e pediu que os campos pendentes fossem
-destacados. Os dois pontos foram corrigidos depois da coleta, fora da versão avaliada: a tecla
-Enter passou a levar ao campo seguinte, e a recusa de um valor passou a nomear e destacar o campo.
-P2 relatou ter conseguido informar um só tipo de adubo da revenda, embora o formulário aceite até
-três fórmulas. Dois participantes apontaram o contexto de uso: P1 lembrou que o teste não reproduz
-o dia a dia com internet lenta, e P5 pediu uma versão que funcione sem conexão e fora do
+com dados incompletos e sugeriu uma confirmação; P7 relatou que, ao deixar de informar um campo,
+recebeu apenas uma mensagem de erro, sem indicação do que faltava, e pediu que os campos
+pendentes fossem destacados. Os dois pontos foram corrigidos depois da coleta, fora da versão
+avaliada: a tecla Enter passou a levar ao campo seguinte, as recusas passaram a nomear o campo e o
+próximo passo, e o campo com valor inválido passou a vir destacado. P2 relatou ter conseguido
+informar um só tipo de adubo da revenda, embora o formulário aceite até três fórmulas. Dois
+participantes apontaram o contexto de uso: P1 lembrou que o teste não reproduz o dia a dia, com
+internet lenta, e P5 pediu um aplicativo que funcione sem conexão, porque nem sempre há acesso ao
 computador do escritório.
 
 Nas perguntas abertas, os oito disseram que usariam a ferramenta no trabalho, com justificativas
-centradas em tempo e precisão --- \emph{``ter o laudo completo em menos de 10 min''} (P1),
-\emph{``evita erros, e possui linguagem agronômica de fácil entendimento''} (P4). O participante
-que já conhecia o FertFácil destacou justamente o que o diferencia: \emph{``as informações de onde
-saiu os números achei muito bom''} (P7). Sobre a recomendação, os oito a consideraram confiável e
-a recomendariam ao produtor; P1 ressalvou que conferiria os valores à mão, e P4 citou a adaptação
-da recomendação às fórmulas disponíveis nas revendas da região. Seis responderam que não falta
-nada para a sua rotina; as duas exceções são as já citadas: a versão sem conexão (P5) e o
-destaque dos campos pendentes (P7).
+centradas em tempo e precisão: P1 estimou ``ter o laudo completo em menos de 10 min'', e P4
+destacou que ela evita erros e usa linguagem agronômica de fácil entendimento. O participante que
+já conhecia o FertFácil destacou justamente o que o diferencia: ``as informações de onde saiu os
+números achei muito bom'' (P7). Sobre a recomendação gerada, sete responderam afirmativamente à
+pergunta --- se ela é confiável, clara e útil e se a recomendariam ao produtor como está ---, e P4
+citou a adaptação às fórmulas disponíveis nas revendas da região; P1 respondeu que os valores podem
+ser usados na recomendação, mas que os conferiria à mão. Seis responderam que não falta nada para a
+sua rotina; as duas exceções são as já citadas: o aplicativo sem conexão (P5) e o destaque dos
+campos pendentes (P7).
 
 As notas devem ser lidas como um teto, e não como prova de ausência de problemas. A amostra é
 pequena e por conveniência, o questionário foi respondido logo após uma sessão acompanhada pelo
 pesquisador, e esses fatores favorecem avaliações positivas. O que o teste sustenta é mais
-modesto e mais útil: profissionais do público-alvo, inclusive um sem experiência e um com mais de
-dez anos, concluíram sozinhos um cenário de recomendação completo e não encontraram obstáculo que
+modesto e mais útil: participantes do público-alvo, do estudante que ainda não atua na área ao
+técnico com mais de dez anos de prática, concluíram sozinhos um cenário de recomendação completo e não encontraram obstáculo que
 julgassem mais que estético; e os relatos localizaram um ponto concreto a melhorar, a
 sinalização de dados faltantes no formulário.
 
 \subsection{Comparação com ferramenta existente}\label{sec:res_comparacao}
-O SIRAS foi posicionado frente ao FertFácil \citep{Tiecher2016, FertFacil2026}, a ferramenta de
-recomendação de calagem e adubação mais difundida no RS, adotada pela Emater/RS. A
+O SIRAS foi posicionado frente ao FertFácil \citep{Tiecher2016, FertFacil2026}, ferramenta de
+recomendação de calagem e adubação amplamente difundida no RS e adotada pela Emater/RS. A
 \autoref{tab:fertfacil} resume a comparação funcional, feita a partir da documentação pública e de
 um laudo de exemplo do FertFácil.
 
@@ -193,7 +198,7 @@ um laudo de exemplo do FertFácil.
 \caption{Comparação funcional entre o FertFácil e o SIRAS.}
 \label{tab:fertfacil}
 \footnotesize
-\begin{tabularx}{\columnwidth}{lXX}
+\begin{tabularx}{\columnwidth}{@{}lLL@{}}
 \toprule
  & \textbf{FertFácil} & \textbf{SIRAS} \\
 \midrule
@@ -222,9 +227,9 @@ um produto consolidado e um trabalho de conclusão de curso, e a integração en
 aptidão, ausente nas ferramentas analisadas, é a contribuição que este trabalho se propôs a fazer.
 
 A proposta previa também submeter um subconjunto dos casos de validação ao FertFácil e comparar as
-saídas, e a mesma restrição impediu uma comparação de usabilidade entre as duas ferramentas. Nenhuma
-das duas foi realizada, porque o acesso ao sistema, que exige cadastro, não pôde ser obtido no
-período da avaliação. A perda é limitada: as duas ferramentas implementam o mesmo Manual,
+saídas. Essa comparação, assim como uma comparação de usabilidade entre as duas ferramentas, não
+foi realizada, porque o acesso ao sistema, que exige cadastro, não pôde ser obtido no período da
+avaliação. A perda é limitada: as duas ferramentas implementam o mesmo Manual,
 e a correção numérica do SIRAS já foi medida contra o oráculo calculado à mão. A comparação
 numérica permanece como trabalho futuro, útil sobretudo para localizar pontos de leitura
 divergente do Manual entre as duas implementações.
@@ -238,5 +243,6 @@ do mesmo Manual que o sistema implementa, o que limita a validação à fidelida
 publicados. O conjunto de casos é menor que o previsto e desigual entre os grupos. A avaliação de
 usabilidade usa amostra pequena e por conveniência, com sessões acompanhadas pelo pesquisador; as
 notas de severidade exprimem percepção dos usuários, não gravidade técnica, e a pergunta sobre a
-recomendação reuniu o juízo sobre a ferramenta e o juízo sobre a recomendação agronômica. Por fim, o SIRAS é ferramenta de apoio à decisão e não
-substitui a responsabilidade técnica de profissional habilitado.
+recomendação reuniu o juízo sobre a ferramenta e o juízo sobre a recomendação agronômica. Por
+fim, o SIRAS é ferramenta de apoio à decisão e não substitui a responsabilidade técnica de
+profissional habilitado.

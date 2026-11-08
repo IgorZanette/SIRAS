@@ -59,11 +59,19 @@ _PADRAO_CODIGO = re.compile(r"c[óo]digo", re.IGNORECASE)
 #: de papel foi dissolvida nele. Sao detectadas pelo enunciado para irem ao perfil da
 #: amostra, e precisam ficar FORA da varredura das heuristicas: "Como tu fazes a
 #: recomendacao hoje?" nao e nota de severidade nem relato de falha.
+#:
+#: Os enunciados mudaram de "tu" para "você" na revisão do orientador (03/11/2026): o
+#: padrão aceita as duas formas, para o script ler os dois exports.
 _PADRAO_PERFIL = re.compile(
-    r"forma[çc][ãa]o|h[áa] quanto tempo|recomenda[çc][ãa]o hoje|conforto|como tu usaste"
-    r"|j[áa] conhecias",
+    r"forma[çc][ãa]o|h[áa] quanto tempo|recomenda[çc][ãa]o hoje|conforto"
+    r"|ferramentas digitais|como (tu usaste|voc[êe] usou)|j[áa] conhecias",
     re.IGNORECASE,
 )
+
+#: As perguntas abertas finais (Seção 12). São as colunas que sobram: nem carimbo, nem
+#: código, nem perfil, nem uma das três perguntas de cada heurística ("H1 —" a "H10 —").
+_PADRAO_HEURISTICA = re.compile(r"^\s*H\d+\s*[—-]")
+_PADRAO_CARIMBO = re.compile(r"carimbo|timestamp", re.IGNORECASE)
 
 
 class ErroConsolidacao(Exception):
@@ -110,6 +118,18 @@ def colunas_de_perfil(cabecalho: List[str]) -> List[str]:
     nunca usou.
     """
     return [c for c in cabecalho if _PADRAO_PERFIL.search(c)]
+
+
+def colunas_abertas(cabecalho: List[str]) -> List[str]:
+    """As perguntas abertas finais, na ordem do formulário."""
+    return [
+        c for c in cabecalho
+        if c.strip()
+        and not _PADRAO_HEURISTICA.search(c)
+        and not _PADRAO_PERFIL.search(c)
+        and not _PADRAO_CODIGO.search(c)
+        and not _PADRAO_CARIMBO.search(c)
+    ]
 
 
 def _coluna_do_codigo(cabecalho: List[str]) -> Optional[str]:
@@ -208,7 +228,33 @@ def consolidar(linhas: List[Dict[str, str]]) -> Dict[str, Any]:
             "relatos": relatos,
         })
 
-    return {"heuristicas": resultado, "respondentes": len(linhas)}
+    # Perfil: contagem de cada opção. A pergunta "como faz a recomendação hoje" é de
+    # múltipla marcação, e o Forms junta as opções com ";" — cada uma conta à parte.
+    perfil = []
+    for coluna in colunas_de_perfil(cabecalho):
+        contagem: Dict[str, int] = {}
+        for linha in linhas:
+            for opcao in (linha.get(coluna) or "").split(";"):
+                opcao = opcao.strip()
+                if opcao:
+                    contagem[opcao] = contagem.get(opcao, 0) + 1
+        perfil.append({
+            "pergunta": coluna.strip(),
+            "contagem": sorted(contagem.items(), key=lambda par: (-par[1], par[0])),
+        })
+
+    abertas = []
+    for coluna in colunas_abertas(cabecalho):
+        respostas = []
+        for i, linha in enumerate(linhas, start=1):
+            codigo = (linha.get(coluna_codigo) or "").strip().upper() if coluna_codigo else ""
+            texto = " ".join((linha.get(coluna) or "").split())
+            if texto:
+                respostas.append({"codigo": codigo or f"(resposta {i})", "texto": texto})
+        abertas.append({"pergunta": coluna.strip(), "respostas": respostas})
+
+    return {"heuristicas": resultado, "respondentes": len(linhas),
+            "perfil": perfil, "abertas": abertas}
 
 
 def _num(valor: Optional[float], casas: int = 2) -> str:
@@ -231,6 +277,15 @@ def relatorio_markdown(dados: Dict[str, Any]) -> str:
         "atribuída aqui a heurísticas, por usuários, e não a problemas, por especialistas "
         "— o que ela mede é percepção de gravidade. Ver `trabalho_de_conclusao/usabilidade/protocolo.md`, §2 e §3.",
         "",
+    ]
+    if dados.get("perfil"):
+        linhas += ["## Perfil da amostra", ""]
+        for p in dados["perfil"]:
+            linhas.append(f"**{p['pergunta']}**")
+            for opcao, n in p["contagem"]:
+                linhas.append(f"- {opcao}: {n}")
+            linhas.append("")
+    linhas += [
         "## Severidade por heurística",
         "",
         "| # | Heurística | Média | Mediana | Mín | Máx | n | Não observou |",
@@ -280,6 +335,14 @@ def relatorio_markdown(dados: Dict[str, Any]) -> str:
             linhas.append("")
     if not algum:
         linhas.append("Nenhum relato em texto foi registrado.")
+
+    if dados.get("abertas"):
+        linhas += ["", "## Perguntas abertas finais", ""]
+        for pergunta in dados["abertas"]:
+            linhas += [f"### {pergunta['pergunta']}", ""]
+            for r in pergunta["respostas"]:
+                linhas.append(f"- **{r['codigo']}:** {r['texto']}")
+            linhas.append("")
 
     return "\n".join(linhas) + "\n"
 

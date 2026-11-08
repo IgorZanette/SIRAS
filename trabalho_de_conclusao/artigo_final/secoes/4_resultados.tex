@@ -109,10 +109,75 @@ limitação remanescente é a CTC, que não se corrige com insumos. O laudo deix
 apenas quanto aplicar e passa a dizer o que a aplicação muda.
 
 \subsection{Avaliação de usabilidade}\label{sec:res_usabilidade}
-\pendente{perfil dos participantes; desempenho nos três roteiros (concluíram sozinhos, com ajuda
-ou não concluíram; onde travaram); severidade por heurística, com média e mediana; problemas
-priorizados; juízo sobre a recomendação separado do juízo sobre a ferramenta. Fonte:
-\texttt{scripts/consolidar\_heuristicas.py} sobre o CSV do formulário e as anotações das sessões}
+Participaram oito pessoas: cinco técnicos agrícolas, dois estudantes de agronomia e um
+engenheiro agrônomo. Quatro têm mais de dez anos de trabalho com análise de solo ou recomendação
+de adubação; os demais se distribuem entre seis e dez anos (um), dois a cinco anos (um), menos de
+dois anos (um) e ainda sem atuação profissional (um). Hoje, cinco fazem a recomendação à mão, com
+o Manual, quatro usam o sistema do laboratório, dois um programa de cooperativa ou revenda e um
+uma planilha própria --- a pergunta admitia mais de uma resposta. Todos se declararam
+confortáveis (quatro) ou muito confortáveis (quatro) com ferramentas digitais, nenhum conhecia o
+SIRAS antes do teste e um deles (P7) já tinha usado o FertFácil.
+
+Os oito concluíram sozinhos o cenário fechado do segundo roteiro, sem intervenção do pesquisador.
+No questionário, das 80 avaliações possíveis (oito participantes, dez heurísticas), 79 receberam
+nota; em uma o participante indicou não ter passado pela situação. Foram 73 notas 0 (\emph{não é
+problema}) e seis notas 1 (\emph{problema estético}); nenhuma heurística recebeu nota 2 ou maior
+(\autoref{tab:heuristicas}). As seis notas 1 vieram de três participantes, e quatro delas de um só
+(P5). A mediana foi 0 em todas as heurísticas, e a ordenação por gravidade que o protocolo previa
+não se aplica: as diferenças entre heurísticas são de uma nota, de um participante.
+
+\begin{table}[htb]
+\centering
+\caption{Gravidade atribuída pelos participantes a cada heurística ($n=8$).}
+\label{tab:heuristicas}
+\footnotesize
+\begin{tabular}{llccc}
+\toprule
+\# & Heurística & Nota 0 & Nota 1 & Não observou \\
+\midrule
+H1  & Visibilidade do status do sistema      & 7 & 1 & -- \\
+H2  & Correspondência com o mundo real       & 7 & 1 & -- \\
+H3  & Controle e liberdade do usuário        & 8 & -- & -- \\
+H4  & Consistência e padrões                 & 8 & -- & -- \\
+H5  & Prevenção de erros                     & 7 & 1 & -- \\
+H6  & Reconhecimento em vez de memorização   & 8 & -- & -- \\
+H7  & Flexibilidade e eficiência de uso      & 8 & -- & -- \\
+H8  & Estética e design minimalista          & 7 & 1 & -- \\
+H9  & Ajuda para reconhecer e corrigir erros & 6 & 1 & 1 \\
+H10 & Ajuda e documentação                   & 7 & 1 & -- \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\raggedright\scriptsize Escala de 0 (não é problema) a 4 (catástrofe). Nenhuma heurística
+recebeu nota 2, 3 ou 4.
+\end{table}
+
+Os relatos em texto são mais informativos que as notas. Dois descrevem a mesma falha, de
+prevenção e recuperação de erro no formulário: P5 observou que a tecla Enter gera o laudo mesmo
+com dados incompletos e sugeriu uma confirmação; P7, que de início não informou um campo e recebeu
+apenas uma mensagem de erro, sem indicação do que faltava, e pediu que os campos pendentes fossem
+destacados. P2 relatou ter conseguido informar um só tipo de adubo da revenda. Dois participantes
+apontaram o contexto de uso: P1 lembrou que o teste não reproduz o dia a dia com internet lenta, e
+P5 pediu uma versão que funcione sem conexão e fora do computador do escritório.
+
+Nas perguntas abertas, os oito disseram que usariam a ferramenta no trabalho, com justificativas
+centradas em tempo e precisão --- \emph{``ter o laudo completo em menos de 10 min''} (P1),
+\emph{``evita erros, e possui linguagem agronômica de fácil entendimento''} (P4). O participante
+que já conhecia o FertFácil destacou justamente o que o diferencia: \emph{``as informações de onde
+saiu os números achei muito bom''} (P7). Sobre a recomendação, os oito a consideraram confiável e
+a recomendariam ao produtor; P1 ressalvou que conferiria os valores à mão, e P4 citou a adaptação
+da recomendação às fórmulas disponíveis nas revendas da região. Seis responderam que não falta
+nada para a sua rotina; as duas exceções são as já citadas: a versão sem conexão (P5) e o
+destaque dos campos pendentes (P7).
+
+As notas devem ser lidas como um teto, e não como prova de ausência de problemas. A amostra é
+pequena e por conveniência, o questionário foi respondido logo após uma sessão acompanhada pelo
+pesquisador, e esses fatores favorecem avaliações positivas. O que o teste sustenta é mais
+modesto e mais útil: profissionais do público-alvo, inclusive um sem experiência e um com mais de
+dez anos, concluíram sozinhos um cenário de recomendação completo e não encontraram obstáculo que
+julgassem mais que estético; e os relatos localizaram um ponto concreto a melhorar, a
+sinalização de dados faltantes no formulário.
 
 \subsection{Comparação com ferramenta existente}\label{sec:res_comparacao}
 O SIRAS foi posicionado frente ao FertFácil \citep{Tiecher2016, FertFacil2026}, a ferramenta de
@@ -154,8 +219,9 @@ um produto consolidado e um trabalho de conclusão de curso, e a integração en
 aptidão, ausente nas ferramentas analisadas, é a contribuição que este trabalho se propôs a fazer.
 
 A proposta previa também submeter um subconjunto dos casos de validação ao FertFácil e comparar as
-saídas. A comparação não foi realizada, porque o acesso ao sistema, que exige cadastro, não pôde ser
-obtido no período da avaliação. A perda é limitada: as duas ferramentas implementam o mesmo Manual,
+saídas, e a mesma restrição impediu uma comparação de usabilidade entre as duas ferramentas. Nenhuma
+das duas foi realizada, porque o acesso ao sistema, que exige cadastro, não pôde ser obtido no
+período da avaliação. A perda é limitada: as duas ferramentas implementam o mesmo Manual,
 e a correção numérica do SIRAS já foi medida contra o oráculo calculado à mão. A comparação
 numérica permanece como trabalho futuro, útil sobretudo para localizar pontos de leitura
 divergente do Manual entre as duas implementações.
@@ -167,6 +233,7 @@ critérios, embora ancorados no Manual e no sistema oficial, foram definidos pel
 foram validados por especialistas independentes nem em campo. O oráculo das recomendações deriva
 do mesmo Manual que o sistema implementa, o que limita a validação à fidelidade aos critérios
 publicados. O conjunto de casos é menor que o previsto e desigual entre os grupos. A avaliação de
-usabilidade usa amostra pequena e por conveniência, e as notas de severidade exprimem percepção
-dos usuários, não gravidade técnica. Por fim, o SIRAS é ferramenta de apoio à decisão e não
+usabilidade usa amostra pequena e por conveniência, com sessões acompanhadas pelo pesquisador; as
+notas de severidade exprimem percepção dos usuários, não gravidade técnica, e a pergunta sobre a
+recomendação reuniu o juízo sobre a ferramenta e o juízo sobre a recomendação agronômica. Por fim, o SIRAS é ferramenta de apoio à decisão e não
 substitui a responsabilidade técnica de profissional habilitado.

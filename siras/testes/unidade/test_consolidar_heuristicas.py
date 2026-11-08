@@ -141,3 +141,63 @@ def test_perfil_inclui_a_pergunta_de_conhecimento_previo():
     perfil = colunas_de_perfil(_cabecalho())
     assert "Tu já conhecias o SIRAS antes deste teste?" in perfil
     assert not any("gravidade" in c for c in perfil)
+
+
+# --- formulário revisado pelo orientador (03/11/2026): enunciados com "você" ----------
+_PERFIL_VOCE = [
+    "Código do participante (eu te passo na hora do teste — P1, P2, ...)",
+    "Qual a sua formação/atuação?",
+    "Há quanto tempo você trabalhas com análise de solo ou recomendação de adubação?",
+    "Como você faz a recomendação hoje? Marca todas as que se aplicam.",
+    "Como você se sente ao usar ferramentas digitais no trabalho?",
+    "Como você usou o sistema SIRAS?",
+    "Você já conhecias o SIRAS antes deste teste?",
+]
+_ABERTAS_VOCE = [
+    "Se você pudesse alterar apenas uma coisa no SIRAS, qual seria? ",
+    "Você usaria essa ferramenta no seu trabalho? Por quê?",
+    "Em relação à recomendação agronômica gerada pelo sistema: ela é confiável, clara e útil?",
+    "Falta algo no sistema para que ele atenda perfeitamente à sua rotina de trabalho?",
+]
+
+
+def _cabecalho_voce():
+    colunas = ["Carimbo de data/hora"] + _PERFIL_VOCE
+    for n in range(1, 11):
+        colunas += [
+            f"H{n} — Qual a gravidade dos problemas que encontraste neste aspecto?",
+            f"H{n} — Descreva o que deu errado e em que tela aconteceu.",
+            f"H{n} — O que você faria diferente?",
+        ]
+    return colunas + _ABERTAS_VOCE
+
+
+def test_perfil_reconhece_os_enunciados_revisados():
+    perfil = colunas_de_perfil(_cabecalho_voce())
+    assert perfil == _PERFIL_VOCE[1:]
+
+
+def test_perfil_conta_cada_opcao_da_multipla_marcacao_e_abertas_saem_por_participante(tmp_path):
+    caminho = tmp_path / "respostas.csv"
+    cab = _cabecalho_voce()
+    def linha(codigo, recomenda, aberta):
+        valores = {c: "" for c in cab}
+        valores[cab[1]] = codigo
+        valores[_PERFIL_VOCE[3]] = recomenda
+        for n in range(1, 11):
+            valores[f"H{n} — Qual a gravidade dos problemas que encontraste neste aspecto?"] = "0 — Não é problema"
+        valores[_ABERTAS_VOCE[1]] = aberta
+        return [valores[c] for c in cab]
+    with open(caminho, "w", encoding="utf-8", newline="") as arquivo:
+        escritor = csv.writer(arquivo)
+        escritor.writerow(cab)
+        escritor.writerow(linha("P1", "À mão, com o Manual;Planilha própria", "sim, \n agiliza"))
+        escritor.writerow(linha("p2", "À mão, com o Manual", ""))
+
+    dados = consolidar(carregar(caminho))
+
+    recomenda = next(p for p in dados["perfil"] if p["pergunta"].startswith("Como você faz"))
+    assert recomenda["contagem"] == [("À mão, com o Manual", 2), ("Planilha própria", 1)]
+    assert [a["pergunta"] for a in dados["abertas"]] == [a.strip() for a in _ABERTAS_VOCE]
+    usaria = dados["abertas"][1]["respostas"]
+    assert usaria == [{"codigo": "P1", "texto": "sim, agiliza"}]

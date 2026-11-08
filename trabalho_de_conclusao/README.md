@@ -10,8 +10,7 @@ sistema, está em `siras/docs/`; se descreve o trabalho sobre o sistema, está a
 | Pasta | O que é |
 |---|---|
 | [`proposta/`](proposta/) | A proposta aprovada, em LaTeX. É o que foi prometido, e o parâmetro contra o qual o resultado se mede |
-| [`artigo_final/`](artigo_final/) | O artigo final, na classe oficial do curso (`CC-EC_TF-TC`) |
-| [`figuras/`](figuras/) | As figuras do artigo, feitas no Figma e exportadas em PDF, e a especificação de cada uma |
+| [`artigo_final/`](artigo_final/) | O artigo final, na classe oficial do curso (`CC-EC_TF-TC`). Pasta autossuficiente: as figuras moram em `artigo_final/figuras/`, e ela sobe inteira para um editor on-line |
 | [`validacao/`](validacao/) | O protocolo de validação (Seção 4.4 da proposta) e como o oráculo de cada caso é calculado à mão |
 | [`usabilidade/`](usabilidade/) | O protocolo do teste com usuários e o questionário pelas dez heurísticas de Nielsen |
 | [`processo/`](processo/) | Roadmap com o estado de cada etapa, o plano do front-end e as convenções de trabalho |

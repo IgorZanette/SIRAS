@@ -105,15 +105,15 @@ dos quais 88 com classe definida e 4 que devem resultar em estado indeterminado 
 ausente. Doze desses casos usam as glebas reais publicadas no Anexo~1 do Manual, cujas classes de
 P e K o próprio Manual divulga e servem, assim, de oráculo externo para a etapa de interpretação.
 
-O processo de desenvolvimento foi apoiado por testes automatizados (5.404 ao final), que
-incluem os casos de validação; por um registro de decisões de arquitetura (13 decisões
+O processo de desenvolvimento foi apoiado por testes automatizados (5.528 ao final), que
+incluem os casos de validação; por um registro de decisões de arquitetura (14 decisões
 documentadas, com contexto e alternativas); e por versionamento em Git.
 
 \subsection{Avaliação de usabilidade}\label{sec:usabilidade}
 
-A interface foi avaliada em teste com 5 a 8 usuários do público-alvo --- agrônomos, técnicos
-agrícolas e estudantes concluintes de agronomia com contato com análise de solo ---, precedido
-de um piloto fora da amostra. O tamanho segue \cite{NielsenLandauer1993}, segundo os quais cerca
+A interface foi avaliada em teste com oito usuários do público-alvo --- agrônomos, técnicos
+agrícolas e estudantes de agronomia com contato com análise de solo ---, recrutados por
+conveniência, entre 2 e 5 de novembro de 2026, e precedido de um piloto fora da amostra. O tamanho segue \cite{NielsenLandauer1993}, segundo os quais cerca
 de cinco participantes revelam a maior parte dos problemas de uma interface. Cada sessão, de
 cerca de 35 minutos, percorreu três roteiros: uma demonstração conduzida pelo pesquisador sobre
 uma análise real do Anexo~1 do Manual; um cenário fechado, entregue em ficha impressa e
@@ -124,14 +124,19 @@ Depois da sessão, sem a presença do pesquisador, o participante respondeu a um
 estruturado pelas dez heurísticas de \cite{Nielsen1994}, atribuindo a cada uma a gravidade dos
 problemas encontrados, de 0 (não é problema) a 4 (catástrofe), ou indicando que não passou pela
 situação, e descrevendo as falhas e a tela em que ocorreram. Quatro perguntas abertas encerram
-o instrumento e separam o juízo sobre a ferramenta do juízo sobre a recomendação agronômica.
+o instrumento: o que o participante mudaria, se usaria a ferramenta, se a recomendação gerada é
+confiável e se ele a recomendaria ao produtor, e o que falta para a sua rotina. O formulário foi
+revisado pelo orientador antes da coleta; na versão aplicada, o juízo sobre a ferramenta e o
+juízo sobre a recomendação agronômica ficaram numa mesma pergunta.
 
 O instrumento substituiu o \textit{System Usability Scale} \citep{Brooke1996} previsto na proposta,
 porque o SUS produz um escore único, e esta etapa precisava de um diagnóstico que localizasse os
 problemas e os ordenasse por gravidade. Não se trata de avaliação heurística no sentido de
 \cite{NielsenMolich1990}, que é inspeção por especialistas sem usuários: as notas são atribuídas
 por usuários a heurísticas e exprimem percepção de gravidade, analisada por estatística
-descritiva. A versão avaliada foi congelada antes da primeira sessão e mantida até a última.
+descritiva. A versão avaliada foi congelada antes da primeira sessão e mantida até a última; as
+sessões foram acompanhadas pelo pesquisador, seis delas remotamente, com o participante
+controlando a tela, e duas presencialmente.
 
 \subsection{O sistema desenvolvido}\label{sec:siras}
 

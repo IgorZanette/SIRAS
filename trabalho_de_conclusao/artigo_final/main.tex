@@ -21,17 +21,17 @@
 \usepackage{multirow}
 \usepackage{nicefrac}
 
-%%% As figuras moram fora do artigo, em trabalho_de_conclusao/figuras/, porque são
-%%% produzidas no Figma e reaproveitadas na apresentação. Exportar em PDF vetorial.
-\graphicspath{{../figuras/}}
+%%% As figuras moram DENTRO da pasta do artigo (figuras/), para que ela suba inteira e
+%%% compile sozinha num editor on-line (TeXPage, Overleaf). Feitas no Figma, em PDF vetorial.
+\graphicspath{{figuras/}}
 
 %%% Figura ainda não exportada: em vez de quebrar a compilação, desenha um quadro com o
 %%% nome do arquivo esperado. Assim o texto pode ser revisado antes das figuras existirem.
 %%% Aceita PDF (preferido, vetorial) ou PNG.
 \newcommand{\figura}[2]{%
-  \IfFileExists{../figuras/#1.pdf}%
+  \IfFileExists{figuras/#1.pdf}%
     {\includegraphics[width=#2]{#1.pdf}}%
-    {\IfFileExists{../figuras/#1.png}%
+    {\IfFileExists{figuras/#1.png}%
       {\includegraphics[width=#2]{#1.png}}%
       {\fbox{\parbox[c][3cm][c]{\dimexpr #2-2\fboxsep-2\fboxrule}{\centering\footnotesize
         \textcolor{red}{Figura ainda não exportada do Figma}\\[2pt]\texttt{figuras/#1.pdf}}}}}%

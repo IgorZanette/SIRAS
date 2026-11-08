@@ -11,6 +11,43 @@ a redação genérica de Nielsen, e sim a pergunta que o público-alvo consegue 
 
 ---
 
+## Versão aplicada — revisão do orientador (antes da coleta, novembro de 2026)
+
+O orientador revisou o formulário no Google Forms antes da primeira sessão. **A versão
+aplicada aos 8 participantes é a do Forms**, e não a redação abaixo. Os enunciados da
+versão aplicada, como saíram no CSV exportado, são estes; as opções de cada pergunta
+fechada estão no Forms. Três mudanças importam para a análise:
+
+1. **Tratamento por "você"** em vez de "tu" (o script aceita as duas formas).
+2. **Perguntas finais de 5 para 4.** As antigas 12.3a (sobre a ferramenta) e 12.3b (sobre a
+   recomendação) viraram uma pergunta só. Isso reabre a ameaça 6 do protocolo (§9): a
+   resposta mistura o juízo sobre a interface e o juízo sobre a recomendação, e o artigo
+   declara essa limitação.
+3. A pergunta de recomendação passou a pedir também se o participante **concorda com os
+   resultados**.
+
+| Seção | Enunciado aplicado |
+|---|---|
+| 1 | Código do participante (eu te passo na hora do teste — P1, P2, ...) |
+| 1 | Qual a sua formação/atuação? |
+| 1 | Há quanto tempo você trabalhas com análise de solo ou recomendação de adubação? |
+| 1 | Como você faz a recomendação hoje? Marca todas as que se aplicam. |
+| 1 | Como você se sente ao usar ferramentas digitais no trabalho? |
+| 1 | Como você usou o sistema SIRAS? |
+| 1 | Você já conhecias o SIRAS antes deste teste? |
+| 2–11 | Hn — Qual a gravidade dos problemas que encontraste neste aspecto? |
+| 2–11 | Hn — Descreva o que deu errado e em que tela aconteceu. |
+| 2–11 | Hn — O que você faria diferente? |
+| 12 | Se você pudesse alterar apenas uma coisa no SIRAS, qual seria? |
+| 12 | Você usaria essa ferramenta no seu trabalho? Por quê? |
+| 12 | Em relação à recomendação agronômica gerada pelo sistema: ela é confiável, clara e útil? Você concorda com os resultados? Recomendaria essa recomendação ao produtor exatamente como está? |
+| 12 | Falta algo no sistema para que ele atenda perfeitamente à sua rotina de trabalho? Se sim, o quê? |
+
+O texto abaixo fica como registro do desenho original e das justificativas de cada
+pergunta.
+
+---
+
 ## Configuração do formulário
 
 | Ajuste | Valor | Por quê |

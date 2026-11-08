@@ -66,14 +66,14 @@ ETAPAS: Tuple[Etapa, ...] = (
     Etapa(
         "Validação e análise dos resultados",
         "andamento",
-        "A concordância com o oráculo já está medida e publicada; falta a comparação "
-        "com uma ferramenta existente.",
+        "A concordância com o oráculo está medida e a comparação com uma ferramenta "
+        "existente, feita; falta consolidar a avaliação de usabilidade.",
     ),
     Etapa(
         "Avaliação de usabilidade",
-        "proximo",
-        "Três roteiros de teste com técnicos e agrônomos, e um questionário "
-        "estruturado pelas dez heurísticas de Nielsen.",
+        "andamento",
+        "Coleta em curso com técnicos e agrônomos: três roteiros de teste e um "
+        "questionário estruturado pelas dez heurísticas de Nielsen.",
     ),
 )
 
